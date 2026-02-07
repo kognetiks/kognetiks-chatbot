@@ -109,6 +109,7 @@ $fallback_like = [
  * Global explicit failure and apology patterns. 
  */
 $fallback_failure_and_apology = [
+    '%es tut mir leid%',
     '%ich weiß nicht%',
     '%ich bin mir nicht sicher%',
     '%ich bin mir nicht sicher%',

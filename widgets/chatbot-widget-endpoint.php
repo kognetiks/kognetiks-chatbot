@@ -218,10 +218,10 @@ $chatbot_widget_height = ($iframe_height - 20) . 'px';
             background: transparent !important;
         }
         .chatbot-wrapper {
-            width: <?php echo $chatbot_widget_width; ?>;
+            width: <?php echo esc_attr( $chatbot_widget_width ); ?>;
             max-width: 1000px;
             margin: 0 auto;
-            height: <?php echo $chatbot_widget_height; ?>;
+            height: <?php echo esc_attr( $chatbot_widget_height ); ?>;
             max-height: 1000px;
             overflow: hidden;
             position: fixed;
@@ -243,13 +243,13 @@ $chatbot_widget_height = ($iframe_height - 20) . 'px';
 </head>
 <body>
     <div class="chatbot-wrapper">
-        <?php echo $chatbot_html; ?>
+        <?php echo wp_kses_post( $chatbot_html ); ?>
     </div>
     <?php wp_footer(); // Use wp_footer() instead of get_footer() to avoid theme dependency ?>
     <script type="text/javascript">
 
         // Set values for the chatbot
-        var kchat_settings = <?php echo $kchat_settings_json; ?>;
+        var kchat_settings = <?php echo $kchat_settings_json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON from wp_json_encode for JavaScript, escaping would corrupt the data ?>;
 
         // Set values in local storage
         localStorage.setItem('chatbot_chatgpt_opened', 'true');

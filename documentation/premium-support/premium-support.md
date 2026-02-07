@@ -24,7 +24,7 @@ When you install **Kognetiks Chatbot (Free)** from the WordPress plugin director
 
 - The plugin is fully functional with core chatbot features
 - Advanced Premium features are visible but locked
-- You may see “Start Free Trial” or “Unlock Premium Features” buttons in:
+- You may see "Unlock Deeper Insights", “Start Free Trial” or “Unlock Premium Features” buttons in:
   - Plugin settings
   - Reporting or Insights screens
   - Admin notices
@@ -35,7 +35,7 @@ At this stage, **no account is required**, and **no data is sent to Freemius** u
 
 ## Step 2: Starting the Free 7-Day Trial
 
-When you click **Start Free Trial**, you are taken to the Kognetiks Chatbot pricing page.
+When you click **Unlock Deeper Insights** or **Start Free Trial**, you are taken to the Kognetiks Chatbot pricing page.
 
 ### What You’ll See
 

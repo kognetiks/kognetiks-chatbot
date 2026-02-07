@@ -39,6 +39,8 @@ When a fallback pattern is detected, the system:
 
 4. **Ranks by Frequency**: Questions are ranked by how often they triggered fallback responses, with the most frequently unanswered questions appearing first.
 
+For technical details, see [Unanswered Questions Dectection Analysis](unanswered-questions-dectection-analysis.md)
+
 #### 3. Data Quality Filters
 
 To ensure accuracy, the system applies several filters:

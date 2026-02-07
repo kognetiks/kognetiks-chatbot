@@ -40,8 +40,8 @@ function chatbot_chatgpt_upload_files() {
     global $voice;
     
     if (empty($session_id) || $session_id == 0) {
-        $session_id = isset($_POST['session_id']) ? $_POST['session_id'] : null;
-        $user_id = isset($_POST['user_id']) ? $_POST['user_id'] : null;
+        $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : null;
+        $user_id = isset($_POST['user_id']) ? sanitize_text_field(wp_unslash($_POST['user_id'])) : null;
     }
     
     global $chatbot_chatgpt_display_style;
@@ -585,7 +585,7 @@ function generate_random_string($length = 26) {
     $charactersLength = strlen($characters);
     $randomString = '';
     for ($i = 0; $i < $length; $i++) {
-        $randomString .= $characters[rand(0, $charactersLength - 1)];
+        $randomString .= $characters[wp_rand( 0, $charactersLength - 1 )];
     }
     return $randomString;
 }
@@ -615,7 +615,7 @@ function create_index_file($directory) {
     if (!is_dir($directory)) {
         if (!mkdir($directory, 0755, true)) {
             // If the directory could not be created, log an error and exit the function
-            error_log("[Chatbot] [chatbot-file-upload.php] Failed to create directory: " . $directory);
+            back_trace('ERROR', 'Failed to create directory: ' . $directory);
             return;
         }
     }
@@ -634,7 +634,7 @@ function create_index_file($directory) {
             fclose($file);
         } else {
             // Handle the error
-            error_log("[Chatbot] [chatbot-file-upload.php] Failed to create index.php file in directory: " . $directory);
+            back_trace('ERROR', 'Failed to create index.php file in directory: ' . $directory);
         }
     }
 }

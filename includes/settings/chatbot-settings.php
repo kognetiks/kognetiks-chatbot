@@ -837,8 +837,8 @@ function chatbot_chatgpt_settings_page() {
 
                     echo '<hr style="margin: 20px 0;">';
                     
-                    echo '<h3>✅ Ready to Upgrade?</h3>';
-                    echo '<p>Reports delivered automatically. No dashboard monitoring required.</p>';
+                    echo '<h3>🔍 Curious about deeper signals or faster feedback?</h3>';
+                    echo '<p>Weekly reports show what happened. Insights highlights patterns, risks, and what to improve next.</p>';
                     echo '<p>';
                     // Trial-first CTA with safety guards
                     if (function_exists('chatbot_chatgpt_freemius')) {
@@ -846,7 +846,7 @@ function chatbot_chatgpt_settings_page() {
                         if (is_object($fs) && method_exists($fs, 'get_upgrade_url')) {
                             // Use monthly billing cycle for trial
                             $trial_url = $fs->get_upgrade_url( WP_FS__PERIOD_MONTHLY, true );
-                            echo '<a href="' . esc_url($trial_url) . '" class="button button-primary" style="text-decoration: none; margin-right: 10px;">Start Free Trial</a>';
+                            echo '<a href="' . esc_url($trial_url) . '" class="button button-primary" style="text-decoration: none; margin-right: 10px;">Unlock Deeper Insights</a>';
                         }
                         // Secondary "View Plans" link
                         if (is_object($fs) && method_exists($fs, 'get_upgrade_url')) {

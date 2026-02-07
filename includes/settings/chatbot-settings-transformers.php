@@ -363,10 +363,10 @@ function chatbot_transformer_model_status_section_callback($args) {
     ?>
         <div class="wrap">
             <div style="background-color: white; border: 1px solid #ccc; padding: 10px; margin: 10px; display: inline-block;">
-                <p><b>Scheduled to Run: </b><?php echo $chatbot_transformer_model_current_build_schedule; ?></p>
+                <p><b>Scheduled to Run: </b><?php echo esc_html( $chatbot_transformer_model_current_build_schedule ); ?></p>
                 <p><b>Status of Last Run: </b><?php echo esc_attr(get_option('chatbot_transformer_model_last_updated', 'Please select a Build Schedule below.')); ?></p>
-                <!-- <p><b>Character Count: </b><?php echo $chatbot_transformer_model_character_count; ?></p> -->
-                <!-- <p><b>Table Size: </b><?php echo $chatbot_transformer_model_content_in_mb; ?> MB</p> -->
+                <!-- <p><b>Character Count: </b><?php echo esc_html( $chatbot_transformer_model_character_count ); ?></p> -->
+                <!-- <p><b>Table Size: </b><?php echo esc_html( $chatbot_transformer_model_content_in_mb ); ?> MB</p> -->
                 <p><b>Content Items Proccessed: </b><?php echo esc_attr(get_option('chatbot_transformer_model_content_items_processed', 0)); ?></p>
             </div>
             <p>Refresh this page to determine the progress and status of Transformer Model build status!</p>
@@ -508,7 +508,7 @@ if (!function_exists('chatbot_transformer_model_format_bytes')) {
  */
 function chatbot_transformer_model_handle_cache_rebuild() {
     if (!current_user_can('manage_options')) {
-        wp_die(__('You do not have permission to perform this action.', 'chatbot-chatgpt'));
+        wp_die( esc_html__( 'You do not have permission to perform this action.', 'chatbot-chatgpt' ) );
     }
 
     check_admin_referer('chatbot_transformer_model_rebuild_cache');

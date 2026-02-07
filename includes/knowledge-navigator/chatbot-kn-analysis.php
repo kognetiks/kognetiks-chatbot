@@ -23,7 +23,7 @@ function chatbot_chatgpt_kn_analysis_section_callback($args) {
     if (is_admin()) {
         $header = " ";
         $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_kn_analysis_download_csv')) . '">Download Data</a>';
-        echo $header;
+        echo wp_kses_post( $header );
     }
 }
 

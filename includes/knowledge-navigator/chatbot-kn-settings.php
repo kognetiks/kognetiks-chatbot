@@ -302,7 +302,7 @@ function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
     <select id="chatbot_chatgpt_kn_maximum_top_words" name="chatbot_chatgpt_kn_maximum_top_words">
         <?php
         for ($i = 500; $i <= 10000; $i += 500) {
-            echo '<option value="' . $i . '"' . selected($GLOBALS['max_top_words'], $i, false) . '>' . $i . '</option>';
+            echo '<option value="' . esc_attr( $i ) . '"' . selected($GLOBALS['max_top_words'], $i, false) . '>' . esc_html( $i ) . '</option>';
         }
         ?>
     </select>
@@ -325,7 +325,7 @@ function chatbot_chatgpt_enhanced_response_limit_callback($args) {
     <select id="chatbot_chatgpt_enhanced_response_limit" name="chatbot_chatgpt_enhanced_response_limit">
         <?php
         for ($i = 1; $i <= 10; $i++) {
-            echo '<option value="' . $i . '"' . selected($chatbot_chatgpt_enhanced_response_limit, $i, false) . '>' . $i . '</option>';
+            echo '<option value="' . esc_attr( $i ) . '"' . selected($chatbot_chatgpt_enhanced_response_limit, $i, false) . '>' . esc_html( $i ) . '</option>';
         }
         ?>
     </select>
@@ -338,7 +338,7 @@ function chatbot_chatgpt_kn_tuning_percentage_callback($args) {
     <select id="chatbot_chatgpt_kn_tuning_percentage" name="chatbot_chatgpt_kn_tuning_percentage">
         <?php
         for ($i = 10; $i <= 100; $i += 5) {
-            echo '<option value="' . $i . '"' . selected($chatbot_chatgpt_kn_tuning_percentage, $i, false) . '>' . $i . '</option>';
+            echo '<option value="' . esc_attr( $i ) . '"' . selected($chatbot_chatgpt_kn_tuning_percentage, $i, false) . '>' . esc_html( $i ) . '</option>';
         }
         ?>
     </select>

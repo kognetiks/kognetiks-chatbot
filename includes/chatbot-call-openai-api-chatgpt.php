@@ -35,6 +35,15 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     global $voice;
     
     global $errorResponses;
+
+    // DIAG - Diagnostics - Ver 2.4.4
+    // back_trace("NOTICE", "Starting OpenAI API call");
+    // back_trace("NOTICE", "Message: " . $message);
+    // back_trace("NOTICE", "User ID: " . $user_id);
+    // back_trace("NOTICE", "Page ID: " . $page_id);
+    // back_trace("NOTICE", "Session ID: " . $session_id);
+    // back_trace("NOTICE", "Assistant ID: " . $assistant_id);
+    // back_trace("NOTICE", "Client Message ID: " . $client_message_id);
     
     // Use parameter if provided (not null), otherwise use global
     if ($param_user_id !== null) {
@@ -215,6 +224,14 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     // DIAG Diagnostics - Ver 1.6.1
 
     $chatbot_chatgpt_timeout = intval(esc_attr(get_option('chatbot_chatgpt_timeout_setting', '50')));
+    
+    // Fix for timeout exceeding PHP max_execution_time - Ver 2.4.5
+    // Temporarily increase PHP's max_execution_time to prevent fatal errors
+    $current_max_execution_time = ini_get('max_execution_time');
+    $required_execution_time = $chatbot_chatgpt_timeout + 10; // Add 10 seconds buffer
+    if ($current_max_execution_time > 0 && $required_execution_time > $current_max_execution_time) {
+        @set_time_limit($required_execution_time);
+    }
 
     $args = array(
         'headers' => $headers,
@@ -227,6 +244,11 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     // DIAG - Diagnostics - Ver 2.2.4
 
     $response = wp_remote_post($api_url, $args);
+    
+    // Restore original execution time limit - Ver 2.4.5
+    if ($current_max_execution_time > 0 && $required_execution_time > $current_max_execution_time) {
+        @set_time_limit($current_max_execution_time);
+    }
  
     // DIAG - Diagnostics - Ver 1.6.7
 
@@ -482,6 +504,14 @@ function chatbot_chatgpt_call_api_basic($api_key, $message) {
     }
 
     $chatbot_chatgpt_timeout = intval(esc_attr(get_option('chatbot_chatgpt_timeout_setting', '50')));
+    
+    // Fix for timeout exceeding PHP max_execution_time - Ver 2.4.5
+    // Temporarily increase PHP's max_execution_time to prevent fatal errors
+    $current_max_execution_time = ini_get('max_execution_time');
+    $required_execution_time = $chatbot_chatgpt_timeout + 10; // Add 10 seconds buffer
+    if ($current_max_execution_time > 0 && $required_execution_time > $current_max_execution_time) {
+        @set_time_limit($required_execution_time);
+    }
 
     $args = array(
         'headers' => $headers,
@@ -492,6 +522,11 @@ function chatbot_chatgpt_call_api_basic($api_key, $message) {
     );
 
     $response = wp_remote_post($api_url, $args);
+    
+    // Restore original execution time limit - Ver 2.4.5
+    if ($current_max_execution_time > 0 && $required_execution_time > $current_max_execution_time) {
+        @set_time_limit($current_max_execution_time);
+    }
     // DIAG - Diagnostics - Ver 1.6.7
 
     // Handle any errors that are returned from the chat engine

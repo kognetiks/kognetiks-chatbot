@@ -34,7 +34,16 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     global $voice;
     
     global $errorResponses;
-    
+
+    // DIAG - Diagnostics - Ver 2.4.4
+    // back_trace("NOTICE", "Starting OpenAI Omni API call");
+    // back_trace("NOTICE", "Message: " . $message);
+    // back_trace("NOTICE", "User ID: " . $user_id);
+    // back_trace("NOTICE", "Page ID: " . $page_id);
+    // back_trace("NOTICE", "Session ID: " . $session_id);
+    // back_trace("NOTICE", "Assistant ID: " . $assistant_id);
+    // back_trace("NOTICE", "Client Message ID: " . $client_message_id);
+
     // Use parameter if provided (not null), otherwise use global
     if ($param_user_id !== null) {
         $user_id = $param_user_id;

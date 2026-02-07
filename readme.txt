@@ -1,60 +1,85 @@
 === Kognetiks Chatbot for WordPress ===
 Contributors: kognetiks
-Tags: ai chatbot, chatgpt, conversational ai, reporting, insights
-Requires at least: 6.0
-Tested up to: 6.9
-Stable tag: 2.4.3
+Tags: chat, chatgpt, ai, reporting, insights
+Donate link: https://kognetiks.com/wordpress-plugins/donate/
+Tested up to: 6.9.1
+Stable tag: 2.4.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
+Quiet proof that your website is working. Turn real visitor convesrations into clear insight, automatically. No dashboards. No guesswork.
+
 == Description ==
 
-Turn chatbot conversations into insight - automatically.
+**Quiet Proof for Your Website**
 
-The Kognetiks Chatbot helps WordPress site owners understand what visitors are asking, see how AI is being used, and understand its value without reading every chat transcript.
+Most websites are having conversations you never see.
 
-Instead of guessing whether your chatbot is helping, you receive clear conversation digests and proof-of-value summaries that highlight usage, intent, and engagement.
+Visitors ask questions, express confusion, or look for answers without ever filling out a form or opening a ticket. Traditional analytics don’t show this. Chat logs are too noisy to monitor at scale.
 
-This plugin is designed for transparency, oversight, and measurable outcomes - not black-box AI.
+**Kognetiks Chatbot turns those invisible interactions into quiet proof of value.**
+
+Instead of guessing whether your chatbot is helping, you receive clear, human-readable summaries that show what visitors asked, where AI helped, and where attention may be needed.
+
+No dashboards to babysit.
+No transcripts to dig through.
+Just insight, delivered.
+
+== What Makes This Different ==
+
+Kognetiks is not a novelty chatbot.  It is build for understanding, oversight, and long-term use.
+
+It is designed for **visibility, oversight, and measurable outcomes**, so you can understand how AI is actually being used on your site.
+
+AI assists.
+Humans decide.
 
 == Who This Is For ==
 
-This plugin is for you if:
+This plugin is a strong fit if you:
 
-* You want visibility into what visitors are actually asking
-* You care about understanding intent, not just answering questions
-* You want AI that supports human decision-making
-* You value transparency and measurable outcomes
-* You want insight delivered automatically, not buried in dashboards
+* Want to know what visitors are really asking
+* Care about intent, not just answers
+* Need proof that AI is providing value
+* Prefer insight delivered automatically
+* Value transparency over black-box automation
+
+Common users include:
+
+* Agencies managing client websites
+* Consultants and site owners
+* Product and content teams
+* Founders who want clarity, not noise
 
 == Who This Is Not For ==
 
-This plugin may not be a fit if:
+This plugin may not be a fit if you:
 
-* You only want a novelty chatbot
-* You prefer opaque or fully autonomous AI systems
-* You don’t want insight into how AI is being used
-* You expect AI to replace human judgment
+* Only want a novelty chatbot
+* Expect AI to operate without human oversight
+* Prefer opaque or fully autonomous systems
+* Don’t want visibility into AI behavior
 
 == Key Outcomes ==
 
-* Know what visitors are asking without reading every transcript
+With Kognetiks, you can:
+
+* See what visitors asked without reading every transcript
 * Understand engagement and intent patterns over time
-* See where AI is helping and where it needs improvement
-* Demonstrate real value from conversational AI
+* Identify unanswered questions and content gaps
+* Demonstrate real, ongoing value from conversational AI
 
 == Conversation Digest ==
 
 Automatically summarizes real chatbot interactions, including:
 
 * Common questions and themes
-* Emerging topics and visitor intent
 * Signals of confusion, friction, or opportunity
 * High-level engagement and sentiment indicators
 
-No dashboards to babysit.
-No logs to dig through.
-Just insight delivered to you.
+Reports are delivered automatically to your inbox.
+
+No dashboards required.
 
 == Proof-of-Value Reporting ==
 
@@ -64,10 +89,13 @@ Turns invisible chatbot activity into visible outcomes:
 * Evidence of support and efficiency gains
 * Insight you can act on or share
 
+Ideal for agencies, consultants, and teams who need to justify ongoing value.
+
 == Key Features ==
 
 * Conversation Digest summaries
 * Proof-of-value reporting
+* Reports are designed to be shared as-is, wihtout explanation
 * Supports multiple AI engines (OpenAI, Azure OpenAI, NVIDIA, Anthropic, Mistral, DeepSeek, Google, JAN.AI)
 * Knowledge Navigator for site-aware responses
 * Custom assistants for specific purposes
@@ -75,6 +103,12 @@ Turns invisible chatbot activity into visible outcomes:
 * Sentiment and engagement signals
 * Optional voice and speech support
 * Embedded or floating chat via shortcode
+
+== Philosophy ==
+
+**Designed for visibility, not guesswork.**
+
+The **Kognetiks Chatbot** helps you understand when AI is helping, when it needs adjustment, and where samll changes can quietly make a big difference.
 
 == Installation ==
 
@@ -114,7 +148,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 **IMPORTANT**:
 
-- This plugin requires an API key from OpenAI, NVIDIA, Anthropic or DeepSeek to function. Without an API key, the chatbot cannot process user queries.
+- This plugin requires an API key from OpenAI, NVIDIA, Anthropic, DeepSeek, Mistral, Google, or JAN.AI to function. Without an API key, the chatbot cannot process user queries.
 
 - Obtain API keys here:
 
@@ -140,17 +174,25 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Screenshots ==
 
-1. Floating chatbot
-2. Embedded chatbot
-3. Conversation Digest summary
-4. Proof-of-value reporting
+1. Proof-of-value reporting
+2. Conversation Digest summary
+3. Floating chatbot
+4. Embedded chatbot
 5. Chatbot settings and configuration
 
-== Philosophy ==
-
-The **Kognetiks Chatbot** is designed around human oversight. AI assists. Humans decide.
-
 == Changelog ==
+
+= 2.4.4 - Released 2026-02-07 =
+
+### Improvements
+* **Documentation**: Added Unanswered Questions Detection Analysis documentation.
+* **Vendor management**: Refined free→trial→premium upgrade path and messaging.
+* **Reporting**: Modal prompts conversation logging when enabling digest or proof-of-value reports.
+* **Uninstall**: Improved uninstall process and version handling.
+
+### Bug Fixes
+* Suppressed vendor notices and quieted third-party warnings.
+* Replaced select error_log calls with back_trace for cleaner debugging.
 
 = 2.4.3 - Released 2026-01-24 =
 

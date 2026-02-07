@@ -283,11 +283,10 @@ function chatbot_chatgpt_upgrade() {
     // FIXME - DETERMINE WHAT OTHER 'OLD' OPTIONS SHOULD BE DELETED
     // FIXME - DETERMINE WHAT OPTION NAMES NEED TO BE CHANGED (DELETE, THEN REPLACE)
 
-    // Add/update the option - chatbot_chatgpt_plugin_version
-    global $chatbot_chatgpt_plugin_version;
-    $plugin_version = $chatbot_chatgpt_plugin_version;
-    $old_version = get_option('chatbot_chatgpt_plugin_version', '');
-    update_option('chatbot_chatgpt_plugin_version', $plugin_version);
+    // Remove legacy chatbot_chatgpt_plugin_version option if it exists (replaced by chatbot_chatgpt_version_installed in Ver 2.4.1)
+    if (get_option('chatbot_chatgpt_plugin_version', false) !== false) {
+        delete_option('chatbot_chatgpt_plugin_version');
+    }
     
     // Track installed version for upgrade detection - Ver 2.4.1
     // Use multisite-aware options if plugin is network-activated
@@ -304,6 +303,9 @@ function chatbot_chatgpt_upgrade() {
     $get_opt = $is_network ? 'get_site_option' : 'get_option';
     $update_opt = $is_network ? 'update_site_option' : 'update_option';
     $delete_opt = $is_network ? 'delete_site_option' : 'delete_option';
+    
+    global $chatbot_chatgpt_plugin_version;
+    $plugin_version = isset($chatbot_chatgpt_plugin_version) ? $chatbot_chatgpt_plugin_version : '';
     
     $installed_version = call_user_func($get_opt, 'chatbot_chatgpt_version_installed', '');
     if ($installed_version !== $plugin_version) {

@@ -22,7 +22,7 @@ function transformer_model_sentential_context_model_response_lite($prompt, $max_
 
         global $stopWords;
 
-        $text = strtolower(strip_tags($text));
+        $text = strtolower(wp_strip_all_tags($text));
         $text = preg_replace('/[^a-z0-9 ]/', '', $text);
         $text = preg_replace('/\s+/', ' ', $text);
         $text = trim($text);
@@ -213,7 +213,7 @@ function transformer_model_sentential_context_model_response_lite_version_two($p
     // Preprocess text: convert to lowercase, strip HTML tags, remove punctuation/extra spaces, and filter out stop words.
     function preprocess_text($text) {
         global $stopWords;
-        $text = strtolower(strip_tags($text));
+        $text = strtolower(wp_strip_all_tags($text));
         $text = preg_replace('/[^a-z0-9 ]/', '', $text);
         $text = preg_replace('/\s+/', ' ', $text);
         $text = trim($text);
@@ -388,7 +388,7 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
 
         global $stopWords;
         // Convert to lowercase and strip HTML tags
-        $text = strtolower(strip_tags($text));
+        $text = strtolower(wp_strip_all_tags($text));
         // Remove punctuation and special characters
         $text = preg_replace('/[^a-z0-9 ]/', '', $text);
         // Remove extra spaces
@@ -790,7 +790,7 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     }
 
     // Clean and return content
-    $content = strip_tags($content);
+    $content = wp_strip_all_tags($content);
     $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5);
 
     return $content;

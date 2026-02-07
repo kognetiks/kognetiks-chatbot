@@ -127,22 +127,23 @@ function chatbot_chatgpt_manage_error_logs() {
         .error-log-templates-display th {
             background-color: #f2f2f2;
         }
-        .notice {
+        /* Scope notice styles to error-log section only to avoid overriding WordPress admin notices */
+        .error-log-templates-display .notice {
             padding: 10px;
             margin: 10px 0;
             border-radius: 4px;
         }
-        .notice-success {
+        .error-log-templates-display .notice-success {
             background-color: #d4edda;
             border: 1px solid #c3e6cb;
             color: #155724;
         }
-        .notice-error {
+        .error-log-templates-display .notice-error {
             background-color: #f8d7da;
             border: 1px solid #f5c6cb;
             color: #721c24;
         }
-        .notice-warning {
+        .error-log-templates-display .notice-warning {
             background-color: #fff3cd;
             border: 1px solid #ffeaa7;
             color: #856404;
@@ -196,7 +197,7 @@ function chatbot_chatgpt_manage_error_logs() {
     $output .= '</form>';
     $output .= '</div>';
 
-    echo $output; // Output the generated HTML
+    echo wp_kses_post( $output ); // Output the generated HTML
 
     return;
 
@@ -206,6 +207,11 @@ function chatbot_chatgpt_manage_error_logs() {
 function handle_log_actions() {
 
     global $chatbot_chatgpt_plugin_dir_path;
+
+    // Security: Require admin capability - log management is admin-only
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'chatbot-chatgpt' ), 403 );
+    }
 
     if (!isset($_GET['action']) || !isset($_GET['_wpnonce'])) {
         return;
@@ -349,11 +355,8 @@ function handle_log_actions() {
     }
     
 }
-add_action('admin_post_nopriv_download_log', 'handle_log_actions');
+// Admin-only: no admin_post_nopriv_* - unauthenticated users cannot manage logs
 add_action('admin_post_download_log', 'handle_log_actions');
-add_action('admin_post_nopriv_delete_log', 'handle_log_actions');
 add_action('admin_post_delete_log', 'handle_log_actions');
-add_action('admin_post_nopriv_delete_all_logs', 'handle_log_actions');
 add_action('admin_post_delete_all_logs', 'handle_log_actions');
-add_action('admin_post_nopriv_fix_permissions', 'handle_log_actions');
 add_action('admin_post_fix_permissions', 'handle_log_actions');

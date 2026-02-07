@@ -146,7 +146,7 @@ add_filter('cron_schedules', 'chatbot_chatgpt_add_weekly_schedule');
 function chatbot_chatgpt_add_weekly_schedule($schedules) {
     $schedules['weekly'] = array(
         'interval' => 604800, // 1 week in seconds
-        'display' => __('Once Weekly')
+        'display' => __('Once Weekly', 'chatbot-chatgpt')
     );
     return $schedules;
 }

@@ -28,9 +28,9 @@ function chatbot_chatgpt_capability_tester() {
 
     foreach ($capabilities as $capability) {
         if (current_user_can($capability)) {
-            echo '<p>User has the capability: ' . $capability . '</p>';
+            echo '<p>User has the capability: ' . esc_html( $capability ) . '</p>';
         } else {
-            echo '<p>User does not have the capability: ' . $capability . '</p>';
+            echo '<p>User does not have the capability: ' . esc_html( $capability ) . '</p>';
         }
     }
 

@@ -208,8 +208,8 @@ function chatbot_chatgpt_send_conversation_digest() {
         $message .= "This is an automated digest from your Chatbot Conversation Logging system.\n";
     }
     
-    // Send the email
-    $sent = wp_mail($email_address, $subject, $message);
+    // Send the email using safe wrapper to prevent timeout errors
+    $sent = chatbot_chatgpt_safe_wp_mail($email_address, $subject, $message);
     
     // Update the last digest timestamp
     if ($sent) {

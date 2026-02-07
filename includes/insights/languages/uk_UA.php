@@ -111,6 +111,7 @@ $fallback_like = [
  * Global explicit failure and apology patterns. 
  */
 $fallback_failure_and_apology = [
+    '%вибачте%',
     '%я не знаю%',
     '%я не впевнений%',
     '%я не впевнена%',

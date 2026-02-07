@@ -226,6 +226,25 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
     // Get current values for conditional display
     $digest_enabled = esc_attr(get_option('chatbot_chatgpt_conversation_digest_enabled', 'No'));
     $insights_enabled = esc_attr(get_option('chatbot_chatgpt_insights_email_enabled', 'No'));
+    $logging_enabled = esc_attr(get_option('chatbot_chatgpt_enable_conversation_logging', 'Off'));
+    
+    // Check if either Conversation Digest or Proof of Value Reports is enabled but Conversation Logging is disabled
+    if (($digest_enabled === 'Yes' || $insights_enabled === 'Yes') && $logging_enabled !== 'On') {
+        ?>
+        <div class="notice notice-warning conversation-logging-warning" style="padding: 20px; margin: 20px 0; border-left: 4px solid #dba617;">
+            <h2 style="margin-top: 0;">▲ Conversation Logging Required</h2>
+            <p>To use <?php echo ($digest_enabled === 'Yes' && $insights_enabled === 'Yes') ? 'Conversation Digest and Proof of Value Reports' : ($digest_enabled === 'Yes' ? 'Conversation Digest' : 'Proof of Value Reports'); ?>, you need to enable conversation logging.</p>
+            <p>Please follow these steps:</p>
+            <ol>
+                <li>Scroll down to the bottom of this <strong>Reporting</strong> tab to the <strong>Reporting Settings</strong> section</li>
+                <li>Set the <strong>Enable Conversation Logging</strong> option to <strong>On</strong></li>
+                <li>Choose the <strong>Conversation Log Days to Keep</strong> option to the number of days you want to keep the conversation logs (default is 30 days)</li>
+                <li>Save your changes by scrolling to the bottom of the page and clicking the <strong>Save Changes</strong> button</li>
+            </ol>
+            <p>Once conversation logging is enabled, <?php echo ($digest_enabled === 'Yes' && $insights_enabled === 'Yes') ? 'these reports' : 'this report'; ?> will function properly.</p>
+        </div>
+        <?php
+    }
     
     // IMPORTANT: Render the fields manually first, then WordPress will also try to render them
     // We need to output the fields here so they're in the form, but we'll hide WordPress's automatic table
@@ -312,6 +331,47 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
             color: #1e1e1e;
         }
         </style>
+        
+        <!-- Card C: Upgrade CTA (Free users only) -->
+        <?php if ($is_free): ?>
+        <div class="kchat-email-card" id="kchat-upgrade-cta-card">
+            <div class="kchat-upgrade-cta" style="text-align: left;">
+                <h3>Curious about deeper signals or faster feedback?</h3>
+                <p>Weekly reports show what happened.<br>Insights highlights <i>what to do next</i>.</p>
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <?php
+                // Trial-first CTA with safety guards
+                if (function_exists('chatbot_chatgpt_freemius')) {
+                    $fs = chatbot_chatgpt_freemius();
+                    if (is_object($fs)) {
+                        // Primary: Start Free Trial button changed to Unlock Deeper Insights button
+                        if (method_exists($fs, 'get_upgrade_url')) {
+                            // Use monthly billing cycle for trial
+                            $trial_url = $fs->get_upgrade_url( WP_FS__PERIOD_MONTHLY, true );
+                            ?>
+                            <a href="<?php echo esc_url($trial_url); ?>" class="button button-primary" style="background-color: #f56e28; border-color: #f56e28; color: #fff; text-decoration: none; padding: 8px 16px; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 0;">
+                                Unlock Deeper Insights
+                            </a>
+                            <?php
+                        }
+                        // Secondary: View Plans link
+                        if (method_exists($fs, 'get_upgrade_url')) {
+                            $upgrade_url = $fs->get_upgrade_url();
+                            ?>
+                            <a href="<?php echo esc_url($upgrade_url); ?>" class="button button-secondary" style="text-decoration: none; padding: 8px 16px; font-size: 14px; display: inline-block; margin-bottom: 0;">
+                                View Plans
+                            </a>
+                            <?php
+                        }
+                    }
+                }
+                ?>
+                    <a href="?page=chatbot-chatgpt&tab=support&dir=analytics-package&file=proof-of-value-reports-email.md" style="color: #2271b1; text-decoration: underline;">Learn more</a>
+                    <a href="mailto:support@kognetiks.com" style="color: #2271b1; text-decoration: underline;">Contact Support</a>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
         
         <!-- Card A: Conversation Digest -->
         <div class="kchat-email-card" id="kchat-digest-card" data-enabled="<?php echo esc_attr($digest_enabled); ?>">
@@ -403,48 +463,6 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
             <?php endif; ?>
         </div>
         
-        <!-- Card C: Upgrade CTA (Free users only) -->
-        <?php if ($is_free): ?>
-        <div class="kchat-email-card" id="kchat-upgrade-cta-card">
-            <div class="kchat-upgrade-cta" style="text-align: left;">
-                <p style="margin: 0 0 15px 0; font-size: 15px; font-weight: 600; color: #1e1e1e;">
-                    <span style="color: #00a32a; margin-right: 5px;">✓</span> Ready to Upgrade?
-                </p>
-                <?php
-                // Trial-first CTA with safety guards
-                if (function_exists('chatbot_chatgpt_freemius')) {
-                    $fs = chatbot_chatgpt_freemius();
-                    if (is_object($fs)) {
-                        // Primary: Start Free Trial button
-                        if (method_exists($fs, 'get_upgrade_url')) {
-                            // Use monthly billing cycle for trial
-                            $trial_url = $fs->get_upgrade_url( WP_FS__PERIOD_MONTHLY, true );
-                            ?>
-                            <a href="<?php echo esc_url($trial_url); ?>" class="button button-primary" style="background-color: #f56e28; border-color: #f56e28; color: #fff; text-decoration: none; padding: 8px 16px; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 10px; margin-right: 10px;">
-                                Start Free Trial
-                            </a>
-                            <?php
-                        }
-                        // Secondary: View Plans link
-                        if (method_exists($fs, 'get_upgrade_url')) {
-                            $upgrade_url = $fs->get_upgrade_url();
-                            ?>
-                            <a href="<?php echo esc_url($upgrade_url); ?>" class="button button-secondary" style="text-decoration: none; padding: 8px 16px; font-size: 14px; display: inline-block; margin-bottom: 10px;">
-                                View Plans
-                            </a>
-                            <?php
-                        }
-                    }
-                }
-                ?>
-                <div style="margin-top: 10px;">
-                    <a href="?page=chatbot-chatgpt&tab=support&dir=analytics-package&file=proof-of-value-reports-email.md" style="color: #2271b1; text-decoration: underline; margin-right: 15px;">Learn more</a>
-                    <a href="mailto:support@kognetiks.com" style="color: #2271b1; text-decoration: underline;">Contact Support</a>
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
-        
         <?php
         // Prepare variables for JavaScript (outside conditional blocks)
         $insights_email_js = get_option('chatbot_chatgpt_insights_email_address', '');
@@ -488,15 +506,62 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
             toggleConditionalFields('kchat-digest-card', '<?php echo esc_js($digest_enabled); ?>');
             toggleConditionalFields('kchat-insights-card', '<?php echo esc_js($insights_enabled); ?>');
             
+            // Function to check and show/hide conversation logging warning
+            function checkConversationLoggingWarning() {
+                var digestEnabled = $('#chatbot_chatgpt_conversation_digest_enabled').val();
+                var insightsEnabled = $('#chatbot_chatgpt_insights_email_enabled').val();
+                var loggingEnabled = $('#chatbot_chatgpt_enable_conversation_logging').val();
+                
+                // Check if either report is enabled but logging is disabled
+                if ((digestEnabled === 'Yes' || insightsEnabled === 'Yes') && loggingEnabled !== 'On') {
+                    // Show warning if it doesn't exist
+                    if ($('.conversation-logging-warning').length === 0) {
+                        var reportNames = [];
+                        if (digestEnabled === 'Yes') reportNames.push('Conversation Digest');
+                        if (insightsEnabled === 'Yes') reportNames.push('Proof of Value Reports');
+                        var reportText = reportNames.join(' and ');
+                        
+                        var warningHtml = '<div class="notice notice-warning conversation-logging-warning" style="padding: 20px; margin: 20px 0; border-left: 4px solid #dba617;">' +
+                            '<h2 style="margin-top: 0;">▲ Conversation Logging Required</h2>' +
+                            '<p>To use ' + reportText + ', you need to enable conversation logging.</p>' +
+                            '<p>Please follow these steps:</p>' +
+                            '<ol>' +
+                            '<li>Scroll down to the bottom of this <strong>Reporting</strong> tab to the <strong>Reporting Settings</strong> section</li>' +
+                            '<li>Set the <strong>Enable Conversation Logging</strong> option to <strong>On</strong></li>' +
+                            '<li>Choose the <strong>Conversation Log Days to Keep</strong> option to the number of days you want to keep the conversation logs (default is 30 days)</li>' +
+                            '<li>Save your changes by scrolling to the bottom of the page and clicking the <strong>Save Changes</strong> button</li>' +
+                            '</ol>' +
+                            '<p>Once conversation logging is enabled, ' + (reportNames.length > 1 ? 'these reports' : 'this report') + ' will function properly.</p>' +
+                            '</div>';
+                        
+                        // Insert warning before the email cards section
+                        $('.kchat-email-card').first().before(warningHtml);
+                    }
+                } else {
+                    // Hide warning if logging is enabled or both reports are disabled
+                    $('.conversation-logging-warning').remove();
+                }
+            }
+            
             // Watch for changes to digest enabled
             $('#chatbot_chatgpt_conversation_digest_enabled').on('change', function() {
                 toggleConditionalFields('kchat-digest-card', $(this).val());
+                checkConversationLoggingWarning();
             });
             
             // Watch for changes to insights enabled
             $('#chatbot_chatgpt_insights_email_enabled').on('change', function() {
                 toggleConditionalFields('kchat-insights-card', $(this).val());
+                checkConversationLoggingWarning();
             });
+            
+            // Watch for changes to conversation logging
+            $('#chatbot_chatgpt_enable_conversation_logging').on('change', function() {
+                checkConversationLoggingWarning();
+            });
+            
+            // Check on page load
+            checkConversationLoggingWarning();
             
             // Test Conversation Digest Email
             $('#chatbot-test-digest-email-btn').on('click', function(e) {
@@ -583,7 +648,7 @@ function chatbot_chatgpt_conversation_reporting_section_callback($args) {
         <?php
             if (is_admin()) {
                 $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_conversation_data')) . '">Download Conversation Data</a>';
+                $header .= '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_conversation_data' ), 'chatbot_chatgpt_download_conversation_data' ) ) . '">Download Conversation Data</a>';
                 echo $header;
             }
         ?>
@@ -601,7 +666,7 @@ function chatbot_chatgpt_interaction_reporting_section_callback($args) {
         <?php
             if (is_admin()) {
                 $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_interactions_data')) . '">Download Interaction Data</a>';
+                $header .= '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_interactions_data' ), 'chatbot_chatgpt_download_interactions_data' ) ) . '">Download Interaction Data</a>';
                 echo $header;
             }
         ?>
@@ -617,7 +682,7 @@ function chatbot_chatgpt_token_reporting_section_callback($args) {
         <?php
             if (is_admin()) {
                 $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_token_usage_data')) . '">Download Token Usage Data</a>';
+                $header .= '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_token_usage_data' ), 'chatbot_chatgpt_download_token_usage_data' ) ) . '">Download Token Usage Data</a>';
                 echo $header;
             }
         ?>
@@ -902,7 +967,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
     // Parsing shortcode attributes
     $a = shortcode_atts( array(
-        'name' => 'visitorsChart_' . rand(100, 999),
+        'name' => 'visitorsChart_' . wp_rand( 100, 999 ),
         'type' => 'bar',
         'labels' => 'label',
         ), $atts );
@@ -913,7 +978,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
         $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';
         
         // Get the reporting period from the options
-        $reporting_period = gesc_attr(et_option('chatbot_chatgpt_reporting_period'));
+        $reporting_period = esc_attr(get_option('chatbot_chatgpt_reporting_period'));
         
         // Calculate the start date and group by clause based on the reporting period
         if($reporting_period === 'Daily') {
@@ -1181,22 +1246,52 @@ function chatbot_chatgpt_total_tokens() {
 
 function chatbot_chatgpt_download_interactions_data() {
 
+    // Security: Check capability
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'chatbot-chatgpt' ), 403 );
+    }
+
+    // Security: Verify nonce for CSRF protection
+    if ( ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'chatbot_chatgpt_download_interactions_data' ) ) {
+        wp_die( esc_html__( 'Security check failed. Please refresh the page and try again.', 'chatbot-chatgpt' ), 403 );
+    }
+
     // Export data from the chatbot_chatgpt_interactions table to a csv file
-    chatbot_chatgpt_export_data('chatbot_chatgpt_interactions', 'Chatbot-ChatGPT-Interactions');
+    chatbot_chatgpt_export_data( 'chatbot_chatgpt_interactions', 'Chatbot-ChatGPT-Interactions' );
 
 }
 
 function chatbot_chatgpt_download_conversation_data() {
 
+    // Security: Check capability
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'chatbot-chatgpt' ), 403 );
+    }
+
+    // Security: Verify nonce for CSRF protection
+    if ( ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'chatbot_chatgpt_download_conversation_data' ) ) {
+        wp_die( esc_html__( 'Security check failed. Please refresh the page and try again.', 'chatbot-chatgpt' ), 403 );
+    }
+
     // Export data from the chatbot_chatgpt_conversation_log table to a csv file
-    chatbot_chatgpt_export_data('chatbot_chatgpt_conversation_log', 'Chatbot-ChatGPT-Conversation Logs');
-    
+    chatbot_chatgpt_export_data( 'chatbot_chatgpt_conversation_log', 'Chatbot-ChatGPT-Conversation Logs' );
+
 }
 
 function chatbot_chatgpt_download_token_usage_data() {
 
+    // Security: Check capability
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'chatbot-chatgpt' ), 403 );
+    }
+
+    // Security: Verify nonce for CSRF protection
+    if ( ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'chatbot_chatgpt_download_token_usage_data' ) ) {
+        wp_die( esc_html__( 'Security check failed. Please refresh the page and try again.', 'chatbot-chatgpt' ), 403 );
+    }
+
     // Export data from the chatbot_chatgpt_conversation_log table to a csv file
-    chatbot_chatgpt_export_data('chatbot_chatgpt_conversation_log', 'Chatbot-ChatGPT-Token Usage');
+    chatbot_chatgpt_export_data( 'chatbot_chatgpt_conversation_log', 'Chatbot-ChatGPT-Token Usage' );
 
 }
 
@@ -1225,7 +1320,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
 
     // Check for errors
     if (!empty($wpdb->last_error)) {
-        $message = __( 'Error reading table: ' . $wpdb->last_error, 'chatbot-chatgpt' );
+        $message = sprintf( __( 'Error reading table: %s', 'chatbot-chatgpt' ), $wpdb->last_error );
         set_transient('chatbot_chatgpt_admin_error', $message, 60); // Expires in 60 seconds
         wp_safe_redirect(admin_url('options-general.php?page=chatbot-chatgpt&tab=reporting')); // Redirect to your settings page
         exit;
@@ -1282,7 +1377,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     // Exit early if the file doesn't exist
     if (!file_exists($results_csv_file)) {
         $class = 'notice notice-error';
-        $message = __( 'File not found!' . $results_csv_file, 'chatbot-chatgpt' );
+        $message = sprintf( __( 'File not found: %s', 'chatbot-chatgpt' ), $results_csv_file );
         // printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
         chatbot_chatgpt_general_admin_notice($message);
         return;
@@ -1429,8 +1524,8 @@ function chatbot_chatgpt_test_conversation_digest_ajax() {
         prod_trace( 'NOTICE', 'Test Conversation Digest Email - Ver 2.4.2 - Message');
     }
     
-    // Send the email
-    $sent = wp_mail($email_address, $subject, $message);
+    // Send the email using safe wrapper to prevent timeout errors
+    $sent = chatbot_chatgpt_safe_wp_mail($email_address, $subject, $message);
     
     // Log result
     if (function_exists('back_trace')) {

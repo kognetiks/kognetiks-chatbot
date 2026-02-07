@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.4.3
+ * Version:     2.4.4
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -22,13 +22,16 @@
  * along with Kognetiks Chatbot. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  * 
  * @package chatbot-chatgpt
- * @version 2.4.3
+ * @version 2.4.4
  * @author Kognetiks.com
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+// Load vendor management early so it can register for chatbot_chatgpt_freemius_loaded (before do_action runs)
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-vendor-management.php';
 
 if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
     chatbot_chatgpt_freemius()->set_basename( true, __FILE__ );
@@ -86,7 +89,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.4.3';
+$chatbot_chatgpt_plugin_version = '2.4.4';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -95,6 +98,11 @@ $chatbot_chatgpt_plugin_dir_path = plugin_dir_path( __FILE__ );
 // Plugin directory URL
 global $chatbot_chatgpt_plugin_dir_url;
 $chatbot_chatgpt_plugin_dir_url = plugins_url( '/', __FILE__ );
+
+// Main plugin file pointer (used by vendor-management hooks, etc.)
+if ( ! defined( 'CHATBOT_CHATGPT_PLUGIN_FILE' ) ) {
+    define( 'CHATBOT_CHATGPT_PLUGIN_FILE', __FILE__ );
+}
 
 // Declare Globals
 global $wpdb;
@@ -260,6 +268,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients-
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.php';                   // Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-upgrade.php';                      // Ver 1.6.7
 // chatbot-utilities.php moved above to be loaded before API files - Ver 2.3.9
+// chatbot-vendor-management.php loaded at top of file (before Freemius init) - Ver 2.4.4
 
 // Third-party libraries
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php';                            // Version 2.0.2.1
@@ -405,6 +414,9 @@ if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
     chatbot_chatgpt_freemius()->add_action( 'after_premium_version_activation', function() {
         chatbot_chatgpt_load_insights_files();
     } );
+    // Freemius overwrites the plugin's uninstall hook on deactivation. Hook into Freemius's
+    // after_uninstall so our data cleanup runs when the user has set chatbot_chatgpt_delete_data = yes.
+    chatbot_chatgpt_freemius()->add_action( 'after_uninstall', 'chatbot_chatgpt_uninstall' );
 }
 
 // Include necessary files - Widgets - Ver 2.1.3
@@ -3223,6 +3235,8 @@ function enqueue_color_picker($hook_suffix) {
 add_action('admin_enqueue_scripts', 'enqueue_color_picker');
 
 // Determine if the plugin is installed
+// NOTE: This function is deprecated. Version tracking is now handled via chatbot_chatgpt_version_installed option.
+// Kept for backward compatibility but no longer updates the legacy chatbot_chatgpt_plugin_version option.
 function kchat_get_plugin_version() {
 
     global $chatbot_chatgpt_plugin_version;
@@ -3232,13 +3246,9 @@ function kchat_get_plugin_version() {
     }
 
     $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . 'chatbot-chatgpt.php');
-    // DIAG - Print the plugin data
-    // $plugin_version = $plugin_data['chatbot_chatgpt_version'];
     $plugin_version = $plugin_data['Version'];
-    // $plugin_version = $chatbot_chatgpt_plugin_version;
-    update_option('chatbot_chatgpt_plugin_version', $plugin_version);
-    // DIAG - Log the plugin version
-
+    
+    // Return version without updating legacy option (chatbot_chatgpt_plugin_version is deprecated)
     return $plugin_version;
 
 }

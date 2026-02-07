@@ -148,7 +148,7 @@ function chatbot_google_temperature_callback($args) {
     <select id="chatbot_google_temperature" name="chatbot_google_temperature">
         <?php
         for ($i = 0.01; $i <= 2.01; $i += 0.01) {
-            echo '<option value="' . $i . '" ' . selected($temperature, (string)$i) . '>' . esc_html($i) . '</option>';
+            echo '<option value="' . esc_attr( $i ) . '" ' . selected($temperature, (string)$i) . '>' . esc_html( $i ) . '</option>';
         }
         ?>
     </select>
