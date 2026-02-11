@@ -493,7 +493,7 @@ function chatbot_error_log($message) {
                 // error_log('[Chatbot] [chatbot-settings-diagnotics.php] WordPress filesystem initialized successfully');
             } else {
                 // Fallback to file_put_contents if filesystem initialization fails
-                //error_log('[Chatbot] [chatbot-settings-diagnotics.php] Falling back to native file_put_contents');
+                // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Falling back to native file_put_contents');
                 file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
                 return;
             }
@@ -513,9 +513,9 @@ function chatbot_error_log($message) {
         $existing_content = '';
         if ($wp_filesystem->exists($log_file)) {
             $existing_content = $wp_filesystem->get_contents($log_file);
-            //error_log('[Chatbot] [chatbot-settings-diagnotics.php] Existing content length: ' . strlen($existing_content));
+            // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Existing content length: ' . strlen($existing_content));
         } else {
-            //error_log('[Chatbot] [chatbot-settings-diagnotics.php] Log file does not exist, creating new file');
+            // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Log file does not exist, creating new file');
         }
         
         // Append the new message to existing content

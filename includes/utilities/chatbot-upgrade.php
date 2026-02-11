@@ -16,7 +16,8 @@ if ( ! defined( 'WPINC' ) ) {
 // Activation Hook - Revised 1.7.6
 function chatbot_chatgpt_activate() {
 
-    // DIAG - Log the activation
+    // DIAG - Diagnotics - Ver 2.4.5
+    error_log('chatbot_chatgpt_activate');
 
     // Logic to run during activation
     chatbot_chatgpt_upgrade();
@@ -37,7 +38,8 @@ function chatbot_chatgpt_activate() {
 // Upgrade Hook for Plugin Update - Revised 1.7.6
 function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
 
-    // DIAG - Log the activation
+    // DIAG - Diagnotics - Ver 2.4.5
+    // error_log('chatbot_chatgpt_upgrade_completed');
 
     if ($options['action'] == 'update' && $options['type'] == 'plugin') {
         if (isset($options['plugins']) && is_array($options['plugins'])) {
@@ -62,7 +64,8 @@ function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
 // Upgrade Logic - Revised 1.7.6
 function chatbot_chatgpt_upgrade() {
 
-    // DIAG - Log the upgrade
+    // DIAG - Diagnotics - Ver 2.4.5
+    error_log('chatbot_chatgpt_upgrade');
 
     // Removed obsolete or replaced options
     if ( esc_attr(get_option( 'chatbot_chatgpt_crawler_status' )) ) {

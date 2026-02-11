@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Load vendor management early so it can register for chatbot_chatgpt_freemius_loaded (before do_action runs)
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-vendor-management.php';
+// require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-vendor-management.php';
 
 if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
     chatbot_chatgpt_freemius()->set_basename( true, __FILE__ );

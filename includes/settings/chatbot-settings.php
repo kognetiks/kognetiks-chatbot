@@ -31,6 +31,9 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Settings page HTML - Ver 1.3.0
 function chatbot_chatgpt_settings_page() {
+
+    // DIAG - Diagnotics - Ver 2.4.5
+    // error_log('chatbot_chatgpt_settings_page');
     
     if (!current_user_can('manage_options')) {
         return;
