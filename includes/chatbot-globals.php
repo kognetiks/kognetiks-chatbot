@@ -71,7 +71,9 @@ function chatbot_chatgpt_load_globals($language_code) {
 
     // Log a warning if the file could not be loaded
     if ( ! $chatbot_chatgpt_globals_loaded ) {
-        error_log ('[Chatbot] [chatbot-globals.php] Could not load translation file: ' . $file_path);
+        if ( defined('WP_DEBUG') && WP_DEBUG ) {
+            error_log ('[Chatbot] [chatbot-globals.php] Could not load translation file: ' . $file_path);
+        }
         $chatbot_chatgtp_globals_loaded = false;
     }
 

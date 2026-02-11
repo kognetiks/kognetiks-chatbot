@@ -17,7 +17,9 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_activate() {
 
     // DIAG - Diagnotics - Ver 2.4.5
-    error_log('chatbot_chatgpt_activate');
+    if ( defined('WP_DEBUG') && WP_DEBUG ) {
+        error_log('[Chatbot] [chatbot-upgrade.php] activate: function called');
+    }
 
     // Logic to run during activation
     chatbot_chatgpt_upgrade();
@@ -26,7 +28,9 @@ function chatbot_chatgpt_activate() {
     $unexpected_output = ob_get_clean();
     if (!empty($unexpected_output)) {
         // Log or handle unexpected output
-        error_log('[Chatbot] [chatbot-upgrade.php] Unexpected output during plugin activation: ' . $unexpected_output);
+        if ( defined('WP_DEBUG') && WP_DEBUG ) {
+            error_log('[Chatbot] [chatbot-upgrade.php] Unexpected output during plugin activation: ' . $unexpected_output);
+        }
     }
 
     // DIAG - Log the activation
@@ -65,7 +69,9 @@ function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
 function chatbot_chatgpt_upgrade() {
 
     // DIAG - Diagnotics - Ver 2.4.5
-    error_log('chatbot_chatgpt_upgrade');
+    if ( defined('WP_DEBUG') && WP_DEBUG ) {
+        error_log('[Chatbot] [chatbot-upgrade.php] upgrade: function called');
+    }
 
     // Removed obsolete or replaced options
     if ( esc_attr(get_option( 'chatbot_chatgpt_crawler_status' )) ) {

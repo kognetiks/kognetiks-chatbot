@@ -31,7 +31,9 @@ function chatbot_manage_widget_logs() {
         $scanned_dir = scandir($chatbot_logs_dir);
     } else {
         // Handle the error, e.g., log it, create the directory, or throw an exception
-        error_log('[Chatbot] [chatbot-manage-widget-logs.php] Directory not found: ' . $chatbot_logs_dir);
+        if ( defined('WP_DEBUG') && WP_DEBUG ) {
+            error_log('[Chatbot] [chatbot-manage-widget-logs.php] Directory not found: ' . $chatbot_logs_dir);
+        }
         // Optionally, create the directory
         // mkdir($chatbot_logs_dir, 0777, true);
         // Then, you might want to scan it again or handle the situation differently
