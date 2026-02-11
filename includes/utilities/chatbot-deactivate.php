@@ -53,117 +53,105 @@ function chatbot_chatgpt_admin_notices() {
 }
 
 // Uninstall Logic - Revised 2.4.4
-function chatbot_chatgpt_uninstall(){
+function chatbot_chatgpt_uninstall() {
 
-    // Security check: Only allow uninstall via Freemius after_uninstall.
-    // We have no uninstall.php so Freemius can track the uninstall event and collect user feedback.
-    // WP_UNINSTALL_PLUGIN is defined by WordPress during the uninstall flow.
     if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
         return;
     }
 
     global $wpdb;
 
-    // Log the uninstall attempt
-    error_log('[Chatbot] [chatbot-deactivate.php] Uninstall function called');
+    $debug = defined('WP_DEBUG') && WP_DEBUG;
 
-    // Only remove data when the user has explicitly set chatbot_chatgpt_delete_data = yes.
-    // If no or empty, keep all options and tables.
+    if ( $debug ) {
+        error_log('[Chatbot] [chatbot-deactivate.php] uninstall: function called');
+    }
+
     $delete_data = get_option('chatbot_chatgpt_delete_data');
-    if ( empty( $delete_data ) || $delete_data !== 'yes' ) {
-        error_log('[Chatbot] [chatbot-deactivate.php] Data deletion not requested (chatbot_chatgpt_delete_data != yes), skipping cleanup');
+    if ( $delete_data !== 'yes' ) {
+        if ( $debug ) {
+            error_log('[Chatbot] [chatbot-deactivate.php] uninstall: delete_data != yes, skipping cleanup');
+        }
         return;
     }
 
-    error_log('[Chatbot] [chatbot-deactivate.php] Starting data deletion process');
-
-    // Suppress errors during uninstall but log them
-    $wpdb->suppress_errors(false); // Show errors for debugging
     $errors_occurred = false;
 
-    // Helper function to execute queries with error checking
-    $execute_query = function($query, $description) use (&$wpdb, &$errors_occurred) {
-        $result = $wpdb->query($query);
-        if ($result === false && !empty($wpdb->last_error)) {
-            error_log("[Chatbot] [chatbot-deactivate.php] Error during $description: " . $wpdb->last_error);
+    $execute_query = function( $query, $description ) use ( &$wpdb, &$errors_occurred, $debug ) {
+        $result = $wpdb->query( $query );
+        if ( $result === false && ! empty( $wpdb->last_error ) ) {
+            if ( $debug ) {
+                error_log("[Chatbot] [chatbot-deactivate.php] uninstall error ($description): " . $wpdb->last_error);
+            }
             $errors_occurred = true;
         }
         return $result;
     };
 
-    // Delete on-off options
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name = %s", 'chatbot_ai_platform_choice'),
-        'deleting chatbot_ai_platform_choice option'
-    );
-    
-    // Delete ChatGPT options
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s", 'chatbot_chatgpt%'),
-        'deleting ChatGPT options'
+    // Options: exact + prefixes
+    $exact_options = array(
+        'chatbot_ai_platform_choice',
     );
 
-    // Delete Azure OpenAI options
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s", 'chatbot_azure%'),
-        'deleting Azure OpenAI options'
+    foreach ( $exact_options as $opt ) {
+        $execute_query(
+            $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name = %s", $opt),
+            "delete option {$opt}"
+        );
+    }
+
+    $prefixes = array(
+        'chatbot_chatgpt',
+        'chatbot_openai',
+        'chatbot_azure',
+        'chatbot_nvidia',
+        'chatbot_anthropic',
+        'chatbot_deepseek',
+        'chatbot_google',
+        'chatbot_mistral',
+        'chatbot_markov',
+        'chatbot_local',
+        'chatbot_transformer',
+        'kognetiks_insights',
     );
 
-    // Delete NVIDIA options
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s", 'chatbot_nvidia%'),
-        'deleting NVIDIA options'
+    foreach ( $prefixes as $prefix ) {
+        $like = $wpdb->esc_like( $prefix ) . '%';
+        $execute_query(
+            $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s", $like),
+            "delete options like {$prefix}%"
+        );
+    }
+
+    // Transients (prefix-based)
+    $transient_prefixes = array(
+        'chatbot_chatgpt',
+        'chatbot_nvidia',
+        'chatbot_anthropic',
+        'chatbot_google',
+        'chatbot_markov',
+        'chatbot_transformer_model',
+        'chatbot_mistral',
+        'chatbot_local',
+        'chatbot_azure',
+        'kchat',
     );
 
-    // Delete Anthropic options
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s", 'chatbot_anthropic%'),
-        'deleting Anthropic options'
-    );
+    foreach ( $transient_prefixes as $tp ) {
+        $like1 = $wpdb->esc_like('_transient_' . $tp) . '%';
+        $like2 = $wpdb->esc_like('_transient_timeout_' . $tp) . '%';
 
-    // Delete DeepSeek options
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s", 'chatbot_deepseek%'),
-        'deleting DeepSeek options'
-    );
+        $execute_query(
+            $wpdb->prepare(
+                "DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s",
+                $like1,
+                $like2
+            ),
+            "delete transients for {$tp}"
+        );
+    }
 
-    // Delete Google options
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s", 'chatbot_google%'),
-        'deleting Google options'
-    );
-
-    // Delete Mistral options
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s", 'chatbot_mistral%'),
-        'deleting Mistral options'
-    );
-
-    // Delete Markov Chain options
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s", 'chatbot_markov%'),
-        'deleting Markov Chain options'
-    );
-
-    // Delete Local options
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s", 'chatbot_local%'),
-        'deleting Local options'
-    );
-
-    // Delete Transformer options
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s", 'chatbot_transformer_model%'),
-        'deleting Transformer options'
-    );
-
-    // Delete Insights options
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s", 'kognetiks_insights%'),
-        'deleting Insights options'
-    );
-
-    // Delete ChatGPT tables
+    // Tables
     $tables_to_drop = array(
         'chatbot_chatgpt_assistants',
         'chatbot_chatgpt_azure_assistants',
@@ -172,104 +160,25 @@ function chatbot_chatgpt_uninstall(){
         'chatbot_chatgpt_knowledge_base',
         'chatbot_chatgpt_knowledge_base_tfidf',
         'chatbot_chatgpt_knowledge_base_word_count',
-        'chatbot_markov_chain'
+        'chatbot_markov_chain',
     );
 
-    foreach ($tables_to_drop as $table) {
+    foreach ( $tables_to_drop as $table ) {
         $table_name = $wpdb->prefix . $table;
         $execute_query(
             "DROP TABLE IF EXISTS `{$table_name}`",
-            "dropping table {$table_name}"
+            "drop table {$table_name}"
         );
     }
 
-    // Delete ChatGPT transients
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s", '_transient_chatbot_chatgpt%', '_transient_timeout_chatbot_chatgpt%'),
-        'deleting ChatGPT transients'
-    );
-
-    // Delete NVIDIA transients
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s", '_transient_chatbot_nvidia%', '_transient_timeout_chatbot_nvidia%'),
-        'deleting NVIDIA transients'
-    );
-
-    // Delete Anthropic transients
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s", '_transient_chatbot_anthropic%', '_transient_timeout_chatbot_anthropic%'),
-        'deleting Anthropic transients'
-    );
-
-    // Delete Google transients
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s", '_transient_chatbot_google%', '_transient_timeout_chatbot_google%'),
-        'deleting Google transients'
-    );
-
-    // Delete Markov Chain transients
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s", '_transient_chatbot_markov%', '_transient_timeout_chatbot_markov%'),
-        'deleting Markov Chain transients'
-    );
-    
-    // Delete Transformer transients
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s", '_transient_chatbot_transformer_model%', '_transient_timeout_chatbot_transformer_model%'),
-        'deleting Transformer transients'
-    );
-
-    // Delete Mistral transients
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s", '_transient_chatbot_mistral%', '_transient_timeout_chatbot_mistral%'),
-        'deleting Mistral transients'
-    );
-
-    // Delete Local transients
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s", '_transient_chatbot_local%', '_transient_timeout_chatbot_local%'),
-        'deleting Local transients'
-    );
-
-    // Delete Azure OpenAI transients
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s", '_transient_chatbot_azure%', '_transient_timeout_chatbot_azure%'),
-        'deleting Azure OpenAI transients'
-    );
-
-    // Delete any kchat transients
-    $execute_query(
-        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s", '_transient_kchat%', '_transient_timeout_kchat%'),
-        'deleting kchat transients'
-    );
-
-    // Delete any scheduled cron events
-    $crons = _get_cron_array();
-    if (!empty($crons)) {
-        foreach ($crons as $timestamp => $cron) {
-            foreach ($cron as $hook => $events) {
-                if (strpos($hook, 'chatbot_chatgpt') !== false || strpos($hook, 'chatbot_transformer') !== false || strpos($hook, 'kognetiks_insights') !== false) {
-                    foreach ($events as $event) {
-                        wp_unschedule_event($timestamp, $hook, $event['args']);
-                    }
-                }
-            }
-        }
-    }
-
-    // Delete the cron event called "knowledge_navigator_scan_hook"
+    // Cron: clear only known hooks you own
     wp_clear_scheduled_hook('knowledge_navigator_scan_hook');
-
-    // Clear any remaining insights cron events
     wp_clear_scheduled_hook('kognetiks_insights_send_proof_of_value_email_hook');
     wp_clear_scheduled_hook('kognetiks_insights_send_conversation_digest_email_hook');
     wp_clear_scheduled_hook('chatbot_chatgpt_conversation_log_cleanup_event');
 
-    if ($errors_occurred) {
-        error_log('[Chatbot] [chatbot-deactivate.php] Uninstall completed with errors - some data may not have been deleted');
-    } else {
-        error_log('[Chatbot] [chatbot-deactivate.php] Uninstall completed successfully');
+    if ( $debug ) {
+        error_log('[Chatbot] [chatbot-deactivate.php] uninstall: completed ' . ($errors_occurred ? 'with errors' : 'successfully'));
     }
 
-    return;
 }
