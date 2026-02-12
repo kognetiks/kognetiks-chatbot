@@ -1968,19 +1968,37 @@ window.resetAllLocks = resetAllLocks;
                 submitButton.prop('disabled', true);
             },
             success: function(response) {
-                // console.error('Chatbot: NOTICE: Response from server', response);
-                $('#chatbot-chatgpt-upload-file-input').val(''); // Clear the file input after successful upload
-                appendMessage('File(s) successfully uploaded.', 'bot');
+                $('#chatbot-chatgpt-upload-file-input').val(''); // Clear the file input after upload
+                var data = response && response.data;
+                var hasErrors = false;
+                if (Array.isArray(data)) {
+                    data.forEach(function(item) {
+                        if (item && item.status === 'error' && item.message) {
+                            hasErrors = true;
+                            appendMessage(item.message, 'error');
+                        }
+                    });
+                }
+                if (!hasErrors && response && response.success) {
+                    appendMessage('File(s) successfully uploaded.', 'bot');
+                } else if (!hasErrors && (!response || !response.success) && data && typeof data.message === 'string') {
+                    appendMessage(data.message, 'error');
+                } else if (!hasErrors && (!response || !response.success)) {
+                    appendMessage('Oops! Failed to upload file. Please try again.', 'error');
+                }
             },
             error: function(jqXHR, status, error) {
-                if(status === "timeout") {
+                if (status === "timeout") {
                     appendMessage('Error: ' + error, 'error');
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                 } else {
-                    // DIAG - Log the error - Ver 1.6.7
-                    // console.log('Chatbot: ERROR: ' + JSON.stringify(response));
-                    appendMessage('Error: ' + error, 'error');
-                    appendMessage('Oops! Failed to upload file. Please try again.', 'error');
+                    var data = (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.data) || null;
+                    if (Array.isArray(data) && data.length > 0 && data[0].message) {
+                        appendMessage(data[0].message, 'error');
+                    } else {
+                        appendMessage('Error: ' + error, 'error');
+                        appendMessage('Oops! Failed to upload file. Please try again.', 'error');
+                    }
                 }
             },
             complete: function (response) {

@@ -121,9 +121,9 @@ function chatbot_chatgpt_safe_wp_mail( $to, $subject, $message, $headers = '', $
     // On localhost without SMTP, skip email sending to prevent timeouts
     // Allow override via constant if needed for testing
     if ( $is_localhost && ! $smtp_configured && ! defined( 'CHATBOT_CHATGPT_FORCE_EMAIL_ON_LOCALHOST' ) ) {
-        if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'error_log' ) ) {
-            back_trace('ERROR', 'Skipping email send on localhost without SMTP configuration. Email would have been sent to: ' . ( is_array( $to ) ? implode( ', ', $to ) : $to ) );
-        }
+        // if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'error_log' ) ) {
+        //     back_trace('ERROR', 'Skipping email send on localhost without SMTP configuration. Email would have been sent to: ' . ( is_array( $to ) ? implode( ', ', $to ) : $to ) );
+        // }
         return false; // Return false to indicate email was not sent
     }
     
@@ -149,8 +149,8 @@ function chatbot_chatgpt_safe_wp_mail( $to, $subject, $message, $headers = '', $
         }
         
         // Log failure if email didn't send and we're in debug mode
-        if ( ! $result && defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'error_log' ) ) {
-            back_trace('ERROR', 'Failed to send email to ' . ( is_array( $to ) ? implode( ', ', $to ) : $to ) . '. This may be due to missing SMTP configuration.' );
+        if ( ! $result && defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'back_trace' ) ) {
+            back_trace( 'ERROR', 'Failed to send email to ' . ( is_array( $to ) ? implode( ', ', $to ) : $to ) . '. This may be due to missing SMTP configuration.' );
         }
         
         return $result;
@@ -162,8 +162,8 @@ function chatbot_chatgpt_safe_wp_mail( $to, $subject, $message, $headers = '', $
         }
         
         // Log the exception
-        if ( function_exists( 'error_log' ) ) {
-            back_trace('ERROR', 'Email sending exception: ' . $e->getMessage() );
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'back_trace' ) ) {
+            back_trace( 'ERROR', 'Email sending exception: ' . $e->getMessage() );
         }
         
         return false;
@@ -174,8 +174,8 @@ function chatbot_chatgpt_safe_wp_mail( $to, $subject, $message, $headers = '', $
             @set_time_limit( $original_time_limit );
         }
         
-        if ( function_exists( 'error_log' ) ) {
-            back_trace('ERROR', 'Email sending error: ' . $e->getMessage() );
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'back_trace' ) ) {
+            back_trace( 'ERROR', 'Email sending error: ' . $e->getMessage() );
         }
         
         return false;

@@ -127,6 +127,88 @@ function kchat_openai_http_post_json( $url, $api_key, $payload, $timeout = 45, $
 }
 
 /* -------------------------------------------------------------------------
+ * OpenAI file metadata (filename) and content - for PDF vs text-embed path
+ * ------------------------------------------------------------------------- */
+/** Max characters for inlined file content (non-PDF) to avoid huge prompts. */
+const CHATBOT_OPENAI_RESPONSES_FILE_CONTENT_MAX_CHARS = 20000;
+
+/**
+ * Get OpenAI file metadata (e.g. filename) via GET /v1/files/{file_id}.
+ * Used to infer PDF vs non-PDF when building Responses input.
+ *
+ * @param string $api_key Decrypted API key.
+ * @param string $file_id OpenAI file id (e.g. file-xxx).
+ * @return array{filename?: string} Non-empty with 'filename' key on success, empty on failure.
+ */
+function chatbot_openai_get_file_metadata( $api_key, $file_id ) {
+
+    $api_key = trim( (string) $api_key );
+    $file_id = trim( (string) $file_id );
+    if ( empty( $api_key ) || empty( $file_id ) ) {
+        return array();
+    }
+
+    $url = 'https://api.openai.com/v1/files/' . rawurlencode( $file_id );
+    $resp = wp_remote_get( $url, array(
+        'headers' => array( 'Authorization' => 'Bearer ' . $api_key ),
+        'timeout' => 30,
+    ) );
+
+    if ( is_wp_error( $resp ) ) {
+        return array();
+    }
+    $code = wp_remote_retrieve_response_code( $resp );
+    if ( $code < 200 || $code >= 300 ) {
+        return array();
+    }
+    $body = wp_remote_retrieve_body( $resp );
+    $json = json_decode( $body, true );
+    if ( ! is_array( $json ) || empty( $json['filename'] ) ) {
+        return array();
+    }
+    return array( 'filename' => (string) $json['filename'] );
+}
+
+/**
+ * Fetch file content from OpenAI via GET /v1/files/{file_id}/content.
+ * Used for non-PDF files (e.g. txt, md, json) to inline as input_text.
+ *
+ * @param string $api_key Decrypted API key.
+ * @param string $file_id OpenAI file id (e.g. file-xxx).
+ * @return string|WP_Error File content as string, or WP_Error on failure.
+ */
+function chatbot_openai_get_file_content( $api_key, $file_id ) {
+
+    $api_key = trim( (string) $api_key );
+    $file_id = trim( (string) $file_id );
+    if ( empty( $api_key ) || empty( $file_id ) ) {
+        return new WP_Error( 'missing_params', __( 'Missing API key or file ID.', 'chatbot-chatgpt' ) );
+    }
+
+    $url = 'https://api.openai.com/v1/files/' . rawurlencode( $file_id ) . '/content';
+    $resp = wp_remote_get( $url, array(
+        'headers' => array( 'Authorization' => 'Bearer ' . $api_key ),
+        'timeout' => 30,
+    ) );
+
+    if ( is_wp_error( $resp ) ) {
+        return $resp;
+    }
+    $code = wp_remote_retrieve_response_code( $resp );
+    if ( $code < 200 || $code >= 300 ) {
+        $body = wp_remote_retrieve_body( $resp );
+        $msg = sprintf(
+            /* translators: 1: HTTP code, 2: response body snippet */
+            __( 'Failed to fetch file content (HTTP %1$s): %2$s', 'chatbot-chatgpt' ),
+            $code,
+            substr( $body, 0, 200 )
+        );
+        return new WP_Error( 'file_content_fetch_failed', $msg );
+    }
+    return wp_remote_retrieve_body( $resp );
+}
+
+/* -------------------------------------------------------------------------
  * Conversation creation
  * ------------------------------------------------------------------------- */
 function kchat_openai_create_conversation( $api_key, $meta = array(), $timeout = 45 ) {
@@ -348,6 +430,7 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
         }
 
         // Build input: text plus optional file/image attachments (Responses API input_items format).
+        // Only use input_file for PDFs; for non-PDF (txt, md, json, etc.) fetch content and add as input_text.
         $input_content = array(
             array(
                 'type' => 'input_text',
@@ -362,15 +445,40 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
                 $file_type = isset( $file_ids_for_input[ $fid ] ) ? $file_ids_for_input[ $fid ] : 'assistants';
                 if ( $file_type === 'vision' ) {
                     $input_content[] = array(
-                        'type'   => 'input_image',
-                        'file_id' => $fid,
-                        'detail' => 'auto',
+                        'type'     => 'input_image',
+                        'file_id'  => $fid,
+                        'detail'   => 'auto',
                     );
-                } else {
+                    continue;
+                }
+                // Assistants file: PDF => input_file; non-PDF => use cached text transient (OpenAI does not allow GET /files/{id}/content for purpose=assistants).
+                $meta = chatbot_openai_get_file_metadata( $api_key, $fid );
+                $filename = isset( $meta['filename'] ) ? $meta['filename'] : '';
+                $is_pdf = ( $filename !== '' && preg_match( '/\.pdf$/i', $filename ) );
+                if ( $is_pdf ) {
                     $input_content[] = array(
                         'type'    => 'input_file',
                         'file_id' => $fid,
                     );
+                    // if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'back_trace' ) ) {
+                    //     back_trace( 'NOTICE', 'Responses file input: using PDF path (input_file) for file_id ' . $fid );
+                    // }
+                } else {
+                    $content = function_exists( 'get_chatbot_chatgpt_transients_files' )
+                        ? get_chatbot_chatgpt_transients_files( 'chatbot_chatgpt_assistant_file_text', $session_id, $idx )
+                        : '';
+                    if ( $content === '' ) {
+                        return 'Error: Could not read the uploaded text content. Please re-upload as PDF or try uploading again.';
+                    }
+                    $display_name = $filename !== '' ? $filename : ( 'file_' . $idx );
+                    $text_block = "BEGIN FILE: " . $display_name . "\n\n" . $content . "\n\nEND FILE: " . $display_name;
+                    $input_content[] = array(
+                        'type' => 'input_text',
+                        'text' => $text_block,
+                    );
+                    // if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'back_trace' ) ) {
+                    //     back_trace( 'NOTICE', 'Responses file input: embedded cached text transient for file_id ' . $fid );
+                    // }
                 }
             }
         }
@@ -406,22 +514,22 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
             'truncation'   => 'auto',
         );
 
-        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-            back_trace( 'NOTICE', 'Step 2: Payload: ' . print_r( $payload, true ) );
-            back_trace( 'NOTICE', 'Input Payload: ' . print_r( $input_payload, true ) );
-        }
+        // if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+        //     back_trace( 'NOTICE', 'Step 2: Payload: ' . print_r( $payload, true ) );
+        //     back_trace( 'NOTICE', 'Input Payload: ' . print_r( $input_payload, true ) );
+        // }
 
         $resp = kchat_openai_http_post_json( kchat_openai_responses_url(), $api_key, $payload, $timeout, $message_uuid );
 
         // DIAG - Log API response so we can see success vs error and payload shape.
-        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-            if ( isset( $resp['error'] ) ) {
-                back_trace( 'NOTICE', 'Responses API returned error: ' . print_r( $resp['error'], true ) );
-                back_trace( 'NOTICE', 'Full response: ' . print_r( $resp, true ) );
-            } else {
-                back_trace( 'NOTICE', 'Responses API success. Has output: ' . ( isset( $resp['output'] ) ? 'yes' : 'no' ) );
-            }
-        }
+        // if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+        //     if ( isset( $resp['error'] ) ) {
+        //         back_trace( 'NOTICE', 'Responses API returned error: ' . print_r( $resp['error'], true ) );
+        //         back_trace( 'NOTICE', 'Full response: ' . print_r( $resp, true ) );
+        //     } else {
+        //         back_trace( 'NOTICE', 'Responses API success. Has output: ' . ( isset( $resp['output'] ) ? 'yes' : 'no' ) );
+        //     }
+        // }
 
         if ( isset( $resp['error'] ) ) {
             $msg = is_array( $resp['error'] ) ? ( $resp['error']['message'] ?? 'OpenAI error.' ) : 'OpenAI error.';

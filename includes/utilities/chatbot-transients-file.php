@@ -21,6 +21,8 @@ function set_chatbot_chatgpt_transients_files( $transient_type, $transient_value
         $transient_key = 'chatbot_chatgpt_assistant_file_ids_' . $session_id . '_' . $file_no;
     } elseif ($transient_type == 'chatbot_chatgpt_assistant_file_types') {
         $transient_key = 'chatbot_chatgpt_assistant_file_types_' . $session_id . '_' . $file_no;
+    } elseif ($transient_type == 'chatbot_chatgpt_assistant_file_text') {
+        $transient_key = 'chatbot_chatgpt_assistant_file_text_' . $session_id . '_' . $file_no;
     } else {
         $transient_key = 'chatbot_chatgpt_file_id_' . $session_id . '_' . $file_no;
     }
@@ -39,6 +41,8 @@ function get_chatbot_chatgpt_transients_files( $transient_type, $session_id, $fi
         $transient_key = 'chatbot_chatgpt_assistant_file_ids_' . $session_id . '_' . $file_no;
     } elseif ($transient_type == 'chatbot_chatgpt_assistant_file_types') {
         $transient_key = 'chatbot_chatgpt_assistant_file_types_' . $session_id . '_' . $file_no;
+    } elseif ($transient_type == 'chatbot_chatgpt_assistant_file_text') {
+        $transient_key = 'chatbot_chatgpt_assistant_file_text_' . $session_id . '_' . $file_no;
     } else {
         $transient_key = 'chatbot_chatgpt_file_id_' . $session_id . '_' . $file_no;
     }
@@ -59,6 +63,8 @@ function delete_chatbot_chatgpt_transients_files( $transient_type, $session_id, 
         $file_transient_key = 'chatbot_chatgpt_assistant_file_ids_' . $session_id . '_' . $file_no;
     } elseif ($transient_type == 'chatbot_chatgpt_assistant_file_types') {
         $file_transient_key = 'chatbot_chatgpt_assistant_file_types_' . $session_id . '_' . $file_no;
+    } elseif ($transient_type == 'chatbot_chatgpt_assistant_file_text') {
+        $file_transient_key = 'chatbot_chatgpt_assistant_file_text_' . $session_id . '_' . $file_no;
     } else {
         $file_transient_key = 'chatbot_chatgpt_file_id_' . $session_id . '_' . $file_no;
     }
