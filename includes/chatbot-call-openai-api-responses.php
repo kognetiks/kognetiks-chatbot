@@ -69,13 +69,13 @@ function kchat_openai_responses_url() {
 function kchat_openai_http_post_json( $url, $api_key, $payload, $timeout = 45, $idempotency_key = '' ) {
 
     // DIAG - Diagnostics - Ver 2.4.5
-    if ( defined('WP_DEBUG') && WP_DEBUG ) {
-        back_trace('NOTICE', 'kchat_openai_http_post_json');
-        back_trace('NOTICE', 'URL: ' . $url);
-        back_trace('NOTICE', 'Payload: ' . print_r($payload, true));
-        back_trace('NOTICE', 'Timeout: ' . $timeout);
-        back_trace('NOTICE', 'Idempotency key: ' . $idempotency_key);
-    }
+    // if ( defined('WP_DEBUG') && WP_DEBUG ) {
+    //     back_trace('NOTICE', 'kchat_openai_http_post_json');
+    //     back_trace('NOTICE', 'URL: ' . $url);
+    //     back_trace('NOTICE', 'Payload: ' . print_r($payload, true));
+    //     back_trace('NOTICE', 'Timeout: ' . $timeout);
+    //     back_trace('NOTICE', 'Idempotency key: ' . $idempotency_key);
+    // }
 
     $headers = array(
         'Content-Type'  => 'application/json',
@@ -97,9 +97,9 @@ function kchat_openai_http_post_json( $url, $api_key, $payload, $timeout = 45, $
 
     if ( is_wp_error( $resp ) ) {
         // DIAG - Diagnostics - Ver 2.4.5
-        if ( defined('WP_DEBUG') && WP_DEBUG ) {
-            back_trace('NOTICE', 'OpenAI Responses API error: ' . $resp->get_error_message());
-        }
+        // if ( defined('WP_DEBUG') && WP_DEBUG ) {
+        //     back_trace('NOTICE', 'OpenAI Responses API error: ' . $resp->get_error_message());
+        // }
         return array( 'error' => array( 'message' => $resp->get_error_message() ) );
     }
 
@@ -109,12 +109,12 @@ function kchat_openai_http_post_json( $url, $api_key, $payload, $timeout = 45, $
     $json = json_decode( $body, true );
 
     // DIAG - Log HTTP result so we can see API errors.
-    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-        back_trace( 'NOTICE', 'HTTP response code: ' . $code );
-        if ( $code < 200 || $code >= 300 ) {
-            back_trace( 'NOTICE', 'HTTP error body: ' . substr( $body, 0, 1000 ) );
-        }
-    }
+    // if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+    //     back_trace( 'NOTICE', 'HTTP response code: ' . $code );
+    //     if ( $code < 200 || $code >= 300 ) {
+    //         back_trace( 'NOTICE', 'HTTP error body: ' . substr( $body, 0, 1000 ) );
+    //     }
+    // }
 
     if ( $code < 200 || $code >= 300 ) {
         // Preserve OpenAI-style error shape when possible.
@@ -132,11 +132,11 @@ function kchat_openai_http_post_json( $url, $api_key, $payload, $timeout = 45, $
 function kchat_openai_create_conversation( $api_key, $meta = array(), $timeout = 45 ) {
 
     // DIAG - Diagnostics - Ver 2.4.5
-    if ( defined('WP_DEBUG') && WP_DEBUG ) {
-        back_trace('NOTICE', 'kchat_openai_create_conversation');
-        back_trace('NOTICE', 'Meta: ' . print_r($meta, true));
-        back_trace('NOTICE', 'Timeout: ' . $timeout);
-    }
+    // if ( defined('WP_DEBUG') && WP_DEBUG ) {
+    //     back_trace('NOTICE', 'kchat_openai_create_conversation');
+    //     back_trace('NOTICE', 'Meta: ' . print_r($meta, true));
+    //     back_trace('NOTICE', 'Timeout: ' . $timeout);
+    // }
 
     $payload = array();
 
@@ -162,10 +162,10 @@ function kchat_openai_create_conversation( $api_key, $meta = array(), $timeout =
 function kchat_openai_extract_output_text( $response_json ) {
 
     // DIAG - Diagnostics - Ver 2.4.5
-    if ( defined('WP_DEBUG') && WP_DEBUG ) {
-        back_trace('NOTICE', 'kchat_openai_extract_output_text');
-        back_trace('NOTICE', 'Response JSON: ' . print_r($response_json, true));
-    }
+    // if ( defined('WP_DEBUG') && WP_DEBUG ) {
+    //     back_trace('NOTICE', 'kchat_openai_extract_output_text');
+    //     back_trace('NOTICE', 'Response JSON: ' . print_r($response_json, true));
+    // }
 
     if ( ! is_array( $response_json ) ) {
         return '';
@@ -204,10 +204,10 @@ function kchat_openai_extract_output_text( $response_json ) {
 function check_assistant_tool_usage_responses( $response_json ) {
 
     // DIAG - Diagnostics - Ver 2.4.5
-    if ( defined('WP_DEBUG') && WP_DEBUG ) {
-        back_trace('NOTICE', 'check_assistant_tool_usage_responses');
-        back_trace('NOTICE', 'Response JSON: ' . print_r($response_json, true));
-    }
+    // if ( defined('WP_DEBUG') && WP_DEBUG ) {
+    //     back_trace('NOTICE', 'check_assistant_tool_usage_responses');
+    //     back_trace('NOTICE', 'Response JSON: ' . print_r($response_json, true));
+    // }
 
     if ( ! is_array( $response_json ) ) { return false; }
     if ( empty( $response_json['output'] ) || ! is_array( $response_json['output'] ) ) { return false; }
@@ -230,11 +230,12 @@ function check_assistant_tool_usage_responses( $response_json ) {
 function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null ) {
 
     // DIAG - Diagnostics - Ver 2.4.5
-    if ( defined('WP_DEBUG') && WP_DEBUG ) {
-        back_trace('NOTICE', 'chatbot_chatgpt_custom_pmpt_call_api');
-        back_trace('NOTICE', 'Message: ' . $message);
-        back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
-    }
+    // if ( defined('WP_DEBUG') && WP_DEBUG ) {
+    //     back_trace('NOTICE', 'chatbot_chatgpt_custom_pmpt_call_api');
+    //     back_trace('NOTICE', 'Message: ' . $message);
+    //     back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
+    // }
+
     // Migration behavior:
     // - $assistant_id => Prompt ID (pmpt_...)
     // - $thread_id    => Conversation ID (cnv_...)
@@ -284,15 +285,15 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
         // -----------------------------------------------------------------
 
         // DIAG - Diagnostics - Ver 2.4.5
-        if ( defined('WP_DEBUG') && WP_DEBUG ) {
-            back_trace('NOTICE', 'Step 1: Resolve or create the conversation (cnv_...)');
-            back_trace('NOTICE', 'Message: ' . $message);
-            back_trace('NOTICE', 'User ID: ' . $user_id);
-            back_trace('NOTICE', 'Page ID: ' . $page_id);
-            back_trace('NOTICE', 'Session ID: ' . $session_id);
-            back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
-            back_trace('NOTICE', 'Client Message ID: ' . $client_message_id);
-        }
+        // if ( defined('WP_DEBUG') && WP_DEBUG ) {
+        //     back_trace('NOTICE', 'Step 1: Resolve or create the conversation (cnv_...)');
+        //     back_trace('NOTICE', 'Message: ' . $message);
+        //     back_trace('NOTICE', 'User ID: ' . $user_id);
+        //     back_trace('NOTICE', 'Page ID: ' . $page_id);
+        //     back_trace('NOTICE', 'Session ID: ' . $session_id);
+        //     back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
+        //     back_trace('NOTICE', 'Client Message ID: ' . $client_message_id);
+        // }
 
         if ( empty( $thread_id ) ) {
 
@@ -338,15 +339,15 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
         // -----------------------------------------------------------------
 
         // DIAG - Diagnostics - Ver 2.4.5
-        if ( defined('WP_DEBUG') && WP_DEBUG ) {
-            back_trace('NOTICE', 'Step 2: Create the model response (Responses API)');
-            back_trace('NOTICE', 'Message: ' . $message);
-            back_trace('NOTICE', 'User ID: ' . $user_id);
-            back_trace('NOTICE', 'Page ID: ' . $page_id);
-            back_trace('NOTICE', 'Session ID: ' . $session_id);
-            back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
-            back_trace('NOTICE', 'Client Message ID: ' . $client_message_id);
-        }
+        // if ( defined('WP_DEBUG') && WP_DEBUG ) {
+        //     back_trace('NOTICE', 'Step 2: Create the model response (Responses API)');
+        //     back_trace('NOTICE', 'Message: ' . $message);
+        //     back_trace('NOTICE', 'User ID: ' . $user_id);
+        //     back_trace('NOTICE', 'Page ID: ' . $page_id);
+        //     back_trace('NOTICE', 'Session ID: ' . $session_id);
+        //     back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
+        //     back_trace('NOTICE', 'Client Message ID: ' . $client_message_id);
+        // }
 
         $payload = array(
             // The conversation that this response belongs to. Conversation items are
@@ -373,14 +374,14 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
         $resp = kchat_openai_http_post_json( kchat_openai_responses_url(), $api_key, $payload, $timeout, $message_uuid );
 
         // DIAG - Log API response so we can see success vs error and payload shape.
-        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-            if ( isset( $resp['error'] ) ) {
-                back_trace( 'NOTICE', 'Responses API returned error: ' . print_r( $resp['error'], true ) );
-                back_trace( 'NOTICE', 'Full response: ' . print_r( $resp, true ) );
-            } else {
-                back_trace( 'NOTICE', 'Responses API success. Has output: ' . ( isset( $resp['output'] ) ? 'yes' : 'no' ) );
-            }
-        }
+        // if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+        //     if ( isset( $resp['error'] ) ) {
+        //         back_trace( 'NOTICE', 'Responses API returned error: ' . print_r( $resp['error'], true ) );
+        //         back_trace( 'NOTICE', 'Full response: ' . print_r( $resp, true ) );
+        //     } else {
+        //         back_trace( 'NOTICE', 'Responses API success. Has output: ' . ( isset( $resp['output'] ) ? 'yes' : 'no' ) );
+        //     }
+        // }
 
         if ( isset( $resp['error'] ) ) {
             $msg = is_array( $resp['error'] ) ? ( $resp['error']['message'] ?? 'OpenAI error.' ) : 'OpenAI error.';
@@ -406,10 +407,10 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
         // -----------------------------------------------------------------
 
         // DIAG - Diagnostics - Ver 2.4.5
-        if ( defined('WP_DEBUG') && WP_DEBUG ) {
-            back_trace('NOTICE', 'Step 3: Extract assistant output');
-            back_trace('NOTICE', 'Response: ' . print_r($resp, true));
-        }
+        // if ( defined('WP_DEBUG') && WP_DEBUG ) {
+        //     back_trace('NOTICE', 'Step 3: Extract assistant output');
+        //     back_trace('NOTICE', 'Response: ' . print_r($resp, true));
+        // }
 
         // Extract text first. Responses API runs tools (e.g. file_search) server-side
         // and returns the final assistant message, so we use it when present.
@@ -429,9 +430,9 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
     } finally {
 
         // DIAG - Diagnostics - Ver 2.4.5
-        if ( defined('WP_DEBUG') && WP_DEBUG ) {
-            back_trace('NOTICE', 'Restore execution time');
-        }
+        // if ( defined('WP_DEBUG') && WP_DEBUG ) {
+        //     back_trace('NOTICE', 'Restore execution time');
+        // }
 
         chatbot_chatgpt_restore_execution_time_responses();
 
@@ -441,46 +442,7 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
     }
 }
 
-/* -------------------------------------------------------------------------
- * Back-compat stubs for older code paths that may still call these helpers.
- * ------------------------------------------------------------------------- */
-
-// function createAnAssistant() {
-//     return array( 'error' => array( 'message' => 'Assistants API deprecated. Create a Prompt in the dashboard and use Responses API.' ) );
-// }
-
-// function addAMessage() {
-//     return array( 'error' => array( 'message' => 'Assistants API deprecated. Use Responses API with conversation + input.' ) );
-// }
-
-// function runTheAssistant() {
-//     return array( 'error' => array( 'message' => 'Assistants API deprecated. Use Responses API.' ) );
-// }
-
-// function getTheRunsStatus() {
-//     return array( 'error' => array( 'message' => 'Assistants API deprecated. Use Responses API.' ) );
-// }
-
-// function getTheRunsSteps() {
-//     return array( 'error' => array( 'message' => 'Assistants API deprecated. Use Responses API.' ) );
-// }
-
-// function getTheStepsStatus() {
-//     return array( 'error' => array( 'message' => 'Assistants API deprecated. Use Responses API.' ) );
-// }
-
-// function getTheMessage() {
-//     return array( 'error' => array( 'message' => 'Assistants API deprecated. Use Responses API.' ) );
-// }
-
-// function cancel_active_run() {
-//     return false; // no runs in this pathway
-// }
-
-/* -------------------------------------------------------------------------
- * File utilities (kept for compatibility with other plugin modules)
- * ------------------------------------------------------------------------- */
-
+// File utilities - Retrieve the first file id - Ver 2.4.5
 function chatbot_chatgpt_retrieve_file_id_responses( $api_key ) {
 
     if ( function_exists( 'chatbot_chatgpt_decrypt_api_key' ) ) {
@@ -511,6 +473,7 @@ function chatbot_chatgpt_retrieve_file_id_responses( $api_key ) {
     return '';
 }
 
+// File utilities - Delete a file - Ver 2.4.5
 function delete_uploaded_file_responses( $api_key, $file_id ) {
 
     if ( function_exists( 'chatbot_chatgpt_decrypt_api_key' ) ) {

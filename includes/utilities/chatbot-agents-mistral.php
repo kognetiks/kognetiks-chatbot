@@ -69,6 +69,7 @@ function create_chatbot_mistral_assistants_table() {
         back_trace('ERROR', 'SQL: ' . $sql);
         back_trace('ERROR', 'chatbot-agents-mistral.php] Error details: ' . $wpdb->last_error);
         return false;  // Table creation failed
+
     }
 
     // Call the upgrade function after creating the table
@@ -519,6 +520,7 @@ function mistral_update_assistant() {
         back_trace('ERROR', 'Failed to update row in table: ' . $table_name);
         back_trace('ERROR', 'Error details: ' . $wpdb->last_error);
         return false;  // Row update failed
+        
     }
 
     wp_die();
