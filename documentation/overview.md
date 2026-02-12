@@ -46,9 +46,15 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## What's new in Version 2.4.5
 
-### Bug Fixes
+### New Features
+* **OpenAI Prompts (Responses API)**: Shortcode now supports prompt IDs (`pmpt_...`) in addition to assistant IDs (`asst_...`) for OpenAI Responses API usage.
+* **Conversation Logging**: Added option to retain conversation logs indefinitely.
 
-* **Bug Fixes**: Fixes and improvements to version 2.4.4.
+### Improvements
+* **Documentation**: Updated documentation for OpenAI Prompts (Responses API) and Conversation Logging.
+
+### Bug Fixes
+* **PHP execution time**: Fixed timeouts on long-running API calls by temporarily adjusting and restoring `max_execution_time` for OpenAI Chat Completions and Assistants API requests.
 
 * Information about past updates can be found [here](updates/updates.md).
 
