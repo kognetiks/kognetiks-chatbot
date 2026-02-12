@@ -173,7 +173,8 @@ if (is_user_logged_in()) {
 $page_id = '999999';
 
 // Localize the data for the chatbot - Ver 2.1.1.1
-$kchat_settings = array_merge($kchat_settings,array(
+// Include nonces so send-message and other AJAX actions pass security check (widget iframe had no nonces before)
+$kchat_settings = array_merge($kchat_settings, array(
     'chatbot-chatgpt-version' => esc_attr($chatbot_chatgpt_plugin_version),
     'plugins_url' => esc_url($chatbot_chatgpt_plugin_dir_url),
     'ajax_url' => esc_url(admin_url('admin-ajax.php')),
@@ -190,7 +191,16 @@ $kchat_settings = array_merge($kchat_settings,array(
     'chatbot_chatgpt_custom_error_message' => esc_attr(get_option('chatbot_chatgpt_custom_error_message', 'Your custom error message goes here.')),
     'chatbot_chatgpt_start_status' => esc_attr(get_option('chatbot_chatgpt_start_status', 'closed')),
     'chatbot_chatgpt_start_status_new_visitor' => esc_attr(get_option('chatbot_chatgpt_start_status_new_visitor', 'closed')),
-    ));
+    'chatbot_message_nonce' => wp_create_nonce('chatbot_message_nonce'),
+    'chatbot_upload_nonce' => wp_create_nonce('chatbot_upload_nonce'),
+    'chatbot_erase_nonce' => wp_create_nonce('chatbot_erase_nonce'),
+    'chatbot_unlock_nonce' => wp_create_nonce('chatbot_unlock_nonce'),
+    'chatbot_reset_nonce' => wp_create_nonce('chatbot_reset_nonce'),
+    'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
+    'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
+    'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
+    'nonce_timestamp' => time() * 1000,
+));
 
 $kchat_settings_json = wp_json_encode($kchat_settings);
 

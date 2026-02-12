@@ -164,15 +164,16 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     // Check the length of the context and truncate if necessary - Ver 2.2.6
     $context_length = intval(strlen($context) / 4); // Assuming 1 token ≈ 4 characters
     // FIXME - Define max context length (adjust based on model requirements)
-    $max_context_length = 16385 / 2 ; // Estimate at 65536 characters ≈ 16384 tokens
+    $max_context_length = (int) (16385 / 2); // Estimate at 65536 characters ≈ 16384 tokens
     if ($context_length > $max_context_length) {
+        $max_chars = (int) $max_context_length;
         // Truncate to the max length
-        $truncated_context = substr($context, 0, $max_context_length);
+        $truncated_context = substr($context, 0, $max_chars);
         // Ensure truncation happens at the last complete word
         $truncated_context = preg_replace('/\s+[^\s]*$/', '', $truncated_context);
         // Fallback if regex fails (e.g., no spaces in the string)
         if (empty($truncated_context)) {
-            $truncated_context = substr($context, 0, $max_context_length);
+            $truncated_context = substr($context, 0, $max_chars);
         }
         $context = $truncated_context;
     } else {

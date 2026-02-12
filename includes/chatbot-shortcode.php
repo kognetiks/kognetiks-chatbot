@@ -146,21 +146,16 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     foreach ($atts as $key => $value) {
         $atts[$key] = sanitize_text_field($value);
         $atts[$key] = htmlspecialchars(wp_strip_all_tags($atts[$key] ?? ''), ENT_QUOTES, 'UTF-8');
-        // DIAG - Diagnostics - Ver 2.0.6
     }
-
-    // DIAG - Diagnostics - Ver 2.0.8
 
     // Normalize [assistant-#] to [chatbot-#] - Ver 2.2.6 - 2025 03 07
     if (strpos($tag, 'assistant-') === 0) {
         $tag = str_replace('assistant-', 'chatbot-', $tag);
-        // DIAG - Diagnostic - Ver 2.2.6
     }
 
     // Normalize [agent-#] to [chatbot-#] - Ver 2.2.6 - 2025 03 07
     if (strpos($tag, 'agent-') === 0) {
         $tag = str_replace('agent-', 'chatbot-', $tag);
-        // DIAG - Diagnostic - Ver 2.2.6
     }
 
     // Tag Processing - Ver 2.0.6
@@ -174,12 +169,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // Fetch the common name of the Assistant Common Name from the Assistant table
         $assistant_details = get_chatbot_chatgpt_assistant_by_key($assistant_key);
 
-        // DIAG - Diagnostics - Ver 2.2.6
-
         // For each key in $assistant_details, set the $atts value
         foreach ($assistant_details as $key => $value) {
             $atts[$key] = $value;
-            // DIAG - Diagnostics - Ver 2.0.9
         }
 
         // If the assistant_id is null, then set it to original
@@ -209,7 +201,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
     // If the assistant is not set to 'original', 'primary', or 'alternate' then try to fetch the Assistant details
-    if ( !empty($atts['assistant']) && strpos($atts['assistant'], 'asst_') === false && strpos($atts['assistant'], 'ag:') === false && strpos($atts['assistant'], 'websearch') === false) {
+    if ( !empty($atts['assistant']) && strpos($atts['assistant'], 'asst_') === false && strpos($atts['assistant'], 'pmpt_') === false && strpos($atts['assistant'], 'ag:') === false && strpos($atts['assistant'], 'websearch') === false) {
 
         // Initialize the Assistant details
         $assistant_details = [];
@@ -223,22 +215,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // If no match is found, then the $assistant_details will be an empty array
         if (empty($assistant_details)) {
 
-            // DIAG - Diagnostics - Ver 2.0.5
-
             // Set to original
             $chatbot_chatgpt_assistant_alias = 'original'; // default value
 
         } else {
 
-            // DIAG - Diagnostics - Ver 2.0.5
-
-            // DIAG - Diagnostics - Ver 2.0.4
-
             foreach ($assistant_details as $key => $value) {
                 $atts[$key] = $value;
             }
-
-            // DIAG - Diagnostics - Ver 2.0.4
 
             // Set the assistant_id
             $atts['assistant'] = $assistant_details['assistant_id'];
@@ -247,7 +231,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
         }
 
-    } elseif ( !empty($atts['assistant']) && (strpos($atts['assistant'], 'asst_') !== false || strpos($atts['assistant'], 'ag:') !== false || strpos($atts['assistant'], 'websearch') !== false) ) {
+    } elseif ( !empty($atts['assistant']) && ((strpos($atts['assistant'], 'asst_') !== false || strpos($atts['assistant'], 'pmpt_') !== false) || strpos($atts['assistant'], 'ag:') !== false || strpos($atts['assistant'], 'websearch') !== false) ) {
 
         // Set the assistant_id
         $chatbot_chatgpt_assistant_alias = $atts['assistant'];
@@ -302,7 +286,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $chatbot_chatgpt_assistant_alias = 'original'; // default value
     if (array_key_exists('assistant', $atts)) {
         $sanitized_assistant = sanitize_text_field($atts['assistant']);
-        if (in_array($sanitized_assistant, $valid_ids) || strpos($sanitized_assistant, 'asst_') === 0 || strpos($sanitized_assistant, 'ag:') === 0 ||strpos($sanitized_assistant, 'websearch') === 0 ) {
+        if (in_array($sanitized_assistant, $valid_ids) || strpos($sanitized_assistant, 'asst_') === 0 || strpos($sanitized_assistant, 'pmpt_') === 0 || strpos($sanitized_assistant, 'ag:') === 0 || strpos($sanitized_assistant, 'websearch') === 0 ) {
             $chatbot_chatgpt_assistant_alias = $sanitized_assistant;
         } else {
         }
