@@ -91,7 +91,8 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 ## 🧠 Assistants & Knowledge  
 *What the chatbot knows*
 
-- [Assistants](assistants/manage-assistants.md)  
+- [Assistants](assistants/manage-assistants.md)
+- [OpenAI's Responses API](api-openai-responses-api/prompt-agent-build-and-deploy-guide.md)
 - [Knowledge Navigator](knowledge-navigator/knowledge-navigator.md)  
 - [Knowledge Navigator Analysis](knowledge-navigator/knowledge-navigator-analysis.md)
 

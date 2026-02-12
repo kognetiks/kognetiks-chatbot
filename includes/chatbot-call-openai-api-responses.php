@@ -387,6 +387,20 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
             return 'Error: ' . $msg;
         }
 
+        // Add the usage to the conversation tracker (Responses API: input_tokens = Prompt, output_tokens = Completion)
+        if ( is_array( $resp ) && isset( $resp['usage'] ) && is_array( $resp['usage'] ) && function_exists( 'append_message_to_conversation_log' ) ) {
+            $usage = $resp['usage'];
+            if ( isset( $usage['input_tokens'] ) ) {
+                append_message_to_conversation_log( $session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, null, $usage['input_tokens'] );
+            }
+            if ( isset( $usage['output_tokens'] ) ) {
+                append_message_to_conversation_log( $session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, null, $usage['output_tokens'] );
+            }
+            if ( isset( $usage['total_tokens'] ) ) {
+                append_message_to_conversation_log( $session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, null, $usage['total_tokens'] );
+            }
+        }
+
         // -----------------------------------------------------------------
         // Step 3: Extract assistant output
         // -----------------------------------------------------------------
