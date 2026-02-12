@@ -374,8 +374,13 @@ function chatbot_chatgpt_conversation_log_cleanup() {
     // Get the number of days to keep the conversation log
     $days_to_keep = esc_attr(get_option('chatbot_chatgpt_conversation_log_days_to_keep'));
 
+    // If "Indefinitely" is set, do not delete any log entries
+    if ($days_to_keep === 'indefinitely') {
+        return true;
+    }
+
     // If the number of days is not set, then set it to 30 days
-    if ($days_to_keep === false) {
+    if ($days_to_keep === false || $days_to_keep === '') {
         $days_to_keep = 30;
     }
 

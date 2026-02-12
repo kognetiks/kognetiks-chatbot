@@ -733,13 +733,14 @@ function chatbot_chatgpt_conversation_log_days_to_keep_callback($args) {
     // DIAG - Log the output choice
     ?>
     <select id="chatbot_chatgpt_conversation_log_days_to_keep" name="chatbot_chatgpt_conversation_log_days_to_keep">
-        <option value="<?php echo esc_attr( '1' ); ?>" <?php selected( $output_choice, '7' ); ?>><?php echo esc_html( '1' ); ?></option>
+        <option value="<?php echo esc_attr( '1' ); ?>" <?php selected( $output_choice, '1' ); ?>><?php echo esc_html( '1' ); ?></option>
         <option value="<?php echo esc_attr( '7' ); ?>" <?php selected( $output_choice, '7' ); ?>><?php echo esc_html( '7' ); ?></option>
         <option value="<?php echo esc_attr( '30' ); ?>" <?php selected( $output_choice, '30' ); ?>><?php echo esc_html( '30' ); ?></option>
         <option value="<?php echo esc_attr( '60' ); ?>" <?php selected( $output_choice, '60' ); ?>><?php echo esc_html( '60' ); ?></option>
         <option value="<?php echo esc_attr( '90' ); ?>" <?php selected( $output_choice, '90' ); ?>><?php echo esc_html( '90' ); ?></option>
         <option value="<?php echo esc_attr( '180' ); ?>" <?php selected( $output_choice, '180' ); ?>><?php echo esc_html( '180' ); ?></option>
         <option value="<?php echo esc_attr( '365' ); ?>" <?php selected( $output_choice, '365' ); ?>><?php echo esc_html( '365' ); ?></option>
+        <option value="<?php echo esc_attr( 'indefinitely' ); ?>" <?php selected( $output_choice, 'indefinitely' ); ?>><?php echo esc_html( 'Indefinitely' ); ?></option>
     </select>
     <?php
 }
