@@ -338,6 +338,51 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
         // Step 2: Create the model response (Responses API)
         // -----------------------------------------------------------------
 
+        // Retrieve session file IDs (same transient store as Assistants API) so we can
+        // include uploaded files in the request. chatbot_chatgpt_retrieve_file_id_responses()
+        // is not used here because it returns the first file from the account (/v1/files);
+        // for chat uploads we need per-session files from transients.
+        $file_ids_for_input = array();
+        if ( function_exists( 'chatbot_chatgpt_retrieve_file_id' ) ) {
+            $file_ids_for_input = chatbot_chatgpt_retrieve_file_id( $user_id, $page_id );
+        }
+
+        // Build input: text plus optional file/image attachments (Responses API input_items format).
+        $input_content = array(
+            array(
+                'type' => 'input_text',
+                'text' => $message,
+            ),
+        );
+        if ( ! empty( $file_ids_for_input ) && is_array( $file_ids_for_input ) ) {
+            foreach ( $file_ids_for_input as $idx => $fid ) {
+                if ( ! is_int( $idx ) || empty( $fid ) || ! is_string( $fid ) ) {
+                    continue;
+                }
+                $file_type = isset( $file_ids_for_input[ $fid ] ) ? $file_ids_for_input[ $fid ] : 'assistants';
+                if ( $file_type === 'vision' ) {
+                    $input_content[] = array(
+                        'type'   => 'input_image',
+                        'file_id' => $fid,
+                        'detail' => 'auto',
+                    );
+                } else {
+                    $input_content[] = array(
+                        'type'    => 'input_file',
+                        'file_id' => $fid,
+                    );
+                }
+            }
+        }
+
+        $input_payload = array(
+            array(
+                'type'    => 'message',
+                'role'    => 'user',
+                'content' => $input_content,
+            ),
+        );
+
         // DIAG - Diagnostics - Ver 2.4.5
         // if ( defined('WP_DEBUG') && WP_DEBUG ) {
         //     back_trace('NOTICE', 'Step 2: Create the model response (Responses API)');
@@ -353,30 +398,30 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
             'prompt'       => array(
                 'id' => $prompt_id,
             ),
-            // The new user input for this turn.
-            'input'        => array(
-                array(
-                    'role'    => 'user',
-                    'content' => $message,
-                ),
-            ),
+            // The new user input for this turn (text + optional file/image attachments).
+            'input'        => $input_payload,
             // Helpful for abuse detection without sending PII.
             'safety_identifier' => wp_hash( (string) $user_id ),
             // Let the API auto-truncate old items if context would overflow.
             'truncation'   => 'auto',
         );
 
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            back_trace( 'NOTICE', 'Step 2: Payload: ' . print_r( $payload, true ) );
+            back_trace( 'NOTICE', 'Input Payload: ' . print_r( $input_payload, true ) );
+        }
+
         $resp = kchat_openai_http_post_json( kchat_openai_responses_url(), $api_key, $payload, $timeout, $message_uuid );
 
         // DIAG - Log API response so we can see success vs error and payload shape.
-        // if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-        //     if ( isset( $resp['error'] ) ) {
-        //         back_trace( 'NOTICE', 'Responses API returned error: ' . print_r( $resp['error'], true ) );
-        //         back_trace( 'NOTICE', 'Full response: ' . print_r( $resp, true ) );
-        //     } else {
-        //         back_trace( 'NOTICE', 'Responses API success. Has output: ' . ( isset( $resp['output'] ) ? 'yes' : 'no' ) );
-        //     }
-        // }
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            if ( isset( $resp['error'] ) ) {
+                back_trace( 'NOTICE', 'Responses API returned error: ' . print_r( $resp['error'], true ) );
+                back_trace( 'NOTICE', 'Full response: ' . print_r( $resp, true ) );
+            } else {
+                back_trace( 'NOTICE', 'Responses API success. Has output: ' . ( isset( $resp['output'] ) ? 'yes' : 'no' ) );
+            }
+        }
 
         if ( isset( $resp['error'] ) ) {
             $msg = is_array( $resp['error'] ) ? ( $resp['error']['message'] ?? 'OpenAI error.' ) : 'OpenAI error.';
@@ -437,7 +482,10 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
     }
 }
 
-// File utilities - Retrieve the first file id - Ver 2.4.5
+// File utilities - Retrieve the first file id from the account (GET /v1/files) - Ver 2.4.5
+// Use this when you need a single "first uploaded" file by API key. For chat uploads,
+// the pmpt_ path uses session-based file IDs via chatbot_chatgpt_retrieve_file_id()
+// (same transients as the Assistants API) and includes them in the request payload.
 function chatbot_chatgpt_retrieve_file_id_responses( $api_key ) {
 
     if ( function_exists( 'chatbot_chatgpt_decrypt_api_key' ) ) {
@@ -466,6 +514,7 @@ function chatbot_chatgpt_retrieve_file_id_responses( $api_key ) {
     }
 
     return '';
+
 }
 
 // File utilities - Delete a file - Ver 2.4.5
