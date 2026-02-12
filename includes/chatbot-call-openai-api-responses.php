@@ -342,11 +342,6 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
         // if ( defined('WP_DEBUG') && WP_DEBUG ) {
         //     back_trace('NOTICE', 'Step 2: Create the model response (Responses API)');
         //     back_trace('NOTICE', 'Message: ' . $message);
-        //     back_trace('NOTICE', 'User ID: ' . $user_id);
-        //     back_trace('NOTICE', 'Page ID: ' . $page_id);
-        //     back_trace('NOTICE', 'Session ID: ' . $session_id);
-        //     back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
-        //     back_trace('NOTICE', 'Client Message ID: ' . $client_message_id);
         // }
 
         $payload = array(
