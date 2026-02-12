@@ -1015,7 +1015,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
     if (empty( $a['labels']) || empty($atts['data'])) {
         // return '<p>You need to specify both the labels and data for the chart to work.</p>';
-        return '<p>No data to chart at this time. Plesae visit again later.</p>';
+        return '<p>No data to chart at this time. Please visit again later.</p>';
     }
 
     // Generate the chart

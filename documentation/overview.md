@@ -25,7 +25,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - Obtain API keys here:
 
    - [OpenAI API Keys](https://platform.openai.com/account/api-keys)
-   - [Auzre API Keys](https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account?icid=ai-services)
+   - [Azure API Keys](https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account?icid=ai-services)
    - [NVIDIA API Keys](https://developer.nvidia.com/nim)
    - [Anthropic API Keys](https://www.anthropic.com/)
    - [DeepSeek API Keys](https://platform.deepseek.com/sign_in)
