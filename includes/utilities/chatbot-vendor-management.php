@@ -32,7 +32,7 @@ if ( ! defined( 'KCHAT_FREEMIUS_QUIET_MODE' ) ) {
 if ( ! function_exists( 'kchat_has_unlock_proof' ) ) {
     function kchat_has_unlock_proof() {
 
-        // DIAG - Diagnotics - Ver 2.4.5
+        // DIAG - Diagnostics - Ver 2.4.5
         // error_log('kchat_has_unlock_proof');
 
         global $wpdb;
@@ -66,7 +66,7 @@ if ( ! function_exists( 'kchat_has_unlock_proof' ) ) {
 if ( ! function_exists( 'kchat_freemius_proof_gate' ) ) {
     function kchat_freemius_proof_gate() {
 
-        // DIAG - Diagnotics - Ver 2.4.5
+        // DIAG - Diagnostics - Ver 2.4.5
         // error_log('kchat_freemius_proof_gate');
 
         return function_exists( 'kchat_has_unlock_proof' ) ? (bool) kchat_has_unlock_proof() : false;
@@ -78,7 +78,7 @@ if ( ! function_exists( 'kchat_freemius_proof_gate' ) ) {
 // Freemius: suppress marketing UI surfaces
 add_action( 'chatbot_chatgpt_freemius_loaded', function () {
 
-    // DIAG - Diagnotics - Ver 2.4.5
+    // DIAG - Diagnostics - Ver 2.4.5
     // error_log('chatbot_chatgpt_freemius_loaded');
 
     // Fix: Ensure fs_logger table exists when storage logging is enabled (prevents "Table doesn't exist" errors)
@@ -114,7 +114,7 @@ add_action( 'chatbot_chatgpt_freemius_loaded', function () {
      */
     $fs->add_filter( 'show_admin_notice', function ( $show, $notice ) {
 
-        // DIAG - Diagnotics - Ver 2.4.5
+        // DIAG - Diagnostics - Ver 2.4.5
         // error_log('show_admin_notice');
 
         if ( ! $show ) {
@@ -182,7 +182,7 @@ add_action( 'chatbot_chatgpt_freemius_loaded', function () {
 // We scope this to wp-admin. If you want it only on specific screens, we can narrow it.
 add_action( 'admin_head', function () {
 
-    // DIAG - Diagnotics - Ver 2.4.5
+    // DIAG - Diagnostics - Ver 2.4.5
     // error_log('admin_head');
 
     if ( ! KCHAT_FREEMIUS_QUIET_MODE ) {
@@ -220,7 +220,7 @@ add_action( 'admin_head', function () {
 // Remove upgrade/trial links from Plugins list action links
 add_action( 'admin_init', function () {
     
-    // DIAG - Diagnotics - Ver 2.4.5
+    // DIAG - Diagnostics - Ver 2.4.5
     // error_log('admin_init');
 
     if ( ! KCHAT_FREEMIUS_QUIET_MODE ) {

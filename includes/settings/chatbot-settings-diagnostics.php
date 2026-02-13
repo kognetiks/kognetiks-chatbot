@@ -39,7 +39,7 @@ function chatbot_chatgpt_diagnostics_settings_init() {
         'chatbot_chatgpt_diagnostics_system_settings'
     );
 
-    // Diagnotics API Status
+    // Diagnostics API Status
     add_settings_section(
         'chatbot_chatgpt_diagnostics_api_status_section',
         'API Status and Results',
@@ -355,7 +355,7 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     // Or add new back_trace() calls to log messages at any point in the code
     //
     // Go to the Chatbot Settings, then the Messages tab
-    // Set the Chatbot Diagnotics to one of Off, Success, Notice, Failure, Warning, or Error
+    // Set the Chatbot Diagnostics to one of Off, Success, Notice, Failure, Warning, or Error
     //
     // Each level will log messages based on the following criteria (Off will not log any messages)
     // [ERROR], [WARNING], [NOTICE], or [SUCCESS]
@@ -462,19 +462,19 @@ function chatbot_error_log($message) {
     $log_file = $chatbot_logs_dir . 'chatbot-error-log-' . $current_date . '.log';
 
     // Debug: Log the file path and method being used
-    // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Writing to log file: ' . $log_file);
+    // error_log('[Chatbot] [chatbot-settings-Diagnostics.php] Writing to log file: ' . $log_file);
 
     // Check and fix file permissions if needed
     if (file_exists($log_file)) {
         $current_perms = fileperms($log_file);
         if (($current_perms & 0x0080) === 0) { // Check if writable by owner
             chmod($log_file, 0644);
-            error_log('[Chatbot] [chatbot-settings-diagnotics.php] Fixed file permissions for: ' . $log_file);
+            error_log('[Chatbot] [chatbot-settings-Diagnostics.php] Fixed file permissions for: ' . $log_file);
         }
         
         // Check if file is currently being used by another process
         if (is_file_in_use($log_file)) {
-            error_log('[Chatbot] [chatbot-settings-diagnotics.php] File appears to be in use by another process: ' . $log_file);
+            error_log('[Chatbot] [chatbot-settings-Diagnostics.php] File appears to be in use by another process: ' . $log_file);
         }
     }
 
@@ -490,16 +490,16 @@ function chatbot_error_log($message) {
             $creds = request_filesystem_credentials(site_url() . '/wp-admin/', '', false, false, array());
             if (WP_Filesystem($creds)) {
                 // Filesystem initialized successfully
-                // error_log('[Chatbot] [chatbot-settings-diagnotics.php] WordPress filesystem initialized successfully');
+                // error_log('[Chatbot] [chatbot-settings-Diagnostics.php] WordPress filesystem initialized successfully');
             } else {
                 // Fallback to file_put_contents if filesystem initialization fails
-                // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Falling back to native file_put_contents');
+                // error_log('[Chatbot] [chatbot-settings-Diagnostics.php] Falling back to native file_put_contents');
                 file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
                 return;
             }
         } else {
             // Fallback to file_put_contents if direct access is not available
-            // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Direct access not available, using native file_put_contents');
+            // error_log('[Chatbot] [chatbot-settings-Diagnostics.php] Direct access not available, using native file_put_contents');
             file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
             return;
         }
@@ -508,14 +508,14 @@ function chatbot_error_log($message) {
     // Append the error message to the log file
     if ($wp_filesystem) {
 
-        // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Using WordPress filesystem to write log');
+        // error_log('[Chatbot] [chatbot-settings-Diagnostics.php] Using WordPress filesystem to write log');
         // WordPress filesystem doesn't support FILE_APPEND flag, so we need to read existing content first
         $existing_content = '';
         if ($wp_filesystem->exists($log_file)) {
             $existing_content = $wp_filesystem->get_contents($log_file);
-            // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Existing content length: ' . strlen($existing_content));
+            // error_log('[Chatbot] [chatbot-settings-Diagnostics.php] Existing content length: ' . strlen($existing_content));
         } else {
-            // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Log file does not exist, creating new file');
+            // error_log('[Chatbot] [chatbot-settings-Diagnostics.php] Log file does not exist, creating new file');
         }
         
         // Append the new message to existing content
@@ -524,7 +524,7 @@ function chatbot_error_log($message) {
         // Write the combined content back to the file with proper locking
         $result = $wp_filesystem->put_contents($log_file, $new_content, 0644);
         if ($result === false) {
-            // error_log('[Chatbot] [chatbot-settings-diagnotics.php] WordPress filesystem write failed, falling back to native method');
+            // error_log('[Chatbot] [chatbot-settings-Diagnostics.php] WordPress filesystem write failed, falling back to native method');
             // Try to fix file permissions before attempting to write
             if (file_exists($log_file)) {
                 chmod($log_file, 0644);
@@ -536,15 +536,15 @@ function chatbot_error_log($message) {
                     fwrite($handle, $message . PHP_EOL);
                     flock($handle, LOCK_UN); // Release lock
                     fclose($handle);
-                    // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Native fopen write successful');
+                    // error_log('[Chatbot] [chatbot-settings-Diagnostics.php] Native fopen write successful');
                 } else {
                     fclose($handle);
-                    // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Failed to acquire file lock');
+                    // error_log('[Chatbot] [chatbot-settings-Diagnostics.php] Failed to acquire file lock');
                     // Try alternative method without locking
                     @file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND);
                 }
             } else {
-                // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Failed to open file for writing: ' . $log_file);
+                // error_log('[Chatbot] [chatbot-settings-Diagnostics.php] Failed to open file for writing: ' . $log_file);
                 // Try to create the file with proper permissions
                 $dir = dirname($log_file);
                 if (!is_dir($dir)) {
@@ -570,14 +570,14 @@ function chatbot_error_log($message) {
         
         } else {
 
-            // error_log('[Chatbot] [chatbot-settings-diagnotics.php] WordPress filesystem write successful, bytes written: ' . $result);
+            // error_log('[Chatbot] [chatbot-settings-Diagnostics.php] WordPress filesystem write successful, bytes written: ' . $result);
         
         }
 
     } else {
 
         // Fallback to file_put_contents if $wp_filesystem is still not available
-        // error_log('[Chatbot] [chatbot-settings-diagnotics.php] WordPress filesystem not available, using native file_put_contents');
+        // error_log('[Chatbot] [chatbot-settings-Diagnostics.php] WordPress filesystem not available, using native file_put_contents');
         // Use exclusive lock to prevent race conditions
         $handle = @fopen($log_file, 'a');
         if ($handle) {
@@ -680,7 +680,7 @@ add_action('wp_ajax_nopriv_log_chatbot_error', 'log_chatbot_error');
 // Test function to verify logging functionality
 function test_chatbot_logging() {
 
-    $test_message = '[' . date('Y-m-d H:i:s') . '] [Chatbot] [chatbot-settings-diagnotics.php] This is a test log message to verify logging functionality.';
+    $test_message = '[' . date('Y-m-d H:i:s') . '] [Chatbot] [chatbot-settings-Diagnostics.php] This is a test log message to verify logging functionality.';
     chatbot_error_log($test_message);
     return 'Test log message written. Check the log file to verify.';
 

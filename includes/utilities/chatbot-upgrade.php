@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Activation Hook - Revised 1.7.6
 function chatbot_chatgpt_activate() {
 
-    // DIAG - Diagnotics - Ver 2.4.5
+    // DIAG - Diagnostics - Ver 2.4.5
     if ( defined('WP_DEBUG') && WP_DEBUG ) {
         error_log('[Chatbot] [chatbot-upgrade.php] activate: function called');
     }
@@ -40,7 +40,7 @@ function chatbot_chatgpt_activate() {
 // Upgrade Hook for Plugin Update - Revised 1.7.6
 function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
 
-    // DIAG - Diagnotics - Ver 2.4.5
+    // DIAG - Diagnostics - Ver 2.4.5
     // error_log('chatbot_chatgpt_upgrade_completed');
 
     if ($options['action'] == 'update' && $options['type'] == 'plugin') {
@@ -64,7 +64,7 @@ function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
 // Upgrade Logic - Revised 1.7.6
 function chatbot_chatgpt_upgrade() {
 
-    // DIAG - Diagnotics - Ver 2.4.5
+    // DIAG - Diagnostics - Ver 2.4.5
     if ( defined('WP_DEBUG') && WP_DEBUG ) {
         error_log('[Chatbot] [chatbot-upgrade.php] upgrade: function called');
     }

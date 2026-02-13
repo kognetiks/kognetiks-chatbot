@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Create the interaction tracking table - Ver 1.6.3
 function create_chatbot_chatgpt_interactions_table() {
     
-    // DIAG - Diagnotics - Ver 2.4.5
+    // DIAG - Diagnostics - Ver 2.4.5
     // error_log('create_chatbot_chatgpt_interactions_table');
 
     global $wpdb;
@@ -60,7 +60,7 @@ function create_chatbot_chatgpt_interactions_table() {
 // Update Interaction Tracking - Ver 1.6.3
 function update_interaction_tracking() {
 
-    // DIAG - Diagnotics - Ver 2.4.5
+    // DIAG - Diagnostics - Ver 2.4.5
     // error_log('update_interaction_tracking');
 
     global $wpdb;
@@ -98,7 +98,7 @@ function update_interaction_tracking() {
 // Conversation Tracking - Ver 1.7.6
 function create_conversation_logging_table() {
 
-    // DIAG - Diagnotics - Ver 2.4.5
+    // DIAG - Diagnostics - Ver 2.4.5
     // error_log('create_conversation_logging_table');
 
     global $wpdb;
@@ -234,7 +234,7 @@ function create_conversation_logging_table() {
 // Append message to conversation log in the database - Ver 1.7.6
 function append_message_to_conversation_log($session_id, $user_id, $page_id, $user_type, $thread_id, $assistant_id, $assistant_name, $message) {
 
-    // DIAG - Diagnotics - Ver 2.4.5
+    // DIAG - Diagnostics - Ver 2.4.5
     // error_log('append_message_to_conversation_log');
 
     global $wpdb;
@@ -319,7 +319,7 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
 // Function to delete specific expired transients - Ver 1.7.6
 function clean_specific_expired_transients() {
 
-    // DIAG - Diagnotics - Ver 2.4.5
+    // DIAG - Diagnostics - Ver 2.4.5
     // error_log('clean_specific_expired_transients');
 
     global $wpdb;
@@ -357,7 +357,7 @@ function clean_specific_expired_transients() {
 // Function to purge conversation log entries that are older than the specified number of days - Ver 1.7.6
 function chatbot_chatgpt_conversation_log_cleanup() {
 
-    // DIAG - Diagnotics - Ver 2.4.5
+    // DIAG - Diagnostics - Ver 2.4.5
     // error_log('chatbot_chatgpt_conversation_log_cleanup');
 
     global $wpdb;
@@ -406,7 +406,7 @@ register_deactivation_hook(plugin_dir_path(dirname(__FILE__)) . 'chatbot-chatgpt
 // Function to handle database setup on activation
 function chatbot_chatgpt_activate_db() {
 
-    // DIAG - Diagnotics - Ver 2.4.5
+    // DIAG - Diagnostics - Ver 2.4.5
     // error_log('chatbot_chatgpt_activate_db');
 
     // Create the interaction tracking table
@@ -425,7 +425,7 @@ function chatbot_chatgpt_activate_db() {
 // Add sentiment_score column if missing - Ver 2.3.1
 function chatbot_chatgpt_add_sentiment_score_column() {
 
-    // DIAG - Diagnotics - Ver 2.4.5
+    // DIAG - Diagnostics - Ver 2.4.5
     // error_log('chatbot_chatgpt_add_sentiment_score_column');
 
     global $wpdb;
@@ -460,7 +460,7 @@ function chatbot_chatgpt_add_sentiment_score_column() {
 // Function to handle cleanup on deactivation
 function chatbot_chatgpt_deactivate_db() {
 
-    // DIAG - Diagnotics - Ver 2.4.5
+    // DIAG - Diagnostics - Ver 2.4.5
     // error_log('chatbot_chatgpt_deactivate_db');
 
     // Clear the scheduled cleanup event

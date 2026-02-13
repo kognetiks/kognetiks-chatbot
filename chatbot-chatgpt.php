@@ -431,7 +431,7 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
     update_option('chatbot_chatgpt_upgraded', 'Yes');
 }
 
-// Diagnotics on/off setting can be found on the Settings tab - Ver 2.4.5
+// Diagnostics on/off setting can be found on the Settings tab - Ver 2.4.5
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
 global $chatbot_ai_platform_choice;
