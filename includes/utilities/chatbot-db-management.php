@@ -16,6 +16,9 @@ if ( ! defined( 'WPINC' ) ) {
 // Create the interaction tracking table - Ver 1.6.3
 function create_chatbot_chatgpt_interactions_table() {
     
+    // DIAG - Diagnostics - Ver 2.4.5
+    // error_log('create_chatbot_chatgpt_interactions_table');
+
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';
@@ -48,7 +51,6 @@ function create_chatbot_chatgpt_interactions_table() {
         return false;  // Table creation failed
     }
 
-    // DIAG - Diagnostics
     return;
 
 }
@@ -57,6 +59,9 @@ function create_chatbot_chatgpt_interactions_table() {
 
 // Update Interaction Tracking - Ver 1.6.3
 function update_interaction_tracking() {
+
+    // DIAG - Diagnostics - Ver 2.4.5
+    // error_log('update_interaction_tracking');
 
     global $wpdb;
 
@@ -93,6 +98,9 @@ function update_interaction_tracking() {
 // Conversation Tracking - Ver 1.7.6
 function create_conversation_logging_table() {
 
+    // DIAG - Diagnostics - Ver 2.4.5
+    // error_log('create_conversation_logging_table');
+
     global $wpdb;
 
     // Check version and create table if necessary
@@ -103,7 +111,6 @@ function create_conversation_logging_table() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
 
     if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name) {
-        // DIAG - Diagnostics
 
         // Modify interaction_time column to remove DEFAULT CURRENT_TIMESTAMP
         $sql = "ALTER TABLE $table_name MODIFY COLUMN interaction_time datetime NOT NULL;";
@@ -115,7 +122,7 @@ function create_conversation_logging_table() {
         }
 
         if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'assistant_name')) === 'assistant_name') {
-            // DIAG - Diagnostics
+            // Do nothing
         } else {
             // Directly execute the ALTER TABLE command without prepare()
             $sql = "ALTER TABLE $table_name ADD COLUMN assistant_name VARCHAR(255) AFTER assistant_id";
@@ -129,7 +136,7 @@ function create_conversation_logging_table() {
 
         // Check and add sentiment_score column if it doesn't exist
         if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'sentiment_score')) === 'sentiment_score') {
-            // DIAG - Diagnostics
+            // Do nothing
         } else {
             // Directly execute the ALTER TABLE command without prepare()
             $sql = "ALTER TABLE $table_name ADD COLUMN sentiment_score FLOAT AFTER message_text";
@@ -174,11 +181,10 @@ function create_conversation_logging_table() {
                 // If the operation was successful, log the success
             }
         }
-        
-        // DIAG - Diagnostics - Ver 1.9.9
+
 
     } else {
-        // DIAG - Diagnostics
+
         // SQL to create the conversation logging table
 
         $charset_collate = $wpdb->get_charset_collate();
@@ -227,6 +233,9 @@ function create_conversation_logging_table() {
 
 // Append message to conversation log in the database - Ver 1.7.6
 function append_message_to_conversation_log($session_id, $user_id, $page_id, $user_type, $thread_id, $assistant_id, $assistant_name, $message) {
+
+    // DIAG - Diagnostics - Ver 2.4.5
+    // error_log('append_message_to_conversation_log');
 
     global $wpdb;
 
@@ -299,7 +308,7 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
 
     // Check if the insert was successful
     if ($insert_result === false) {
-        // DIAG - Diagnostics
+
         return false;
     }
 
@@ -310,6 +319,8 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
 // Function to delete specific expired transients - Ver 1.7.6
 function clean_specific_expired_transients() {
 
+    // DIAG - Diagnostics - Ver 2.4.5
+    // error_log('clean_specific_expired_transients');
 
     global $wpdb;
 
@@ -340,10 +351,14 @@ function clean_specific_expired_transients() {
         // Delete the transient timeout.
         $wpdb->delete($wpdb->options, ['option_name' => $transient]);
     }
+
 }
 
 // Function to purge conversation log entries that are older than the specified number of days - Ver 1.7.6
 function chatbot_chatgpt_conversation_log_cleanup() {
+
+    // DIAG - Diagnostics - Ver 2.4.5
+    // error_log('chatbot_chatgpt_conversation_log_cleanup');
 
     global $wpdb;
 
@@ -356,8 +371,13 @@ function chatbot_chatgpt_conversation_log_cleanup() {
     // Get the number of days to keep the conversation log
     $days_to_keep = esc_attr(get_option('chatbot_chatgpt_conversation_log_days_to_keep'));
 
+    // If "Indefinitely" is set, do not delete any log entries
+    if ($days_to_keep === 'indefinitely') {
+        return true;
+    }
+
     // If the number of days is not set, then set it to 30 days
-    if ($days_to_keep === false) {
+    if ($days_to_keep === false || $days_to_keep === '') {
         $days_to_keep = 30;
     }
 
@@ -372,7 +392,7 @@ function chatbot_chatgpt_conversation_log_cleanup() {
 
     // Check if delete was successful
     if ($delete_result === false) {
-        // DIAG - Diagnostics
+
         return false;
     }
 
@@ -385,6 +405,10 @@ register_deactivation_hook(plugin_dir_path(dirname(__FILE__)) . 'chatbot-chatgpt
 
 // Function to handle database setup on activation
 function chatbot_chatgpt_activate_db() {
+
+    // DIAG - Diagnostics - Ver 2.4.5
+    // error_log('chatbot_chatgpt_activate_db');
+
     // Create the interaction tracking table
     create_chatbot_chatgpt_interactions_table();
     
@@ -395,10 +419,14 @@ function chatbot_chatgpt_activate_db() {
     if (!wp_next_scheduled('chatbot_chatgpt_conversation_log_cleanup_event')) {
         wp_schedule_event(time(), 'daily', 'chatbot_chatgpt_conversation_log_cleanup_event');
     }
+
 }
 
 // Add sentiment_score column if missing - Ver 2.3.1
 function chatbot_chatgpt_add_sentiment_score_column() {
+
+    // DIAG - Diagnostics - Ver 2.4.5
+    // error_log('chatbot_chatgpt_add_sentiment_score_column');
 
     global $wpdb;
     
@@ -426,15 +454,21 @@ function chatbot_chatgpt_add_sentiment_score_column() {
     }
     
     return true;
+
 }
 
 // Function to handle cleanup on deactivation
 function chatbot_chatgpt_deactivate_db() {
+
+    // DIAG - Diagnostics - Ver 2.4.5
+    // error_log('chatbot_chatgpt_deactivate_db');
+
     // Clear the scheduled cleanup event
     wp_clear_scheduled_hook('chatbot_chatgpt_conversation_log_cleanup_event');
     
     // Clean up any expired transients
     clean_specific_expired_transients();
+
 }
 
 // Hook for the cleanup event

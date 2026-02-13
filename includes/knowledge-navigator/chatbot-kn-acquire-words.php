@@ -16,9 +16,8 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Knowledge Navigator - Acquire Top Words using TF-IDF - Ver 1.9.6
 function kn_acquire_words($Content, $action = 'add') {
+
     global $wpdb;
-    
-    // Debug log the input
     
     // Get current total word count
     $current_total = esc_attr(get_option('chatbot_chatgpt_kn_total_word_count', 0));
@@ -29,8 +28,6 @@ function kn_acquire_words($Content, $action = 'add') {
     // Clean and tokenize the content
     $words = str_word_count(strtolower($Content), 1);
     $word_count = count($words);
-    
-    // Debug log the word count for this content
     
     if ($action === 'add') {
         // Update total word count
@@ -74,4 +71,5 @@ function kn_acquire_words($Content, $action = 'add') {
     }
     
     return $words;
+
 }

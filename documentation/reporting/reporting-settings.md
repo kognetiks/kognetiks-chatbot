@@ -5,7 +5,7 @@ The Reporting Settings allow you to manage how conversation data is logged and r
 <img src="reporting-settings.png" alt="Reporting Settings" style="width:auto;height:auto;">
 
 1. **Reporting Period**:
-   - **Description**: This setting determines the frequency at which reports are generated.
+   - **Description**: This setting determines the frequency at which reports are aggregated.
    - **Options**: 
      - `Daily`: Generates reports every day.
      - `Monthly`: Generates reports every month.
@@ -19,8 +19,9 @@ The Reporting Settings allow you to manage how conversation data is logged and r
 
 3. **Conversation Log Days to Keep**:
    - **Description**: This setting determines how long conversation logs are retained before they are deleted.
-   - **Options**: One of `1`, `7`, `30`, `60`, `90`, `180` or `365` days.
+   - **Options**: One of `1`, `7`, `30`, `60`, `90`, `180`, `365` days or `Indefinitely` (i.e., retain forever).
    - **Selection**: Choose a retention period that balances your need for historical data with storage capacity. For example, `365` days keeps logs for a year.
+   - **Important**: If you select `Indefinitely`, keep in mind that high chat volumes can quickly consume storage capacity.
 
 ## Steps to Configure
 

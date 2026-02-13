@@ -16,8 +16,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Create the table for the chatbot assistants
 function create_chatbot_mistral_assistants_table() {
 
-    // DIAG - Diagnostics - Ver 2.2.7
-
     global $wpdb;
 
     // FIX ME: Change the table name to chatbot_chatgpt_assistants
@@ -65,10 +63,12 @@ function create_chatbot_mistral_assistants_table() {
     // Check for errors after dbDelta
     if ($wpdb->last_error) {
 
+        // DIAG - Diagnostics - Ver 2.4.5
         back_trace('ERROR', 'Failed to create table: ' . $table_name);
         back_trace('ERROR', 'SQL: ' . $sql);
         back_trace('ERROR', 'chatbot-agents-mistral.php] Error details: ' . $wpdb->last_error);
         return false;  // Table creation failed
+
     }
 
     // Call the upgrade function after creating the table
@@ -77,8 +77,6 @@ function create_chatbot_mistral_assistants_table() {
     // Keep the chatbot_mistral_number_of_shortcodes option updated - Ver 2.0.6
     // REMOVED - Ver 2.2.7
     // update_chatbot_mistral_number_of_shortcodes();
-
-    // DIAG - Diagnostics - Ver 2.2.7
 
 }
 // REMOVED - Ver 2.2.7
@@ -163,8 +161,6 @@ function get_chatbot_mistral_assistant_by_key($id) {
 // Keep the chatbot_mistral_number_of_shortcodes option updated - Ver 2.0.6
 function update_chatbot_mistral_number_of_shortcodes() {
 
-    // DIAG - Diagnostics - Ver 2.2.7
-
     global $wpdb;
 
     // FIX ME: Change the table name to chatbot_chatgpt_assistants
@@ -189,10 +185,6 @@ function update_chatbot_mistral_number_of_shortcodes() {
     }  
 
     update_option('chatbot_mistral_number_of_shortcodes', $number_of_shortcodes);
-
-    // Optionally log for debugging
-
-    // DIAG - Diagnostics - Ver 2.2.7
     
 }
 
@@ -516,9 +508,12 @@ function mistral_update_assistant() {
 
     // Check for errors after update
     if ($wpdb->last_error) {
+
+        // DIAG - Diagnostics - Ver 2.4.5
         back_trace('ERROR', 'Failed to update row in table: ' . $table_name);
         back_trace('ERROR', 'Error details: ' . $wpdb->last_error);
         return false;  // Row update failed
+        
     }
 
     wp_die();
@@ -547,9 +542,12 @@ function mistral_delete_assistant() {
 
     // Check for errors after delete
     if ($wpdb->last_error) {
+
+        // DIAG - Diagnostics - Ver 2.4.5
         back_trace('ERROR', 'Failed to delete row from table: ' . $table_name);
         back_trace('ERROR', 'Error details: ' . $wpdb->last_error);
         return false;  // Row deletion failed
+
     }
 
     wp_die();

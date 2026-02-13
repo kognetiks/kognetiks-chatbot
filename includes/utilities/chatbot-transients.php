@@ -18,7 +18,7 @@ function chatbot_chatgpt_set_consolidated_transient_data ( $page_id , $user_id ,
 
     // Example Usage
     //
-    // // DIAG - Diagnostics - Ver 2.2.7
+    // // DIAG - Diagnostics - Ver 2.4.5
     // $consolidated_transient_data = array (
     //     'user_id' => $user_id,
     //     'page_id' => $page_id,
@@ -37,8 +37,6 @@ function chatbot_chatgpt_set_consolidated_transient_data ( $page_id , $user_id ,
     // // Set the consolidated transient
     // chatbot_chatgpt_set_consolidated_transient_data( $page_id , $user_id , $session_id, $consolidated_transient_data );
 
-    // DIAG - Diagnostics - Ver 2.2.7
-
     // Check if the user ID and page ID are set
     if (0 === $user_id || empty($user_id)) {
         $user_id = $session_id;
@@ -55,8 +53,6 @@ function chatbot_chatgpt_set_consolidated_transient_data ( $page_id , $user_id ,
     // Store the transient
     set_transient('chatbot_chatgpt_transient_' . $page_id . '_' . $user_id , $consolidated_transient_data, 60*60*24); // Store for 24 hours   
 
-    // DIAG - Diagnostics - Ver 2.2.7
-
 }
 
 // Consolidated Transient Get Functions - Ver 2.2.7
@@ -64,7 +60,7 @@ function chatbot_chatgpt_get_consolidated_transient_data ( $page_id , $user_id ,
 
     // Example Usage
     //
-    // DIAG - Diagnostics - Ver 2.2.7
+    // DIAG - Diagnostics - Ver 2.4.5
     // // Get the consolidated transient
     // $consolidated_transient_data = chatbot_chatgpt_get_consolidated_transient_data( $page_id , $user_id );
     // $user_id = $consolidated_transient_data['user_id'];
@@ -81,8 +77,6 @@ function chatbot_chatgpt_get_consolidated_transient_data ( $page_id , $user_id ,
     // $thread_id = $consolidated_transient_data['thread_id'];
     // $additional_instructions = $consolidated_transient_data['additional_instructions'];
 
-    // DIAG - Diagnostics - Ver 2.2.7
-
     // Check if the user ID and page ID are set
     if (0 === $user_id || empty($user_id)) {
         $user_id = $session_id;
@@ -98,8 +92,6 @@ function chatbot_chatgpt_get_consolidated_transient_data ( $page_id , $user_id ,
     
     // Get the transient value
     $consolidated_transient_data = get_transient('chatbot_chatgpt_transient_' . $page_id . '_' . $user_id);
-
-    // DIAG - Diagnostics - Ver 2.2.7
 
     // Return the transient value if it's found, or an empty string if not
     return $consolidated_transient_data !== false ? $consolidated_transient_data : '';
@@ -156,8 +148,6 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $u
     // Store the transient
     set_transient($transient_key, $transient_value, 60*60*24); // Store for 24 hours
 
-    // DIAG - Diagnostics
-
 }
 
 // Get the transients based on the type - Ver 1.8.1
@@ -176,11 +166,6 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
         if (empty($page_id)) {
             $page_id = get_queried_object_id();
         }
-    }
-
-    // DIAG - Diagnostics
-    if ($transient_type == 'file_id' || $transient_type == 'chatbot_chatgpt_assistant_file_id') {
-    } else {
     }
 
     // Construct the transient key based on the transient type - Always use session_id in keys - Ver 2.3.6
@@ -216,8 +201,6 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
     // Get the transient value
     $transient_value = get_transient($transient_key);
 
-    // DIAG - Diagnostics
-
     // Return the transient value if it's found, or an empty string if not
     // return $transient_value !== false ? $transient_value : '';
 
@@ -241,8 +224,6 @@ function delete_chatbot_chatgpt_transients( $transient_type, $user_id = null, $p
     global $assistant_id;
     global $sequence_id;
     global $step_id;
-
-    // DIAG - Diagnostics
 
     // Check if the user ID and page ID are set
     if (0 === $user_id || empty($user_id)) {

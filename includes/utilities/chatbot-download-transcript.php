@@ -50,8 +50,6 @@ function chatbot_chatgpt_download_transcript() {
     $transcriptFileName = 'transcript_' . generate_random_string() . '_' . date('Y-m-d_H-i-s') . '.txt';
     $transcriptFile = $transcript_dir . $transcriptFileName;
 
-    // DIAG - Diagnostics - Ver 1.9.9
-
     // Attempt to write the content to the file
     if (file_put_contents($transcriptFile, $conversation_content) === false) {
         wp_send_json_error('Failed to write to file');
@@ -60,8 +58,6 @@ function chatbot_chatgpt_download_transcript() {
 
     // Construct the URL for download
     $url = plugins_url('transcripts/' . $transcriptFileName, $chatbot_chatgpt_plugin_dir_path . 'chatbot-chatgpt');
-
-    // DIAG - Diagnostics - Ver 1.9.9
 
     wp_send_json_success($url);
 

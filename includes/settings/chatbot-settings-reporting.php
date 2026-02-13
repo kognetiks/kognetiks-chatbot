@@ -702,7 +702,6 @@ function chatbot_chatgpt_reporting_settings_callback($args){
 function chatbot_chatgpt_reporting_period_callback($args) {
     // Get the saved chatbot_chatgpt_reporting_period value or default to "Daily"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_reporting_period', 'Daily'));
-    // DIAG - Log the output choice
     ?>
     <select id="chatbot_chatgpt_reporting_period" name="chatbot_chatgpt_reporting_period">
         <option value="<?php echo esc_attr( 'Daily' ); ?>" <?php selected( $output_choice, 'Daily' ); ?>><?php echo esc_html( 'Daily' ); ?></option>
@@ -717,7 +716,6 @@ function chatbot_chatgpt_reporting_period_callback($args) {
 function  chatbot_chatgpt_enable_conversation_logging_callback($args) {
     // Get the saved chatbot_chatgpt_enable_conversation_logging value or default to "Off"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_enable_conversation_logging', 'Off'));
-    // DIAG - Log the output choice
     ?>
     <select id="chatbot_chatgpt_enable_conversation_logging" name="chatbot_chatgpt_enable_conversation_logging">
         <option value="<?php echo esc_attr( 'On' ); ?>" <?php selected( $output_choice, 'On' ); ?>><?php echo esc_html( 'On' ); ?></option>
@@ -730,16 +728,16 @@ function  chatbot_chatgpt_enable_conversation_logging_callback($args) {
 function chatbot_chatgpt_conversation_log_days_to_keep_callback($args) {
     // Get the saved chatbot_chatgpt_conversation_log_days_to_keep value or default to "30"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_conversation_log_days_to_keep', '30'));
-    // DIAG - Log the output choice
     ?>
     <select id="chatbot_chatgpt_conversation_log_days_to_keep" name="chatbot_chatgpt_conversation_log_days_to_keep">
-        <option value="<?php echo esc_attr( '1' ); ?>" <?php selected( $output_choice, '7' ); ?>><?php echo esc_html( '1' ); ?></option>
+        <option value="<?php echo esc_attr( '1' ); ?>" <?php selected( $output_choice, '1' ); ?>><?php echo esc_html( '1' ); ?></option>
         <option value="<?php echo esc_attr( '7' ); ?>" <?php selected( $output_choice, '7' ); ?>><?php echo esc_html( '7' ); ?></option>
         <option value="<?php echo esc_attr( '30' ); ?>" <?php selected( $output_choice, '30' ); ?>><?php echo esc_html( '30' ); ?></option>
         <option value="<?php echo esc_attr( '60' ); ?>" <?php selected( $output_choice, '60' ); ?>><?php echo esc_html( '60' ); ?></option>
         <option value="<?php echo esc_attr( '90' ); ?>" <?php selected( $output_choice, '90' ); ?>><?php echo esc_html( '90' ); ?></option>
         <option value="<?php echo esc_attr( '180' ); ?>" <?php selected( $output_choice, '180' ); ?>><?php echo esc_html( '180' ); ?></option>
         <option value="<?php echo esc_attr( '365' ); ?>" <?php selected( $output_choice, '365' ); ?>><?php echo esc_html( '365' ); ?></option>
+        <option value="<?php echo esc_attr( 'indefinitely' ); ?>" <?php selected( $output_choice, 'indefinitely' ); ?>><?php echo esc_html( 'Indefinitely' ); ?></option>
     </select>
     <?php
 }
@@ -955,9 +953,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
     // Check is GD Library is installed - Ver 1.6.3
     if (!extension_loaded('gd')) {
         // GD Library is installed and loaded
-        // DIAG - Log the output choice
         chatbot_chatgpt_general_admin_notice('Chatbot requires the GD Library to function correctly, but it is not installed or enabled on your server. Please install or enable the GD Library.');
-        // DIAG - Log the output choice
         // Disable the shortcode functionality
         return;
     }
@@ -997,7 +993,6 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
         $results = $wpdb->get_results("SELECT $group_by AS date, SUM(count) AS count FROM $table_name WHERE date >= '$start_date' GROUP BY $group_by");
 
         if(!empty($wpdb->last_error)) {
-            // DIAG - Handle the error
             return;
         } else if(!empty($results)) {
             $labels = [];
@@ -1014,7 +1009,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
     if (empty( $a['labels']) || empty($atts['data'])) {
         // return '<p>You need to specify both the labels and data for the chart to work.</p>';
-        return '<p>No data to chart at this time. Plesae visit again later.</p>';
+        return '<p>No data to chart at this time. Please visit again later.</p>';
     }
 
     // Generate the chart
@@ -1089,7 +1084,6 @@ function chatbot_chatgpt_interactions_table() {
     ));
 
     if(!empty($wpdb->last_error)) {
-        // DIAG - Handle the error
         return '<p>Error retrieving interaction data. Please try again later.</p>';
     } else if(!empty($results)) {
         $labels = [];
@@ -1383,8 +1377,6 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
         return;
     }
 
-    // DIAG - Diagnostics - Ver 2.0.2.1
-
     if (!file_exists($results_csv_file)) {
         return;
     }
@@ -1518,25 +1510,19 @@ function chatbot_chatgpt_test_conversation_digest_ajax() {
     $message .= "\nThis is a test email from your Kognetiks Chatbot Conversation Digest system.\n";
     $message .= "If you receive this email, your Kognetiks Chatbot Conversation Digest settings are configured correctly.\n";
     
-    // Log email attempt
-    if (function_exists('back_trace')) {
-        // prod_trace( 'NOTICE', 'Test Conversation Digest Email - Ver 2.4.2 - Message: ' . $message );
-        prod_trace( 'NOTICE', 'Test Conversation Digest Email - Ver 2.4.2 - Message');
-    }
+    // DIAG - Diagnostics - Ver 2.4.5
+    prod_trace( 'NOTICE', 'Test Conversation Digest Email - Ver 2.4.5 - Message');
     
     // Send the email using safe wrapper to prevent timeout errors
     $sent = chatbot_chatgpt_safe_wp_mail($email_address, $subject, $message);
     
-    // Log result
-    if (function_exists('back_trace')) {
-        if ($sent) {
-            // prod_trace( 'NOTICE', 'Test Conversation Digest Email - Ver 2.4.2 - Sent: ' . $sent );
-            prod_trace( 'NOTICE', 'Test Conversation Digest Email - Ver 2.4.2 - Sent');
-        } else {
-            // Check for PHP mail errors
-            $last_error = error_get_last();
-            if ($last_error && strpos($last_error['message'], 'mail') !== false) {
-            }
+    // DIAG - Diagnostics - Ver 2.4.5
+    if ($sent) {
+        prod_trace( 'NOTICE', 'Test Conversation Digest Email - Ver 2.4.5 - Sent');
+    } else {
+        // Check for PHP mail errors
+        $last_error = error_get_last();
+        if ($last_error && strpos($last_error['message'], 'mail') !== false) {
         }
     }
     

@@ -106,14 +106,9 @@ function validateDocumentation($dir, $file) {
         }
     }
 
-    // Diagnostics
-
     if (!empty($valid_directories) && !empty($valid_files) && !empty($dir) && !empty($file)) {
         // If the $dir and $file are found in the list of $valid_directories and $valid_files, return true
         if (in_array($dir, $valid_directories) && in_array($file, $valid_files[$dir])) {
-
-            // DIAG - Diagnostics - Ver 2.0.2.1
-
             // Return true if the directory and file are valid
             return true;
 
@@ -157,12 +152,6 @@ function chatbot_chatgpt_support_section_callback() {
     } else {
         $docLocation = $chatbot_chatgpt_plugin_dir_path . 'documentation/' . 'overview.md';
     }
-
-    // DIAG - Diagnostics - Ver 2.0.2.1
-
-    // DIAG - Diagnostics - Ver 2.0.5
-    // error_reporting(E_ALL);
-    // ini_set('display_errors', 1);
   
     $parsedown = new Parsedown();
     $markdownContent = file_get_contents($docLocation);
@@ -186,13 +175,6 @@ function chatbot_chatgpt_support_section_callback() {
     // Add inline styling to <ul> and <li> tags
     $adjustedHtmlContent = str_replace('<ul>', '<ul style="list-style-type: disc; margin-left: 20px;">', $adjustedHtmlContent);
     $adjustedHtmlContent = str_replace('<li>', '<li style="margin-bottom: 10px;">', $adjustedHtmlContent);
-
-    // DIAG - Diagnostics - Ver 2.0.5
-    // $absolutePath = __DIR__ . '/debug_adjustedHtmlContent.html';
-    // $result = file_put_contents($absolutePath, $adjustedHtmlContent);
-    // if ($result === false) {
-    // } else {
-    // }
 
     echo wp_kses_post($adjustedHtmlContent);
 

@@ -206,8 +206,6 @@ function kognetiks_insights_get_time_based_conversation_counts($period = 'Today'
     $previous_unique_query = "SELECT COUNT(DISTINCT session_id) FROM `$table_name` WHERE " . $period_info['previous'] . $user_type_condition;
     $previous_unique = $wpdb->get_var($previous_unique_query);
     
-    // DIAG - Diagnostics - V1.0.0
-    
     $current_data = array(
         'total' => $current_total,
         'unique_visitors' => $current_unique
@@ -289,8 +287,6 @@ function kognetiks_insights_get_message_statistics($period = 'Today', $user_type
             COUNT(CASE WHEN user_type = 'Chatbot' THEN 1 END) as chatbot_messages
         FROM `$table_name`
         WHERE " . $period_info['current'] . $user_type_condition;
-
-    // DIAG - Diagnostics - V1.0.0
     
     $previous_query = "
         SELECT 
@@ -299,8 +295,6 @@ function kognetiks_insights_get_message_statistics($period = 'Today', $user_type
             COUNT(CASE WHEN user_type = 'Chatbot' THEN 1 END) as chatbot_messages
         FROM `$table_name`
         WHERE " . $period_info['previous'] . $user_type_condition;
-
-    // DIAG - Diagnostics - V1.0.0
     
     // Get current period data
     $current_data = $wpdb->get_row($current_query);
@@ -464,7 +458,6 @@ function kognetiks_insights_get_token_statistics($period = 'Today', $user_type =
         $user_type_condition = " AND user_type = '" . esc_sql($user_type) . "'";
     }
     
-    // DIAG - Diagnostics - V1.0.0
     $current_query = "
         SELECT SUM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(message_text, 'total_tokens:', -1), ' prompt_tokens:', 1) AS UNSIGNED))
         FROM `$table_name`

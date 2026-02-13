@@ -2,7 +2,7 @@
 
 The Messages and Diagnostics Settings help you monitor the health and performance of the **Kognetiks Chatbot**, providing tools for error logging, API connection checks, and other diagnostics. Follow these steps to configure these options effectively:
 
-<img src="messages-and-diagnostics-overiew.png" alt="Messages and Diagnotics Overview" style="width:auto;height:auto;">
+<img src="messages-and-diagnostics-overiew.png" alt="Messages and Diagnostics Overview" style="width:auto;height:auto;">
 
 # Platform Settings Details
 

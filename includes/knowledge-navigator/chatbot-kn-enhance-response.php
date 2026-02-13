@@ -21,8 +21,6 @@ if ( ! defined( 'WPINC' ) ) {
 
 function chatbot_chatgpt_enhance_with_tfidf($message) {
 
-    // DIAG - Diagnostics - Ver 2.2.9
-
     global $wpdb;
     global $learningMessages;
     global $stopWords;
@@ -39,8 +37,6 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     // Convert results to indexed array
     $results = array_values($results);
 
-    // DIAG - Diagnostics - Ver 2.2.9
-
     // Select top three results
     $results = array_slice($results, 0, $limit);
     $links = [];
@@ -51,10 +47,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     // Decide if the links to site content and exceprts should be included in the response
     $include_post_or_page_excerpt = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_excerpts', 'No'));
 
-    // Debugging output to verify the structure of the results
-
     foreach ($results as $result) {
-        // Debugging output for each result
 
         if (is_array($result) && isset($result['title'], $result['url'], $result['ID'])) {
             if ('yes' == $include_title) {
@@ -70,9 +63,8 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
                 }
             }
         }
-    }
 
-    // DIAG - Diagnostics - Ver 2.2.9
+    }
 
     if (!empty($links)) {
 
@@ -111,11 +103,6 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
 
     }
 
-    // DIAG - Diagnostics - Ver 2.2.9
-    // if (!empty($enhanced_response)) {
-    // } else {
-    // }
-
     return !empty($enhanced_response) ? $enhanced_response : null;
 
 }
@@ -147,8 +134,6 @@ function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
     $words = explode(" ", $message);
     $words = array_diff($words, $stopWords);
 
-    // DIAG - Diagnostics - Ver 2.2.1
-
     // Initialize arrays to hold word scores and results
     $word_scores = array();
     $results = array();
@@ -162,7 +147,6 @@ function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
         $total_score = $wpdb->get_var($query);
         // Store the word and its total score
         $word_scores[$word] = $total_score ? $total_score : 0;
-        // DIAG - Diagnostics - Ver 2.2.1
     }
 
     // Sort words by their scores (lowest to highest)
@@ -193,13 +177,9 @@ function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
         // Execute the query
         $rows = $wpdb->get_results($query);
 
-        // Diagnostics - Ver 2.2.1
-
         // Check if matches are found
         if ($rows) {
             foreach ($rows as $row) {
-
-                // Diagnostics - Ver 2.2.1
                 
                 $result_key = hash('sha256', $row->url);
                 if (!isset($results[$result_key])) {
@@ -226,10 +206,6 @@ function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
 
     }
 
-    // DIAG - Diagnostics - Ver 2.2.1
-    // foreach ($results as $result) {
-    // }
-
     // Convert results to indexed array
     $results = array_values($results);
 
@@ -243,12 +219,7 @@ function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
     // Decide if the links to site content and exceprts should be included in the response
     $include_post_or_page_excerpt = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_excerpts', 'No'));
 
-    // DIAG - Diagnostics - Ver 2.2.9
-
-
     foreach ($results as $result) {
-
-        // DIAG - Diagnostics - Ver 2.2.9
 
         if (is_object($result) && isset($result->post_title, $result->url, $result->ID)) {
             if ('yes' == $include_title) {

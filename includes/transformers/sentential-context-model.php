@@ -76,7 +76,6 @@ function transformer_model_sentential_context_model_response_lite($prompt, $max_
     }
 
     $prompt = preprocess_text($prompt);
-    // DIAG - Diagnostic - Ver 2.2.6
 
     $highest_score = 0;
     $best_match = "";
@@ -454,7 +453,6 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
             }
 
             $scoring_algorithm = 'pairwise'; // Set to 'average' or 'pairwise'
-            // DIAG - Diagnostics
 
             if ( $scoring_algorithm == 'average' ) { // ORIGINAL
 
@@ -556,7 +554,6 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
 
                     // Get store number of sentences around the matching sentence
                     $sentence_response_length = esc_attr(get_option('chatbot_transformer_model_sentence_response_length', 3));
-                    // DIAG - Diagnostics
                     $start_index = max(0, $sentence_index - 1);
                     $end_index = min($sentence_count - 1, $sentence_index + $sentence_response_length - 1);
 
@@ -569,8 +566,6 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
                         $best_match .= $sentences[$i] . ' ';
 
                     }
-
-                    // DIAG - Diagnostics
 
                 }
             }
@@ -587,8 +582,6 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
 // Sentential Context Model (SCM) - Transformer Model - Ver 2.2.1
 function transformer_model_sentential_context_model_response($input, $responseCount = 500) {
 
-    // DIAG - Diagnostic - Ver 2.2.1
-
     // Normalize the input string - Ver 2.2.2
     if (class_exists('Normalizer')) {
         $input = Normalizer::normalize($input, Normalizer::FORM_C);
@@ -600,9 +593,6 @@ function transformer_model_sentential_context_model_response($input, $responseCo
 
     // Set the window size for co-occurrence matrix
     $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
-    // DIAG - Diagnostic - Ver 2.2.1
-
-    // DIAG - Diagnostic - Ver 2.2.1
 
     // MOVED TO transformer-model-scheduler.php
     // Build embeddings (with caching for performance)
@@ -618,8 +608,6 @@ function transformer_model_sentential_context_model_response($input, $responseCo
 // Function to fetch WordPress page and post content
 function transformer_model_sentential_context_fetch_wordpress_content($input = null) {
 
-    // DIAG - Diagnostic - Ver 2.2.1
-
     global $wpdb;
     global $no_matching_content_response;
 
@@ -627,7 +615,6 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     if (empty($input)) {
         return '';
     }
-    // DIAG - Diagnostics - Ver 2.2.1
 
     // Step 1 - Normalize and remove stop words
     // $input = preg_replace('/[^\w\s]/', '', $input);
@@ -638,8 +625,6 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
 
     // FIXME - OVERRIDE - Ver 2.2.4
     $all_words = $words;
-
-    // DIAG - Diagnostic - Ver 2.2.4
 
     // Step 2 - Query the TF-IDF table for the highest-scoring words
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
@@ -671,10 +656,6 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     $existing_words = array_column($results, 'word');
     $remaining_words = array_diff($words, $existing_words);
 
-    // DIAG - Diagnostic - Ver 2.2.1 - Print the words and scores
-    // for ($i = 0; $i < count($results); $i++) {
-    // }
-
     // Ensure results meet the limit
     if (count($results) > $limit) {
         $results = array_slice($results, 0, $limit);
@@ -690,10 +671,6 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     $results = array_merge($results, array_map(function($word) {
         return ['word' => $word, 'score' => 0];
     }, $remaining_words));
-
-    // DIAG - Diagnostic - Ver 2.2.1 - Print the words and scores
-    // for ($i = 0; $i < count($results); $i++) {
-    // }
 
     // Define the window size
     $window_size = get_option('chatbot_transformer_model_word_content_windows_size', 3); // Default to 3 if not set
@@ -755,8 +732,6 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     // // Require at least one group to match
     // $like_condition = implode(' AND ', $like_conditions);
 
-    // DIAG - Diagnostic - Ver 2.2.4
-
     // Handle error for no matching content
     if (empty($like_condition_template) || empty($like_condition_values)) {
         return $no_matching_content_response[array_rand($no_matching_content_response)];
@@ -800,8 +775,6 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
 // Function to build or retrieve cached embeddings
 function transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize = 3) {
 
-    // DIAG - Diagnostic - Ver 2.2.1
-
     $embeddings = transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize);
 
     return $embeddings;
@@ -810,8 +783,6 @@ function transformer_model_sentential_context_get_cached_embeddings($corpus, $wi
 
 // Function to build a co-occurrence matrix for word embeddings
 function transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize = 3) {
-
-    // DIAG - Diagnostic - Ver 2.2.1
 
     $matrix = [];
     $words = preg_split('/\s+/', strtolower($corpus)); // Tokenize and normalize
@@ -843,8 +814,6 @@ function transformer_model_sentential_context_build_cooccurrence_matrix($corpus,
 // Function to remove stop words from an array of words
 function transformer_model_sentential_context_remove_stop_words($words) {
 
-    // DIAG - Diagnostic - Ver 2.2.1
-
     // Use global stop words list
     global $stopWords;
 
@@ -858,8 +827,6 @@ function transformer_model_sentential_context_remove_stop_words($words) {
 
 // Function to calculate cosine similarity between two vectors
 function transformer_model_sentential_context_cosine_similarity($vectorA, $vectorB) {
-
-    // DIAG - Diagnostic - Ver 2.2.1
 
     $commonKeys = array_intersect_key($vectorA, $vectorB);
 
@@ -891,8 +858,6 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
 }
 
 function transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $maxTokens = 500) {
-
-    // DIAG - Diagnostic - Ver 2.3.0
 
     // Tokenize the corpus into sentences
     $sentences = preg_split('/(?<=[.?!])\s+/', $corpus);

@@ -16,8 +16,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Call the ChatGPT API for Speech-to-Text (STT)
 function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $user_id = null, $page_id = null, $session_id = null, $assistant_id = null, $client_message_id = null) {
 
-    // DIAG - Diagnostics
-
     global $chatbot_chatgpt_plugin_dir_path;
     global $session_id;
     global $user_id;
@@ -31,7 +29,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
     global $learningMessages;
     global $errorResponses;
 
-    // DIAG - Diagnostics - Ver 2.4.4
+    // DIAG - Diagnostics - Ver 2.4.5
     // back_trace("NOTICE", "Starting OpenAI STT API call");
     // back_trace("NOTICE", "Message: " . $message);
     // back_trace("NOTICE", "User ID: " . $user_id);
@@ -50,7 +48,6 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
     // Check for duplicate message UUID in conversation log
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
-        // DIAG - Diagnostics - Ver 2.3.4
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -101,7 +98,6 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
     finfo_close($finfo);
 
     if (strpos($mime_type, 'audio/') === false && strpos($mime_type, 'video/') === false) {
-        // DIAG - Diagnostics
         return "Error: The file is not an audio or video file. Please upload an audio or video file.";
     }
 
@@ -157,7 +153,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
     // Handle API errors
     if (isset($response_data['error'])) {
         http_response_code(400);
-        // DIAG - Diagnostics
+        // DIAG - Diagnostics - Ver 2.4.5
         prod_trace( 'ERROR', 'API error: ' . $response_data['error']['message'] );
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
@@ -184,8 +180,6 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
 
 //Process the transcription using ChatGPT to correct spelling and formatting.
 function chatbot_chatgpt_post_process_transcription($api_key, $message, $transcription, $session_id = null) {
-
-    // DIAG - Diagnostics
 
     // Get API URL for text processing
     $api_url = get_chat_completions_api_url();
@@ -258,7 +252,7 @@ function chatbot_chatgpt_post_process_transcription($api_key, $message, $transcr
 
     // Handle errors
     if (is_wp_error($response)) {
-        // DIAG - Diagnostics
+        // DIAG - Diagnostics - Ver 2.4.5
         prod_trace( 'ERROR', 'WP error: ' . $response->get_error_message() );
         return 'Error in API request: ' . $response->get_error_message();
     }

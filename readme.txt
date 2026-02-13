@@ -3,11 +3,11 @@ Contributors: kognetiks
 Tags: chat, chatgpt, ai, reporting, insights
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Tested up to: 6.9.1
-Stable tag: 2.4.4
+Stable tag: 2.4.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Quiet proof that your website is working. Turn real visitor convesrations into clear insight, automatically. No dashboards. No guesswork.
+Quiet proof that your website is working. Turn real visitor conversations into clear insight, automatically. No dashboards. No guesswork.
 
 == Description ==
 
@@ -95,7 +95,7 @@ Ideal for agencies, consultants, and teams who need to justify ongoing value.
 
 * Conversation Digest summaries
 * Proof-of-value reporting
-* Reports are designed to be shared as-is, wihtout explanation
+* Reports are designed to be shared as-is, without explanation
 * Supports multiple AI engines (OpenAI, Azure OpenAI, NVIDIA, Anthropic, Mistral, DeepSeek, Google, JAN.AI)
 * Knowledge Navigator for site-aware responses
 * Custom assistants for specific purposes
@@ -108,7 +108,7 @@ Ideal for agencies, consultants, and teams who need to justify ongoing value.
 
 **Designed for visibility, not guesswork.**
 
-The **Kognetiks Chatbot** helps you understand when AI is helping, when it needs adjustment, and where samll changes can quietly make a big difference.
+The **Kognetiks Chatbot** helps you understand when AI is helping, when it needs adjustment, and where small changes can quietly make a big difference.
 
 == Installation ==
 
@@ -138,7 +138,7 @@ You control which AI engine processes data. Local AI options keep data on your o
 The **Kognetiks Chatbot** plugin relies on external AI services to provide chatbot functionality. It sends user queries and related data to a third-party AI provider for processing and response generation. By using this plugin, you agree to abide by each service's terms of service and privacy policy:
 
 - **OpenAI**: [Terms of Use](https://platform.openai.com/terms) | [Privacy Policy](https://openai.com/policies/privacy-policy/)
-- **Azure OpenAI**: [Terms of Use](https://learn.microsoft.com/en-us/legal/cognitive-services/openai/data-privacy?tabs=azure-portal) | [Privacy Polisy](https://www.microsoft.com/en-us/privacy/privacystatement)
+- **Azure OpenAI**: [Terms of Use](https://learn.microsoft.com/en-us/legal/cognitive-services/openai/data-privacy?tabs=azure-portal) | [Privacy Policy](https://www.microsoft.com/en-us/privacy/privacystatement)
 - **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
 - **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
 - **DeepSeek**: [Terms of Use](https://chat.deepseek.com/downloads/DeepSeek%20User%20Agreement.html) | [Privacy Policy](https://chat.deepseek.com/downloads/DeepSeek%20Privacy%20Policy.html)
@@ -153,7 +153,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - Obtain API keys here:
 
    - [OpenAI API Keys](https://platform.openai.com/account/api-keys)
-   - [Auzre API Keys](https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account?icid=ai-services)
+   - [Azure API Keys](https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account?icid=ai-services)
    - [NVIDIA API Keys](https://developer.nvidia.com/nim)
    - [Anthropic API Keys](https://www.anthropic.com/)
    - [DeepSeek API Keys](https://platform.deepseek.com/sign_in)
@@ -181,6 +181,18 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 5. Chatbot settings and configuration
 
 == Changelog ==
+
+= 2.4.5 - Released 2026-02-12 =
+
+### New Features
+* **OpenAI Prompts (Responses API)**: Shortcode now supports prompt IDs (`pmpt_...`) in addition to assistant IDs (`asst_...`) for OpenAI Responses API usage.
+* **Conversation Logging**: Added option to retain conversation logs indefinitely.
+
+### Improvements
+* **Documentation**: Updated documentation for OpenAI Prompts (Responses API) and Conversation Logging.
+
+### Bug Fixes
+* **PHP execution time**: Fixed timeouts on long-running API calls by temporarily adjusting and restoring `max_execution_time` for OpenAI Chat Completions and Assistants API requests.
 
 = 2.4.4 - Released 2026-02-07 =
 

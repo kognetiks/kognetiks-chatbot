@@ -29,7 +29,7 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     
     global $errorResponses;
 
-    // DIAG - Diagnostics - Ver 2.4.4
+    // DIAG - Diagnostics - Ver 2.4.5
     // back_trace("NOTICE", "Starting Azure OpenAI API call");
     // back_trace("NOTICE", "Message: " . $message);
     // back_trace("NOTICE", "User ID: " . $user_id);
@@ -48,20 +48,15 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     // Check for duplicate message UUID in conversation log
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
-        // DIAG - Diagnostics - Ver 2.3.4
         return "Error: Duplicate request detected. Please try again.";
     }
 
     // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
-    // DIAG - Diagnostics - Ver 2.2.6
-
     // The current Azure OpenAI API URL endpoint
     // $api_url = 'https://YOUR_RESOURCE_NAME.openai.azure.com/deployments/DEPLOYMENT_NAME/chat/completions?api-version=2024-08-01-preview';
     $api_url = get_chat_completions_api_url();
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     $headers = array(
         'Content-Type' => 'application/json',
@@ -128,7 +123,6 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
                 $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts) . ' ' . $context;
             }
         }
-        // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
 
     } else {
 
@@ -159,8 +153,6 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
         $context = $truncated_context;
     } else {
     }
-
-    // DIAG Diagnostics - Ver 2.2.6
 
     // Added Role, System, Content Static Variable - Ver 2.2.6
     // Build messages array with system message, conversation history, and current user message - Ver 2.3.9+
@@ -203,8 +195,6 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     // Context History - Ver 2.2.6
     addEntry('chatbot_azure_context_history', $message);
 
-    // DIAG Diagnostics - Ver 2.2.6
-
     $chatbot_azure_timeout = intval(esc_attr(get_option('chatbot_azure_timeout_setting', '50')));
 
     $args = array(
@@ -215,20 +205,14 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
         'timeout' => $chatbot_azure_timeout, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
     );
 
-    // DIAG - Diagnostics - Ver 2.2.6
-
     $response = wp_remote_post($api_url, $args);
  
-    // DIAG - Diagnostics - Ver 2.2.6
-
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
         return 'Error: ' . $response->get_error_message().' Please check Settings for a valid API key or your OpenAI account for additional information.';
     }
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
@@ -238,8 +222,6 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
             $response_body['message'] .= '.';
         }
     }
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -253,10 +235,6 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
             $page_id = get_the_ID(); // Get the ID of the queried object if $page_id is not set
         }
     }
-
-    // DIAG - Diagnostics - Ver 2.2.6
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     // Add the usage to the conversation tracker
     if ($response['response']['code'] == 200) {

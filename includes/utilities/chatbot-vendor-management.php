@@ -31,6 +31,10 @@ if ( ! defined( 'KCHAT_FREEMIUS_QUIET_MODE' ) ) {
 // Proof Unlocked
 if ( ! function_exists( 'kchat_has_unlock_proof' ) ) {
     function kchat_has_unlock_proof() {
+
+        // DIAG - Diagnostics - Ver 2.4.5
+        // error_log('kchat_has_unlock_proof');
+
         global $wpdb;
 
         // Must have logging enabled
@@ -55,17 +59,27 @@ if ( ! function_exists( 'kchat_has_unlock_proof' ) ) {
 
         return ( $conversation_count >= 10 );
     }
+
 }
 
 // Proof gate (you’ll use this for your own notices/UX)
 if ( ! function_exists( 'kchat_freemius_proof_gate' ) ) {
     function kchat_freemius_proof_gate() {
+
+        // DIAG - Diagnostics - Ver 2.4.5
+        // error_log('kchat_freemius_proof_gate');
+
         return function_exists( 'kchat_has_unlock_proof' ) ? (bool) kchat_has_unlock_proof() : false;
+
     }
+
 }
 
 // Freemius: suppress marketing UI surfaces
 add_action( 'chatbot_chatgpt_freemius_loaded', function () {
+
+    // DIAG - Diagnostics - Ver 2.4.5
+    // error_log('chatbot_chatgpt_freemius_loaded');
 
     // Fix: Ensure fs_logger table exists when storage logging is enabled (prevents "Table doesn't exist" errors)
     if ( 1 == get_option( 'fs_storage_logger', 0 ) ) {
@@ -99,6 +113,9 @@ add_action( 'chatbot_chatgpt_freemius_loaded', function () {
      *    Keep errors/warnings.
      */
     $fs->add_filter( 'show_admin_notice', function ( $show, $notice ) {
+
+        // DIAG - Diagnostics - Ver 2.4.5
+        // error_log('show_admin_notice');
 
         if ( ! $show ) {
             return $show;
@@ -165,6 +182,9 @@ add_action( 'chatbot_chatgpt_freemius_loaded', function () {
 // We scope this to wp-admin. If you want it only on specific screens, we can narrow it.
 add_action( 'admin_head', function () {
 
+    // DIAG - Diagnostics - Ver 2.4.5
+    // error_log('admin_head');
+
     if ( ! KCHAT_FREEMIUS_QUIET_MODE ) {
         return;
     }
@@ -199,6 +219,9 @@ add_action( 'admin_head', function () {
 
 // Remove upgrade/trial links from Plugins list action links
 add_action( 'admin_init', function () {
+    
+    // DIAG - Diagnostics - Ver 2.4.5
+    // error_log('admin_init');
 
     if ( ! KCHAT_FREEMIUS_QUIET_MODE ) {
         return;

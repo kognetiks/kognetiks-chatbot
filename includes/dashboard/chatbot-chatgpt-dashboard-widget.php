@@ -82,9 +82,7 @@ function chatbot_chatgpt_dashboard_widget_content() {
             $start_date = date('Y-m-d H:i:s', strtotime('-365 days'));
             break;
     }
-    
-    // Debug: Log the calculated start date
-    
+        
     // Get chat statistics
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
     
@@ -137,50 +135,46 @@ function chatbot_chatgpt_dashboard_widget_content() {
                 $start_date
             ));
         
-        // Get daily interaction counts for the graph
-        if ($period === '24h') {
-            // Use simpler query for 24h period to avoid placeholder issues
-            $daily_chats = $wpdb->get_results($wpdb->prepare(
-                "SELECT 
-                    DATE_FORMAT(interaction_time, '%%Y-%%m-%%d %%H:00:00') as date,
-                    COUNT(*) / 2 as count
-                FROM $table_name 
-                WHERE interaction_time >= %s AND user_type IN ('Chatbot', 'Visitor')
-                GROUP BY DATE_FORMAT(interaction_time, '%%Y-%%m-%%d %%H:00:00')
-                ORDER BY date ASC",
-                $start_date
-            ));
-        } else {
-            // Use simpler query for daily periods to avoid placeholder issues
-            $daily_chats = $wpdb->get_results($wpdb->prepare(
-                "SELECT 
-                    DATE(interaction_time) as date,
-                    COUNT(*) / 2 as count
-                FROM $table_name 
-                WHERE interaction_time >= %s AND user_type IN ('Chatbot', 'Visitor')
-                GROUP BY DATE(interaction_time)
-                ORDER BY date ASC",
-                $start_date
-            ));
-        }
+            // Get daily interaction counts for the graph
+            if ($period === '24h') {
+                // Use simpler query for 24h period to avoid placeholder issues
+                $daily_chats = $wpdb->get_results($wpdb->prepare(
+                    "SELECT 
+                        DATE_FORMAT(interaction_time, '%%Y-%%m-%%d %%H:00:00') as date,
+                        COUNT(*) / 2 as count
+                    FROM $table_name 
+                    WHERE interaction_time >= %s AND user_type IN ('Chatbot', 'Visitor')
+                    GROUP BY DATE_FORMAT(interaction_time, '%%Y-%%m-%%d %%H:00:00')
+                    ORDER BY date ASC",
+                    $start_date
+                ));
+            } else {
+                // Use simpler query for daily periods to avoid placeholder issues
+                $daily_chats = $wpdb->get_results($wpdb->prepare(
+                    "SELECT 
+                        DATE(interaction_time) as date,
+                        COUNT(*) / 2 as count
+                    FROM $table_name 
+                    WHERE interaction_time >= %s AND user_type IN ('Chatbot', 'Visitor')
+                    GROUP BY DATE(interaction_time)
+                    ORDER BY date ASC",
+                    $start_date
+                ));
+            }
+        }    
+        // Close the table existence check
     }
     
-    // Close the table existence check
-    }
-    
-    // DIAG - Diagnostics - Ver 2.3.4
+    // DIAG - Diagnostics - Ver 2.4.5
     // if (empty($daily_chats)) {
-        
     //     prod_trace( 'NOTICE', 'No data in daily_chats. Period: ' . $period . ', Start date: ' . $start_date);
     //     prod_trace( 'NOTICE', 'Total chats count: ' . $chat_count);
-        
     //     // Check if table exists and has data
     //     if (isset($table_exists) && !$table_exists) {
     //         prod_trace( 'ERROR', 'Table ' . $table_name . ' does not exist');
     //     } else {
     //         $total_rows = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
     //         prod_trace( 'NOTICE', 'Table exists with ' . $total_rows . ' total rows');
-            
     //         // Check for recent data
     //         $recent_data = $wpdb->get_var($wpdb->prepare(
     //             "SELECT COUNT(*) FROM $table_name WHERE interaction_time >= %s",

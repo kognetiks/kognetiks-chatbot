@@ -19,14 +19,18 @@ function ensure_log_directory_permissions($dir_path) {
     // Ensure the directory exists
     if (!file_exists($dir_path)) {
         if (!wp_mkdir_p($dir_path)) {
-            error_log('[Chatbot] [chatbot-manage-error-logs.php] Failed to create directory: ' . $dir_path);
+            if ( defined('WP_DEBUG') && WP_DEBUG ) {
+                error_log('[Chatbot] [chatbot-manage-error-logs.php] Failed to create directory: ' . $dir_path);
+            }
             return false;
         }
     }
     
     // Set directory permissions to 0755 (readable and executable by all, writable by owner)
     if (!chmod($dir_path, 0755)) {
-        error_log('[Chatbot] [chatbot-manage-error-logs.php] Failed to set directory permissions: ' . $dir_path);
+        if ( defined('WP_DEBUG') && WP_DEBUG ) {
+            error_log('[Chatbot] [chatbot-manage-error-logs.php] Failed to set directory permissions: ' . $dir_path);
+        }
     }
     
     return true;
@@ -81,7 +85,9 @@ function chatbot_chatgpt_manage_error_logs() {
         $scanned_dir = scandir($chatbot_logs_dir);
     } else {
         // Handle the error, e.g., log it, create the directory, or throw an exception
-        error_log('[Chatbot] [chatbot-manage-error-logs.php] Directory not found: ' . $chatbot_logs_dir);
+        if ( defined('WP_DEBUG') && WP_DEBUG ) {
+            error_log('[Chatbot] [chatbot-manage-error-logs.php] Directory not found: ' . $chatbot_logs_dir);
+        }
         // Optionally, create the directory
         // mkdir($chatbot_logs_dir, 0777, true);
         // Then, you might want to scan it again or handle the situation differently
@@ -104,8 +110,6 @@ function chatbot_chatgpt_manage_error_logs() {
         echo '<p>No log files found.</p>';
         return;
     }
-
-    // DIAG - Log files for troubleshooting - Ver 2.0.7
 
     // Start HTML output with styling
     $output = '<style>
@@ -197,7 +201,8 @@ function chatbot_chatgpt_manage_error_logs() {
     $output .= '</form>';
     $output .= '</div>';
 
-    echo wp_kses_post( $output ); // Output the generated HTML
+    // Output style block first (wp_kses_post strips <style> and would show CSS as text).
+    echo $output;
 
     return;
 
@@ -255,13 +260,17 @@ function handle_log_actions() {
             if (file_exists($file_path)) {
                 // Check if file is writable before attempting to delete
                 if (!is_writable($file_path)) {
-                    error_log('[Chatbot] [chatbot-manage-error-logs.php] File not writable: ' . $file_path);
+                    if ( defined('WP_DEBUG') && WP_DEBUG ) {
+                        error_log('[Chatbot] [chatbot-manage-error-logs.php] File not writable: ' . $file_path);
+                    }
                     wp_die('File is not writable. Please check file permissions.');
                 }
                 
                 // Attempt to delete the file with error handling
                 if (!unlink($file_path)) {
-                    error_log('[Chatbot] [chatbot-manage-error-logs.php] Failed to delete file: ' . $file_path);
+                    if ( defined('WP_DEBUG') && WP_DEBUG ) {
+                        error_log('[Chatbot] [chatbot-manage-error-logs.php] Failed to delete file: ' . $file_path);
+                    }
                     wp_die('Failed to delete file. Please check file permissions or if the file is in use.');
                 }
                 
@@ -287,7 +296,9 @@ function handle_log_actions() {
                 if (file_exists($file_path) && is_file($file_path)) {
                     // Check if file is writable before attempting to delete
                     if (!is_writable($file_path)) {
-                        error_log('[Chatbot] [chatbot-manage-error-logs.php] File not writable: ' . $file_path);
+                        if ( defined('WP_DEBUG') && WP_DEBUG ) {
+                            error_log('[Chatbot] [chatbot-manage-error-logs.php] File not writable: ' . $file_path);
+                        }
                         $failed_count++;
                         continue;
                     }
@@ -296,7 +307,9 @@ function handle_log_actions() {
                     if (unlink($file_path)) {
                         $deleted_count++;
                     } else {
-                        error_log('[Chatbot] [chatbot-manage-error-logs.php] Failed to delete file: ' . $file_path);
+                        if ( defined('WP_DEBUG') && WP_DEBUG ) {
+                            error_log('[Chatbot] [chatbot-manage-error-logs.php] Failed to delete file: ' . $file_path);
+                        }
                         $failed_count++;
                     }
                 }

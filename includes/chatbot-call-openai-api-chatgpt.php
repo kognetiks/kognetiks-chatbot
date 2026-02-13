@@ -36,7 +36,7 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     
     global $errorResponses;
 
-    // DIAG - Diagnostics - Ver 2.4.4
+    // DIAG - Diagnostics - Ver 2.4.5
     // back_trace("NOTICE", "Starting OpenAI API call");
     // back_trace("NOTICE", "Message: " . $message);
     // back_trace("NOTICE", "User ID: " . $user_id);
@@ -69,14 +69,11 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     // Check for duplicate message UUID in conversation log
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
-        // DIAG - Diagnostics - Ver 2.3.4
         return "Error: Duplicate request detected. Please try again.";
     }
 
     // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
-
-    // DIAG - Diagnostics - Ver 1.8.6
 
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     // $api_url = 'https://api.openai.com/v1/chat/completions';
@@ -146,7 +143,6 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
                 $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts);
             }
         }
-        // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
 
     } else {
 
@@ -164,21 +160,20 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     // Check the length of the context and truncate if necessary - Ver 2.2.6
     $context_length = intval(strlen($context) / 4); // Assuming 1 token ≈ 4 characters
     // FIXME - Define max context length (adjust based on model requirements)
-    $max_context_length = 16385 / 2 ; // Estimate at 65536 characters ≈ 16384 tokens
+    $max_context_length = (int) (16385 / 2); // Estimate at 65536 characters ≈ 16384 tokens
     if ($context_length > $max_context_length) {
+        $max_chars = (int) $max_context_length;
         // Truncate to the max length
-        $truncated_context = substr($context, 0, $max_context_length);
+        $truncated_context = substr($context, 0, $max_chars);
         // Ensure truncation happens at the last complete word
         $truncated_context = preg_replace('/\s+[^\s]*$/', '', $truncated_context);
         // Fallback if regex fails (e.g., no spaces in the string)
         if (empty($truncated_context)) {
-            $truncated_context = substr($context, 0, $max_context_length);
+            $truncated_context = substr($context, 0, $max_chars);
         }
         $context = $truncated_context;
     } else {
     }
-
-    // DIAG Diagnostics - Ver 2.1.8
 
     // Added Role, System, Content Static Variable - Ver 1.6.0
     // Build messages array with system message, conversation history, and current user message - Ver 2.3.9+
@@ -221,8 +216,6 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     // Context History - Ver 1.6.1
     addEntry('chatbot_chatgpt_context_history', $message);
 
-    // DIAG Diagnostics - Ver 1.6.1
-
     $chatbot_chatgpt_timeout = intval(esc_attr(get_option('chatbot_chatgpt_timeout_setting', '50')));
     
     // Fix for timeout exceeding PHP max_execution_time - Ver 2.4.5
@@ -241,16 +234,12 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
         'timeout' => $chatbot_chatgpt_timeout, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
     );
 
-    // DIAG - Diagnostics - Ver 2.2.4
-
     $response = wp_remote_post($api_url, $args);
     
     // Restore original execution time limit - Ver 2.4.5
     if ($current_max_execution_time > 0 && $required_execution_time > $current_max_execution_time) {
         @set_time_limit($current_max_execution_time);
     }
- 
-    // DIAG - Diagnostics - Ver 1.6.7
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
@@ -258,8 +247,6 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
         // Lock clearing removed - main send function handles locking
         return 'Error: ' . $response->get_error_message().' Please check Settings for a valid API key or your OpenAI account for additional information.';
     }
-
-    // DIAG - Diagnostics - Ver 1.8.6
 
     // Get the raw response body
     $raw_response_body = wp_remote_retrieve_body($response);
@@ -270,8 +257,6 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     if (substr($raw_response_body, 0, 3) === "\xEF\xBB\xBF") {
         $raw_response_body = substr($raw_response_body, 3);
     }
-    
-    // DIAG - Diagnostics - Check raw response body
     
     // Validate that we have a non-empty string that looks like JSON
     if (empty($raw_response_body)) {
@@ -296,8 +281,6 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     
     // Decode the JSON response
     $response_body = json_decode($raw_response_body, true);
-    
-    // DIAG - Log the result immediately after decode
     
     // Check if json_decode failed
     if (json_last_error() !== JSON_ERROR_NONE) {
@@ -333,7 +316,6 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
         }
     }
 
-    // DIAG - Diagnostics - Ver 1.8.1
     if (is_array($response_body)) {
         if (isset($response_body['choices'])) {
         }
@@ -352,9 +334,7 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
         }
     }
 
-    // DIAG - Diagnostics - Ver 1.8.6
-
-    // DIAG - Diagnostics - Ver 1.8.1
+    // DIAG - Diagnostics - Ver 2.4.5
     // FIXME - ADD THE USAGE TO CONVERSATION TRACKER
     // if (isset($response_body["usage"]["prompt_tokens"])) {
     // }
@@ -375,18 +355,12 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
             append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, null, $response_body["usage"]["total_tokens"]);
         }
     }
-    
-    // DIAG - Check before choices validation
-    // if (isset($response_body['choices'])) {
-    // }
-    
+       
     if (!empty($response_body['choices'])) {
         // Handle the response from the chat engine
         $content = isset($response_body['choices'][0]['message']['content']) 
             ? trim($response_body['choices'][0]['message']['content']) 
             : '';
-        
-        // DIAG - Log content extraction
         
         // Check if content is empty - this can happen with gpt-5 when all tokens are used for reasoning
         if (empty($content)) {
@@ -398,7 +372,7 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
                 ? $response_body['usage']['completion_tokens_details']['reasoning_tokens'] 
                 : 0;
             
-            // DIAG - Diagnostics - Ver 2.3.9+
+            // DIAG - Diagnostics - Ver 2.4.5
             prod_trace('WARNING', 'Empty content response. Finish reason: ' . $finish_reason . ', Reasoning tokens: ' . $reasoning_tokens);
             
             if ($finish_reason === 'length' && $reasoning_tokens > 0) {
@@ -430,12 +404,6 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
         // Lock clearing removed - main send function handles locking
         return $content;
     } else {
-        // DIAG - Log why we're in the else block
-        // if (is_array($response_body)) {
-        //     if (isset($response_body['choices'])) {
-        //     }
-        // }
-        
         // FIXME - Decide what to return here - it's an error
         if (get_locale() !== "en_US") {
             $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
@@ -527,7 +495,6 @@ function chatbot_chatgpt_call_api_basic($api_key, $message) {
     if ($current_max_execution_time > 0 && $required_execution_time > $current_max_execution_time) {
         @set_time_limit($current_max_execution_time);
     }
-    // DIAG - Diagnostics - Ver 1.6.7
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
@@ -535,8 +502,6 @@ function chatbot_chatgpt_call_api_basic($api_key, $message) {
         // Lock clearing removed - main send function handles locking
         return 'Error: ' . $response->get_error_message().' Please check Settings for a valid API key or your OpenAI account for additional information.';
     }
-
-    // DIAG - Diagnostics - Ver 1.8.6
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
@@ -546,8 +511,6 @@ function chatbot_chatgpt_call_api_basic($api_key, $message) {
             $response_body['message'] .= '.';
         }
     }
-
-    // DIAG - Diagnostics - Ver 1.8.1
     
     if (!empty($response_body['choices'])) {
         // Handle the response from the chat engine

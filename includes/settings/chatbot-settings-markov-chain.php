@@ -73,8 +73,6 @@ function chatbot_markov_chain_build_schedule_callback($args) {
     </select>
     <?php
     
-    // DIAG - Diagnostics - Ver 2.1.6
-    
 }
 
 // Markov Chain Length Options Callback - Ver 2.1.6

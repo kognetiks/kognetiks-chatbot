@@ -84,8 +84,6 @@ function chatbot_chatgpt_erase_conversation_handler() {
         $session_id = isset($_POST['session_id']) ? sanitize_text_field($_POST['session_id']) : kognetiks_get_unique_id();
     }
 
-    // DIAG - Diagnostics - Ver 1.9.1
-
     $transient_type = 'assistant_alias';
     
     $assistant_id = get_chatbot_chatgpt_transients( $transient_type , $user_id, $page_id, $session_id);
@@ -118,8 +116,6 @@ function chatbot_chatgpt_erase_conversation_handler() {
     // This prevents false positive duplicate detection after clearing conversation
     clear_duplicate_message_uuids($user_id, $page_id, $session_id);
 
-    // DIAG - Diagnostics - Ver 2.0.4
-
     if ($chatbot_chatgpt_force_page_reload == 'Yes') {
         global $chatbot_chatgpt_fixed_literal_messages;
         // Define a default fallback message
@@ -139,9 +135,6 @@ function chatbot_chatgpt_erase_conversation_handler() {
         // Send error response
         wp_send_json_success($success_message);
     }
-
-
-    // DIAG - Diagnostics - Ver 1.8.6
 
     global $chatbot_chatgpt_fixed_literal_messages;
         
@@ -282,8 +275,6 @@ function clear_duplicate_message_uuids($user_id, $page_id, $session_id) {
     );
     
     $deleted = $wpdb->query($sql);
-    
-    // DIAG - Diagnostics - Ver 2.3.7
     
     return $deleted;
 }

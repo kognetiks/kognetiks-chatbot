@@ -6,6 +6,18 @@
 
 ---
 
+= 2.4.5 - Released 2026-02-12 =
+
+### New Features
+* **OpenAI Prompts (Responses API)**: Shortcode now supports prompt IDs (`pmpt_...`) in addition to assistant IDs (`asst_...`) for OpenAI Responses API usage.
+* **Conversation Logging**: Added option to retain conversation logs indefinitely.
+
+### Improvements
+* **Documentation**: Updated documentation for OpenAI Prompts (Responses API) and Conversation Logging.
+
+### Bug Fixes
+* **PHP execution time**: Fixed timeouts on long-running API calls by temporarily adjusting and restoring `max_execution_time` for OpenAI Chat Completions and Assistants API requests.
+
 ## 2.4.4 - Released 2026-02-07
 
 ### Improvements

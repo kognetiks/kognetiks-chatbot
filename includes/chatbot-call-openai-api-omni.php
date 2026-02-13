@@ -35,7 +35,7 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     
     global $errorResponses;
 
-    // DIAG - Diagnostics - Ver 2.4.4
+    // DIAG - Diagnostics - Ver 2.4.5
     // back_trace("NOTICE", "Starting OpenAI Omni API call");
     // back_trace("NOTICE", "Message: " . $message);
     // back_trace("NOTICE", "User ID: " . $user_id);
@@ -68,14 +68,11 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     // Check for duplicate message UUID in conversation log
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
-        // DIAG - Diagnostics - Ver 2.3.4
         return "Error: Duplicate request detected. Please try again.";
     }
 
     // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
-
-    // DIAG - Diagnostics - Ver 1.8.6
 
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     // $api_url = 'https://api.openai.com/v1/chat/completions';
@@ -120,14 +117,8 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
 
     $sys_message = 'We previously have been talking about the following things: ';
 
-    // DIAG Diagnostics - Ver 1.6.1
-
-    //
     // ENHANCED CONTEXT - Select some context to send with the message - Ver 1.9.6
-    //
     $use_enhanced_content_search = esc_attr(get_option('chatbot_chatgpt_use_advanced_content_search', 'No'));
-
-    // DIAG Diagnostics - Ver 1.9.6
 
     if ($use_enhanced_content_search == 'Yes') {
 
@@ -145,7 +136,6 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
                 $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts) . ' ' . $context;
             }
         }
-        // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
 
     } else {
 
@@ -204,12 +194,8 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
         $body['max_tokens'] = $max_tokens;
     }
 
-    // DIAG - Diagnostics - Ver 2.0.2.1
-
     // Context History - Ver 1.6.1
     addEntry('chatbot_chatgpt_context_history', $message);
-
-    // DIAG Diagnostics - Ver 1.6.1
 
     $args = array(
         'headers' => $headers,
@@ -219,20 +205,15 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
         'timeout' => 50, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
     );
 
-    // DIAG - Diagnostics - Ver 2.0.2.1
-
     $response = wp_remote_post($api_url, $args);
-    // DIAG - Diagnostics - Ver 1.6.7
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
-        // DIAG - Diagnostics - Ver 2.0.2.1
+        // DIAG - Diagnostics - Ver 2.4.5
         prod_trace( 'ERROR', 'Error: ' . $response->get_error_message());
         // Lock clearing removed - main send function handles locking
         return 'Error: ' . $response->get_error_message().' Please check Settings for a valid API key or your OpenAI account for additional information.';
     }
-
-    // DIAG - Diagnostics - Ver 1.8.6
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
@@ -242,8 +223,6 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
             $response_body['message'] .= '.';
         }
     }
-
-    // DIAG - Diagnostics - Ver 1.8.1
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -258,9 +237,6 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
         }
     }
 
-    // DIAG - Diagnostics - Ver 1.8.6
-
-    // DIAG - Diagnostics - Ver 1.8.1
     // FIXME - ADD THE USAGE TO CONVERSATION TRACKER
 
     // Add the usage to the conversation tracker

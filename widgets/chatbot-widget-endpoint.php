@@ -40,7 +40,7 @@ if ($chatbot_enable_remote_widget !== 'Yes') {
     chatbot_widget_logging('Remote access is not allowed', $referer );
     die();
 } else {
-    // Log the referer for accounting, monitoring, and debugging purposes
+    // Log the referer for accounting and monitoring purposes
     $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
     $request_ip = getUserIP();
     chatbot_widget_logging('Remote access is allowed' , $referer , $request_ip);
@@ -117,7 +117,7 @@ if (empty($allowed_pairs)) {
             $normalized_domain = preg_replace('/^www\./', '', $allowed_domain);
             $base_domain = implode('.', array_slice(explode('.', $normalized_domain), -2));
 
-            // Debugging: Log the normalized referer and domain for comparison
+            // Log the normalized referer and domain for comparison
             chatbot_widget_logging('Checking Pair', $base_referer, $base_domain);
 
             if (!empty($base_domain) && $base_referer === $base_domain && $allowed_shortcode === $shortcode_param) {
@@ -173,7 +173,8 @@ if (is_user_logged_in()) {
 $page_id = '999999';
 
 // Localize the data for the chatbot - Ver 2.1.1.1
-$kchat_settings = array_merge($kchat_settings,array(
+// Include nonces so send-message and other AJAX actions pass security check (widget iframe had no nonces before)
+$kchat_settings = array_merge($kchat_settings, array(
     'chatbot-chatgpt-version' => esc_attr($chatbot_chatgpt_plugin_version),
     'plugins_url' => esc_url($chatbot_chatgpt_plugin_dir_url),
     'ajax_url' => esc_url(admin_url('admin-ajax.php')),
@@ -190,7 +191,16 @@ $kchat_settings = array_merge($kchat_settings,array(
     'chatbot_chatgpt_custom_error_message' => esc_attr(get_option('chatbot_chatgpt_custom_error_message', 'Your custom error message goes here.')),
     'chatbot_chatgpt_start_status' => esc_attr(get_option('chatbot_chatgpt_start_status', 'closed')),
     'chatbot_chatgpt_start_status_new_visitor' => esc_attr(get_option('chatbot_chatgpt_start_status_new_visitor', 'closed')),
-    ));
+    'chatbot_message_nonce' => wp_create_nonce('chatbot_message_nonce'),
+    'chatbot_upload_nonce' => wp_create_nonce('chatbot_upload_nonce'),
+    'chatbot_erase_nonce' => wp_create_nonce('chatbot_erase_nonce'),
+    'chatbot_unlock_nonce' => wp_create_nonce('chatbot_unlock_nonce'),
+    'chatbot_reset_nonce' => wp_create_nonce('chatbot_reset_nonce'),
+    'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
+    'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
+    'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
+    'nonce_timestamp' => time() * 1000,
+));
 
 $kchat_settings_json = wp_json_encode($kchat_settings);
 

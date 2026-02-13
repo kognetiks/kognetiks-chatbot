@@ -17,8 +17,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Handle long-running scripts with a scheduled event function
 function chatbot_transformer_model_scheduler() {
 
-    // DIAG - Diagnostics
-
     // Retrieve the schedule setting
     $chatbot_transformer_model_build_schedule = esc_attr(get_option('chatbot_transformer_model_build_schedule', 'Disable'));
 
@@ -42,12 +40,9 @@ function chatbot_transformer_model_scheduler() {
     // Reset the cache file if offset is 0
     if (in_array($chatbot_transformer_model_build_schedule, ['Now', 'Hourly', 'Twice Daily', 'Daily', 'Weekly'])) {
 
-        // DIAG - Diagnostics
-
         // Update the status as 'In Process'
         update_option('chatbot_transformer_model_build_status', 'In Process');
 
-        // DIAG - Diagnostics
         prod_trace( 'NOTICE', 'chatbot_transformer_model_build_status: ' . $chatbot_transformer_model_build_status);
 
         // Reset the cache fil
@@ -64,15 +59,11 @@ function chatbot_transformer_model_scheduler() {
 
     }
 
-    // DIAG - Diagnostics
-
 }
 add_action('chatbot_transformer_model_scheduler_hook', 'chatbot_transformer_model_scheduler');
 
 // Reset the cache files and offset
 function transformer_model_sentential_context_reset_cache() {
-
-    // DIAG - Diagnostics
 
     // Log reset activity
     prod_trace( 'NOTICE', 'Transformer Model Content Cache Reset');
@@ -96,17 +87,15 @@ function transformer_model_sentential_context_reset_cache() {
         // Optionally, delete the folder itself if required
         // rmdir($cacheDir); // Uncomment if you want to remove the folder
     } else {
+        // Do nothing
     }
 
-    // DIAG - Diagnostics
 
 }
 
 
 // Check if the Transformer Model needs to be built or updated
 function chatbot_transformer_model_scan() {
-
-    // DIAG - Diagnostics
 
     // Retrieve current state
     $offset = intval(get_option('chatbot_transformer_model_offset', 0));
@@ -136,15 +125,11 @@ function chatbot_transformer_model_scan() {
     // Schedule the next batch if needed
     wp_schedule_single_event(time() + 10, 'chatbot_transformer_model_scan_hook');
 
-    // DIAG - Diagnostics
-
 }
 add_action('chatbot_transformer_model_scan_hook', 'chatbot_transformer_model_scan');
 
 // Fetch WordPress content
 function transformer_model_sentential_context_fetch_content($offset, $batchSize) {
-
-    // DIAG - Diagnostics
 
     global $wpdb;
 
@@ -164,16 +149,12 @@ function transformer_model_sentential_context_fetch_content($offset, $batchSize)
         wp_schedule_single_event(time() + 10, 'chatbot_transformer_model_scan_hook');
     }
 
-    // DIAG - Diagnostics
-
     return $results;
 
 }
 
 // Cache embeddings for the fetched content
 function transformer_model_sentential_context_cache_embeddings($corpus, $windowSize = 3) {
-
-    // DIAG - Diagnostics
 
     $cacheDir = __DIR__ . '/sentential_embeddings_cache/';
 

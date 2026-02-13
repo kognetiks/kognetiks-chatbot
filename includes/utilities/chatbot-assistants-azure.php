@@ -16,8 +16,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Create the table for the chatbot assistants
 function create_chatbot_azure_assistants_table() {
 
-    // DIAG - Diagnostics - Ver 2.2.7
-
     global $wpdb;
 
     // FIX ME: Change the table name to chatbot_chatgpt_assistants
@@ -76,8 +74,6 @@ function create_chatbot_azure_assistants_table() {
     // Keep the chatbot_azure_number_of_shortcodes option updated - Ver 2.0.6
     // REMOVED - Ver 2.2.7
     // update_chatbot_azure_number_of_shortcodes();
-
-    // DIAG - Diagnostics - Ver 2.2.7
 
 }
 // REMOVED - Ver 2.2.7
@@ -162,8 +158,6 @@ function get_chatbot_azure_assistant_by_key($id) {
 // Keep the chatbot_azure_number_of_shortcodes option updated - Ver 2.0.6
 function update_chatbot_azure_number_of_shortcodes() {
 
-    // DIAG - Diagnostics - Ver 2.2.7
-
     global $wpdb;
 
     // FIX ME: Change the table name to chatbot_chatgpt_assistants
@@ -188,10 +182,6 @@ function update_chatbot_azure_number_of_shortcodes() {
     }  
 
     update_option('chatbot_azure_number_of_shortcodes', $number_of_shortcodes);
-
-    // Optionally log for debugging
-
-    // DIAG - Diagnostics - Ver 2.2.7
     
 }
 

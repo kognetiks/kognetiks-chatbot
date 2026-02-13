@@ -122,8 +122,6 @@ function chatbot_azure_model_choice_callback($args) {
     // Fetch models from the API
     $models = chatbot_azure_get_models();
 
-    // DIAG - Ver 2.2.6
-
     // Limit the models to chat models
     $models = array_filter($models, function($model) {
         return strpos($model['id'], 'gpt') !== false;
@@ -573,8 +571,6 @@ function chatbot_azure_whisper_response_format_callback($args) {
 
 // Register API settings
 function chatbot_azure_api_settings_init() {
-
-    // DIAG - Diagnostics
 
     add_settings_section(
         'chatbot_azure_model_settings_section',

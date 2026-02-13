@@ -83,7 +83,7 @@ Kognetiks Chatbot may not be a fit if:
 
 - Multiple AI engines: OpenAI, Azure OpenAI, NVIDIA, Anthropic, Mistral, DeepSeek, Google, or local JAN.AI
 - Knowledge Navigator for site-aware responses
-- Custom assistants for specific purposes
+- Custom assistants and prompts for specific purposes
 - Conversation logging with export options
 - Sentiment and engagement signals
 - Optional speech recognition and voice replies

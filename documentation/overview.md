@@ -25,7 +25,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - Obtain API keys here:
 
    - [OpenAI API Keys](https://platform.openai.com/account/api-keys)
-   - [Auzre API Keys](https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account?icid=ai-services)
+   - [Azure API Keys](https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account?icid=ai-services)
    - [NVIDIA API Keys](https://developer.nvidia.com/nim)
    - [Anthropic API Keys](https://www.anthropic.com/)
    - [DeepSeek API Keys](https://platform.deepseek.com/sign_in)
@@ -44,19 +44,17 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
-## What's new in Version 2.4.4
+## What's new in Version 2.4.5
+
+### New Features
+* **OpenAI Prompts (Responses API)**: Shortcode now supports prompt IDs (`pmpt_...`) in addition to assistant IDs (`asst_...`) for OpenAI Responses API usage.
+* **Conversation Logging**: Added option to retain conversation logs indefinitely.
 
 ### Improvements
-* **Documentation**: Added Unanswered Questions Detection Analysis documentation.
-* **Vendor management**: Refined free→trial→premium upgrade path and messaging.
-* **Reporting**: Modal prompts conversation logging when enabling digest or proof-of-value reports.
-* **Uninstall**: Improved uninstall process and version handling.
+* **Documentation**: Updated documentation for OpenAI Prompts (Responses API) and Conversation Logging.
 
 ### Bug Fixes
-* Suppressed vendor notices and quieted third-party warnings.
-* Replaced select error_log calls with back_trace for cleaner debugging.
-
-## Past Updates
+* **PHP execution time**: Fixed timeouts on long-running API calls by temporarily adjusting and restoring `max_execution_time` for OpenAI Chat Completions and Assistants API requests.
 
 * Information about past updates can be found [here](updates/updates.md).
 
@@ -99,7 +97,8 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 ## 🧠 Assistants & Knowledge  
 *What the chatbot knows*
 
-- [Assistants](assistants/manage-assistants.md)  
+- [Assistants](assistants/manage-assistants.md)
+- [OpenAI's Responses API](api-openai-responses-api/prompt-agent-build-and-deploy-guide.md)
 - [Knowledge Navigator](knowledge-navigator/knowledge-navigator.md)  
 - [Knowledge Navigator Analysis](knowledge-navigator/knowledge-navigator-analysis.md)
 

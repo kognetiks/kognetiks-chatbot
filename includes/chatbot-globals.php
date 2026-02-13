@@ -19,7 +19,7 @@ global $chatbot_chatgpt_language_code;
 // Get the site language using get_locale()
 $chatbot_chatgpt_installed_language_code = get_locale();
 
-// Log the site language for debugging
+// DIAG - Log the site language
 // error_log('[Chatbot] [chatbot-globals.php] Site locale: ' . $chatbot_chatgpt_installed_language_code);
 
 // Set a default language code if site language is not set
@@ -38,7 +38,7 @@ function chatbot_chatgpt_load_globals($language_code) {
 
     // If the globals have already been loaded, return
     if ( $chatbot_chatgpt_globals_loaded ) {
-        // DIAG - Diagnotics
+        // DIAG - Diagnostics - Ver 2.4.5
         // error_log('[Chatbot] [chatbot-globals.php]Globals already loaded for language: ' . $language_code);
         return;
     }

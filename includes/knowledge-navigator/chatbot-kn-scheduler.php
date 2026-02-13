@@ -15,12 +15,8 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Handle long-running scripts with a scheduled event function - Ver 1.6.1
 function knowledge_navigator_scan() {
-
-    // DIAG - Diagnostics - Ver 1.6.3
     
     $run_scanner = esc_attr(get_option('chatbot_chatgpt_knowledge_navigator', 'No'));
-    
-    // DIAG - Diagnostics - Ver 1.9.6
 
     // The second parameter is the default value if the option is not set.
     update_option('chatbot_chatgpt_kn_status', 'In Process');
@@ -38,13 +34,9 @@ function knowledge_navigator_scan() {
     update_option('chatbot_chatgpt_kn_results', '');
 
     // New process to acquire the content - Ver 1.9.6 - 2024 04 18
-    // DIAG - Diagnostics - Ver 1.9.6
-
     update_option( 'chatbot_chatgpt_kn_action', 'initialize' );
 
     chatbot_kn_acquire_controller();
-
-    // DIAG - Diagnostics - Ver 1.6.3
 
 }
 add_action('knowledge_navigator_scan_hook', 'knowledge_navigator_scan');

@@ -32,7 +32,7 @@ function chatbot_chatgpt_call_image_api($api_key, $message, $user_id = null, $pa
     global $model;
     global $voice;
 
-    // DIAG - Diagnostics - Ver 2.4.4
+    // DIAG - Diagnostics - Ver 2.4.5
     // back_trace("NOTICE", "Starting OpenAI Image API call");
     // back_trace("NOTICE", "Message: " . $message);
     // back_trace("NOTICE", "User ID: " . $user_id);
@@ -65,7 +65,6 @@ function chatbot_chatgpt_call_image_api($api_key, $message, $user_id = null, $pa
     // Check for duplicate message UUID in conversation log
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
-        // DIAG - Diagnostics - Ver 2.3.4
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -96,10 +95,8 @@ function chatbot_chatgpt_call_image_api($api_key, $message, $user_id = null, $pa
     // Select the OpenAI Model (dall-e-2 or dall-e-3)
     if ( !empty($kchat_settings['model']) ) {
         $model = $kchat_settings['model'];
-        // DIAG - Diagnostics - Ver 1.9.4
     } else {
         $model = esc_attr(get_option('chatbot_chatgpt_image_model_option', 'dall-e-2'));
-        // DIAG - Diagnostics - Ver 1.9.4
     }
 
     // Enforce message length constraints based on model
@@ -130,8 +127,6 @@ function chatbot_chatgpt_call_image_api($api_key, $message, $user_id = null, $pa
 
     // User tracking data
     $user_tracking = implode('-', [$session_id, $user_id, $page_id, $thread_id, $assistant_id]);
-
-    // Diagnostics - Ver 1.9.5
 
     // Prepare the request body
     $body = [

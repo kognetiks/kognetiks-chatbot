@@ -29,12 +29,15 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
 
-    // DIAG - Diagnostics - Ver 2.2.6
-
     $api_key = '';
 
     $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice'), 'OpenAI');
-    // DIAG - Diagnostics - Ver 2.2.6
+
+    // Prompt IDs (pmpt_) use the Responses API; /v1/assistants/ only accepts asst_. Do not call it with pmpt_.
+    $id_str = (string) $assistant_id_lookup;
+    if ( ( function_exists( 'str_starts_with' ) && str_starts_with( $id_str, 'pmpt_' ) ) || strpos( $id_str, 'pmpt_' ) === 0 ) {
+        return false;
+    }
 
     if ( $chatbot_ai_platform_choice == 'OpenAI' ) {
 
@@ -63,8 +66,6 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
 
     } elseif ( $chatbot_ai_platform_choice == 'Azure OpenAI' ) {
 
-        // DIAG - Diagnostics - Ver 2.2.6
-
         // Retrieve the API key
         $api_key = esc_attr(get_option('chatbot_azure_api_key'));
         // Decrypt the API key - Ver 2.2.6
@@ -92,18 +93,13 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
     } elseif ( $chatbot_ai_platform_choice == 'Mistral' ) {
 
         // Look up the Agent's name in the Assistants table
-        // DIAG - Diagnostics - Ver 2.3.0
         
         // Prepare the query of the database
         global $wpdb;
         $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
         $query = $wpdb->prepare("SELECT * FROM $table_name WHERE assistant_id = %s", $assistant_id_lookup);
         
-        // DIAG - Diagnostics - Ver 2.3.0
-        
         $result = $wpdb->get_results($query);
-        
-        // DIAG - Diagnostics - Ver 2.3.0
 
         // Return the Agent's name
         return $result[0]->common_name;
@@ -128,7 +124,6 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
 
     // Decode JSON response
     $data = json_decode($response_body, true);
-    // DIAG - Diagnostics - Ver 2.2.6
 
     // Validate JSON
     if (json_last_error() !== JSON_ERROR_NONE) {

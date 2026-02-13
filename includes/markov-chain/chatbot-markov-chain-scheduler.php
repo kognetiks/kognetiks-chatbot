@@ -16,8 +16,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Handle long-running scripts with a scheduled event function - Ver 1.6.1
 function chatbot_markov_chain_scheduler() {
 
-    // DIAG - Diagnostics - Ver 2.1.6
-
     // FIXME - Force a full rebuild if necessary
     // update_option('chatbot_markov_chain_force_rebuild', 'Yes');
     // prod_trace( 'NOTICE', 'FIXME - chatbot_markov_chain_force_rebuild: Yes');
@@ -45,15 +43,11 @@ function chatbot_markov_chain_scheduler() {
     // Update the status as 'Completed'
     update_option('chatbot_markov_chain_build_status', 'Completed');
 
-    // DIAG - Diagnostics - Ver 2.1.6
-
 }
 add_action('chatbot_markov_chain_scheduler_hook', 'chatbot_markov_chain_scheduler');
 
 // Check if the Markov Chain needs to be built or updated
 function chatbot_markov_chain_scan() {
-
-    // DIAG - Diagnostics - Ver 2.1.6
 
     // Get the current schedule setting
     $run_scanner = esc_attr(get_option('chatbot_markov_chain_build_schedule', 'No'));
@@ -71,15 +65,11 @@ function chatbot_markov_chain_scan() {
     // Run the Markov Chain building and saving process
     runMarkovChatbotAndSaveChain();
 
-    // DIAG - Diagnostics - Ver 2.1.6
-
 }
 add_action('chatbot_markov_chain_scan_hook', 'chatbot_markov_chain_scan');
 
 // Markov Chain Build Schedule handler
 function chatbot_markov_chain_build_results_callback($run_scanner) {
-
-    // DIAG - Diagnostics - Ver 2.1.6
 
     // update_option('chatbot_markov_chain_last_updated', date('Y-m-d H:i:s')); // REMOVED - Ver 2.2.0 - 2924-11-27
 

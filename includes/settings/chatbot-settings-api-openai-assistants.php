@@ -209,20 +209,18 @@ function chatbot_chatgpt_assistant_settings_init() {
 }
 add_action('admin_init', 'chatbot_chatgpt_assistant_settings_init');
 
-// GPT Assistants settings section callback - Ver 1.7.2 - Updated Ver 2.0.4
+// GPT Assistants / Responses settings section callback - Ver 1.7.2 - Updated Ver 2.0.4, Ver 2.4.5
 function chatbot_chatgpt_assistant_settings_section_callback($args) {
     ?>
-    <p>Effortlessly manage your chatbot Assistants all in one place using the intuitive interface below.</p>
-    <p>You will no longer need to remember all the Assistant options, as they are all available here for you to view and edit.</p>
-    <p>Tailor each Assistant to meet the unique needs of your audience, ensuring an engaging and personalized experience for all.</p>
-    <p>If you have developed an Assistant in the OpenAI Playground, you will need the id of the assistant - it usually starts with "asst_".</p>
-    <p>More information can be found here <a href="https://platform.openai.com/playground?mode=assistant" target="_blank">https://platform.openai.com/playground?mode=assistant</a>.</p>
-    <!-- <p>When you're ready to use an Assistant, simply add the shortcode <code>[chatbot assistant="Common Name"]</code> to your page.</p> -->
-    <p>When you're ready to use an Assistant, simply add a shortcode such as <code>[chatbot-1]</code>, <code>[chatbot-2]</code>, etc. to your page.</p>
+    <p>Manage your chatbot <b>Assistants</b> and <b>Responses</b> (prompts) in one place using the interface below. Both types work with the same shortcodes and settings.</p>
+    <p><b>ID prefixes:</b> Use <code>asst_</code> for <b>Assistants</b> (OpenAI Assistants API; <a href="https://platform.openai.com/assistants" target="_blank">Assistants</a>). Use <code>pmpt_</code> for <b>Responses</b> (Responses API; <a href=https://platform.openai.com/chat" target="_blank">Chat</a>). The plugin detects the type from the ID prefix, so both work side by side.</p>
+    <p><b>Note:</b> The Assistants API is scheduled for deprecation around mid-2026. For new setups, prefer creating prompts in the Responses API and using <code>pmpt_</code> IDs.</p>
+    <p>Tailor each Assistant or Response to your audience. When you're ready, add a shortcode such as <code>[chatbot-1]</code>, <code>[chatbot-2]</code>, etc. to your page.</p>
     <p><b>TIP:</b> For best results ensure that the shortcode appears only once on the page.</p>
-    <p><b>TIP:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
-    <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation Assistant Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=manage-assistants.md">here</a>.</b></p>
+    <p><b>TIP:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</p>
+    <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes you might make.</i></b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of Responses settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-openai-responses-api&file=prompt-agent-build-and-deploy-guide.md">here</a>.</b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of Assistant settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=manage-assistants.md">here</a>.</b></p>
     <?php
 }
 

@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Test API for status and errors - Ver 1.6.3 - Update Ver 2.2.1
  function kchat_test_api_status($chatbot_chatbot_ai_platform_choice = null) {
 
-    // DIAG - Diagnostics - Ver 2.4.4
+    // DIAG - Diagnostics - Ver 2.4.5
     // back_trace("NOTICE", "Starting API Test");
     // back_trace("NOTICE", "Chatbot AI Platform Choice: " . $chatbot_chatbot_ai_platform_choice);
 
@@ -156,8 +156,6 @@ function kchat_fetch_api_status($api_key, $model) {
                 $body['max_tokens'] = 100;
             }
 
-            // DIAG - Diagnostics - Ver 2.1.8
-
             $args = array(
                 'headers' => $headers,
                 'body' => json_encode($body),
@@ -168,16 +166,11 @@ function kchat_fetch_api_status($api_key, $model) {
 
             $response = wp_remote_post($api_url, $args);
 
-            // DIAG - Diagnostics - Ver 2.1.8
-
             if (is_wp_error($response)) {
-                // DIAG - Log the response body
                 return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your AI Platform vendor account for additional information.';
             }
 
             $response_body = json_decode(wp_remote_retrieve_body($response), true);
-
-            // DIAG - Log the response body
 
             // Check for API-specific errors
             //
@@ -237,8 +230,6 @@ function kchat_fetch_api_status($api_key, $model) {
                 ),
             );
 
-            // DIAG - Diagnostics - Ver 2.1.8
-
             $args = array(
                 'headers' => $headers,
                 'body' => json_encode($body),
@@ -249,17 +240,13 @@ function kchat_fetch_api_status($api_key, $model) {
 
             $response = wp_remote_post($api_url, $args);
 
-            // DIAG - Diagnostics - Ver 2.1.8
-
             if (is_wp_error($response)) {
-                // DIAG - Log the response body
                 return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your AI Platform vendor account for additional information.';
             }
 
             $response_body = json_decode(wp_remote_retrieve_body($response), true);
 
             // DIAG - Log the response body
-
             // Check for API-specific errors
             //
             // https://platform.openai.com/docs/guides/error-codes/api-errors
@@ -325,8 +312,6 @@ function kchat_fetch_api_status($api_key, $model) {
 
             $timeout = esc_attr(get_option('chatbot_anthropic_timeout_setting', 240 ));
 
-            // DIAG - Diagnostics
-
             // Call the API
             $response = wp_remote_post($api_url, array(
                 'headers' => $headers,
@@ -348,7 +333,6 @@ function kchat_fetch_api_status($api_key, $model) {
             // Handle WP Error
             if (is_wp_error($response)) {
 
-                // DIAG - Diagnostics
                 return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
 
             }
@@ -427,8 +411,6 @@ function kchat_fetch_api_status($api_key, $model) {
             // Encode the body
             $body = json_encode($body);
 
-            // DIAG - Diagnostics
-
             // Call the API
             $response = wp_remote_post($api_url, array(
                 'headers' => $headers,
@@ -437,8 +419,6 @@ function kchat_fetch_api_status($api_key, $model) {
 
             // Get the response body
             $response_data = json_decode(wp_remote_retrieve_body($response));
-
-            // DIAG - Diagnostics
 
             // Check for API-specific errors
             if (isset($response_data->error)) {
@@ -510,8 +490,6 @@ function kchat_fetch_api_status($api_key, $model) {
             // Encode the body
             $body = json_encode($body);
 
-            // DIAG - Diagnostics
-
             // Call the API
             $response = wp_remote_post($api_url, array(
                 'headers' => $headers,
@@ -521,7 +499,6 @@ function kchat_fetch_api_status($api_key, $model) {
 
             // Handle WP Error
             if (is_wp_error($response)) {
-                // DIAG - Diagnostics
                 $updated_status = 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your Mistral account for additional information.';
                 update_option('chatbot_mistral_api_status', $updated_status);
                 return $updated_status;
@@ -530,8 +507,6 @@ function kchat_fetch_api_status($api_key, $model) {
             // Check HTTP response code
             $response_code = wp_remote_retrieve_response_code($response);
             $response_body_raw = wp_remote_retrieve_body($response);
-
-            // DIAG - Diagnostics - Log raw response for debugging
 
             // Check for HTTP errors
             if ($response_code >= 400) {
@@ -561,8 +536,6 @@ function kchat_fetch_api_status($api_key, $model) {
                 update_option('chatbot_mistral_api_status', $updated_status);
                 return $updated_status;
             }
-
-            // DIAG - Diagnostics
 
             // Check for API-specific errors (Mistral uses 'object' => 'error' format or 'error' key)
             if (isset($response_data['object']) && $response_data['object'] === 'error') {
@@ -641,8 +614,6 @@ function kchat_fetch_api_status($api_key, $model) {
             // Encode the body
             $body = json_encode($body);
 
-            // DIAG - Diagnostics
-
             // Call the API
             $response = wp_remote_post($api_url, array(
                 'headers' => $headers,
@@ -652,14 +623,11 @@ function kchat_fetch_api_status($api_key, $model) {
 
             // Handle WP Error
             if (is_wp_error($response)) {
-                // DIAG - Diagnostics
                 return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your Google account for additional information.';
             }
 
             // Retrieve and Decode Response
             $response_data = json_decode(wp_remote_retrieve_body($response), true);
-
-            // DIAG - Diagnostics
 
             // Check for API-specific errors
             if (isset($response_data['error'])) {
@@ -721,7 +689,6 @@ function kchat_fetch_api_status($api_key, $model) {
 
             // Retrieve model settings
             $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
-            // DIAG - Diagnostics
             $max_tokens = intval(get_option('chatbot_local_max_tokens_setting', 1000));
             $temperature = floatval(get_option('chatbot_local_temperature', 0.8));
             $top_p = floatval(get_option('chatbot_local_top_p', 0.95));
@@ -785,15 +752,11 @@ function kchat_fetch_api_status($api_key, $model) {
                 'data_format' => 'body',
             );
 
-            // DIAG - Diagnostics
-
             // Send request
             $response = wp_remote_post($api_url, $args);
 
             // Get the response body
             $response_data = json_decode(wp_remote_retrieve_body($response));
-
-            // DIAG - Diagnostics
 
             // Handle request errors
             if (is_wp_error($response)) {
@@ -864,11 +827,8 @@ function chatgpt_option_updated($option_name, $old_value, $new_value) {
         return;
     }
 
-    // DIAG - Log Function Call
-
     // FIXME Retrieve the current value of the chatbot_chatgpt_api_status option
     $chatbot_chatgpt_api_status = esc_attr(get_option('chatbot_chatgpt_api_status', 'NOT SET'));
-    // DIAG - Log the current value of the chatbot_chatgpt_api_status option
     
     // Check if the option updated is related to your plugin settings
     // if ($option_name === 'chatbot_chatgpt_model_choice' || $option_name === 'chatbot_chatgpt_api_key' || empty($chatbot_chatgpt_api_status)) {
@@ -879,7 +839,6 @@ function chatgpt_option_updated($option_name, $old_value, $new_value) {
 
         // Call your test function
         $test_result = kchat_test_api_status($api_key);
-        // DIAG - Log the test result
 
         // DIAG - Set the option in the admin_notice function uses to display messages
         update_option('chatbot_chatgpt_api_status', $test_result);

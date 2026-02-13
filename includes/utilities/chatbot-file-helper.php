@@ -44,10 +44,11 @@ function chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version = 'ass
     // Add the non-images files to the data payload
     if ( !empty($file_id) && is_array($file_id) && !empty($file_id[0]) ) {
         
-        // DEBUG: Log what files are being sent to the API
-        back_trace('ERROR', 'Sending files to OpenAI API');
-        back_trace('ERROR', 'File count: ' . count($file_id));
-        back_trace('ERROR', 'Files: ' . print_r($file_id, true));
+        // DIAG - Diagnostics - Ver 2.4.5
+        // back_trace('ERROR', 'Sending files to OpenAI API');
+        // back_trace('ERROR', 'File count: ' . count($file_id));
+        // back_trace('ERROR', 'Files: ' . print_r($file_id, true));
+
         if ( $beta_version == 'assistants=v0') {
             // assistants=v2 - Ver 1.9.6 - 2024 04 24
             $data = $data + [
@@ -91,8 +92,6 @@ function chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version = 'ass
             }
         }
     }
-
-    // DIAG - Diagnostics
 
     return $data;
 

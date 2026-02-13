@@ -29,7 +29,7 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
     
     global $errorResponses;
 
-    // DIAG - Diagnostics - Ver 2.4.4
+    // DIAG - Diagnostics - Ver 2.4.5
     // back_trace("NOTICE", "Starting NVIDIA API call");
     // back_trace("NOTICE", "Message: " . $message);
     // back_trace("NOTICE", "User ID: " . $user_id);
@@ -48,20 +48,15 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
     // Check for duplicate message UUID in conversation log
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
-        // DIAG - Diagnostics - Ver 2.3.4
         return "Error: Duplicate request detected. Please try again.";
     }
 
     // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
-    // DIAG - Diagnostics - Ver 1.8.6
-
     // The current NVIDIA API URL endpoint for chat completions
     // $api_url = 'https://integrate.api.nvidia.com/v1';
     $api_url = get_chat_completions_api_url();
-
-    // DIAG - Diagnostics - Ver 2.1.8
 
     $headers = array(
         'Authorization' => 'Bearer ' . $api_key,
@@ -127,7 +122,6 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
                 $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts) . ' ' . $context;
             }
         }
-        // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
 
     } else {
 
@@ -181,15 +175,11 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
         'messages' => $messages,
     );
 
-    // DIAG - Diagnostics - Ver 2.1.8
-
     // FIXME - Allow for file uploads here
     // $file = 'path/to/file';
 
     // Context History - Ver 1.6.1
     addEntry('chatbot_chatgpt_context_history', $message);
-
-    // DIAG Diagnostics - Ver 1.6.1
 
     $chatbot_nvidia_timeout = intval(esc_attr(get_option('chatbot_nvidia_timeout_setting', '50')));
 
@@ -201,11 +191,7 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
         'timeout' => $chatbot_nvidia_timeout, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
         );
 
-    // DIAG - Diagnostics - Ver 2.1.8
-    
     $response = wp_remote_post($api_url, $args);
-
-    // DIAG - Diagnostics - Ver 2.1.8
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
@@ -237,7 +223,7 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
                 $user_message = 'NVIDIA API error: ' . $error_message;
             }
             
-            // DIAG - Diagnostics
+            // DIAG - Diagnostics - Ver 2.4.5
             prod_trace('ERROR', 'NVIDIA API Error (HTTP ' . $response_code . '): ' . $error_type . ' - ' . $error_message);
             
             // Clear locks on error
@@ -247,7 +233,7 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
             // Fallback for non-JSON error responses
             $error_message = 'HTTP ' . $response_code . ' Error: ' . $error_body;
             
-            // DIAG - Diagnostics
+            // DIAG - Diagnostics - Ver 2.4.5
             prod_trace('ERROR', 'NVIDIA API Error: ' . $error_message);
             
             // Clear locks on error
@@ -255,8 +241,6 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
             return 'NVIDIA API error occurred. Please check Settings for a valid API key or your NVIDIA account for additional information.';
         }
     }
-
-    // DIAG - Diagnostics - Ver 1.8.6
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
@@ -266,7 +250,7 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
         $error_message = $response_body['error']['message'] ?? 'Unknown error';
         $error_type = $response_body['error']['type'] ?? 'unknown';
         
-        // DIAG - Diagnostics
+        // DIAG - Diagnostics - Ver 2.4.5
         prod_trace('ERROR', 'NVIDIA API Error: ' . $error_type . ' - ' . $error_message);
         
         // Clear locks on error
@@ -290,8 +274,6 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
         }
     }
 
-    // DIAG - Diagnostics - Ver 1.8.1
-
     // Get the user ID and page ID
     if (empty($user_id)) {
         $user_id = get_current_user_id(); // Get current user ID
@@ -304,11 +286,6 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
             $page_id = get_the_ID(); // Get the ID of the queried object if $page_id is not set
         }
     }
-
-    // DIAG - Diagnostics - Ver 1.8.6
-
-    // DIAG - Diagnostics - Ver 1.8.1
-    // FIXME - ADD THE USAGE TO CONVERSATION TRACKER
 
     // Add the usage to the conversation tracker
     if ($response_code == 200 && isset($response_body['usage'])) {
@@ -327,23 +304,28 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
         }
     }
     
-    // Debug: Log response structure if no content found
+    // Log response structure if no content found
     if (!isset($response_body['choices']) || !isset($response_body['choices'][0])) {
+
+        // DIAG - Diagnostics - Ver 2.4.5
         prod_trace('WARNING', 'NVIDIA API response structure unexpected. Response code: ' . $response_code . ', Response: ' . print_r($response_body, true));
+    
     }
     
     if (!empty($response_body['choices']) && isset($response_body['choices'][0]['message']['content'])) {
+
         // Handle the response from the chat engine
         $response_text = $response_body['choices'][0]['message']['content'];
         
         // Context History - Ver 1.6.1
         addEntry('chatbot_chatgpt_context_history', $response_text);
-        // Clear locks on success
-        // Lock clearing removed - main send function handles locking
+
+        // Return the response text
         return $response_text;
     
     } else {
-        // Log the issue for debugging
+
+        // DIAG - Diagnostics - Ver 2.4.5
         prod_trace('WARNING', 'No valid response text found in NVIDIA API response. Response code: ' . $response_code . ', Response: ' . print_r($response_body, true));
         
         // FIXME - Decide what to return here - it's an error
@@ -352,10 +334,10 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
         } else {
             $localized_errorResponses = $errorResponses;
         }
-        // Clear locks on error
-        // Lock clearing removed - main send function handles locking
+
         // Return a random error message
         return $localized_errorResponses[array_rand($localized_errorResponses)];
+
     }
     
 }

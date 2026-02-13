@@ -13,6 +13,33 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+// Debug helper for file upload to OpenAI
+function chatbot_file_upload_debug_log( $endpoint, $status, $body, $payload_keys, $file_path, $filesize, $mime ) {
+
+    if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG || ! function_exists( 'back_trace' ) ) {
+        return;
+    }
+
+    $safe_keys = $payload_keys;
+
+    if ( isset( $safe_keys['file'] ) && $safe_keys['file'] instanceof \CURLFile ) {
+        $safe_keys['file'] = '[CURLFile: ' . basename( $safe_keys['file']->getFilename() ) . ', mime=' . $safe_keys['file']->getMimeType() . ']';
+    }
+
+    // back_trace( 'NOTICE', sprintf(
+    //     'OpenAI file upload: endpoint=%s, status=%s, body_length=%d, payload_keys=%s, file_path=%s, filesize=%d, mime=%s',
+    //     $endpoint,
+    //     (string) $status,
+    //     strlen( $body ),
+    //     wp_json_encode( $safe_keys ),
+    //     $file_path,
+    //     (int) $filesize,
+    //     $mime
+    // ) );
+    // back_trace( 'NOTICE', 'OpenAI file upload response body (first 500 chars): ' . substr( $body, 0, 500 ) );
+
+}
+
 // Upload Multiple files to the Assistant
 function chatbot_chatgpt_upload_files() {
 
@@ -50,8 +77,6 @@ function chatbot_chatgpt_upload_files() {
     global $chatbot_chatgpt_plugin_dir_path;
 
     $uploads_dir = $chatbot_chatgpt_plugin_dir_path . 'uploads/';
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     // Ensure the directory exists or attempt to create it
     if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
@@ -178,154 +203,193 @@ function chatbot_chatgpt_upload_files() {
 
             // Determine file type
             $file_mime_type = mime_content_type($file_path);
-            $purpose = (strpos($file_mime_type, 'image/') === 0) ? 'vision' : 'assistants';
+            $purpose = 'assistants';
+
+            // Pre-checks before calling OpenAI: file must exist and have size
+            if ( ! file_exists( $file_path ) || filesize( $file_path ) <= 0 ) {
+                $responses[] = [
+                    'status'  => 'error',
+                    'message' => 'Upload failed: file is missing or empty.',
+                ];
+                $error_flag = true;
+                if ( file_exists( $file_path ) ) {
+                    unlink( $file_path );
+                }
+                continue;
+            }
+            $file_size = filesize( $file_path );
+            $filename  = basename( $file_path );
 
             // Prepare API request
             $api_url = get_files_api_url();
-
-            // DIAG - Diagnostics - Ver 2.2.6
 
             // Which API key to use?
             $ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice'), 'OpenAI');
             if ($ai_platform_choice == 'OpenAI') {
                 $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
-                // Decrypt the API key - Ver 2.2.6
                 $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             } elseif ($ai_platform_choice == 'Azure OpenAI') {
                 $api_key = esc_attr(get_option('chatbot_azure_api_key'));
-                // Decrypt the API key - Ver 2.2.6
                 $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             } elseif ($ai_platform_choice == 'NVIDIA') {
                 $api_key = esc_attr(get_option('chatbot_nvidia_api_key'));
-                // Decrypt the API key - Ver 2.2.6
                 $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             } elseif ($ai_platform_choice == 'Anthropic') {
                 $api_key = esc_attr(get_option('chatbot_anthropic_api_key'));
-                // Decrypt the API key - Ver 2.2.6
                 $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             } elseif ($ai_platform_choice == 'DeepSeek') {
                 $api_key = esc_attr(get_option('chatbot_deepseek_api_key'));
-                // Decrypt the API key - Ver 2.2.6
                 $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             } elseif ($ai_platform_choice == 'Google') {
                 $api_key = esc_attr(get_option('chatbot_google_api_key'));
-                // Decrypt the API key - Ver 2.3.9
                 $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             } elseif ($ai_platform_choice == 'Local Server') {
                 $api_key = esc_attr(get_option('chatbot_local_api_key'));
-                // Decrypt the API key - Ver 2.2.6
                 $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             }
 
-            // Open file in a way that works with WP HTTP API
-            $filename = basename($file_path);
-            $file_mime_type = mime_content_type($file_path);
-            $file_data = file_get_contents($file_path);
+            // Build multipart with CURLFile so the API reliably receives the 'file' field (wp_remote_post + raw body can fail for some file types)
+            $post_fields = [
+                'purpose' => $purpose,
+                'file'   => new \CURLFile( $file_path, $file_mime_type, $filename ),
+            ];
+            $payload_keys_log = [ 'purpose' => $purpose, 'file' => $post_fields['file'] ];
 
-            $boundary = wp_generate_password(24); // Generate a unique boundary for multipart encoding
+            $http_status = 0;
+            $response_body = '';
 
-            // Construct multipart body manually
-            $body = "--{$boundary}\r\n";
-            $body .= "Content-Disposition: form-data; name=\"purpose\"\r\n\r\n";
-            $body .= "{$purpose}\r\n";
-            $body .= "--{$boundary}\r\n";
-            $body .= "Content-Disposition: form-data; name=\"file\"; filename=\"{$filename}\"\r\n";
-            $body .= "Content-Type: {$file_mime_type}\r\n\r\n";
-            $body .= $file_data . "\r\n";
-            $body .= "--{$boundary}--\r\n";
-
-            // Set up HTTP request arguments
-            if ($ai_platform_choice == 'OpenAI') {
-                $args = [
-                    'method'    => 'POST',
-                    'headers'   => [
-                        'Authorization'  => 'Bearer ' . trim($api_key),
-                        'Content-Type'   => 'multipart/form-data; boundary=' . $boundary
-                    ],
-                    'body'      => $body,
-                    'timeout'   => 30,
+            if ( $ai_platform_choice === 'OpenAI' || $ai_platform_choice === 'Azure OpenAI' ) {
+                if ( ! function_exists( 'curl_init' ) ) {
+                    $responses[] = [
+                        'status'  => 'error',
+                        'message' => 'Upload failed: server does not support cURL.',
+                    ];
+                    $error_flag = true;
+                    unlink( $file_path );
+                    continue;
+                }
+                $ch = curl_init( $api_url );
+                if ( $ch === false ) {
+                    $responses[] = [ 'status' => 'error', 'message' => 'Upload failed: could not initialize request.' ];
+                    $error_flag = true;
+                    unlink( $file_path );
+                    continue;
+                }
+                $headers = [
+                    'Authorization: Bearer ' . trim( $api_key ),
                 ];
-            } elseif ($ai_platform_choice == 'Azure OpenAI') {
-                $args = [
-                    'method'  => 'POST',
-                    'headers' => [
-                        'api-key'      => trim($api_key),
-                        'Content-Type' => 'multipart/form-data; boundary=' . $boundary
-                    ],
-                    'body'    => $body,
-                    'timeout' => 30,
-                ];
+                if ( $ai_platform_choice === 'Azure OpenAI' ) {
+                    $headers = [ 'api-key: ' . trim( $api_key ) ];
+                }
+                curl_setopt_array( $ch, [
+                    CURLOPT_POST            => true,
+                    CURLOPT_POSTFIELDS      => $post_fields,
+                    CURLOPT_HTTPHEADER     => $headers,
+                    CURLOPT_TIMEOUT        => 30,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_HEADER         => false,
+                ] );
+                $response_body = (string) curl_exec( $ch );
+                $http_status   = (int) curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+                $curl_err      = curl_error( $ch );
+                curl_close( $ch );
+                if ( $response_body === false && $curl_err !== '' ) {
+                    $response_body = '';
+                    $responses[] = [
+                        'status'  => 'error',
+                        'message' => 'API Error: ' . $curl_err,
+                    ];
+                    $error_flag = true;
+                    unlink( $file_path );
+                    chatbot_file_upload_debug_log( $api_url, 0, $response_body, $payload_keys_log, $file_path, $file_size, $file_mime_type );
+                    continue;
+                }
             } else {
-                return 'Error: Unsupported AI platform for file uploads.';
-            }
-
-            // Send request using WP HTTP API
-            $response = wp_remote_post($api_url, $args);
-
-            // Check for errors
-            if (is_wp_error($response)) {
                 $responses[] = [
-                    'status' => 'error',
-                    'message' => 'API Error: ' . $response->get_error_message()
+                    'status'  => 'error',
+                    'message' => 'Unsupported AI platform for file uploads.',
                 ];
                 $error_flag = true;
-                unlink($file_path); // Cleanup file
+                unlink( $file_path );
                 continue;
             }
 
-            $http_status = wp_remote_retrieve_response_code($response);
-            $response_body = wp_remote_retrieve_body($response);
-            $responseData = json_decode($response_body, true);
+            chatbot_file_upload_debug_log( $api_url, $http_status, $response_body, $payload_keys_log, $file_path, $file_size, $file_mime_type );
 
-            // DIAG - Diagnostics - Ver 2.2.6
+            $responseData = json_decode( $response_body, true );
 
-            // Handle API errors
-            if ($http_status != 200 || isset($responseData['error'])) {
-                $errorMessage = $responseData['error']['message'] ?? 'Unknown error occurred.';
+            // Success only when HTTP 200 AND response has id matching OpenAI file id pattern
+            $file_id = isset( $responseData['id'] ) ? $responseData['id'] : '';
+            $is_success = ( $http_status === 200 && is_string( $file_id ) && preg_match( '/^file-/', $file_id ) && ! isset( $responseData['error'] ) );
+
+            if ( ! $is_success ) {
+                $api_message = isset( $responseData['error']['message'] ) ? $responseData['error']['message'] : 'Unknown error occurred.';
+                if ( is_string( $api_message ) && strpos( $api_message, "'file' is a required" ) !== false ) {
+                    $errorMessage = __( 'Upload failed: OpenAI did not receive a file.', 'chatbot-chatgpt' );
+                } else {
+                    $errorMessage = $api_message;
+                }
                 $responses[] = [
-                    'status' => 'error',
+                    'status'      => 'error',
                     'http_status' => $http_status,
-                    'message' => $errorMessage
+                    'message'     => $errorMessage,
                 ];
-                unlink($file_path); // Cleanup file
-                // DIAG - Diagnostics - Ver 2.2.6
+                $error_flag = true;
+                unlink( $file_path );
                 continue;
             }
 
             // Store API response
-            set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $responseData['id'], $session_id, $i);
-            set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $purpose, $session_id, $i);
-            
-            // Clean up old transient keys to prevent conflicts
-            chatbot_chatgpt_cleanup_old_file_transients($session_id);
+            set_chatbot_chatgpt_transients_files( 'chatbot_chatgpt_assistant_file_ids', $responseData['id'], $session_id, $i );
+            set_chatbot_chatgpt_transients_files( 'chatbot_chatgpt_assistant_file_types', $purpose, $session_id, $i );
+            // Cache text-like file content for Responses API (OpenAI does not allow GET /files/{id}/content for purpose=assistants).
+            $ext = strtolower( pathinfo( $_FILES['file']['name'][ $i ], PATHINFO_EXTENSION ) );
+            $text_exts = array( 'txt', 'md', 'csv', 'json', 'xml' );
+            $is_text_like = in_array( $ext, $text_exts, true )
+                || strpos( $file_mime_type, 'text/' ) === 0
+                || $file_mime_type === 'application/json'
+                || $file_mime_type === 'application/xml';
+            if ( $is_text_like ) {
+                $content = file_get_contents( $file_path );
+                $content = is_string( $content ) ? substr( $content, 0, 20000 ) : '';
+                set_chatbot_chatgpt_transients_files( 'chatbot_chatgpt_assistant_file_text', $content, $session_id, $i );
+            }
+            chatbot_chatgpt_cleanup_old_file_transients( $session_id );
 
             $responses[] = [
-                'status' => 'success',
+                'status'      => 'success',
                 'http_status' => $http_status,
-                'id' => $responseData['id'],
-                'message' => 'File ' . $newFileName . ' uploaded successfully.'
+                'id'         => $responseData['id'],
+                'message'    => 'File ' . $newFileName . ' uploaded successfully.',
             ];
+            unlink( $file_path );
 
-            // Delete file after successful upload
-            unlink($file_path);
         }
 
-        // DIAG = Diagnostics - Ver 2.2.6
-
-        return $responses;
+        // Send JSON so the client can show per-file success/error (do not just return; AJAX handler must output)
+        $has_errors = false;
+        foreach ( $responses as $r ) {
+            if ( isset( $r['status'] ) && $r['status'] === 'error' ) {
+                $has_errors = true;
+                break;
+            }
+        }
+        if ( $has_errors ) {
+            wp_send_json_error( $responses );
+        } else {
+            wp_send_json_success( $responses );
+        }
+        return;
 
     } else {
 
         global $chatbot_chatgpt_fixed_literal_messages;
-        // Define a default fallback message
         $default_message = 'Oops! Please select a file to upload.';
         $error_message = isset($chatbot_chatgpt_fixed_literal_messages[5]) 
             ? $chatbot_chatgpt_fixed_literal_messages[5] 
             : $default_message;
-        return array(
-            'status' => 'error',
-            'message' => $error_message
-        );
+        wp_send_json_error( array( 'status' => 'error', 'message' => $error_message ) );
+        return;
 
     }
 
@@ -345,8 +409,6 @@ function upload_file_in_chunks($file_path, $api_key, $file_name, $file_type) {
 
     // Get the API URL
     $url = get_files_api_url();
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     $chunk_number = 0;
     $total_chunks = ceil($file_size / $chunk_size);
@@ -490,8 +552,6 @@ function chatbot_chatgpt_upload_mp3() {
             $newFileName = generate_random_string() . '.' . pathinfo($_FILES['file']['name'][$i], PATHINFO_EXTENSION);
             $file_path = $uploads_dir . $newFileName;
 
-            // DIAG - Diagnostics - Ver 2.0.1
-
             if ($_FILES['file']['error'][$i] > 0) {
                 global $chatbot_chatgpt_fixed_literal_messages;
                 // Define a default fallback message
@@ -555,7 +615,6 @@ function chatbot_chatgpt_upload_mp3() {
         }
 
         // Save the file name for later
-        // DIAG - Diagnostics - Ver 2.0.1
         set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $newFileName, $session_id, $i);
         set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', 'mp3', $session_id, $i);
         $responses[] = array(
@@ -615,7 +674,7 @@ function create_index_file($directory) {
     if (!is_dir($directory)) {
         if (!mkdir($directory, 0755, true)) {
             // If the directory could not be created, log an error and exit the function
-            back_trace('ERROR', 'Failed to create directory: ' . $directory);
+            prod_trace('ERROR', 'Failed to create directory: ' . $directory);
             return;
         }
     }
@@ -634,16 +693,13 @@ function create_index_file($directory) {
             fclose($file);
         } else {
             // Handle the error
-            back_trace('ERROR', 'Failed to create index.php file in directory: ' . $directory);
+            prod_trace('ERROR', 'Failed to create index.php file in directory: ' . $directory);
         }
     }
 }
 
 // File type validation - Ver 2.0.1
 function upload_validation($file) {
-
-
-    // DIAG - Diagnostics - Ver 2.0.7
 
     // Get the file type from the file name.
     $file_type = wp_check_filetype($file['name']);

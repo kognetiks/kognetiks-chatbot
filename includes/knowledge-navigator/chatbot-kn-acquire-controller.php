@@ -49,8 +49,6 @@ function chatbot_kn_acquire_controller() {
     // Get the current action
     $action = esc_attr( get_option( 'chatbot_chatgpt_kn_action', 'initialize' ) ); // Default to run to kick off the process
 
-    // DIAG - Diagnostics - Ver 1.9.6
-
     switch ( $action ) {
         case 'initialize':
             // Initialize the knowledge acquisition process
@@ -107,8 +105,6 @@ function chatbot_kn_initialization() {
 
     global $wpdb;
 
-    // DIAG - Diagnostics - Ver 1.9.6
-
     // Since this is the first step, set the item count = 0
     update_option( 'chatbot_chatgpt_kn_item_count', 0 );
 
@@ -148,8 +144,6 @@ function chatbot_kn_initialization() {
 function chatbot_kn_reinitialization() {
 
     global $wpdb;
-
-    // DIAG - Diagnostics - Ver 1.9.6
 
     // Initialize the $topWords array
     $topWords = [];
@@ -324,15 +318,11 @@ function chatbot_kn_run_phase_3() {
 
     global $wpdb;
 
-    // DIAG - Diagnostics - Ver 1.9.6
-
     // Get the item count
     $offset = esc_attr(get_option('chatbot_chatgpt_kn_item_count', 0)); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 50
     $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 50)); // Fetching 50 items at a time
     $chatbot_chatgpt_no_of_items_analyzed = esc_attr(get_option('chatbot_chatgpt_no_of_items_analyzed', 0));
-
-    // DIAG - Diagnostics - Ver 1.9.6
 
     // Set the next starting point
     update_option( 'chatbot_chatgpt_kn_item_count', $offset + $batch_size );
@@ -352,12 +342,8 @@ function chatbot_kn_run_phase_3() {
     
         // Execute the query and fetch results
         $results = $wpdb->get_results($prepared_query, ARRAY_A);
-    
-        // DIAG - Diagnostics - Ver 1.9.6
 
     } else {
-
-        // DIAG - Diagnostics - Ver 1.9.6
 
         unset($results);
 
@@ -370,7 +356,6 @@ function chatbot_kn_run_phase_3() {
 
     // If the $results = false, then there are no more items to process
     if ( empty($results) ) {
-        // DIAG - Diagnostics - Ver 1.9.6
         update_option( 'chatbot_chatgpt_kn_action', 'phase 4' );
         // Schedule the next action
         wp_schedule_single_event( time() + 30, 'chatbot_kn_acquire_controller' );
@@ -380,11 +365,7 @@ function chatbot_kn_run_phase_3() {
     // Process the results
 
     // Loop through query results
-    foreach ($results as $result) {
-
-        // DIAG - Diagnostics - Ver 1.6.3
-        // foreach($result as $key => $value) {
-        // }        
+    foreach ($results as $result) {  
 
         // Directly use the post content
         if (array_key_exists('comment_content', $result)) {
@@ -392,7 +373,6 @@ function chatbot_kn_run_phase_3() {
         } else {
             // Handle the case where the key does not exist
             $commentContent = "";
-            // DIAG - Diagnostics - Ver 1.9.6
             continue;
         }
        
@@ -435,6 +415,7 @@ function chatbot_kn_run_phase_3() {
 
 // Phase 4 - Compute the TF-IDF
 function chatbot_kn_run_phase_4() {
+
     global $wpdb;
 
     // Maximum number of top words
@@ -443,8 +424,6 @@ function chatbot_kn_run_phase_4() {
     // Get total document count and word count
     $totalDocumentCount = esc_attr(get_option('chatbot_chatgpt_kn_document_count', 0));
     $totalWordCount = esc_attr(get_option('chatbot_chatgpt_kn_total_word_count', 0));
-
-    // Debug log the values
 
     if ($totalDocumentCount == 0 || $totalWordCount == 0) {
         return;
@@ -455,10 +434,9 @@ function chatbot_kn_run_phase_4() {
         "SELECT word, word_count, document_count FROM {$wpdb->prefix}chatbot_chatgpt_knowledge_base_word_count 
         ORDER BY document_count DESC LIMIT $max_top_words"
     );
-
-    // Debug log the first few results
     
     foreach ($results as $result) {
+
         $word = $result->word;
         $wordCount = $result->word_count;
         $documentCount = $result->document_count;
@@ -474,8 +452,6 @@ function chatbot_kn_run_phase_4() {
         // Calculate TF-IDF
         $tfidf = $tf * $idf;
 
-        // Debug log the calculations
-
         // Store the TF-IDF in the chatbot_chatgpt_knowledge_base_tfidf table
         $wpdb->insert(
             $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf',
@@ -485,6 +461,7 @@ function chatbot_kn_run_phase_4() {
             ),
             array('%s', '%f')
         );
+
     }
     
     // Unset large variables to free memory
@@ -496,8 +473,6 @@ function chatbot_kn_run_phase_4() {
 
 // Phase 5 - Reinitialize the batch acquisition for pages, posts, and products
 function chatbot_kn_run_phase_5() {
-
-    // DIAG - Diagnostics - Ver 1.9.6
 
     // REINITIALIZE THE BATCH ACQUISITION
 
@@ -521,14 +496,10 @@ function chatbot_kn_run_phase_6() {
 
     global $wpdb;
 
-    // DIAG - Diagnostics - Ver 1.9.6
-
     // Get the item count
     $offset = esc_attr(get_option('chatbot_chatgpt_kn_item_count', 0));
     $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 50));
     $chatbot_chatgpt_no_of_items_analyzed = esc_attr(get_option('chatbot_chatgpt_no_of_items_analyzed', 0));
-
-    // DIAG - Diagnostics - Ver 1.9.6
 
     // Set the next starting point
     update_option( 'chatbot_chatgpt_kn_item_count', $offset + $batch_size );
@@ -566,8 +537,6 @@ function chatbot_kn_run_phase_6() {
         }
     }
 
-    // DIAG - Diagnostics - Ver 2.2.6
-
     // If no post types are selected, move to phase 7
     if (empty($post_types)) {
         update_option('chatbot_chatgpt_kn_action', 'phase 7');
@@ -584,16 +553,12 @@ function chatbot_kn_run_phase_6() {
         array_merge($post_types, [$batch_size, $offset])
     );
 
-    // DIAG - Diagnostics - Ver 1.9.6
-
     // Get the published items
     $results = $wpdb->get_results($prepared_query);
 
     // If the $results = false, then there are no more items to process
     if ( empty($results) ) {
-        // DIAG - Diagnostics - Ver 1.9.6
         update_option( 'chatbot_chatgpt_kn_action', 'phase 7' );
-
         // Schedule the next action
         wp_schedule_single_event( time() + 30, 'chatbot_kn_acquire_controller' );
         return;
@@ -602,10 +567,7 @@ function chatbot_kn_run_phase_6() {
     // Process the results
 
     // Loop through query results
-    foreach ($results as $result) {
-        // DIAG - Diagnostics - Ver 1.6.3
-        // foreach($result as $key => $value) {
-        // }        
+    foreach ($results as $result) {     
 
         // Directly use the post content
         $Content = $result->post_content;
@@ -714,8 +676,6 @@ function chatbot_kn_output_the_results() {
         // Error handling, e.g., log the error or handle the failure appropriately
         return;
     }
-
-    // DIAG - Log directory path for debugging
 
     // Remove legacy files
     if (file_exists($results_dir_path . 'results-comments.log')) {
@@ -831,10 +791,7 @@ function chatbot_kn_output_the_results() {
 // Wrap up the knowledge acquisition process
 function chatbot_kn_wrap_up() {
 
-    // DIAG - Diagnostics - Ver 1.9.6
-
     // FIXME - Drop the chatbot_chatgpt_knowledge_base_word_count table
-    // DIAG - Diagnostics - Ver 1.9.6
     dbKNClean();
 
     // Save the results message value into the option

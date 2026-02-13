@@ -1,6 +1,6 @@
 jQuery(document).ready(function ($) {
 
-    // DIAG - Diagnostics - Ver 2.0.5
+    // DIAG - Diagnostics - Ver 2.4.5
     // console.log('Chatbot: NOTICE: greetings.js - ENTERING');
     // console.log('Chatbot: NOTICE: greetings.js - chatbot_chatgpt_initial_greeting: ' + localStorage.getItem('chatbot_chatgpt_initial_greeting'));
     // console.log('Chatbot: NOTICE: greetings.js - chatbot_chatgpt_subsequent_greeting: ' + localStorage.getItem('chatbot_chatgpt_subsequent_greeting'));
@@ -13,7 +13,7 @@ jQuery(document).ready(function ($) {
     //     console.error('Chatbot: ERROR: greetings_data is defined.');
     // }
 
-    // DIAG - Diagnostics - Ver 2.0.5
+    // DIAG - Diagnostics - Ver 2.4.5
     // console.log('Chatbot: NOTICE: greetings.js - EXITING');
     // console.log('Chatbot: NOTICE: greetings.js - chatbot_chatgpt_initial_greeting: ' + localStorage.getItem('chatbot_chatgpt_initial_greeting'));
     // console.log('Chatbot: NOTICE: greetings.js - chatbot_chatgpt_subsequent_greeting: ' + localStorage.getItem('chatbot_chatgpt_subsequent_greeting'));

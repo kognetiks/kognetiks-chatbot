@@ -67,7 +67,6 @@ function dismiss_chatgpt_notice() {
     }
     if (isset($_GET['dismiss_kn_status_notice'])) {
         update_option('chatbot_chatgpt_kn_dismissed', '1');
-        // DIAG - Diagnostics - Ver 2.0.4
     }
 }
 add_action('admin_init', 'dismiss_chatgpt_notice');

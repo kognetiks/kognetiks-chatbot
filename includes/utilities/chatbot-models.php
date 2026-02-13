@@ -135,8 +135,6 @@ function chatbot_openai_get_models() {
         });
     }
 
-    // DIAG - Diagnostics - Ver 2.0.2.1
-
     // Return the list of models
     return $models;
 
@@ -237,8 +235,6 @@ function chatbot_azure_get_models() {
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
     $azure_models_url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/models?api-version=' . $chatbot_azure_api_version;
 
-    // DIAG - Diagnostics - Ver 2.2.6
-
     // Set HTTP request arguments
     $args = array(
         'headers' => array(
@@ -260,8 +256,6 @@ function chatbot_azure_get_models() {
 
     // Decode the JSON response
     $data = json_decode(wp_remote_retrieve_body($response), true);
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     // Check for API errors
     if (isset($data['error'])) {
@@ -289,8 +283,6 @@ function chatbot_azure_get_models() {
             return $a['id'] <=> $b['id'];
         });
     }
-
-    // DIAG - Diagnostics - Ver 2.0.2.1
 
     // Return the list of models
     return $models;
@@ -393,8 +385,6 @@ function chatbot_nvidia_get_models() {
         });
     }
 
-    // DIAG - Diagnostics - Ver 2.0.2.1
-
     // Return the list of models
     return $models;
 
@@ -478,8 +468,6 @@ function chatbot_anthropic_get_models() {
         });
     }
 
-    // DIAG - Diagnostics
-
     // Return the list of models
     return $models;
 
@@ -487,8 +475,6 @@ function chatbot_anthropic_get_models() {
 
 // Function to get the Model names from DeepSeek API
 function chatbot_deepseek_get_models() {
-
-    // DIAG - Diagnostics
 
     $api_key = '';
 
@@ -530,8 +516,6 @@ function chatbot_deepseek_get_models() {
 
     // Perform the request
     $response = wp_remote_get($deepseek_models_url, $args);
-
-    // DIAG - Diagnostics
     
     // Check for errors in the response
     if (is_wp_error($response)) {
@@ -572,7 +556,6 @@ function chatbot_deepseek_get_models() {
 // Function to get the Model names from Mistral API
 function chatbot_mistral_get_models() {
 
-    // DIAG - Diagnostics
 
     $api_key = '';
 
@@ -621,8 +604,6 @@ function chatbot_mistral_get_models() {
     $body = wp_remote_retrieve_body($response);
     $data = json_decode($body, true);
 
-    // DIAG - Diagnostics
-
     // Check if the response is valid and contains data
     if (isset($data['data']) && is_array($data['data'])) {
         $default_model_list = array_map(function($model) {
@@ -652,8 +633,6 @@ function chatbot_mistral_get_models() {
 
 // Function to get the Model names from Google API
 function chatbot_google_get_models() {
-
-    // DIAG - Diagnostics
 
     $api_key = '';
 
@@ -740,8 +719,6 @@ function chatbot_google_get_models() {
     $body = wp_remote_retrieve_body($response);
     $data = json_decode($body, true);
 
-    // DIAG - Diagnostics
-
     // Check for API errors
     if (isset($data['error'])) {
         // return "Error: " . $data['error']['message'];
@@ -797,8 +774,6 @@ function chatbot_google_get_models() {
             return $a['id'] <=> $b['id'];
         });
     }
-
-    // DIAG - Diagnostics - Ver 2.3.9
 
     // Return the list of models
     return $models;
