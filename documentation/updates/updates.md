@@ -1,5 +1,10 @@
 # Past Updates
 
+## What's new in Version 2.4.6
+
+### Bug Fixes
+* **Uninstall**: Fixed uninstall process and version handling.
+
 ## What's new in Version 2.4.5
 
 ### New Features

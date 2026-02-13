@@ -6,6 +6,11 @@
 
 ---
 
+= 2.4.6 - Released 2026-02-13 =
+
+### Bug Fixes
+* **Uninstall**: Fixed uninstall process and version handling.
+
 = 2.4.5 - Released 2026-02-12 =
 
 ### New Features
