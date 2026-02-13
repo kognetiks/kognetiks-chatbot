@@ -415,9 +415,8 @@ if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
     chatbot_chatgpt_freemius()->add_action( 'after_premium_version_activation', function() {
         chatbot_chatgpt_load_insights_files();
     } );
-    // Uninstall/data cleanup is handled by uninstall.php (so vendor is not loaded during delete).
-    // Freemius after_uninstall no longer used for cleanup when user deletes via WP UI.
-    // chatbot_chatgpt_freemius()->add_action( 'after_uninstall', 'chatbot_chatgpt_uninstall' );
+    // Uninstall cleanup runs via Freemius after_uninstall so Freemius can report the event (and user feedback) first.
+    chatbot_chatgpt_freemius()->add_action( 'after_uninstall', 'chatbot_chatgpt_uninstall' );
 }
 
 // Include necessary files - Widgets - Ver 2.1.3
@@ -1050,7 +1049,7 @@ register_activation_hook(__FILE__, 'chatbot_chatgpt_activate');
 register_activation_hook(__FILE__, 'create_chatbot_chatgpt_assistants_table');
 register_activation_hook(__FILE__, 'create_chatbot_azure_assistants_table');
 register_deactivation_hook(__FILE__, 'chatbot_chatgpt_deactivate');
-// Uninstall handled by uninstall.php (so main plugin/vendor not loaded during delete).
+// Uninstall cleanup runs via Freemius after_uninstall (see Freemius block above).
 // register_uninstall_hook(__FILE__, 'chatbot_chatgpt_uninstall');
 add_action('upgrader_process_complete', 'chatbot_chatgpt_upgrade_completed', 10, 2);
 
