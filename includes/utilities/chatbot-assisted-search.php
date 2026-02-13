@@ -16,8 +16,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Add the REST API route for the assistant search
 add_action('rest_api_init', function () {
     
-    // DIAG - Diagnostics - Ver 2.2.7
-    
     register_rest_route('assistant/v1', '/search', [
         'methods'  => 'GET',
         'callback' => 'chatbot_assistant_search_handler',
@@ -75,20 +73,15 @@ function assistant_permission_callback( $request ) {
     );
     
     if ( ! $exists ) {
-        // DIAG - Diagnostics - Ver 2.2.7
         // return new WP_Error( 'invalid_assistant_id', __('Invalid Assistant ID'), array( 'status' => 403 ) );
         return new WP_Error( 'unauthorized', __('Unauthorized', 'chatbot-chatgpt'), array( 'status' => 403 ) );
     }
-    
-    // DIAG - Diagnostics - Ver 2.2.7
 
     return true;
 }
 
 // Handle the assistant search request
 function chatbot_assistant_search_handler($request) {
-
-    // DIAG - Diagnostics - Ver 2.2.7
     
     global $wpdb;
 

@@ -67,8 +67,6 @@ function chatbot_google_chat_model_choice_callback($args) {
     // Fetch models from the API
     $models = chatbot_google_get_models();
 
-    // DIAG - Ver 2.3.9
-
     // Limit the models to Google/Gemini models
     $models = array_filter($models, function($model) {
         return strpos($model['id'], 'gemini') !== false;

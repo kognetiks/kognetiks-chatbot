@@ -212,10 +212,7 @@ function store_top_words() {
 function output_results() {
 
     global $chatbot_chatgpt_plugin_dir_path;
-
     global $topWords;
-
-    // DIAG - Diagnostics - Ver 1.6.3
 
     // Generate the directory path
     $results_dir_path = $chatbot_chatgpt_plugin_dir_path . 'results/';

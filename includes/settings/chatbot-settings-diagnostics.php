@@ -175,7 +175,7 @@ function chatbot_chatgpt_diagnostics_system_settings_section_callback($args) {
     global $chatbot_chatgpt_plugin_version;
     global $chatbot_chatgpt_plugin_dir_path;
 
-    // DIAG - Diagnostics - Ver 2.3.9
+    // DIAG - Diagnostics - Ver 2.4.5
     // back_trace( 'NOTICE', '$chatbot_chatgpt_plugin_version: ' . $chatbot_chatgpt_plugin_version);
     // back_trace( 'NOTICE', '$chatbot_chatgpt_plugin_dir_path: ' . $chatbot_chatgpt_plugin_dir_path);
     
@@ -200,7 +200,7 @@ function chatbot_chatgpt_diagnostics_system_settings_section_callback($args) {
 
 }
 
-// Diagnostics settings section callback - Ver 1.6.5
+// Diagnostics settings section callback - Ver 2.4.5
 function chatbot_chatgpt_diagnostics_section_callback($args) {
     ?>
         <p>Choose your settings for Diagnostics, a Custom Error Message, Suppress Notices, Suppress Attribution, and Plugin Data retention settings.</p>
@@ -227,7 +227,7 @@ function chatbot_chatgpt_api_test_callback($args) {
 
 }
 
-// Diagnostics On/Off - Ver 1.6.5
+// Diagnostics On/Off - Ver 2.4.5
 function chatbot_chatgpt_diagnostics_setting_callback($args) {
     $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
     ?>

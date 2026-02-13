@@ -25,8 +25,6 @@ $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 25)
 // Knowledge Navigator Results
 function chatbot_chatgpt_kn_results_callback($run_scanner) {
 
-    // DIAG - Diagnostics - Ver 1.6.3
-
     // NUCLEAR OPTION - OVERRIDE VALUE TO NO
     // update_option('chatbot_chatgpt_kn_schedule', 'No');
     
@@ -41,13 +39,10 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
 
     if (in_array($run_scanner, ['Now', 'Hourly', 'Daily', 'Twice Daily', 'Weekly', 'Disable', 'Cancel'])) {
 
-        // DIAG - Diagnostics - Ver 1.6.3
-
         $chatbot_chatgpt_no_of_items_analyzed = 0;
         update_option('chatbot_chatgpt_no_of_items_analyzed', $chatbot_chatgpt_no_of_items_analyzed);
 
         // WP Cron Scheduler - VER 1.6.2
-
         wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); // Clear before rescheduling
 
         if ($run_scanner === 'Cancel') {
@@ -68,8 +63,6 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
                 
                 // RESET THE STATUS MESSAGE
                 update_option('chatbot_chatgpt_kn_status', 'In Process');
-
-                // Log action to debug.log
 
                 // IDEA WP Cron Scheduler - VER 1.6.2
                 // https://chat.openai.com/share/b1de5d84-966c-4f0f-b24d-329af3e55616
@@ -97,10 +90,8 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
                         wp_schedule_event($timestamp, $interval, $hook); // Schedule a recurring event for other intervals
                     }
                 }
-                
-                // DIAG - Log action to debug.log
-
-                // Log scan interval - Ver 1.6.3
+            
+                // Scan interval - Ver 1.6.3
                 if ($interval === 'Now') {
                     update_option('chatbot_chatgpt_scan_interval', 'No Schedule');
                 } else {
@@ -110,6 +101,7 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
                 // Reset before reloading the page
                 $run_scanner = 'No';
                 update_option('chatbot_chatgpt_kn_schedule', 'No');
+                
             }
         }
     }
@@ -187,8 +179,6 @@ function chatbot_chatgpt_kn_get_published_post_types() {
             $published_types[$type] = $label;
         }
     }
-    
-    // DIAG - Diagnostics - Ver 2.2.6
     
     return $published_types;
 

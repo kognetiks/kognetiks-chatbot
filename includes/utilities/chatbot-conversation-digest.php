@@ -23,8 +23,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Schedule conversation digest cron job - Ver 2.3.9
 function chatbot_chatgpt_schedule_conversation_digest() {
 
-    // DIAG - Diagnostics - Ver 2.3.9
-
     // Get the enabled setting
     $enabled = esc_attr(get_option('chatbot_chatgpt_conversation_digest_enabled', 'No'));
     
@@ -72,8 +70,6 @@ function chatbot_chatgpt_schedule_conversation_digest() {
 
 // Send conversation digest email - Ver 2.3.9
 function chatbot_chatgpt_send_conversation_digest() {
-
-    // DIAG - Diagnostics - Ver 2.3.9
 
     // Get the enabled setting
     $enabled = esc_attr(get_option('chatbot_chatgpt_conversation_digest_enabled', 'No'));

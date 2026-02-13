@@ -29,7 +29,7 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     
     global $errorResponses;
 
-    // DIAG - Diagnostics - Ver 2.4.4
+    // DIAG - Diagnostics - Ver 2.4.5
     // back_trace("NOTICE", "Starting Google API call");
     // back_trace("NOTICE", "Message: " . $message);
     // back_trace("NOTICE", "User ID: " . $user_id);
@@ -48,14 +48,11 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     // Check for duplicate message UUID in conversation log
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
-        // DIAG - Diagnostics - Ver 2.3.9
         return "Error: Duplicate request detected. Please try again.";
     }
 
     // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
-
-    // DIAG - Diagnostics - Ver 2.3.9
 
     // Google Generative AI API Documentation
     // https://ai.google.dev/gemini-api/docs
@@ -87,10 +84,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     // Detect Gemini version (2.0 or 3.0) for potential version-specific handling
     $is_gemini_3 = (stripos($model, 'gemini-3') !== false || stripos($model, 'gemini-3.0') !== false);
     $is_gemini_2 = (stripos($model, 'gemini-2') !== false || stripos($model, 'gemini-2.0') !== false);
-    
-    // DIAG - Diagnostics - Ver 2.3.9+
-
-    // DIAG - Diagnostics - Ver 2.3.9
 
     // Google API endpoint format: {base}/models/{model}:generateContent
     $api_url = $google_base_url . '/models/' . $model . ':generateContent';
@@ -158,8 +151,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
         $context = $truncated_context;
     }
 
-    // DIAG Diagnostics - Ver 2.3.9
-
     // Build the Google API request body
 
     // Define the header
@@ -209,7 +200,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     $user_message_parts = array();
 
     if (!empty($image_data) && is_array($image_data)) {
-        // DIAG - Diagnostics - Ver 2.3.9+
         
         $user_message_parts[] = array(
             'inlineData' => array(
@@ -217,6 +207,7 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
                 'data'     => $image_data['base64']
             )
         );
+
     }
 
     // Add text to the parts
@@ -270,7 +261,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     // The thinking level (Low/High) controls the depth of reasoning.
     // Note: API support for thinking level may vary between versions.
     if ($is_thinking_model) {
-        // DIAG - Diagnostics - Ver 2.3.9+
         
         // For thinking models, we can potentially add thinking-specific configuration
         // Gemini 2.0 and 3.0 thinking models may have different API support
@@ -291,14 +281,10 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
         // but the setting is stored for reference and potential future use
     }
 
-    // DIAG Diagnostics - Ver 2.3.9
-
     $timeout = intval(esc_attr(get_option('chatbot_google_timeout_setting', 240)));
 
     // Context History - Ver 2.3.9
     addEntry('chatbot_chatgpt_context_history', $message);
-
-    // DIAG Diagnostics - Ver 2.3.9
 
     // API Call
     $response = wp_remote_post($api_url, array(
@@ -310,7 +296,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     // Handle WP Error
     if (is_wp_error($response)) {
 
-        // DIAG - Diagnostics - Ver 2.3.9
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'API Connection Error: ' . $response->get_error_message();
@@ -326,14 +311,12 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
         // Extract error type and message safely
         $error_msg = $response_body['error']['message'] ?? 'Unknown API Error';
 
-        // DIAG - Diagnostics - Ver 2.3.9
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'Error: ' . $error_msg;
 
     }
 
-    // DIAG - Diagnostics - Ver 2.3.9
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -348,8 +331,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
         }
     }
 
-    // DIAG - Diagnostics - Ver 2.3.9
-
     // Add the usage to the conversation tracker
     // Google API may return usage information in different format
 
@@ -357,8 +338,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     $input_tokens = $response_body['usageMetadata']['promptTokenCount'] ?? 0;
     $output_tokens = $response_body['usageMetadata']['candidatesTokenCount'] ?? 0;
     $total_tokens = $response_body['usageMetadata']['totalTokenCount'] ?? 0;
-
-    // DIAG - Diagnostics - Ver 2.3.9
 
     // Log Tokens
     if (isset($response['response']['code']) && $response['response']['code'] == 200) {

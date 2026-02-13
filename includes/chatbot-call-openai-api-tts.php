@@ -33,7 +33,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     global $learningMessages;
     global $errorResponses;
 
-    // DIAG - Diagnostics - Ver 2.4.4
+    // DIAG - Diagnostics - Ver 2.4.5
     // back_trace("NOTICE", "Starting OpenAI TTS API call");
     // back_trace("NOTICE", "Message: " . $message);
     // back_trace("NOTICE", "User ID: " . $user_id);
@@ -52,14 +52,11 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     // Check for duplicate message UUID in conversation log
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
-        // DIAG - Diagnostics - Ver 2.3.4
         return "Error: Duplicate request detected. Please try again.";
     }
 
     // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
-
-    // DIAG - Diagnostics - Ver 1.8.6
 
     // Check for the API key
     if (empty($api_key) or $api_key == '[private]') {
@@ -103,10 +100,8 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     // One of tts-1, tts-1-1106, tts-1-hd, tts-1-hd-1106
     if ( !empty($kchat_settings['model']) ) {
         $model = $kchat_settings['model'];
-        // DIAG - Diagnostics - Ver 1.9.4
     } else {
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'tts-1-hd'));
-        // DIAG - Diagnostics - Ver 1.9.4
     }
 
     // Get the audio voice transient if it exists - Ver 1.9.5
@@ -116,14 +111,11 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     if ( !empty($voice) ) {
         $voice = $voice;
-        // DIAG - Diagnostics - Ver 1.9.5
     } elseif ( !empty($kchat_settings['voice'])) {
         $voice = $kchat_settings['voice'];
-        // DIAG - Diagnostics - Ver 1.9.5
     } else {
         // Get the voice option from the settings (default is alloy)
         $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
-        // DIAG - Diagnostics - Ver 1.9.5
     }
 
     // Belt and Suspender - Ver 1.9.5
@@ -135,8 +127,6 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
         $voice = 'alloy';
         update_option( 'chatbot_chatgpt_voice_option', 'alloy');
     }
-
-    // DIAG - Diagnostics - Ver 1.9.5
 
     // Build conversation context using standardized function - Ver 2.3.9+
     // Note: TTS API doesn't use conversation history in the API call itself,
@@ -210,8 +200,6 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     $audio_output = "<div><center><audio autoplay><source src='" . esc_url($audio_file_url) . "' type='audio/mpeg'></audio></center></div>";
     $audio_output .= "[Listen](" . esc_url($audio_file_url) . ")";
 
-    // DIAG - Diagnostics - Ver 1.6.7
-
     // Get the user ID and page ID
     if (empty($user_id)) {
         $user_id = get_current_user_id(); // Get current user ID
@@ -227,8 +215,6 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     if (!empty($audio_output)) {
 
-        // DIAG - Diagnostics - Ver 1.9.4
-
         // Add the usage to the conversation tracker
         // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $response_body["usage"]["prompt_tokens"]);
         // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, null, $response_body["usage"]["completion_tokens"]);
@@ -240,13 +226,12 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
         // Set transient to delete the audio file after 2 hours
         chatbot_chatgpt_delete_audio_file_id( $audio_file_url );
 
-        // DIAG - Diagnostics - Ver 1.9.5
-
         // Clear locks on success
         // Lock clearing removed - main send function handles locking
         return $audio_output;
 
     } else {
+
         // FIXME - Decide what to return here - it's an error
         if (get_locale() !== "en_US") {
             $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
@@ -257,6 +242,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
         // Lock clearing removed - main send function handles locking
         // Return a random error message
         return $localized_errorResponses[array_rand($localized_errorResponses)];
+
     }
 
 }
@@ -318,8 +304,6 @@ function chatbot_chatgpt_read_aloud($message) {
         $voice = esc_attr(get_option( 'chatbot_chatgpt_voice_option', 'alloy') );
     }
     $kchat_settings['voice'] = $voice;
-    
-    // DIAG - Diagnostics - Ver 2.0.6
 
     // Call the Text-to-Speech API
     $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice);
@@ -350,8 +334,6 @@ function chatbot_chatgpt_delete_audio_file_id( $file_id ) {
     global $thread_id;
     global $assistant_id;
 
-    // DIAG - Diagnostics - Ver 1.9.2
-
     // Set a transient that expires in 2 hours
     $timeFrameForDelete = time() + 2 * 60 * 60;
     set_transient('chatbot_chatgpt_delete_audio_file_' . $file_id, $file_id, $timeFrameForDelete);
@@ -375,8 +357,6 @@ function deleteAudioFile($file_id) {
     global $thread_id;
     global $assistant_id;
 
-    // DIAG - Diagnostics - Ver 1.9.2
-
     // Generate directory path
     $audio_dir_path = $chatbot_chatgpt_plugin_dir_path . 'audio/';
 
@@ -394,17 +374,13 @@ function deleteAudioFile($file_id) {
 
     // Check if the file exists
     if (!file_exists($file_id)) {
-        // DIAG - Diagnostics - Ver 1.9.9
         return;
     }
 
     // Try to delete the file
     if (!unlink($file_id)) {
-        // DIAG - Diagnostics - Ver 1.9.9
         return;
     }
-
-    // DIAG - Diagnostics - Ver 1.9.9
 
 }
 add_action( 'chatbot_chatgpt_delete_audio_file', 'deleteAudioFile' );

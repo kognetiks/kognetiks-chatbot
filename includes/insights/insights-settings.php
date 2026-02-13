@@ -16,8 +16,6 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Settings Page
 function kognetiks_insights_settings_page() {
-    
-    // DIAG - Diagnostics
 
     // Determine active tab
     $active_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'insights';
@@ -125,7 +123,6 @@ function kognetiks_insights_settings_page() {
             $selected_scoring_control = isset($_POST['kognetiks_insights_scoring_control']) ? sanitize_text_field(wp_unslash($_POST['kognetiks_insights_scoring_control'])) : 'Manual';
             // Update the option in the database
             kognetiks_insights_set_scoring_control_mode($selected_scoring_control);
-            // DIAG - Diagnostics
         } else {
             // Get the current scoring control mode from the database
             $selected_scoring_control = kognetiks_insights_get_scoring_control_mode();
@@ -712,8 +709,6 @@ function kognetiks_insights_settings_page() {
 
 // Function to start the scoring process
 function kognetiks_insights_start_scoring() {
-
-    // DIAG - Diagnostics
 
     kognetiks_insights_set_scoring_status('running');
 

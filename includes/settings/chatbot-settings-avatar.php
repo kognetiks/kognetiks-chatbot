@@ -91,14 +91,10 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
     $selectedIcon = esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', 'icon-001.png'));
     $customAvatarIcon = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting'));
 
-    // DIAG - Diagnostics - Ver 2.0.3
-
     if ($customAvatarIcon !== '') {
         $selectedIcon = 'custom-000.png';
         update_option('chatbot_chatgpt_avatar_icon_setting', $selectedIcon);
     }
-
-    // DIAG - Diagnostics - Ver 2.0.3
 
     ?>
         <p>Select your icon by clicking on an image to select it.  Don't forget to click 'Save Settings'.</p>
@@ -128,9 +124,6 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
                         for ($j = 0; $j < $cols; $j++) {
                             if ($iconIndex < $iconCount) {
                                 $iconName = sprintf(strtolower(str_replace(' ', '-', $setName)) . "-%03d.png", $iconIndex);
-                                
-                                // DIAG - Diagnostics - Ver 2.0.3
-
                                 $selected = ($iconName === $selectedIcon) ? 'class="selected-icon"' : '';
                                 echo '<td style="padding: 15px;">';
                                 echo '<img src="' . plugins_url('assets/icons/'.$iconName, dirname(__FILE__, 2)) . '" id="'. $iconName .'" onclick="selectIcon(\''.$iconName.'\')" '.$selected.' style="width:60px;height:60px;cursor:pointer;"/>';

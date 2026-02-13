@@ -18,12 +18,7 @@ function options_helper($assistant_details, $option_name, $default_value) {
 
     if (!isset($assistant_details[$option_name]) || $assistant_details[$option_name] == '') {
         $assistant_details[$option_name] = esc_attr(get_option("chatbot_chatgpt_{$option_name}", $default_value));
-
-        // DIAG - Diagnotics - Ver 2.0.5
-
     }
-
-    // DIAG - Diagnotics - Ver 2.0.5
 
     return $assistant_details;
 }

@@ -104,7 +104,7 @@ window.resetAllLocks = resetAllLocks;
         return document.querySelector('.chatbot-chatgpt') !== null;
     }
    
-    // DIAG - Diagnostics - Ver 2.1.1.1
+    // DIAG - Diagnostics - Ver 2.4.5
     // const sortedKeys = Object.keys(kchat_settings).sort();
     // for (const key of sortedKeys) {
     //     // console.log('Chatbot: NOTICE: kchat_settings: ' + key + ': ' + kchat_settings[key]);
@@ -1665,7 +1665,7 @@ window.resetAllLocks = resetAllLocks;
                     appendMessage('Error: ' + error, 'error');
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                 } else {
-                    // DIAG - Log the error - Ver 1.6.7
+                    // DIAG - Diagnostics - Ver 2.4.5
                     // console.log('Chatbot: ERROR: ' + JSON.stringify(response));
                     appendMessage('Error: ' + error, 'error');
                     appendMessage('Oops! Failed to convert text to speech. Please try again.', 'error');
@@ -2080,7 +2080,7 @@ window.resetAllLocks = resetAllLocks;
                     appendMessage('Error: ' + error, 'error');
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                 } else {
-                    // DIAG - Log the error - Ver 1.6.7
+                    // DIAG - Diagnostics - Ver 2.4.5
                     // console.error('Chatbot: ERROR: ' + JSON.stringify(response));
                     appendMessage('Error: ' + error, 'error');
                     appendMessage('Oops! Failed to upload file. Please try again.', 'error');
@@ -2105,7 +2105,7 @@ window.resetAllLocks = resetAllLocks;
         let thread_id = kchat_settings.thread_id;
         let chatbot_chatgpt_force_page_reload = kchat_settings['chatbot_chatgpt_force_page_reload'] || 'No';
 
-        // DIAG - Diagnostics - Ver 1.9.1
+        // DIAG - Diagnostics - Ver 2.4.5
         // console.log('Chatbot: NOTICE: assistant_id: ' + assistant_id);
     
         $.ajax({
@@ -2128,7 +2128,7 @@ window.resetAllLocks = resetAllLocks;
             },
             success: function(response) {
                 sessionStorage.removeItem('chatbot_chatgpt_conversation' + '_' + assistant_id); // Clear the last response from sessionStorage
-                // DIAG - Log the response
+                // DIAG - Diagnostics - Ver 2.4.5
                 // console.log('Chatbot: NOTICE: Removing conversation from sessionStorage');
                 // console.log('Chatbot: SUCCESS:', response.data);
                 appendMessage(safeStringCoercion(response.data), 'bot');
@@ -2142,7 +2142,7 @@ window.resetAllLocks = resetAllLocks;
                     appendMessage('Error: ' + error, 'error');
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                 } else {
-                    // DIAG - Log the error - Ver 1.6.7
+                    // DIAG - Diagnostics - Ver 2.4.5
                     // console.error('Chatbot: ERROR: ' + JSON.stringify(response));
                     appendMessage('Error: ' + error, 'error');
                     appendMessage('Oops! Unable to clear conversation. Please try again.', 'error');
@@ -2205,7 +2205,7 @@ window.resetAllLocks = resetAllLocks;
 
         // Nuclear option to clear session conversation - Ver 1.5.0
         // Do not use unless absolutely needed
-        // DIAG - Diagnostics - Ver 1.5.0
+        // DIAG - Diagnostics - Ver 2.4.5
         // nuclearOption = 'Off';
         // if (nuclearOption === 'On') {
         //     // console.log('Chatbot: NOTICE: ***** NUCLEAR OPTION IS ON ***** ');
@@ -2214,7 +2214,7 @@ window.resetAllLocks = resetAllLocks;
         //     sessionStorage.removeItem('chatgpt_last_response');
         // }
 
-        // DIAG - Diagnostics - Ver 1.5.0
+        // DIAG - Diagnostics - Ver 2.4.5
         // if (kchat_settings.chatbot_chatgpt_diagnostics === 'On') {
         //     // console.log('Chatbot: NOTICE: loadChatbotStatus - BEFORE DECISION');
         // }
@@ -2255,7 +2255,7 @@ window.resetAllLocks = resetAllLocks;
             localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
         }
 
-        // DIAG - Diagnostics - Ver 1.5.0
+        // DIAG - Diagnostics - Ver 2.4.5
         // if (kchat_settings.chatbot_chatgpt_diagnostics === 'On') {
         //     // console.log('Chatbot: NOTICE: loadChatbotStatus - AFTER DECISION');
         // }
@@ -2284,7 +2284,7 @@ window.resetAllLocks = resetAllLocks;
     function scrollToBottom() {
 
         // setTimeout(() => {
-        //     // DIAG - Diagnostics - Ver 1.5.0
+        //     // DIAG - Diagnostics - Ver 2.4.5
         //     // if (kchat_settings.chatbot_chatgpt_diagnostics === 'On') {
         //     //     // console.log('Chatbot: NOTICE: scrollToBottom");
         //     // }
@@ -2304,7 +2304,7 @@ window.resetAllLocks = resetAllLocks;
 
         setTimeout(() => {
             
-            // DIAG - Diagnostics - Ver 2.0.3
+            // DIAG - Diagnostics - Ver 2.4.5
             // if (kchat_settings.chatbot_chatgpt_diagnostics === 'On') {
             //    // console.log('Chatbot: NOTICE: scrollToLastBotResponse');
             // }
@@ -2312,7 +2312,7 @@ window.resetAllLocks = resetAllLocks;
             const botTexts = document.querySelectorAll('.chatbot-bot-text');
             const conversation = document.querySelector('#chatbot-chatgpt-conversation');
     
-            // DIAG - Diagnostics - Ver 2.0.3
+            // DIAG - Diagnostics - Ver 2.4.5
             // if (kchat_settings.chatbot_chatgpt_diagnostics === 'On') {
             //     // console.log('Chatbot: NOTICE: Bot Texts:', botTexts);
             //     // console.log('Chatbot: NOTICE: Conversation:', conversation);
@@ -2322,7 +2322,7 @@ window.resetAllLocks = resetAllLocks;
                 const lastBotText = botTexts[botTexts.length - 1];
                 const topPosition = lastBotText.offsetTop - conversation.offsetTop;
 
-                // DIAG - Diagnostics - Ver 2.0.3
+                // DIAG - Diagnostics - Ver 2.4.5
                 // if (kchat_settings.chatbot_chatgpt_diagnostics === 'On') {
                 //     // console.log('Chatbot: NOTICE: Last Bot Text:', lastBotText);
                 //     // console.log('Chatbot: NOTICE: Last Bot Text OffsetTop:', lastBotText.offsetTop);
@@ -2335,9 +2335,9 @@ window.resetAllLocks = resetAllLocks;
 
             } else {
 
-                // DIAG - Diagnostics - Ver 2.0.3
+                // DIAG - Diagnostics - Ver 2.4.5
                 // if (kchat_settings.chatbot_chatgpt_diagnostics === 'On') {
-                // console.log('Chatbot: NOTICE: No bot texts found or conversation container is missing.');
+                //     console.log('Chatbot: NOTICE: No bot texts found or conversation container is missing.');
                 // }
 
             }

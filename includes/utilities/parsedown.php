@@ -2017,8 +2017,6 @@ class ParsedownCustom extends Parsedown {
             }
         }
 
-        // DIAG - Diagnostics - Ver 2.0.2.1
-
         return $Link;
     }
 
@@ -2042,8 +2040,6 @@ class ParsedownCustom extends Parsedown {
                 ), admin_url('admin.php'));
             }
         }
-
-        // DIAG - Diagnostics - Ver 2.0.2.1
 
         return $Image;
     }

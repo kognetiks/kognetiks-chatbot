@@ -2,10 +2,10 @@ jQuery(document).ready(function ($) {
     
     function chatbot_chatgpt_localize() {
     
-        // DIAG - Diagnostics - Ver 2.1.1.1
+        // DIAG - Diagnostics - Ver 2.4.5
         // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - Before localStorage.set Item loop');
 
-        // Resolve LocalStorage - Ver 2.1.1.1.R3
+        // Resolve LocalStorage - Ver 2.4.5
         const includeKeys = [
             'chatbot_chatgpt_last_reset',
             'chatbot_chatgpt_message_count',
@@ -27,13 +27,13 @@ jQuery(document).ready(function ($) {
             Object.keys(kchat_settings).forEach(function(key) {
                 if (includeKeys.includes(key)) {
                     localStorage.setItem(key, kchat_settings[key]);
-                    // DIAG - Diagnostics - Ver 2.1.1.1
+                    // DIAG - Diagnostics - Ver 2.4.5
                     // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + kchat_settings[key]);
                 }
             });
         }
 
-        // DIAG - Diagnostics - Ver 2.1.1.1
+        // DIAG - Diagnostics - Ver 2.4.5
         // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - After localStorage.set Item loop');
 
     }

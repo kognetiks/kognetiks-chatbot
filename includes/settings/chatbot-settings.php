@@ -31,9 +31,6 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Settings page HTML - Ver 1.3.0
 function chatbot_chatgpt_settings_page() {
-
-    // DIAG - Diagnotics - Ver 2.4.5
-    // error_log('chatbot_chatgpt_settings_page');
     
     if (!current_user_can('manage_options')) {
         return;
@@ -72,12 +69,9 @@ function chatbot_chatgpt_settings_page() {
 
     // Check if the user wants to reset the appearance settings to default - Ver 1.8.1
     $chatbot_chatgpt_appearance_reset = esc_attr(get_option('chatbot_chatgpt_appearance_reset', 'No'));
-    // DIAG - Diagnostics
     if ( $chatbot_chatgpt_appearance_reset == 'Yes' ) {
         chatbot_chatgpt_appearance_restore_default_settings();
     }
-
-    // DIAG - Diagnostics
 
     ?>
     <div id="chatbot-chatgpt-settings" class="wrap">

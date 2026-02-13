@@ -15,8 +15,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Main function to generate a response
 function transformer_model_lexical_context_response( $input, $max_tokens = null ) {
 
-    // DIAG - Diagnostics - Ver 2.3.0
-
     // Maximum tokens - Fixed: removed hardcoded override
     if (empty($max_tokens) || !is_numeric($max_tokens)) {
         $max_tokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', 50)));
@@ -56,8 +54,6 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null 
 
 // Function to get cached embeddings
 function transformer_model_lexical_context_get_cached_embeddings($corpus, $windowSize = 3) {
-
-    // DIAG - Diagnostics - Ver 2.3.0
 
     // Cache directory path
     $cacheDir = __DIR__ . '/lexical_embeddings_cache';
@@ -123,8 +119,6 @@ function transformer_model_lexical_context_fetch_wordpress_content() {
 
     global $wpdb;
 
-    // DIAG - Diagnostics - Ver 2.3.0
-
     // Query to get post and page content with better error handling
     $results = $wpdb->get_results(
         $wpdb->prepare(
@@ -157,8 +151,6 @@ function transformer_model_lexical_context_fetch_wordpress_content() {
 
 // Function to build a PMI matrix for word embeddings
 function transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize = 3) {
-
-    // DIAG - Diagnostics - Ver 2.3.0
 
     if (empty($corpus)) {
         return [];
@@ -397,8 +389,6 @@ function transformer_model_lexical_context_get_cache_timestamps($cacheFile) {
 // Function to calculate cosine similarity between two vectors
 function transformer_model_lexical_context_cosine_similarity($vectorA, $vectorB) {
 
-    // DIAG - Diagnostics - Ver 2.3.0
-
     $dotProduct = 0;
     $magnitudeA = 0;
     $magnitudeB = 0;
@@ -427,8 +417,6 @@ function transformer_model_lexical_context_cosine_similarity($vectorA, $vectorB)
 
 // Function to generate a contextual response
 function transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $corpus, $responseLength = 50) {
-
-    // DIAG - Diagnostics - Ver 2.3.0
 
     global $stopWords;
 

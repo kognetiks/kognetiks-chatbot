@@ -16,8 +16,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Set the threads transient
 function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id) {
 
-    // DIAG - Diagnostics - Ver 1.8.6
-
     // Create unique keys for transients
     $thread_id_thread_key = 'chatbot_chatgpt_thread_id_' . $user_id . '_' . $page_id;
     $assistant_id_thread_key = 'chatbot_chatgpt_assistant_id_' . $user_id . '_' . $page_id;
@@ -34,8 +32,6 @@ function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_
 
 // Get the threads
 function get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id) {
-
-    // DIAG - Diagnostics - Ver 1.8.6
 
     // Construct the unique keys
     $thread_id_thread_key = 'chatbot_chatgpt_thread_id_' . $user_id . '_' . $page_id;
@@ -70,8 +66,6 @@ function get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant
 
 // Delete the threads
 function delete_chatbot_chatgpt_threads($user_id, $page_id) {
-
-    // DIAG - Diagnostics - Ver 1.8.6
 
     // Construct the unique keys
     $thread_id_thread_key = 'chatbot_chatgpt_thread_id_' . $user_id . '_' . $page_id;

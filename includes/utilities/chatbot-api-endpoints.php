@@ -105,7 +105,6 @@ function get_files_api_url() {
         // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai/files?api-version=2024-03-01-preview';
         $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/files?api-version=' . $chatbot_azure_api_version;
 
-        // DIAG - Diagnostics
         return $url;
 
     }

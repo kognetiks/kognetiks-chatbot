@@ -251,10 +251,7 @@ function chatbot_chatgpt_fetch_stored_api_keys($chatbot_ai_platform_choice = nul
         'chatbot_mistral_api_key' => esc_attr( get_option('chatbot_mistral_api_key') ),
         'chatbot_azure_api_key' => esc_attr( get_option('chatbot_azure_api_key') ),
     );
-
-    // DIAG - Diagnostics
-    // error_log('chatbot-keyguard.php: chatbot_chatgpt_fetch_stored_api_keys() - $stored_keys: ' . print_r($stored_keys, true));
-
+    
     return $stored_keys;
 
 }

@@ -142,12 +142,6 @@ function markov_chain_beaker_key_exists($key, $markov_chain_table) {
 
     $result = $wpdb->get_var($wpdb->prepare("SELECT 1 FROM $markov_chain_table WHERE word = %s LIMIT 1", $key));
 
-    if ($result === null) {
-        // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
-    } else {
-        // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
-    }
-
     return !is_null($result);
 
 }
@@ -221,8 +215,6 @@ function markov_chain_beaker_get_random_key($markov_chain_table) {
 function process_text($text) {
 
     global $abbreviations;
-
-    // DIAG - Diagnostics
 
     // Step 1: Remove non-ASCII characters except for common symbols
     $text = preg_replace('/[^\x20-\x7E\x{2018}\x{2019}\x{201C}\x{201D}]/u', '', $text);
@@ -306,8 +298,6 @@ function markov_chain_beaker_clean_up_response($response) {
 
     global $abbreviations;
 
-    // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 25
-
     // Before doing anything, remove any non-ASCII characters except for curly quotes and other common characters
     $response = preg_replace('/[^\x20-\x7E\x{2018}\x{2019}\x{201C}\x{201D}]/u', '', $response);
 
@@ -348,8 +338,6 @@ function markov_chain_beaker_clean_up_response($response) {
 
     // Fix common grammar issues
     $response = markov_chain_beaker_fix_grammar($response);
-
-    // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 25
 
     return $response;
 

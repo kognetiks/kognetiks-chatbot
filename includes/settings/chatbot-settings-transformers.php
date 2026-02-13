@@ -217,8 +217,6 @@ function chatbot_transformer_model_build_schedule_callback($args) {
     </select>
     <?php
     
-    // DIAG - Diagnostics - Ver 2.1.6
-    
 }
 
 // Transformer Length Options Callback - Ver 2.1.6

@@ -25,10 +25,8 @@ function kn_enhance_context( $message ) {
     $enhancedMessage = explode(' ', $enhancedMessage);
 
     // if (get_locale() !== "en_US") {
-    //     // DIAG - Diagnostics - Ver 1.7.2.1
     //     // $localized_stopWords = localize_global_stopwords(get_locale(), $stopWords);
     //     $localized_stopWords = get_localized_stopwords(get_locale(), $stopWords);
-    //     // DIAG - Diagnostics - Ver 1.7.2.1
     // } else {
     //     $localized_stopWords = $stopWords;
     // }
@@ -93,7 +91,6 @@ function kn_enhance_context( $message ) {
     // Collapse the enhanced content into a single string
     $enhancedContext = implode(' ', $enhancedContext);
     $enhancedContext = implode(' ', chatbot_chatgpt_filter_out_html_tags($enhancedContext));
-    // DIAG - Diagnostics - Ver 1.9.6
 
     return $enhancedContext;
 

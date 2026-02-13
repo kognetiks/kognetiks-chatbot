@@ -13,26 +13,19 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-/**
- * Debug helper for file upload to OpenAI: logs endpoint, status, body, payload keys (not file contents), path, size, mime.
- * Call only when WP_DEBUG is enabled to avoid leaking paths in production.
- *
- * @param string $endpoint  URL posted to.
- * @param int    $status    HTTP status code.
- * @param string $body      Response body (e.g. from wp_remote_retrieve_body).
- * @param array  $payload_keys Keys sent in the request (e.g. ['purpose', 'file' => 'filename.ext']). Do not log file contents.
- * @param string $file_path  Local path to the uploaded file.
- * @param int    $filesize   filesize($file_path).
- * @param string $mime       MIME type of the file.
- */
+// Debug helper for file upload to OpenAI
 function chatbot_file_upload_debug_log( $endpoint, $status, $body, $payload_keys, $file_path, $filesize, $mime ) {
+
     if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG || ! function_exists( 'back_trace' ) ) {
         return;
     }
+
     $safe_keys = $payload_keys;
+
     if ( isset( $safe_keys['file'] ) && $safe_keys['file'] instanceof \CURLFile ) {
         $safe_keys['file'] = '[CURLFile: ' . basename( $safe_keys['file']->getFilename() ) . ', mime=' . $safe_keys['file']->getMimeType() . ']';
     }
+
     // back_trace( 'NOTICE', sprintf(
     //     'OpenAI file upload: endpoint=%s, status=%s, body_length=%d, payload_keys=%s, file_path=%s, filesize=%d, mime=%s',
     //     $endpoint,
@@ -44,6 +37,7 @@ function chatbot_file_upload_debug_log( $endpoint, $status, $body, $payload_keys
     //     $mime
     // ) );
     // back_trace( 'NOTICE', 'OpenAI file upload response body (first 500 chars): ' . substr( $body, 0, 500 ) );
+
 }
 
 // Upload Multiple files to the Assistant
@@ -83,8 +77,6 @@ function chatbot_chatgpt_upload_files() {
     global $chatbot_chatgpt_plugin_dir_path;
 
     $uploads_dir = $chatbot_chatgpt_plugin_dir_path . 'uploads/';
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     // Ensure the directory exists or attempt to create it
     if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
@@ -418,8 +410,6 @@ function upload_file_in_chunks($file_path, $api_key, $file_name, $file_type) {
     // Get the API URL
     $url = get_files_api_url();
 
-    // DIAG - Diagnostics - Ver 2.2.6
-
     $chunk_number = 0;
     $total_chunks = ceil($file_size / $chunk_size);
 
@@ -562,8 +552,6 @@ function chatbot_chatgpt_upload_mp3() {
             $newFileName = generate_random_string() . '.' . pathinfo($_FILES['file']['name'][$i], PATHINFO_EXTENSION);
             $file_path = $uploads_dir . $newFileName;
 
-            // DIAG - Diagnostics - Ver 2.0.1
-
             if ($_FILES['file']['error'][$i] > 0) {
                 global $chatbot_chatgpt_fixed_literal_messages;
                 // Define a default fallback message
@@ -627,7 +615,6 @@ function chatbot_chatgpt_upload_mp3() {
         }
 
         // Save the file name for later
-        // DIAG - Diagnostics - Ver 2.0.1
         set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $newFileName, $session_id, $i);
         set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', 'mp3', $session_id, $i);
         $responses[] = array(
@@ -713,9 +700,6 @@ function create_index_file($directory) {
 
 // File type validation - Ver 2.0.1
 function upload_validation($file) {
-
-
-    // DIAG - Diagnostics - Ver 2.0.7
 
     // Get the file type from the file name.
     $file_type = wp_check_filetype($file['name']);

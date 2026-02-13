@@ -111,8 +111,6 @@ function chatbot_chatgpt_manage_error_logs() {
         return;
     }
 
-    // DIAG - Log files for troubleshooting - Ver 2.0.7
-
     // Start HTML output with styling
     $output = '<style>
         .error-log-templates-display {

@@ -122,8 +122,6 @@ function checkKeyInDatabase($key, $attempts = 1) {
     // Check the database for an exact match
     $result = $wpdb->get_var($wpdb->prepare("SELECT word FROM $table_name WHERE word = %s", $key));
 
-    // DIAG - Diagnostics - V 2.1.9
-
     // If no exact match is found, try using the wildcard approach
     if ($result === null) {
         $keyWords = explode(' ', $key);
@@ -136,8 +134,6 @@ function checkKeyInDatabase($key, $attempts = 1) {
 
         // Use LIKE for the wildcard search
         $result = $wpdb->get_var($wpdb->prepare("SELECT word FROM $table_name WHERE word LIKE %s", $wildcardKey));
-
-        // Diagnostic output to log the wildcard key generation and attempt number
 
         // Recursive call with incremented attempts if no result is found
         if ($result === null) {
@@ -181,8 +177,6 @@ function getNextWordFromDatabase($currentWord, $attempts = 1, $randomWordAttempt
         // If we've exhausted random word attempts, return null to indicate failure
         return null;
     }
-
-    // Diagnostic output
 
     // Query to get possible next words and their frequencies
     $results = $wpdb->get_results(

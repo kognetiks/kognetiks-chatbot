@@ -51,7 +51,6 @@ function create_chatbot_chatgpt_interactions_table() {
         return false;  // Table creation failed
     }
 
-    // DIAG - Diagnostics
     return;
 
 }
@@ -112,7 +111,6 @@ function create_conversation_logging_table() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
 
     if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name) {
-        // DIAG - Diagnostics
 
         // Modify interaction_time column to remove DEFAULT CURRENT_TIMESTAMP
         $sql = "ALTER TABLE $table_name MODIFY COLUMN interaction_time datetime NOT NULL;";
@@ -124,7 +122,7 @@ function create_conversation_logging_table() {
         }
 
         if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'assistant_name')) === 'assistant_name') {
-            // DIAG - Diagnostics
+            // Do nothing
         } else {
             // Directly execute the ALTER TABLE command without prepare()
             $sql = "ALTER TABLE $table_name ADD COLUMN assistant_name VARCHAR(255) AFTER assistant_id";
@@ -138,7 +136,7 @@ function create_conversation_logging_table() {
 
         // Check and add sentiment_score column if it doesn't exist
         if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'sentiment_score')) === 'sentiment_score') {
-            // DIAG - Diagnostics
+            // Do nothing
         } else {
             // Directly execute the ALTER TABLE command without prepare()
             $sql = "ALTER TABLE $table_name ADD COLUMN sentiment_score FLOAT AFTER message_text";
@@ -183,11 +181,10 @@ function create_conversation_logging_table() {
                 // If the operation was successful, log the success
             }
         }
-        
-        // DIAG - Diagnostics - Ver 1.9.9
+
 
     } else {
-        // DIAG - Diagnostics
+
         // SQL to create the conversation logging table
 
         $charset_collate = $wpdb->get_charset_collate();
@@ -311,7 +308,7 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
 
     // Check if the insert was successful
     if ($insert_result === false) {
-        // DIAG - Diagnostics
+
         return false;
     }
 
@@ -395,7 +392,7 @@ function chatbot_chatgpt_conversation_log_cleanup() {
 
     // Check if delete was successful
     if ($delete_result === false) {
-        // DIAG - Diagnostics
+
         return false;
     }
 

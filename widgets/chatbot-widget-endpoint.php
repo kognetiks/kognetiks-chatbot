@@ -40,7 +40,7 @@ if ($chatbot_enable_remote_widget !== 'Yes') {
     chatbot_widget_logging('Remote access is not allowed', $referer );
     die();
 } else {
-    // Log the referer for accounting, monitoring, and debugging purposes
+    // Log the referer for accounting and monitoring purposes
     $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
     $request_ip = getUserIP();
     chatbot_widget_logging('Remote access is allowed' , $referer , $request_ip);
@@ -117,7 +117,7 @@ if (empty($allowed_pairs)) {
             $normalized_domain = preg_replace('/^www\./', '', $allowed_domain);
             $base_domain = implode('.', array_slice(explode('.', $normalized_domain), -2));
 
-            // Debugging: Log the normalized referer and domain for comparison
+            // Log the normalized referer and domain for comparison
             chatbot_widget_logging('Checking Pair', $base_referer, $base_domain);
 
             if (!empty($base_domain) && $base_referer === $base_domain && $allowed_shortcode === $shortcode_param) {

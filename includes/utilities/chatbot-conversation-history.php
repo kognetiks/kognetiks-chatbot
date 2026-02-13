@@ -333,8 +333,6 @@ function chatbot_chatgpt_get_converation_history($session_id) {
         WHERE session_id = %s AND user_type IN ('Chatbot', 'Visitor')
         ORDER BY interaction_time ASC", $session_id));
 
-    // DIAG - Diagnostics - Ver 2.1.8
-
     // Filter results to stay within the 2.5 MB limit
     $limited_results = [];
     $max_size = 2.5 * 1024 * 1024; // 2.5 MB in bytes
@@ -355,8 +353,6 @@ function chatbot_chatgpt_get_converation_history($session_id) {
 
     // Remove extra spaces from $conversation_history
     $conversation_history = preg_replace('/\s+/', ' ', $conversation_history);
-
-    // DIAG - Diagnostics - Ver 2.1.8
 
     // Return the HTML output as a JSON response
     return($conversation_history);

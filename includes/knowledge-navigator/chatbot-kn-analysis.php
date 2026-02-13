@@ -32,7 +32,6 @@ function chatbot_chatgpt_kn_analysis_section_callback($args) {
 function chatbot_chatgpt_kn_analysis_output_callback($args) {
     // Get the saved chatbot_chatgpt_kn_analysis_choice value or default to "CSV"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_kn_analysis_output', 'CSV'));
-    // DIAG - Log the output choice
     ?>
     <select id="chatbot_chatgpt_kn_analysis_output" name="chatbot_chatgpt_kn_analysis_output">
         <option value="<?php echo esc_attr( 'CSV' ); ?>" <?php selected( $output_choice, 'CSV' ); ?>><?php echo esc_html( 'CSV' ); ?></option>
@@ -54,7 +53,6 @@ function chatbot_chatgpt_kn_analysis_download_csv() {
 
     // Exit early if the file doesn't exist
     if (!file_exists($results_csv_file)) {
-        // DIAG - Diagnostics - Ver 1.9.1
         wp_die('File not found!');
     }
 

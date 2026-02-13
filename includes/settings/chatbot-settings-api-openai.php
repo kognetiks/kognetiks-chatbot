@@ -125,8 +125,6 @@ function chatbot_chatgpt_model_choice_callback($args) {
     // Fetch models from the API
     $models = chatbot_openai_get_models();
 
-    // DIAG - Ver 1.9.5
-
     // Limit the models to chat models
     $models = array_filter($models, function($model) {
         return strpos($model['id'], 'gpt') !== false;

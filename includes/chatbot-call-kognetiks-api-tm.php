@@ -31,7 +31,7 @@ function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $
     
     global $errorResponses;
 
-    // DIAG - Diagnostics - Ver 2.4.4
+    // DIAG - Diagnostics - Ver 2.4.5
     // back_trace("NOTICE", "Starting Transformer Model API call");
     // back_trace("NOTICE", "Message: " . $message);
     // back_trace("NOTICE", "User ID: " . $user_id);
@@ -50,14 +50,11 @@ function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $
     // Check for duplicate message UUID in conversation log
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
-        // DIAG - Diagnostics - Ver 2.3.4
         return "Error: Duplicate request detected. Please try again.";
     }
 
     // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
-
-    // DIAG - Diagnostics - Ver 2.2.0
 
     $model = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
  
@@ -93,18 +90,10 @@ function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $
     // Added "We previously have been talking about the following things: " - Ver 1.9.5 - 2024 04 12
     $sys_message = 'We previously have been talking about the following things: ';
 
-    // DIAG Diagnostics - Ver 1.6.1
-
-    //
     // ENHANCED CONTEXT - Select some context to send with the message - Ver 1.9.6
-    //
     $use_enhanced_content_search = esc_attr(get_option('chatbot_chatgpt_use_advanced_content_search', 'No'));
 
-    // DIAG Diagnostics - Ver 1.9.6
-
     if ($use_enhanced_content_search == 'Yes') {
-
-        // DIAG Diagnostics - Ver 1.9.6
 
         // Focus the content based on the message from the user
         $enhancedContext = kn_enhance_context($message);
@@ -112,8 +101,6 @@ function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $
         // Add Context Instructions
         $contextInstructions = ' Use this information to help guide your response. ';
         $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // DIAG Diagnostics - Ver 1.9.6
 
     } else {
 
@@ -134,8 +121,6 @@ function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $
     // FIXME - LETS OVERRIDE $CONTEXT FOR NOW - Ver 2.2.1 - 2024-12-27
     $context = '';
     $chatbot_chatgpt_kn_conversation_context = '';
-
-    // DIAG Diagnostics - Ver 1.6.1
 
     // Convert $message to an array (this will be used as a starting point)
     // $transformer_model_message = explode(' ', $message);
@@ -161,8 +146,6 @@ function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $
 
     // Retrieve max tokens from the settings
     $max_tokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', '10000')));
-
-    // DIAG - Diagnostics - Ver 2.2.1
 
     // Call the transformer model with the user input
     if ($model == 'lexical-context-model') {
@@ -200,8 +183,6 @@ function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $
         // Set the error response code
         $response_body['response']['code'] = 500; // Internal server error
     }
-        
-    // DIAG - Diagnostics - Ver 1.8.1
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -226,8 +207,6 @@ function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $
     $response_body["usage"]["completion_tokens"] = $word_count;
     $response_body["usage"]["total_tokens"] = $response_body["usage"]["prompt_tokens"] + $response_body["usage"]["completion_tokens"];
 
-    // DIAG - Diagnostics - Ver 2.1.6
-    
     // Add the usage to the conversation tracker
     if ($response_body['response']['code'] == 200) {
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $response_body["usage"]["prompt_tokens"]);

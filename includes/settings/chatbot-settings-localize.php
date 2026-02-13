@@ -95,7 +95,6 @@ function chatbot_chatgpt_localize(){
     foreach ($option_keys as $key) {
         $default_value = $defaults[$key] ?? '';
         $kchat_settings[$key] = esc_attr(get_option($key, $default_value));
-        // DIAG - Diagnostics - Ver 1.6.1
     }
 
 

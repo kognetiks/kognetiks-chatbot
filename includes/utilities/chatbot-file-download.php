@@ -24,7 +24,6 @@ function download_openai_file($file_id, $filename) {
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($downloads_dir)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // DIAG - Diagnostics - Ver 2.0.3
         // FIXME - Return an error message
         return false;
     }
@@ -33,7 +32,6 @@ function download_openai_file($file_id, $filename) {
     // Decrypt the API key - Ver 2.2.6
     $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
     if (empty($api_key)) {
-        // DIAG - Diagnostics - Ver 2.0.3
         // FIXME - Return an error message
         return false;
     }
@@ -86,7 +84,7 @@ function download_openai_file($file_id, $filename) {
 
     } else {
 
-        // DIAG - Diagnostics - Ver 2.0.3
+        // DIAG - Diagnostics - Ver 2.4.5
         prod_trace( 'ERROR', 'Failed to retrieve the file: ' . $http_code);
         return false;
     }

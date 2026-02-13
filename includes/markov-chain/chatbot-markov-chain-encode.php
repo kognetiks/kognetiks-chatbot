@@ -15,8 +15,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Run the Markov Chain algorithm and store the chain in the database
 function runMarkovChatbotAndSaveChain() {
 
-    // Diagnostics
-
     // Step 0: Force a full rebuild if necessary
     $force_rebuild = esc_attr(get_option('chatbot_markov_chain_force_rebuild', 'No'));
 
@@ -241,8 +239,6 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
                 // Clean up the post content
                 $clean_content = clean_up_training_data(get_the_content());
                 $clean_post_title = clean_up_training_data(get_the_title());
-
-                // DIAG - Diagnostics - Ver 2.2.0
 
                 $content .= ' ' . $clean_post_title . ' ' . $clean_content;
             }

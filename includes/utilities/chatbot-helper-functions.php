@@ -121,9 +121,8 @@ function chatbot_chatgpt_safe_wp_mail( $to, $subject, $message, $headers = '', $
     // On localhost without SMTP, skip email sending to prevent timeouts
     // Allow override via constant if needed for testing
     if ( $is_localhost && ! $smtp_configured && ! defined( 'CHATBOT_CHATGPT_FORCE_EMAIL_ON_LOCALHOST' ) ) {
-        // if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'error_log' ) ) {
-        //     back_trace('ERROR', 'Skipping email send on localhost without SMTP configuration. Email would have been sent to: ' . ( is_array( $to ) ? implode( ', ', $to ) : $to ) );
-        // }
+        // DIAG - Diagnostics - Ver 2.4.5
+        // back_trace('ERROR', 'Skipping email send on localhost without SMTP configuration. Email would have been sent to: ' . ( is_array( $to ) ? implode( ', ', $to ) : $to ) );
         return false; // Return false to indicate email was not sent
     }
     
@@ -148,37 +147,35 @@ function chatbot_chatgpt_safe_wp_mail( $to, $subject, $message, $headers = '', $
             @set_time_limit( $original_time_limit );
         }
         
-        // Log failure if email didn't send and we're in debug mode
-        if ( ! $result && defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'back_trace' ) ) {
-            back_trace( 'ERROR', 'Failed to send email to ' . ( is_array( $to ) ? implode( ', ', $to ) : $to ) . '. This may be due to missing SMTP configuration.' );
-        }
+        // Log failure if email didn't send
+        prod_trace( 'ERROR', 'Failed to send email to ' . ( is_array( $to ) ? implode( ', ', $to ) : $to ) . '. This may be due to missing SMTP configuration.' );
         
         return $result;
         
     } catch ( Exception $e ) {
+
         // Restore original time limit on exception
         if ( $original_time_limit > 0 ) {
             @set_time_limit( $original_time_limit );
         }
         
-        // Log the exception
-        if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'back_trace' ) ) {
-            back_trace( 'ERROR', 'Email sending exception: ' . $e->getMessage() );
-        }
+        // DIAG - Diagnostics - Ver 2.4.5
+        prod_trace( 'ERROR', 'Email sending exception: ' . $e->getMessage() );
         
         return false;
         
     } catch ( Error $e ) {
+        
         // Catch PHP 7+ errors (fatal errors)
         if ( $original_time_limit > 0 ) {
             @set_time_limit( $original_time_limit );
         }
         
-        if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'back_trace' ) ) {
-            back_trace( 'ERROR', 'Email sending error: ' . $e->getMessage() );
-        }
+        // DIAG - Diagnostics - Ver 2.4.5
+        prod_trace( 'ERROR', 'Email sending error: ' . $e->getMessage() );
         
         return false;
+
     }
 }
 

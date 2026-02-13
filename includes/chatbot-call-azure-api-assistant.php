@@ -18,8 +18,6 @@ if ( ! defined( 'WPINC' ) ) {
 // -------------------------------------------------------------------------
 function create_an_azure_assistant($api_key) {
 
-    // DIAG - Diagnostics - Ver 2.2.6
-
     // Set your API key and assistant ID here:
     $api_key = esc_attr(get_option('chatbot_azure_api_key', ''));
     // Decrypt the API key - Ver 2.2.6
@@ -35,8 +33,6 @@ function create_an_azure_assistant($api_key) {
         $chatbot_azure_resource_name,
         $chatbot_azure_api_version
     );
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     // Prepare common headers
     $headers = array(
@@ -64,8 +60,6 @@ function create_an_azure_assistant($api_key) {
         return "Error: Thread ID not returned.";
     }
 
-    // DIAG - Diagnostics - Ver 2.2.6
-
     return $thread_response;
 
 }
@@ -78,8 +72,6 @@ function create_an_azure_assistant($api_key) {
 // Step 3: Add a message
 // -------------------------------------------------------------------------
 function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id = null, $message_uuid = null) {
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     global $session_id;
 
@@ -100,8 +92,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
         $chatbot_azure_api_version
     );
 
-    // DIAG - Diagnostics - Ver 2.2.3
-
     // Prepare common headers
     $headers = array(
         'Content-Type' => 'application/json',
@@ -112,8 +102,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
     // FILE ID IS NULL
     // *********************************************************************************
     if ( empty($file_id) ) {
-
-        // DIAG - Diagnostics - Ver 2.2.6
 
         // No files attached, just send the prompt
         $data = [
@@ -144,8 +132,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
         // FIXME - Retrieve the first item file type - assumes they are all the same, not mixed
         $file_type = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_type', $session_id, $file_id[0]);
         $file_type = $file_type ? $file_type : 'unknown';
-    
-        // DIAG - Diagnostics - Ver 2.0.3
 
         // *********************************************************************************
         // NON-IMAGE ATTACHMENTS - Ver 2.0.3
@@ -153,7 +139,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
 
         if ( $file_type == 'assistants' ) {
             $data = chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version);
-            // DIAG - Diagnostics - Ver 2.2.6
         }
 
         // *********************************************************************************
@@ -162,7 +147,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
 
         if ( $file_type == 'vision' ) {
             $data = chatbot_chatgpt_image_attachment($prompt, $file_id, $beta_version);
-            // DIAG - Diagnostics - Ver 2.2.6
         }
 
     }
@@ -182,8 +166,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
 
     // Retrieve response body
     $response_body = wp_remote_retrieve_body($response);
-
-    // DIAG - Diagnostics
     
     // Return the API response
     return json_decode($response_body, true);
@@ -194,8 +176,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
 // Step 4: Run the Assistant
 // -------------------------------------------------------------------------
 function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key, $message_uuid = null) {
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     global $kchat_settings;
     
@@ -210,8 +190,6 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key, $
         $thread_id,
         $chatbot_azure_api_version
     );
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     // Prepare common headers
     $headers = array(
@@ -229,8 +207,6 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key, $
     if (isset($kchat_settings['additional_instructions']) && $kchat_settings['additional_instructions'] !== null) {
         $additional_instructions = $kchat_settings['additional_instructions'];
     }
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     $data = array(
         "assistant_id" => $assistant_id,
@@ -251,8 +227,6 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key, $
         "ignore_errors" => true,
         "timeout"       => 30,
     ]);
-    
-    // Log the full response for debugging
     
     // Ensure the response is valid
     if (is_wp_error($response)) {
@@ -298,8 +272,6 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key, $
 // -------------------------------------------------------------------------
 function get_the_azure_run_status($thread_id, $runId, $api_key) {
 
-    // DIAG - Diagnostics - Ver 2.2.6
-
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
@@ -312,8 +284,6 @@ function get_the_azure_run_status($thread_id, $runId, $api_key) {
         $runId,
         $chatbot_azure_api_version
     );
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     // Headers
     $headers = [
@@ -342,8 +312,6 @@ function get_the_azure_run_status($thread_id, $runId, $api_key) {
 // -------------------------------------------------------------------------
 function get_the_azure_run_steps($thread_id, $runId, $api_key) {
 
-    // DIAG - Diagnostics - Ver 2.2.3
-
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
@@ -356,8 +324,6 @@ function get_the_azure_run_steps($thread_id, $runId, $api_key) {
         $runId,
         $chatbot_azure_api_version
     );
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     // Prepare request headers
     $headers = array(
@@ -395,8 +361,6 @@ function get_the_azure_run_steps($thread_id, $runId, $api_key) {
         return "Error: Failed to parse API response.";
     }
 
-    // DIAG - Diagnostic - Ver 2.2.6
-
     return $response_data;
 
 }
@@ -405,8 +369,6 @@ function get_the_azure_run_steps($thread_id, $runId, $api_key) {
 // Step 7: Get the Step's Status
 // -------------------------------------------------------------------------
 function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $user_id, $page_id, $assistant_id) {
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
@@ -421,8 +383,6 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $
         $chatbot_azure_api_version
     );
     
-    // DIAG - Diagnostics - Ver 2.2.6
-
     // Prepare request headers    
     $headers = array(
         'Content-Type' => 'application/json',
@@ -466,17 +426,13 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $
             return "Error: Failed to parse API response.";
         }
 
-        // DIAG - Diagnostics - Ver 2.2.6
-
         // Updated check for "data" field
         if (isset($responseArray["data"][0]) && isset($responseArray["data"][0]["status"])) {
             if ($responseArray["data"][0]["status"] === "completed") {
-                // DIAG - Diagnostics - Ver 2.2.7
                 if (isset($responseArray["data"][0]["usage"])) {
                     $prompt_tokens = $responseArray["data"][0]["usage"]["prompt_tokens"] ?? 0;
                     $completion_tokens = $responseArray["data"][0]["usage"]["completion_tokens"] ?? 0;
                     $total_tokens = $responseArray["data"][0]["usage"]["total_tokens"] ?? 0;
-                    // DIAG - Diagnostics - Ver 2.2.6
                     if ( $total_tokens != 0 ) {
                         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, null, $prompt_tokens);
                         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, null, $completion_tokens);
@@ -516,8 +472,6 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $
 // -------------------------------------------------------------------------
 function get_the_azure_message($thread_id, $api_key, $run_id = null) {
 
-    // DIAG - Diagnostics - Ver 2.2.6
-
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
@@ -529,8 +483,6 @@ function get_the_azure_message($thread_id, $api_key, $run_id = null) {
         $thread_id,
         $chatbot_azure_api_version
     );
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     // Prepare request headers 
     $headers = array(
@@ -559,8 +511,6 @@ function get_the_azure_message($thread_id, $api_key, $run_id = null) {
         prod_trace('ERROR', 'JSON Decode Error: ' . json_last_error_msg());
         return "Error: Invalid JSON response from API.";
     }
-
-    // DIAG - Diagnostics - Ver 2.0.3
 
     // Download any file attachments - Ver 2.0.3
     if (isset($response_data['data']) && is_array($response_data['data'])) {
@@ -591,14 +541,11 @@ function get_the_azure_message($thread_id, $api_key, $run_id = null) {
 
                         $basename = basename($path);
 
-                        $file_name = 'download_' . generate_random_string() . '_' . basename($annotation['text']); // Extract the filename
-
-                        // DIAG - Diagnostics - Ver 2.0.3
+                        // Extract the filename
+                        $file_name = 'download_' . generate_random_string() . '_' . basename($annotation['text']);
 
                         // Call the function to download the file
                         $file_url = download_openai_file($file_id, $file_name);
-
-                        // DIAG - Diagnostics - Ver 2.0.3
 
                         if ($file_url) {
                             // Append the local URL to the message (modify as needed for your use case)
@@ -628,12 +575,8 @@ function get_the_azure_message($thread_id, $api_key, $run_id = null) {
                                 $file_id = $annotation['file_path']['file_id'];
                                 $file_name = 'download_' . generate_random_string() . '_' . basename($annotation['text']); // Extract the filename
 
-                                // DIAG - Diagnostics - Ver 2.0.3
-
                                 // Call the function to download the file
                                 $file_url = download_openai_file($file_id, $file_name);
-
-                                // DIAG - Diagnostics - Ver 2.0.3
 
                                 if ($file_url) {
                                     // Replace the placeholder link with the actual URL
@@ -657,9 +600,7 @@ function get_the_azure_message($thread_id, $api_key, $run_id = null) {
             }
         }
     } else {
-
-        // DIAG - Diagnostics - Ver 2.0.3
-
+        // Do nothing
     }
 
     return $response_data;
@@ -674,7 +615,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     global $errorResponses;
     global $stopWords;
 
-    // DIAG - Diagnostics - Ver 2.4.4
+    // DIAG - Diagnostics - Ver 2.4.5
     // back_trace("NOTICE", "Starting Azure AssistantAPI call");
     // back_trace("NOTICE", "Message: " . $message);
     // back_trace("NOTICE", "User ID: " . $user_id);
@@ -693,7 +634,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     // Check for duplicate message UUID in conversation log
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
-        // DIAG - Diagnostics - Ver 2.3.4
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -717,12 +657,10 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         // Decrypt the API key - Ver 2.2.6
         $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
         $assistants_response = create_an_azure_assistant($api_key);
-        // DIAG - Diagnostics - Ver 2.2.3
 
         // Step 2 - Get The Thread ID
         $thread_id = $assistants_response["id"];
-        $kchat_settings['thread_id'] = $thread_id; // ADDED FOR VER 2.1.1.1 - 2024-08-26
-        // DIAG - Diagnostics - Ver 2.2.3
+        $kchat_settings['thread_id'] = $thread_id;
         set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id);
         
     } else {
@@ -755,9 +693,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     // Fetch the file id - Ver 2.23
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
 
-    // DIAG - Diagnostics - Ver 2.2.3
-
-    // DIAG - Diagnostics - Ver 2.3.3
     for ($i = 0; $i < count($file_id); $i++) {
         if (isset($file_id[$i])) {
         } else {
@@ -765,8 +700,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
             unset($file_id[$i]); // Remove the non-existent key
         }
     }
-
-    // DIAG - Diagnostics - Ver 2.2.3
 
     // ENHANCED CONTEXT - Select some context to send with the message - Ver 2.2.4 - Updated Ver 2.2.9
     if ($use_enhanced_content_search == 'Yes') {
@@ -785,15 +718,13 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
             // Append the formatted search results to the prompt
             $prompt = $prompt . ' When answering the prompt, please consider the following information: ' . $formatted_results;
         }
-        // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
 
     }
+
     if (empty($file_id)) {
         $assistants_response = add_an_azure_message($thread_id, $prompt, $context, $api_key, '', $message_uuid);
     } else {
-        //DIAG - Diagnostics - Ver 1.7.9
         $assistants_response = add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id, $message_uuid);
-        // DIAG - Print the response
     }
 
     $retries = 0;
@@ -820,8 +751,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         } else {
             return "Error: 'id' key not found in response.";
         }
-
-        // DIAG - Print the response
 
         // Step 5: Get the Run's Status
         $run_status = get_the_azure_run_status($thread_id, $runId, $api_key);
@@ -860,10 +789,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
 
     // Step 6: Get the Run's Steps
     $assistants_response = get_the_azure_run_steps($thread_id, $runId, $api_key);
-    // DIAG - Diagnostics - Ver 2.2.6
-
-    // DIAG - Diagnostics - Ver 2.2.6
-
     // Add the usage to the conversation tracker
     // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["prompt_tokens"]);
     // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["completion_tokens"]);
@@ -891,11 +816,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
 
     // Step 8: Get the Message
     $assistants_response = get_the_azure_message($thread_id, $api_key, $runId);
-
-    // DIAG - Diagnostics - Ver 2.2.6
-
-    // DIAG - Diagnostics - Ver 2.2.3
-
     // Add the usage to the conversation tracker
     // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["prompt_tokens"]);
     // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["completion_tokens"]);
@@ -917,8 +837,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     if (!isset($kchat_settings['thread_id'])) {
         $kchat_settings['thread_id'] = $thread_id;
     }
-
-    // DIAG - Diagnostics - Ver 2.2.1
 
     // Verify that "data" exists and is an array.
     if (!isset($assistants_response["data"]) || !is_array($assistants_response["data"])) {
@@ -951,16 +869,17 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         return '';
     }
 
-    prod_trace('ERROR', 'DEBUG: Latest assistant message found at index ' . $latest_index . ' with created_at: ' . $max_created_at);
+    // DIAG - Diagnostics - Ver 2.4.5
+    prod_trace('ERROR', 'Latest assistant message found at index ' . $latest_index . ' with created_at: ' . $max_created_at);
 
     // Extract the text from the selected message. 
     if (isset($assistants_response["data"][$latest_index]["content"][1]["text"]["value"])) {
         $latest_response = $assistants_response["data"][$latest_index]["content"][1]["text"]["value"];
-        prod_trace('ERROR', 'DEBUG: Extracted response from content[1]: ' . $latest_response);
+        prod_trace('ERROR', 'Extracted response from content[1]: ' . $latest_response);
         return $latest_response;
     } elseif (isset($assistants_response["data"][$latest_index]["content"][0]["text"]["value"])) {
         $latest_response = $assistants_response["data"][$latest_index]["content"][0]["text"]["value"];
-        prod_trace('ERROR', 'DEBUG: Extracted response from content[0]: ' . $latest_response);
+        prod_trace('ERROR', 'Extracted response from content[0]: ' . $latest_response);
         return $latest_response;
     } else {
         prod_trace('ERROR', 'Error: No text value found in the latest assistant message.');
@@ -977,8 +896,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
 // -------------------------------------------------------------------------
 function chatbot_azure_retrieve_file_id( $user_id, $page_id ) {
 
-    // DIAG - Diagnostics - Ver 2.2.3
-
     global $session_id;
     global $user_id;
     global $page_id;
@@ -991,8 +908,6 @@ function chatbot_azure_retrieve_file_id( $user_id, $page_id ) {
 
     $file_id = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
     $file_types = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $session_id, $file_id);
-
-    // DIAG - Diagnostics - Ver 2.0.3
 
     while (!empty($file_id)) {
         // Delete the transient
@@ -1025,12 +940,7 @@ function chatbot_azure_retrieve_file_id( $user_id, $page_id ) {
     }
 
     // Join the file ids into a comma-separated string and return it
-    // DIAG - Diagnostics - Ver 2.2.3
-
     // return implode(',', $file_ids);
-
-    // Join the file ids into a comma-separated string and return it
-    // DIAG - Diagnostics - Ver 2.2.3
 
     return $file_ids;
 
@@ -1040,8 +950,6 @@ function chatbot_azure_retrieve_file_id( $user_id, $page_id ) {
 // Cleanup in Aisle 4 on OpenAI - Ver 2.2.6
 // -------------------------------------------------------------------------
 function delete_azure_uploaded_file($file_id) {
-
-    // DIAG - Diagnostics - Ver 2.2.6
 
     // Get the Azure API key
     $api_key = esc_attr(get_option('chatbot_azure_api_key'));
@@ -1058,8 +966,6 @@ function delete_azure_uploaded_file($file_id) {
         $file_id,
         $chatbot_azure_api_version
     );
-    
-    // DIAG - Diagnostics - Ver 2.2.6
 
     $headers = array(
         'Content-Type' => 'application/json',

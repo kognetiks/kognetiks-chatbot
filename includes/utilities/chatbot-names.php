@@ -99,11 +99,7 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
         $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
         $query = $wpdb->prepare("SELECT * FROM $table_name WHERE assistant_id = %s", $assistant_id_lookup);
         
-        // DIAG - Diagnostics - Ver 2.3.0
-        
         $result = $wpdb->get_results($query);
-        
-        // DIAG - Diagnostics - Ver 2.3.0
 
         // Return the Agent's name
         return $result[0]->common_name;
@@ -128,7 +124,6 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
 
     // Decode JSON response
     $data = json_decode($response_body, true);
-    // DIAG - Diagnostics - Ver 2.2.6
 
     // Validate JSON
     if (json_last_error() !== JSON_ERROR_NONE) {

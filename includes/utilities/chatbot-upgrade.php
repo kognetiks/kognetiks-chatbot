@@ -33,8 +33,6 @@ function chatbot_chatgpt_activate() {
         }
     }
 
-    // DIAG - Log the activation
-
     return;
 
 }
@@ -55,11 +53,9 @@ function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
                 }
             }
         } else {
-            // DIAG - Log the warning
+            // Do nothing
         }
     }
-
-    // DIAG - Log the activation
 
     return;
 
@@ -90,7 +86,6 @@ function chatbot_chatgpt_upgrade() {
     // If the old option exists, delete it
     if (esc_attr(get_option( 'chatgpt_plugin_version') )) {
         delete_option( 'chatgpt_plugin_version' );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatbot_chatgpt_width_setting
@@ -99,7 +94,6 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_width_setting = esc_attr(get_option( 'chatbot_width_setting' ));
         delete_option( 'chatbot_width_setting' );
         update_option( 'chatbot_chatgpt_width_setting', $chatbot_chatgpt_width_setting );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatbot_chatgpt_api_key
@@ -108,7 +102,6 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_api_key = esc_attr(get_option( 'chatgpt_api_key' ));
         delete_option( 'chatgpt_api_key' );
         update_option( 'chatbot_chatgpt_api_key', $chatbot_chatgpt_api_key );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatbot_chatgpt_avatar_greeting_setting
@@ -117,7 +110,6 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_avatar_greeting_setting = esc_attr(get_option( 'chatgpt_avatar_greeting_setting' ));
         delete_option( 'chatgpt_avatar_greeting_setting' );
         update_option( 'chatbot_chatgpt_avatar_greeting_setting', $chatbot_chatgpt_avatar_greeting_setting );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatgpt_avatar_icon_setting
@@ -126,14 +118,12 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_avatar_greeting_setting = esc_attr(get_option( 'chatgpt_avatar_icon_setting' ));
         delete_option( 'chatgpt_avatar_icon_setting' );
         update_option( 'chatbot_chatgpt_avatar_icon_setting', $chatbot_chatgpt_avatar_greeting_setting );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatgpt_avatar_icon_setting
     // If the old option exists, delete it
     if (esc_attr(get_option ( 'chatbot_chatgpt_avatar_icon' ))) {
         delete_option( 'chatbot_chatgpt_avatar_icon' );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatgpt_avatar_icon_setting
@@ -142,7 +132,6 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_avatar_icon_url_setting = esc_attr(get_option( 'chatgpt_avatar_icon_url_setting' ));
         delete_option( 'chatgpt_avatar_icon_url_setting' );
         update_option( 'chatbot_chatgpt_avatar_icon_url_setting', $chatbot_chatgpt_avatar_icon_url_setting );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatgpt_bot_name
@@ -151,7 +140,6 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_bot_name = esc_attr(get_option( 'chatgpt_bot_name' ));
         delete_option( 'chatgpt_bot_name' );
         update_option( 'chatbot_chatgpt_bot_name', $chatbot_chatgpt_bot_name );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatgpt_custom_avatar_icon_setting
@@ -160,7 +148,6 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_custom_avatar_icon_setting = esc_attr(get_option( 'chatgpt_custom_avatar_icon_setting' ));
         delete_option( 'chatgpt_custom_avatar_icon_setting' );
         update_option( 'chatbot_chatgpt_custom_avatar_icon_setting', $chatbot_chatgpt_custom_avatar_icon_setting );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatgpt_diagnostics
@@ -169,7 +156,6 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_diagnostics = esc_attr(get_option( 'chatgpt_diagnostics' ));
         delete_option( 'chatgpt_diagnostics' );
         update_option( 'chatbot_chatgpt_diagnostics', $chatbot_chatgpt_diagnostics );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatgpt_disclaimer_setting
@@ -178,7 +164,6 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_disclaimer_setting = esc_attr(get_option( 'chatgpt_disclaimer_setting' ));
         delete_option( 'chatgpt_disclaimer_setting' );
         update_option( 'chatbot_chatgpt_disclaimer_setting', $chatbot_chatgpt_disclaimer_setting );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatgpt_initial_greeting
@@ -187,7 +172,6 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_initial_greeting = esc_attr(get_option( 'chatgpt_initial_greeting' ));
         delete_option( 'chatgpt_initial_greeting' );
         update_option( 'chatbot_chatgpt_initial_greeting', $chatbot_chatgpt_initial_greeting );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatgpt_max_tokens_setting
@@ -195,8 +179,6 @@ function chatbot_chatgpt_upgrade() {
     if (esc_attr(get_option( 'chatgpt_max_tokens_setting' ))) {
         $chatbot_chatgpt_max_tokens_setting = esc_attr(get_option( 'chatgpt_max_tokens_setting' ));
         delete_option( 'chatgpt_max_tokens_setting' );
-        update_option( 'chatbot_chatgpt_max_tokens_setting', $chatbot_chatgpt_max_tokens_setting );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatgpt_model_choice
@@ -205,7 +187,6 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_model_choice = esc_attr(get_option( 'chatgpt_model_choice' ));
         delete_option( 'chatgpt_model_choice' );
         update_option( 'chatbot_chatgpt_model_choice', $chatbot_chatgpt_model_choice );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatgptStartStatusNewVisitor
@@ -214,11 +195,9 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_start_status_new_visitor = esc_attr(get_option( 'chatgptStartStatusNewVisitor' ));
         delete_option( 'chatgptStartStatusNewVisitor' );
         update_option( 'chatbot_chatgpt_start_status_new_visitor', $chatbot_chatgpt_start_status_new_visitor );
-        // DIAG - Log the old option deletion
     }
     if (esc_attr(get_option( 'chatgpt_start_status' ))) {
         delete_option( 'chatgpt_start_status' );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatgptstartstatus
@@ -227,7 +206,6 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_start_status = esc_attr(get_option( 'chatgptstartstatus' ));
         delete_option( 'chatgptstartstatus' );
         update_option( 'chatbot_chatgpt_start_status', $chatbot_chatgpt_start_status );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatgpt_chatbot_bot_prompt
@@ -236,7 +214,6 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_bot_prompt = esc_attr(get_option( 'chatgpt_chatbot_bot_prompt' ));
         delete_option( 'chatgpt_chatbot_bot_prompt' );
         update_option( 'chatbot_chatgpt_bot_prompts', $chatbot_chatgpt_bot_prompt );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatgpt_subsequent_greeting
@@ -245,19 +222,16 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_subsequent_greeting = esc_attr(get_option( 'chatgpt_subsequent_greeting' ));
         delete_option( 'chatgpt_subsequent_greeting' );
         update_option( 'chatbot_chatgpt_subsequent_greeting', $chatbot_chatgpt_subsequent_greeting );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatGPTChatBotStatus
     if (esc_attr(get_option( 'chatGPTChatBotStatus' ))) {
         delete_option( 'chatGPTChatBotStatus' );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatGPTChatBotStatusNewVisitor
     if (esc_attr(get_option( 'chatGPTChatBotStatusNewVisitor' ))) {
         delete_option( 'chatGPTChatBotStatusNewVisitor' );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatbot_kn_items_per_batch
@@ -265,7 +239,6 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_kn_items_per_batch = esc_attr(get_option( 'chatbot_kn_items_per_batch' ));
         delete_option( 'chatbot_kn_items_per_batch' );
         update_option( 'chatbot_chatgpt_kn_items_per_batch', $chatbot_chatgpt_kn_items_per_batch );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - no_of_items_analyzed
@@ -273,13 +246,11 @@ function chatbot_chatgpt_upgrade() {
         $chatbot_chatgpt_no_of_items_analyzed = esc_attr(get_option( 'no_of_items_analyzed' ));
         delete_option( 'no_of_items_analyzed' );
         update_option( 'chatbot_chatgpt_no_of_items_analyzed', $chatbot_chatgpt_no_of_items_analyzed );
-        // DIAG - Log the old option deletion
     }
 
     // Reset the Knowledge Navigator reminder option
     if (esc_attr(get_option( 'chatbot_chatgpt_kn_dismissed' ))) {
         delete_option( 'chatbot_chatgpt_kn_dismissed' );
-        // DIAG - Log the old option deletion
     }
 
     // Replace option - chatbot_chatgpt_enable_custom_buttons - Ver 2.0.5
@@ -325,23 +296,17 @@ function chatbot_chatgpt_upgrade() {
             call_user_func($delete_opt, 'chatbot_chatgpt_reporting_notice_snooze_until');
         }
     }
-    // DIAG - Log the plugin version
 
     // Add new/replaced options - chatbot_chatgpt_interactions
     create_chatbot_chatgpt_interactions_table();
-    // DIAG - Log the table creation
 
     // Add new/replaced options - create_conversation_logging_table
     create_conversation_logging_table();
-    // DIAG - Log the table creation
 
     // Ensure sentiment_score column exists for existing installations
     if (function_exists('chatbot_chatgpt_add_sentiment_score_column')) {
         chatbot_chatgpt_add_sentiment_score_column();
     }
-    // DIAG - Log the column addition
-
-    // DIAG - Log the upgrade complete
 
     return;
 

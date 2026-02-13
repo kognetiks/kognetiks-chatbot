@@ -15,8 +15,6 @@ if ( ! defined( 'WPINC' ) ) {
 
 function chatbot_chatgpt_check_for_links_and_images( $response ) {
 
-    // DIAG - Diagnostics - Ver 1.9.1
-
     // Get stored image width
     $img_width = esc_attr(get_option('chatbot_chatgpt_image_width_setting', '100%'));
     if (!str_ends_with($img_width, 'px') && !str_ends_with($img_width, '%')) {

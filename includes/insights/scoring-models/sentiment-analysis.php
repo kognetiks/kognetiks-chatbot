@@ -68,8 +68,6 @@ function kognetiks_insights_restart_scoring() {
 
 // Score conversations without a sentiment score
 function kognetiks_insights_score_conversations_without_sentiment_score() {
-
-    // DIAG - Diagnostics
     
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
@@ -124,8 +122,6 @@ function kognetiks_insights_score_conversations_without_sentiment_score() {
             ARRAY_A
         );
 
-        // DIAG - Diagnostics
-
         if (empty($conversations)) {
             break;
         }
@@ -148,14 +144,10 @@ function kognetiks_insights_score_conversations_without_sentiment_score() {
 
             // Mark this ID as processed
             $wpdb->insert($temp_table, array('id' => $conversation['id']));
-
-            // DIAG - Diagnostics
         }
 
         $total_processed += count($conversations);
         $batch_number++;
-
-        // DIAG - Diagnostics
 
     } while (count($conversations) > 0);
 
@@ -169,16 +161,10 @@ function kognetiks_insights_score_conversations_without_sentiment_score() {
     // Set the last scoring date/time in the options table
     update_option('kognetiks_insights_last_scoring_date', date('Y-m-d H:i:s'));
 
-    // DIAG - Diagnostics
-
-    // DIAG - Diagnostics
-
 }
 
 // Score conversations without a sentiment score
 function kognetiks_insights_score_conversations_without_sentiment_score_ai_based() {
-
-    // DIAG - Diagnostics
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
@@ -248,7 +234,7 @@ function kognetiks_insights_score_conversations_without_sentiment_score_ai_based
             ),
             ARRAY_A
         );
-        // DIAG - Diagnostics
+
         if (empty($conversations)) {
             break;
         }
@@ -267,20 +253,14 @@ function kognetiks_insights_score_conversations_without_sentiment_score_ai_based
                 array('sentiment_score' => $sentiment_score),
                 array('id' => $conversation['id'])
             );
-            // DIAG - Diagnostics
         }
         $total_processed += count($conversations);
         $batch_number++;
-        // DIAG - Diagnostics
     } while (count($conversations) > 0);
 
     // Set status to stopped when complete
     kognetiks_insights_set_scoring_status('stopped');
     kognetiks_insights_set_scoring_lock(false); // Clear lock at end
-    
-    // DIAG - Diagnostics
-
-    // DIAG - Diagnostics
 
 }
 
@@ -431,8 +411,6 @@ function kognetiks_insights_compute_sentiment_score_simple($message_text) {
 
 // Compute the sentiment score for a message using an AI model
 function kognetiks_insights_compute_sentiment_score_ai_based($message_text) {
-
-    // DIAG - Diagnostics
 
     // Get the AI Platform Choice from the options table
     $ai_platform_choice = get_option('chatbot_ai_platform_choice');

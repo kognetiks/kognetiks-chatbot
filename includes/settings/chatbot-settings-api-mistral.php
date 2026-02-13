@@ -61,8 +61,6 @@ function chatbot_mistral_chat_model_choice_callback($args) {
     // Fetch models from the API
     $models = chatbot_mistral_get_models();
 
-    // DIAG - Diagnostics
-
     // Remove the models not owned by Mistral
     $models = array_filter($models, function($model) {
         return strpos($model['id'], 'mistral') !== false;

@@ -34,9 +34,6 @@ function get_localized_stopwords($language_code, $stopWords) {
 // Use ChatGPT to translate global variables - Ver 1.7.2
 function localize_global_stopwords($language_code, $stopWords) {
 
-    // DIAG - Log the language code
-    // DIAG - Log the message
-
     $stopWordsTemp = $stopWords;
 
     // Get the API key
@@ -63,7 +60,6 @@ function localize_global_stopwords($language_code, $stopWords) {
 
     $stopWords_string = implode(", ", $stopWords);
     $stopWords = "Translate the global variables into " . $language_code . ":\n\n" . $stopWords_string;
-    // DIAG - Log the message
 
     $body = array(
         'model' => $model,
@@ -84,21 +80,17 @@ function localize_global_stopwords($language_code, $stopWords) {
     );
 
     $response = wp_remote_post($api_url, $args);
-    // DIAG - Log the response
 
     if (is_wp_error($response)) {
-        // DIAG - Log the error message
         return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your OpenAI account for additional information.';
     }
 
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
-    // DIAG - Log the response body
 
     // Convert the translated string back to an array
     if (!empty($response_body['choices'][0]['message']['content'])) {
         // Convert the translated string back to an array
         $translated_array = explode(", ", $response_body['choices'][0]['message']['content']);
-        // DIAG - Log the translations
     } else {
         $translated_array = $stopWordsTemp;
     }
@@ -128,9 +120,6 @@ function get_localized_learningMessages($language_code, $learningMessages) {
 // Use ChatGPT to translate global variables - Ver 1.7.2
 function localize_global_learningMessages($language_code, $learningMessages) {
 
-    // DIAG - Log the language code
-    // DIAG - Log the message
-
     $learningMessagesTemp = $learningMessages;
 
     // Get the API key
@@ -158,7 +147,6 @@ function localize_global_learningMessages($language_code, $learningMessages) {
 
     $learningMessages_string = implode("\n", $learningMessages);
     $learningMessages = "Translate the global variables into " . $language_code . ":\n\n" . $learningMessages_string;
-    // DIAG - Log the message
 
     $body = array(
         'model' => $model,
@@ -179,15 +167,12 @@ function localize_global_learningMessages($language_code, $learningMessages) {
     );
 
     $response = wp_remote_post($api_url, $args);
-    // DIAG - Log the response
 
     if (is_wp_error($response)) {
-        // DIAG - Log the error message
         return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your OpenAI account for additional information.';
     }
 
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
-    // DIAG - Log the response body
 
     // Convert the translated string back to an array
     if (!empty($response_body['choices'][0]['message']['content'])) {
@@ -227,9 +212,6 @@ function get_localized_errorResponses($language_code, $errorResponses) {
 // Use ChatGPT to translate global variables - Ver 1.7.2
 function localize_global_errorResponses($language_code, $errorResponses) {
 
-    // DIAG - Log the language code
-    // DIAG - Log the message
-
     $errorResponsesTemp = $errorResponses;
 
     // Get the API key
@@ -256,7 +238,6 @@ function localize_global_errorResponses($language_code, $errorResponses) {
 
     $errorResponses_string = implode("\n", $errorResponses);
     $errorResponses = "Translate the global variables into " . $language_code . ":\n\n" . $errorResponses_string;
-    // DIAG - Log the message
 
     $body = array(
         'model' => $model,
@@ -277,15 +258,12 @@ function localize_global_errorResponses($language_code, $errorResponses) {
     );
 
     $response = wp_remote_post($api_url, $args);
-    // DIAG - Log the response
 
     if (is_wp_error($response)) {
-        // DIAG - Log the error message
         return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your OpenAI account for additional information.';
     }
 
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
-    // DIAG - Log the response body
 
     // Convert the translated string back to an array
     if (!empty($response_body['choices'][0]['message']['content'])) {

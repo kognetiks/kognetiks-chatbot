@@ -33,7 +33,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message, $user_id = null, $pag
 
     global $kflow_data;
 
-    // DIAG - Diagnostics - Ver 2.4.4
+    // DIAG - Diagnostics - Ver 2.4.5
     // back_trace("NOTICE", "Starting OpenAI KFlow API call");
     // back_trace("NOTICE", "Message: " . $message);
     // back_trace("NOTICE", "User ID: " . $user_id);
@@ -52,14 +52,11 @@ function chatbot_chatgpt_call_flow_api($api_key, $message, $user_id = null, $pag
     // Check for duplicate message UUID in conversation log
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
-        // DIAG - Diagnostics - Ver 2.3.4
         return "Error: Duplicate request detected. Please try again.";
     }
 
     // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
-
-    // DIAG - Diagnostics - Ver 1.8.6
 
     // Build conversation context using standardized function - Ver 2.3.9+
     // This function handles conversation history building, message cleaning, and conversation continuity
@@ -72,8 +69,6 @@ function chatbot_chatgpt_call_flow_api($api_key, $message, $user_id = null, $pag
     $kflow_step = (int) get_chatbot_chatgpt_transients('kflow_step', null, null, $session_id);
 
     $kflow_data = kflow_get_sequence_data($kflow_sequence);
-
-    // DIAG - Diagnostics - Ver 1.9.5
 
     // Count the number of 'Steps' in the KFlow data
     $kflow_data['total_steps'] = count($kflow_data['Steps']);
@@ -138,7 +133,6 @@ function chatbot_chatgpt_call_flow_api($api_key, $message, $user_id = null, $pag
     addEntry('chatbot_chatgpt_context_history', $message);
 
     // Add message to conversation log
-    // DIAG Diagnostics
     $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
     append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, null, $message);
 
@@ -186,13 +180,11 @@ function chatbot_chatgpt_retrieve_answers($session_id, $user_id, $page_id, $assi
 
     // if $answers is empty, return an empty array
     if (empty($answers)) {
-        // DIAG - Diagnostics
         return $answers_array;
     }
 
     // if $answer is an error, return an empty array
     if (is_wp_error($answers)) {
-        // DIAG - Diagnostics
         return $answers_array;
     }
 
@@ -214,7 +206,6 @@ function chatbot_chatgpt_parse_template($template, $answers) {
 
     // if $template is empty, return an empty string
     if (empty($template)) {
-        // DIAG - Diagnostics
         return $message;
     }
 

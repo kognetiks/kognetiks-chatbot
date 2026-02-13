@@ -29,7 +29,7 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
     
     global $errorResponses;
 
-    // DIAG - Diagnostics - Ver 2.4.4
+    // DIAG - Diagnostics - Ver 2.4.5
     // back_trace("NOTICE", "Starting Mistral API call");
     // back_trace("NOTICE", "Message: " . $message);
     // back_trace("NOTICE", "User ID: " . $user_id);
@@ -48,14 +48,11 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
     // Check for duplicate message UUID in conversation log
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
-        // DIAG - Diagnostics - Ver 2.3.4
         return "Error: Duplicate request detected. Please try again.";
     }
 
     // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
-
-    // DIAG - Diagnostics - Ver 2.2.2
 
     // Mistral.com API Documentation
     // https://api.mistral.ai/v1/chat/completions
@@ -63,8 +60,6 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
     // The current Mistral API URL endpoint for mistral-small-latest
     // $api_url = 'https://api.mistral.ai/v1/chat/completions';
     $api_url = get_chat_completions_api_url();
-
-    // DIAG - Diagnostics - Ver 2.2.2
 
     // Select the Mistral Model
     // https://api-docs.mistral.com/quick_start/pricing
@@ -127,7 +122,6 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
                 $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts) . ' ' . $context;
             }
         }
-        // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
 
     } else {
 
@@ -194,10 +188,6 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
     // Context History - Ver 1.6.1
     addEntry('chatbot_chatgpt_context_history', $message);
 
-    // DIAG - Diagnostics - Ver 2.2.2
-
-    // DIAG Diagnostics - Ver 1.6.1
-
     // API Call with exponential backoff retry for rate limits - Ver 2.3.9+
     $max_retries = 5;
     $retries = 0;
@@ -213,7 +203,7 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
 
         // Handle WP Error
         if (is_wp_error($response)) {
-            // DIAG - Diagnostics
+            // DIAG - Diagnostics - Ver 2.4.5
             prod_trace( 'ERROR', 'Error: ' . $response->get_error_message());
             // Clear locks on error
             // Lock clearing removed - main send function handles locking
@@ -267,7 +257,7 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
                     $user_message = 'Mistral API error: ' . $error_message;
                 }
                 
-                // DIAG - Diagnostics
+                // DIAG - Diagnostics - Ver 2.4.5
                 prod_trace('ERROR', 'Mistral API Error (HTTP ' . $response_code . '): ' . $error_type . ' - ' . $error_message);
                 
                 // Clear locks on error
@@ -277,7 +267,7 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
                 // Fallback for non-JSON error responses
                 $error_message = 'HTTP ' . $response_code . ' Error: ' . $error_body;
                 
-                // DIAG - Diagnostics
+                // DIAG - Diagnostics - Ver 2.4.5
                 prod_trace('ERROR', 'Mistral API Error: ' . $error_message);
                 
                 // Clear locks on error
@@ -302,7 +292,7 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
         $error_type = $response_body->error->type ?? 'Unknown Error Type';
         $error_message = $response_body->error->message ?? 'No additional information.';
     
-        // DIAG - Diagnostics
+        // DIAG - Diagnostics - Ver 2.4.5
         prod_trace( 'ERROR', 'Error: Type: ' . $error_type . ' Message: ' . $error_message);
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
@@ -310,12 +300,11 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
     
     }
     
-    // Debug: Log response structure if no content found
+    // Log response structure if no content found
     if (!isset($response_body->choices) || !isset($response_body->choices[0])) {
+        // DIAG - Diagnostics - Ver 2.4.5
         prod_trace('WARNING', 'Mistral API response structure unexpected. Response: ' . print_r($response_body, true));
     }
-
-    // DIAG - Diagnostics - Ver 1.8.1
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -330,16 +319,10 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
         }
     }
 
-    // DIAG - Diagnostics - Ver 2.2.2
-
-    // DIAG - Diagnostics - Ver 1.8.1
-
     // Extract input and output tokens
     $input_tokens = $response_body->usage->prompt_tokens ?? 0;
     $output_tokens = $response_body->usage->completion_tokens ?? 0;
     $total_tokens = $input_tokens + $output_tokens;
-
-    // DIAG - Diagnostics - Ver 1.8.1
 
     // Check if the response content is not empty
     if (!empty($response_body->choices[0]->message->content)) {
