@@ -6,6 +6,11 @@
 
 ---
 
+= 2.4.7 - Released TBD =
+
+### Bug Fixes
+* **Miscellaneous**: Fixed miscellaneous bugs and issues identified after release of version 2.4.6.
+
 = 2.4.6 - Released 2026-02-13 =
 
 ### Bug Fixes
