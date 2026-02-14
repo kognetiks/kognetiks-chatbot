@@ -72,8 +72,7 @@ After you save/publish, you’ll have a **Prompt ID** (commonly starting with ``
 1. Save/publish the Prompt.
 2. Copy the Prompt ID (```pmpt_...```) you’ll use in WordPress.
 
-**Image placeholder:** Prompt saved → Prompt ID visible  
-```![Prompt ID](publish-the-prompt.png)```
+![Prompt ID](publish-the-prompt.png)
 
 > Important note: The Kognetiks documentation examples refer to OpenAI Assistant IDs that usually start with ```asst_...```. This refers to the Assistant API which is being deprecated mid-2026.
 > If you are using a ```pmpt_...``` ID in the shortcode (as in the example at the top of this guide), make sure the plugin version that supports prompts will be Version 2.4.5 or later. If it does not, you may need to use an ```asst_...``` Assistant ID instead.
