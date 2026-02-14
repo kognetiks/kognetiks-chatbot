@@ -25,7 +25,7 @@ This guide walks through an end-to-end setup: creating a **Prompt** on the OpenA
 1. Log in to the OpenAI dashboard.
 2. Open [**Chat**](https://platform.openai.com/chat) (https://platform.openai.com/chat) and choose to create a **Prompt** (Prompt objects are designed to be saved and versioned in the dashboard).
 
-![OpenAI Platform - Create Prompt](platform-openai-chat.png)
+<img src="platform-openai-chat.png" alt="OpenAI Platform - Create Prompt" style="width:auto;height:auto;">
 
 ---
 
@@ -38,7 +38,7 @@ And, then click into the ```Developer message``` to start entering the “rules 
 
 If you already have designed a Developer message, you already you can paste it in, including any scope rules, behavior rules, response style rules, source rules, citation rules.
 
-![Developer Messages](developer-messages.png)
+<img src="developer-messages.png" alt="Developer Messages" style="width:auto;height:auto;">
 
 ---
 
@@ -50,7 +50,7 @@ What you already set up is a good baseline:
 - One “User:” example that instructs the refusal behavior when docs are unclear
 - One “Assistant:” example that demonstrates the exact refusal response
 
-![Prompt messages](prompt-messages.png)
+<img src="prompt-messages.png" alt="Prompt messages" style="width:auto;height:auto;">
 
 ---
 
@@ -60,7 +60,7 @@ In this case, the attachmenet refers to the **official Kognetiks Chatbot documen
 Because the PDF may be replaced over time, the Developer message should refer to it generically as:
 > “the attached official Kognetiks Chatbot documentation PDF”
 
-![Supporting Documentation](supporting-documentation.png)```
+<img src="supporting-documentation.png" alt="Supporting Documentation" style="width:auto;height:auto;">
 
 ---
 
@@ -70,7 +70,7 @@ After you save/publish, you’ll have a **Prompt ID** (commonly starting with ``
 1. Save/publish the Prompt.
 2. Copy the Prompt ID (```pmpt_...```) you’ll use in WordPress.
 
-![Prompt ID](publish-the-prompt.png)
+<img src="publish-the-prompt.png" alt="Prompt ID" style="width:auto;height:auto;">
 
 > Important note: The Kognetiks documentation examples refer to OpenAI Assistant IDs that usually start with ```asst_...```. This refers to the Assistant API which is being deprecated mid-2026.
 > If you are using a ```pmpt_...``` ID in the shortcode (as in the example at the top of this guide), make sure the plugin version that supports prompts will be Version 2.4.5 or later. If it does not, you may need to use an ```asst_...``` Assistant ID instead.
@@ -92,7 +92,7 @@ Expected behavior:
 - It should answer plugin questions using the attached docs
 - It should **decline politely** when the docs don’t clearly confirm the answer (using your refusal style)
 
-![Prompt testing](prompt-testing.png)
+<img src="prompt-testing.png" alt="Prompt testing" style="width:auto;height:auto;">
 
 ---
 
@@ -107,7 +107,7 @@ In WordPress:
 
 If the chatbot “loads but doesn’t respond,” missing/invalid API keys are one of the first things to check. The documentation explicitly states an API key is required for correct operation.
 
-![API key settings](api-key-setting.png)
+<img src="api-key-setting.png" alt="API key settings" style="width:auto;height:auto;">
 
 ---
 
@@ -118,7 +118,7 @@ The documentation describes this as GPT Assistants when configuration flow in th
 
 Prompts ues a Responses API ID that start with ```pmpt_```, for example: ```pmpt_698cc2c1d4a08190981f3ca4780270660bed802bdb1373d7```. Its the same process as using an Assistant API ID which start with ```asst_```.
 
-![Assistant settings](assistant-settings.png)
+<img src="assistant-settings.png" alt="Assistant settings" style="width:auto;height:auto;">
 
 > Note: The docs describe Assistant IDs that typically start with ```asst_...```, however, OpenAI is migrating to the Responses API, and you'll be using a ```pmpt_...``` ID, either on the ```GPT Assistants``` page or when using the ```assistant=``` parameter in the shortcode as to invoke the prompt/response in your environment.
 
@@ -148,13 +148,13 @@ Prompts ues a Responses API ID that start with ```pmpt_```, for example: ```pmpt
 
 You can call the Responses API two different ways, either by the shortcode (for example ```[[chatbot-1]])```) or directly (for example ```[[chatbot style=embedded assistant=pmpt_698cc2c1d4a08190981f3ca4780270660bed802bdb1373d7]]```), both will work.
 
-![Example shortcode](example-shortcode.png)
+<img src="example-shortcode.png" alt="Example shortcode" style="width:auto;height:auto;">
 
-![Example direct](example-direct.png)
+<img src="example-direct.png" alt="Example direct" style="width:auto;height:auto;">
 
 Once you have published the page, post or footer where you have placed the call to the **Kognetiks Chatbot**, you'll see something like this:
 
-![Kognetiks Chatbot](example-direct-running.png)
+<img src="example-direct-running.png" alt="Kognetiks Chatbot" style="width:auto;height:auto;">
 
 ---
 
