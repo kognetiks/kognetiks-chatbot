@@ -93,6 +93,10 @@ The Appearance Settings allow you to customize the visual aspects of your chatbo
 
 By configuring these settings, you can ensure that your Kognetiks Chatbot blends well with your website's design, providing a cohesive and visually appealing user experience.
 
+## Related
+
+- [Custom Icons](custom-icons.md) – Customize chatbot icons for open, send, attach, and other actions.
+
 ---
 
 - **[Back to the Overview](/overview.md)**

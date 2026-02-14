@@ -98,6 +98,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 *What the chatbot knows*
 
 - [Assistants](assistants/manage-assistants.md)
+- [Assistant/Agent Settings](assistants/assistants.md)
 - [OpenAI's Responses API](api-openai-responses-api/prompt-agent-build-and-deploy-guide.md)
 - [Knowledge Navigator](knowledge-navigator/knowledge-navigator.md)  
 - [Knowledge Navigator Analysis](knowledge-navigator/knowledge-navigator-analysis.md)
@@ -109,6 +110,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 - [Avatars](avatars/avatars.md)  
 - [Appearance](appearance/appearance.md)  
+- [Custom Icons](appearance/custom-icons.md)  
 - [Buttons](buttons/buttons.md)
 
 ---
@@ -118,8 +120,11 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 - [Dashboard Widget](dashboard/dashboard.md)  
 - [Reporting](reporting/reporting.md)  
-- [Insights](analytics/analytics.md)  
-- Conversation Digest *(configured within Reporting & Insights)*
+- [Reporting Settings](reporting/reporting-settings.md)  
+- [Conversation Digest (Settings)](reporting/conversation-digest.md)  
+- [Insights](analytics-package/analytics-package.md)  
+- [Proof of Value Reports Email](analytics-package/proof-of-value-reports-email.md)  
+- [Conversation Digest Email](analytics-package/conversation-digest-email.md)  
 
 ---
 
@@ -127,6 +132,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 *Advanced and supporting tools*
 
 - [Tools](tools/tools.md)
+- [Remote Widget Settings](assistants/remote-widget-settings.md)
 
 ---
 
@@ -140,11 +146,15 @@ Kognetiks Premium is designed to help you **stay aware**, **act with confidence*
 
 - **📧 Conversation Digest Email**  
   Stay informed automatically with scheduled summaries of new chatbot conversations delivered to your inbox.  
-  → [Conversation Digest Email](conversation-digest-email.md)
+  → [Conversation Digest Email](analytics-package/conversation-digest-email.md)
 
 - **💎 Proof of Value Reports Email**  
   Turn chatbot activity into clear, executive-ready summaries that demonstrate impact, performance, and ROI.  
-  → [Proof of Value Reports Email](proof-of-value-reports-email.md)
+  → [Proof of Value Reports Email](analytics-package/proof-of-value-reports-email.md)
+
+- **❓ Unanswered Questions Detection**  
+  Technical details on how unanswered questions are detected and why results may vary.  
+  → [Unanswered Questions Detection Analysis](analytics-package/unanswered-questions-dectection-analysis.md)
 
 ---
 
@@ -152,8 +162,8 @@ Kognetiks Premium is designed to help you **stay aware**, **act with confidence*
 
 - **🎧 Premium Support**  
   Priority assistance, guidance, and troubleshooting for Premium users running production chatbots.  
-  → [Premium Support](premium-support/premium-support.md)
-
+  → [Premium Support](premium-support/premium-support.md)  
+  → [Premium Activation](premium-support/premium-activation.md)
 
 ---
 
@@ -167,7 +177,8 @@ Kognetiks Premium is designed to help you **stay aware**, **act with confidence*
 
 - [Enabling Beta Features](beta-features/beta-features.md)
 
-- [API/Transformer Settings](api-transformer-settings/api-transformer-model-settings.md) **BETA FEATURE**
+- [API/Transformer Settings](api-transformer-settings/api-transformer-model-settings.md) **BETA FEATURE**  
+- [API/Transformer Model Build Status](api-transformer-settings/api-transformer-model-build-status.md) **BETA FEATURE**
 
 --- 
 

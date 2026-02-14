@@ -251,6 +251,10 @@ Please use one of these resources to obtain support for the **Kognetiks Chatbot*
 
 - [Support @ GitHub.com](https://github.com/kognetiks/kognetiks-chatbot/issues)
 
+## Related
+
+- [Premium Activation](premium-activation.md) – Step-by-step activation and upload of the Premium plugin.
+
 ---
 
 - **[Back to the Overview](/overview.md)**
