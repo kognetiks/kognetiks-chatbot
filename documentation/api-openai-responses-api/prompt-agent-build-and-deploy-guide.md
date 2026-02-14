@@ -6,8 +6,6 @@ This guide walks through an end-to-end setup: creating a **Prompt** on the OpenA
 [[chatbot style=embedded assistant=pmpt_698cc2c1d4a08190981f3ca4780270660bed802bdb1373d7]]
 ```
 
-You can add your own screenshots where you see **Image placeholder** blocks.
-
 ---
 
 ## What you need before you start
