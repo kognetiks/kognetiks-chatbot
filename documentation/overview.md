@@ -182,7 +182,7 @@ Kognetiks Premium is designed to help you **stay aware**, **act with confidence*
 
 --- 
 
-## Connect with Support
+## Support Documentation
 
 - [How the Kognetiks Chatbot Works](support/how-it-works.md)
 
@@ -202,7 +202,7 @@ While AI-powered applications strive for accuracy, they can sometimes make mista
 
 ## Disclaimer
 
-WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Google, Mistral, Azure and related trademarks are the property of their respective owners. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic, DeepSeek, Google or Mistral.
+WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Google, Mistral, Azure, JAN.AI and related trademarks are the property of their respective owners. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic, DeepSeek, Google or Mistral or other AI vendor or platform.
 
 ---
 
