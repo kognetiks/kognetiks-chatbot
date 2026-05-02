@@ -977,7 +977,7 @@ function transformer_model_lexical_context_sentence_dedupe_key( $sentence ) {
     $sentence = wp_strip_all_tags( (string) $sentence );
     $sentence = preg_replace( '/\s+/', ' ', trim( $sentence ) );
 
-    return md5( strtolower( $sentence ) );
+    return hash( 'sha256', strtolower( $sentence ) );
 }
 
 /**
@@ -1388,17 +1388,108 @@ function transformer_model_lexical_context_diag_log_local_idf( $option_on, $acti
         );
         return;
     }
+}
 
-    arsort( $idf_map );
-    $i = 0;
-    foreach ( $idf_map as $term => $w ) {
-        if ( $i >= 5 ) {
-            break;
-        }
-        $term_safe = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $term );
-        back_trace( 'NOTICE', sprintf( '[LCM][local_idf] term="%s" idf=%g', $term_safe, (float) $w ) );
-        $i++;
+/**
+ * Phrase + proximity bonus from meaningful direct-query tokens (merged stop-word logic).
+ *
+ * Bigrams/trigrams follow meaningful token order. Proximity uses tokenizer-aligned chunk tokens.
+ *
+ * @param string               $sentenceTrimmed Original chunk text.
+ * @param string               $sentenceLower   Lowercased chunk text.
+ * @param array<int, string>   $inputWordsLower Lowercased query tokens.
+ * @return array{ bonus: float, phrases: array<int, string>, proximity: string }
+ */
+function transformer_model_lexical_context_compute_phrase_proximity_bonus( $sentenceTrimmed, $sentenceLower, $inputWordsLower ) {
+
+    $result = array(
+        'bonus'      => 0.0,
+        'phrases'    => array(),
+        'proximity'  => '',
+    );
+
+    $meaningful = transformer_model_lexical_context_meaningful_query_tokens_for_relevance_guard( $inputWordsLower );
+    $n          = count( $meaningful );
+    if ( $n < 2 ) {
+        return $result;
     }
+
+    $phrase_raw = 0.0;
+    $matched    = array();
+
+    for ( $i = 0; $i < $n - 1; $i++ ) {
+        $a = $meaningful[ $i ];
+        $b = $meaningful[ $i + 1 ];
+        $pattern = '/\b' . preg_quote( $a, '/' ) . '\s+' . preg_quote( $b, '/' ) . '\b/iu';
+        if ( preg_match( $pattern, $sentenceLower ) ) {
+            $phrase_raw += 8.0;
+            $matched[]   = $a . ' ' . $b;
+        }
+    }
+
+    for ( $i = 0; $i < $n - 2; $i++ ) {
+        $a = $meaningful[ $i ];
+        $b = $meaningful[ $i + 1 ];
+        $c = $meaningful[ $i + 2 ];
+        $pattern = '/\b' . preg_quote( $a, '/' ) . '\s+' . preg_quote( $b, '/' ) . '\s+' . preg_quote( $c, '/' ) . '\b/iu';
+        if ( preg_match( $pattern, $sentenceLower ) ) {
+            $phrase_raw += 14.0;
+            $matched[]   = $a . ' ' . $b . ' ' . $c;
+        }
+    }
+
+    $prox_raw     = 0.0;
+    $prox_details = array();
+
+    $chunk_tokens = transformer_model_lexical_context_tokenize_for_local_idf( $sentenceTrimmed );
+    $len          = count( $chunk_tokens );
+    if ( $len >= 2 ) {
+        $mean_flip = array_flip( $meaningful );
+        $got_w12   = false;
+        $got_w8    = false;
+        for ( $s = 0; $s < $len && ! $got_w12; $s++ ) {
+            $e = min( $s + 11, $len - 1 );
+            $present = array();
+            for ( $p = $s; $p <= $e; $p++ ) {
+                $t = $chunk_tokens[ $p ];
+                if ( isset( $mean_flip[ $t ] ) ) {
+                    $present[ $t ] = true;
+                }
+            }
+            if ( count( $present ) >= 3 ) {
+                $prox_raw      += 10.0;
+                $prox_details[] = 'w12>=3';
+                $got_w12        = true;
+            }
+        }
+
+        for ( $s = 0; $s < $len && ! $got_w8; $s++ ) {
+            $e = min( $s + 7, $len - 1 );
+            $present = array();
+            for ( $p = $s; $p <= $e; $p++ ) {
+                $t = $chunk_tokens[ $p ];
+                if ( isset( $mean_flip[ $t ] ) ) {
+                    $present[ $t ] = true;
+                }
+            }
+            if ( count( $present ) >= 2 ) {
+                $prox_raw      += 4.0;
+                $prox_details[] = 'w8>=2';
+                $got_w8         = true;
+            }
+        }
+    }
+
+    $total = $phrase_raw + $prox_raw;
+    if ( $total > 25.0 ) {
+        $total = 25.0;
+    }
+
+    $result['bonus']     = $total;
+    $result['phrases']   = $matched;
+    $result['proximity'] = implode( ';', $prox_details );
+
+    return $result;
 }
 
 /**
@@ -1408,7 +1499,7 @@ function transformer_model_lexical_context_diag_log_local_idf( $option_on, $acti
  * @param array<int, string>   $searchWordsLower
  * @param array<int, string>   $inputWordsLower
  * @param array<string, float>|null $local_idf_map Optional IDF weights (runtime: from lexical_local_idf_cache.json when corpus hash matches).
- * @param bool                 $apply_local_idf   When true and map non-empty, scale score conservatively.
+ * @param bool                 $apply_local_idf   When true and map non-empty, add a small direct-query-only IDF bonus (not expansion).
  * @return array<string, mixed>|null
  */
 function transformer_model_lexical_context_lexical_sentence_score_row( $sentenceTrimmed, $searchWordsLower, $inputWordsLower, $local_idf_map = null, $apply_local_idf = false ) {
@@ -1508,45 +1599,75 @@ function transformer_model_lexical_context_lexical_sentence_score_row( $sentence
         $score *= 0.9;
     }
 
+    $phrase_prox = transformer_model_lexical_context_compute_phrase_proximity_bonus( $sentenceTrimmed, $sentenceLower, $inputWordsLower );
+    $score      += $phrase_prox['bonus'];
+
+    if ( $phrase_prox['bonus'] > 0.0 && transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        static $lcm_phrase_bonus_sample_logged = false;
+        if ( ! $lcm_phrase_bonus_sample_logged ) {
+            $ph_list = array();
+            foreach ( $phrase_prox['phrases'] as $ph ) {
+                $ph_list[] = str_replace( array( "\r", "\n", '|' ), array( ' ', ' ', '/' ), (string) $ph );
+            }
+            $ph_str  = ! empty( $ph_list ) ? implode( '|', $ph_list ) : '';
+            $prox_s  = ( $phrase_prox['proximity'] !== '' ) ? $phrase_prox['proximity'] : 'none';
+            back_trace(
+                'NOTICE',
+                sprintf(
+                    '[LCM][phrase_bonus] bonus=%g phrases=[%s] proximity=%s',
+                    $phrase_prox['bonus'],
+                    $ph_str,
+                    $prox_s
+                )
+            );
+            $lcm_phrase_bonus_sample_logged = true;
+        }
+    }
+
     if ( $apply_local_idf && ! empty( $local_idf_map ) && is_array( $local_idf_map ) ) {
-        $matched_idfs = array();
-        foreach ( $inputWordsLower as $word ) {
+        // Direct query tokens only (same notion as relevance guard); PMI expansion terms excluded.
+        $direct_query_tokens = transformer_model_lexical_context_meaningful_query_tokens_for_relevance_guard( $inputWordsLower );
+        $idf_sum_capped      = 0.0;
+        $matched_query_idfs  = array();
+
+        foreach ( $direct_query_tokens as $word ) {
             if ( strlen( $word ) < 2 ) {
                 continue;
             }
             $pattern = '/\b' . preg_quote( $word, '/' ) . '\b/i';
-            if ( preg_match( $pattern, $sentenceLower ) && isset( $local_idf_map[ $word ] ) ) {
-                $matched_idfs[ $word ] = (float) $local_idf_map[ $word ];
-            }
-        }
-        foreach ( $searchWordsLower as $word ) {
-            if ( in_array( $word, $inputWordsLower, true ) || strlen( $word ) < 2 ) {
+            if ( ! preg_match( $pattern, $sentenceLower ) ) {
                 continue;
             }
-            $pattern = '/\b' . preg_quote( $word, '/' ) . '\b/i';
-            if ( preg_match( $pattern, $sentenceLower ) && isset( $local_idf_map[ $word ] ) ) {
-                $matched_idfs[ $word ] = (float) $local_idf_map[ $word ];
+            if ( ! isset( $local_idf_map[ $word ] ) ) {
+                continue;
             }
+            $idf_raw = (float) $local_idf_map[ $word ];
+            $idf_sum_capped += min( 3.0, $idf_raw );
+            $matched_query_idfs[ $word ] = $idf_raw;
         }
-        if ( ! empty( $matched_idfs ) ) {
-            $avg_idf = array_sum( $matched_idfs ) / count( $matched_idfs );
-            $mult    = min( 2.0, max( 1.0, $avg_idf ) );
-            $score   = $score * $mult;
+
+        if ( $idf_sum_capped > 0.0 ) {
+            $idf_bonus = $idf_sum_capped * 2.0;
+            $score    += $idf_bonus;
 
             if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                static $lcm_local_idf_sample_logged = false;
-                if ( ! $lcm_local_idf_sample_logged ) {
-                    arsort( $matched_idfs );
-                    $j = 0;
-                    foreach ( $matched_idfs as $tw => $iw ) {
-                        if ( $j >= 5 ) {
-                            break;
-                        }
-                        $tw_safe = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $tw );
-                        back_trace( 'NOTICE', sprintf( '[LCM][local_idf] sample matched term="%s" idf=%g mult=%g avg_idf=%g', $tw_safe, $iw, $mult, $avg_idf ) );
-                        $j++;
+                static $lcm_local_idf_bonus_sample_logged = false;
+                if ( ! $lcm_local_idf_bonus_sample_logged ) {
+                    $term_parts = array();
+                    foreach ( $matched_query_idfs as $tw => $iw ) {
+                        $tw_safe      = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $tw );
+                        $term_parts[] = sprintf( '%s=%g', $tw_safe, $iw );
                     }
-                    $lcm_local_idf_sample_logged = true;
+                    back_trace(
+                        'NOTICE',
+                        sprintf(
+                            '[LCM][local_idf] sample direct_query_idf bonus=%g sum_capped=%g terms=[%s]',
+                            $idf_bonus,
+                            $idf_sum_capped,
+                            implode( ', ', $term_parts )
+                        )
+                    );
+                    $lcm_local_idf_bonus_sample_logged = true;
                 }
             }
         }
@@ -1682,13 +1803,16 @@ function transformer_model_lexical_context_is_low_value_chunk( $text ) {
 }
 
 /**
- * Stop words removed when deriving meaningful query tokens for the relevance guard.
+ * Stop words removed when deriving meaningful query tokens for the relevance guard and local IDF bonus.
  *
- * @return array<int, string>
+ * Merges the built-in LCM list with global `$stopWords` (from translations/globals) when that variable
+ * exists and is an array; all entries are normalized to lowercase for lookup.
+ *
+ * @return array<int, string> Lowercased unique stop words.
  */
 function transformer_model_lexical_context_relevance_guard_stop_words() {
 
-    return array(
+    $local = array(
         'what',
         'is',
         'are',
@@ -1707,6 +1831,26 @@ function transformer_model_lexical_context_relevance_guard_stop_words() {
         'do',
         'does',
     );
+
+    $merged = array();
+    foreach ( $local as $w ) {
+        $w = strtolower( trim( (string) $w ) );
+        if ( $w !== '' ) {
+            $merged[ $w ] = true;
+        }
+    }
+
+    global $stopWords;
+    if ( isset( $stopWords ) && is_array( $stopWords ) ) {
+        foreach ( $stopWords as $sw ) {
+            $sw = strtolower( trim( (string) $sw ) );
+            if ( $sw !== '' ) {
+                $merged[ $sw ] = true;
+            }
+        }
+    }
+
+    return array_keys( $merged );
 }
 
 /**
