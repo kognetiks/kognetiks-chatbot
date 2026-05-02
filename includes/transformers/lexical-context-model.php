@@ -1083,14 +1083,335 @@ function transformer_model_lexical_context_merge_top_document_expansion( $after_
 }
 
 /**
+ * Tokenization aligned with PMI document processing for local IDF (not identical path, same rules).
+ *
+ * @param string $text Normalized or raw text.
+ * @return array<int, string>
+ */
+function transformer_model_lexical_context_tokenize_for_local_idf( $text ) {
+
+    $corpus = preg_replace( '/[^\w\s]/u', ' ', (string) $text );
+    $words  = preg_split( '/\s+/', strtolower( trim( $corpus ) ), -1, PREG_SPLIT_NO_EMPTY );
+    $out    = array();
+    foreach ( $words as $w ) {
+        if ( strlen( $w ) > 1 ) {
+            $out[] = $w;
+        }
+    }
+
+    return $out;
+}
+
+/**
+ * Per-term IDF from the current LCM document set: idf = log((1+N)/(1+df)) + 1.
+ *
+ * @param array<int, array<string, mixed>> $documents Same structure as fetch_wordpress_documents().
+ * @return array<string, float> Term => idf (empty if no documents).
+ */
+function transformer_model_lexical_context_build_local_idf_map( $documents ) {
+
+    if ( empty( $documents ) || ! is_array( $documents ) ) {
+        return array();
+    }
+
+    $df = array();
+    $N  = 0;
+
+    foreach ( $documents as $doc ) {
+        $corpus = isset( $doc['normalized_text'] ) ? (string) $doc['normalized_text'] : '';
+        if ( $corpus === '' ) {
+            continue;
+        }
+
+        $N++;
+        $tokens = transformer_model_lexical_context_tokenize_for_local_idf( $corpus );
+        $uniq   = array_unique( $tokens );
+
+        foreach ( $uniq as $t ) {
+            if ( $t === '' ) {
+                continue;
+            }
+            if ( ! isset( $df[ $t ] ) ) {
+                $df[ $t ] = 0;
+            }
+            $df[ $t ]++;
+        }
+    }
+
+    if ( $N === 0 || empty( $df ) ) {
+        return array();
+    }
+
+    $idf = array();
+    foreach ( $df as $term => $dcf ) {
+        $idf[ $term ] = log( ( 1 + $N ) / ( 1 + (int) $dcf ) ) + 1.0;
+    }
+
+    return $idf;
+}
+
+/**
+ * Path to the JSON file storing corpus-local IDF (same directory as PMI embeddings cache).
+ *
+ * @return string
+ */
+function transformer_model_lexical_context_local_idf_cache_path() {
+
+    return __DIR__ . '/lexical_embeddings_cache/lexical_local_idf_cache.json';
+}
+
+/**
+ * Persist local IDF map for a corpus hash (admin / scheduled rebuild only — not front-end chat).
+ *
+ * @param array<int, array<string, mixed>> $documents Same structure as fetch_wordpress_documents().
+ * @param string                           $corpus_hash SHA-256 of flattened corpus (same as embeddings version file).
+ * @return bool True if written successfully.
+ */
+function transformer_model_lexical_context_save_local_idf_cache_from_documents( $documents, $corpus_hash ) {
+
+    $corpus_hash = is_string( $corpus_hash ) ? trim( $corpus_hash ) : '';
+    if ( $corpus_hash === '' ) {
+        return false;
+    }
+
+    $cache_dir = dirname( transformer_model_lexical_context_local_idf_cache_path() );
+    if ( ! file_exists( $cache_dir ) ) {
+        if ( ! wp_mkdir_p( $cache_dir ) ) {
+            if ( function_exists( 'prod_trace' ) ) {
+                prod_trace( 'ERROR', 'LCM local IDF: failed to create cache directory: ' . $cache_dir );
+            }
+            return false;
+        }
+    }
+
+    $idf_map = transformer_model_lexical_context_build_local_idf_map( $documents );
+    $n_docs  = 0;
+    foreach ( $documents as $doc ) {
+        if ( ! empty( $doc['normalized_text'] ) ) {
+            $n_docs++;
+        }
+    }
+
+    $payload = array(
+        'version'     => 1,
+        'corpus_hash' => $corpus_hash,
+        'N_docs'      => $n_docs,
+        'created_at'  => gmdate( 'c' ),
+        'idf_map'     => $idf_map,
+    );
+
+    $json = wp_json_encode( $payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+    if ( ! is_string( $json ) || $json === '' ) {
+        if ( function_exists( 'prod_trace' ) ) {
+            prod_trace( 'ERROR', 'LCM local IDF: wp_json_encode failed.' );
+        }
+        return false;
+    }
+
+    $path = transformer_model_lexical_context_local_idf_cache_path();
+    $ok   = ( false !== file_put_contents( $path, $json, LOCK_EX ) );
+
+    if ( ! $ok && function_exists( 'prod_trace' ) ) {
+        prod_trace( 'ERROR', 'LCM local IDF: failed to write cache file: ' . $path );
+    }
+
+    return $ok;
+}
+
+/**
+ * Load local IDF cache when its corpus_hash matches the current flattened corpus (same key as PMI cache).
+ *
+ * @param string $expected_corpus_hash SHA-256 from transformer_model_lexical_context_flatten_documents().
+ * @return array{ hit: bool, idf_map?: array<string, float>, N_docs?: int, reason?: string }
+ */
+function transformer_model_lexical_context_load_local_idf_cache_for_corpus( $expected_corpus_hash ) {
+
+    $expected_corpus_hash = is_string( $expected_corpus_hash ) ? trim( $expected_corpus_hash ) : '';
+    if ( $expected_corpus_hash === '' ) {
+        return array(
+            'hit'    => false,
+            'reason' => 'empty_hash',
+        );
+    }
+
+    $path = transformer_model_lexical_context_local_idf_cache_path();
+    if ( ! file_exists( $path ) ) {
+        return array(
+            'hit'    => false,
+            'reason' => 'cache_missing',
+        );
+    }
+
+    $json = file_get_contents( $path );
+    if ( $json === false || $json === '' ) {
+        return array(
+            'hit'    => false,
+            'reason' => 'cache_invalid',
+        );
+    }
+
+    $data = json_decode( $json, true );
+    if ( ! is_array( $data ) || empty( $data['corpus_hash'] ) || ! isset( $data['idf_map'] ) ) {
+        return array(
+            'hit'    => false,
+            'reason' => 'cache_invalid',
+        );
+    }
+
+    if ( (string) $data['corpus_hash'] !== $expected_corpus_hash ) {
+        return array(
+            'hit'    => false,
+            'reason' => 'cache_stale',
+        );
+    }
+
+    $map = $data['idf_map'];
+    if ( ! is_array( $map ) ) {
+        return array(
+            'hit'    => false,
+            'reason' => 'cache_invalid',
+        );
+    }
+
+    return array(
+        'hit'       => true,
+        'idf_map'   => $map,
+        'N_docs'    => isset( $data['N_docs'] ) ? (int) $data['N_docs'] : 0,
+        'created_at'=> isset( $data['created_at'] ) ? (string) $data['created_at'] : '',
+    );
+}
+
+/**
+ * Resolve local IDF for a request: only loads from file cache (never builds on front-end).
+ *
+ * @param array<int, array<string, mixed>> $documents
+ * @return array{ map: array<string, float>, active: bool, reason: ?string, source: string }
+ */
+function transformer_model_lexical_context_resolve_runtime_local_idf( $documents ) {
+
+    $out = array(
+        'map'    => array(),
+        'active' => false,
+        'reason' => null,
+        'source' => 'none',
+    );
+
+    if ( ! transformer_model_lexical_context_local_idf_enabled() ) {
+        return $out;
+    }
+
+    $corpus_flat = transformer_model_lexical_context_flatten_documents( $documents );
+    if ( $corpus_flat === '' ) {
+        $out['reason'] = 'empty_corpus';
+        return $out;
+    }
+
+    $corpus_hash = hash( 'sha256', $corpus_flat );
+    $loaded      = transformer_model_lexical_context_load_local_idf_cache_for_corpus( $corpus_hash );
+
+    if ( ! empty( $loaded['hit'] ) && ! empty( $loaded['idf_map'] ) && is_array( $loaded['idf_map'] ) ) {
+        $out['map']    = $loaded['idf_map'];
+        $out['active'] = true;
+        $out['source'] = 'cache';
+        return $out;
+    }
+
+    if ( ! empty( $loaded['hit'] ) && empty( $loaded['idf_map'] ) ) {
+        $out['reason'] = 'cache_empty';
+        return $out;
+    }
+
+    $out['reason'] = isset( $loaded['reason'] ) ? (string) $loaded['reason'] : 'cache_missing';
+    return $out;
+}
+
+/**
+ * Optional local IDF weighting for lexical sentence scores (transformer advanced setting).
+ *
+ * @return bool
+ */
+function transformer_model_lexical_context_local_idf_enabled() {
+
+    $v = get_option( 'chatbot_transformer_model_lexical_local_idf', 'No' );
+
+    return ( $v === 'Yes' || $v === '1' || $v === 1 || $v === true );
+}
+
+/**
+ * Log local IDF summary when KOGNETIKS_LCM_DEBUG is on.
+ *
+ * @param bool                      $option_on Setting is Yes.
+ * @param bool                      $active      Non-empty IDF map will be applied to scoring.
+ * @param array<string, float>      $idf_map
+ * @param array<int, array<string, mixed>> $documents
+ * @param string|null               $inactive_reason When option on but inactive (cache miss/stale/etc.).
+ * @param string                    $source          'cache' when loaded from file.
+ * @return void
+ */
+function transformer_model_lexical_context_diag_log_local_idf( $option_on, $active, $idf_map, $documents, $inactive_reason = null, $source = 'none' ) {
+
+    if ( ! transformer_model_lexical_context_is_lcm_diagnostics_enabled() || ! function_exists( 'back_trace' ) ) {
+        return;
+    }
+
+    if ( ! $option_on ) {
+        return;
+    }
+
+    $n_docs = 0;
+    foreach ( $documents as $doc ) {
+        if ( ! empty( $doc['normalized_text'] ) ) {
+            $n_docs++;
+        }
+    }
+
+    $map_terms = is_array( $idf_map ) ? count( $idf_map ) : 0;
+
+    if ( $active && ! empty( $idf_map ) ) {
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][local_idf] option=1 active=1 source=%s N_docs=%d map_terms=%d',
+                $source,
+                $n_docs,
+                $map_terms
+            )
+        );
+    } else {
+        $reason = $inactive_reason !== null && $inactive_reason !== '' ? $inactive_reason : 'inactive';
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][local_idf] option=1 active=0 reason=%s',
+                str_replace( array( "\r", "\n" ), ' ', $reason )
+            )
+        );
+        return;
+    }
+
+    arsort( $idf_map );
+    $i = 0;
+    foreach ( $idf_map as $term => $w ) {
+        if ( $i >= 5 ) {
+            break;
+        }
+        $term_safe = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $term );
+        back_trace( 'NOTICE', sprintf( '[LCM][local_idf] term="%s" idf=%g', $term_safe, (float) $w ) );
+        $i++;
+    }
+}
+
+/**
  * Score one sentence/chunk for lexical retrieval (query + PMI-expanded words).
  *
  * @param string               $sentenceTrimmed
  * @param array<int, string>   $searchWordsLower
  * @param array<int, string>   $inputWordsLower
+ * @param array<string, float>|null $local_idf_map Optional IDF weights (runtime: from lexical_local_idf_cache.json when corpus hash matches).
+ * @param bool                 $apply_local_idf   When true and map non-empty, scale score conservatively.
  * @return array<string, mixed>|null
  */
-function transformer_model_lexical_context_lexical_sentence_score_row( $sentenceTrimmed, $searchWordsLower, $inputWordsLower ) {
+function transformer_model_lexical_context_lexical_sentence_score_row( $sentenceTrimmed, $searchWordsLower, $inputWordsLower, $local_idf_map = null, $apply_local_idf = false ) {
 
     $sentenceTrimmed = trim( $sentenceTrimmed );
     if ( $sentenceTrimmed === '' ) {
@@ -1185,6 +1506,50 @@ function transformer_model_lexical_context_lexical_sentence_score_row( $sentence
         $score *= 0.7;
     } elseif ( $sentenceWordCount > 30 ) {
         $score *= 0.9;
+    }
+
+    if ( $apply_local_idf && ! empty( $local_idf_map ) && is_array( $local_idf_map ) ) {
+        $matched_idfs = array();
+        foreach ( $inputWordsLower as $word ) {
+            if ( strlen( $word ) < 2 ) {
+                continue;
+            }
+            $pattern = '/\b' . preg_quote( $word, '/' ) . '\b/i';
+            if ( preg_match( $pattern, $sentenceLower ) && isset( $local_idf_map[ $word ] ) ) {
+                $matched_idfs[ $word ] = (float) $local_idf_map[ $word ];
+            }
+        }
+        foreach ( $searchWordsLower as $word ) {
+            if ( in_array( $word, $inputWordsLower, true ) || strlen( $word ) < 2 ) {
+                continue;
+            }
+            $pattern = '/\b' . preg_quote( $word, '/' ) . '\b/i';
+            if ( preg_match( $pattern, $sentenceLower ) && isset( $local_idf_map[ $word ] ) ) {
+                $matched_idfs[ $word ] = (float) $local_idf_map[ $word ];
+            }
+        }
+        if ( ! empty( $matched_idfs ) ) {
+            $avg_idf = array_sum( $matched_idfs ) / count( $matched_idfs );
+            $mult    = min( 2.0, max( 1.0, $avg_idf ) );
+            $score   = $score * $mult;
+
+            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                static $lcm_local_idf_sample_logged = false;
+                if ( ! $lcm_local_idf_sample_logged ) {
+                    arsort( $matched_idfs );
+                    $j = 0;
+                    foreach ( $matched_idfs as $tw => $iw ) {
+                        if ( $j >= 5 ) {
+                            break;
+                        }
+                        $tw_safe = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $tw );
+                        back_trace( 'NOTICE', sprintf( '[LCM][local_idf] sample matched term="%s" idf=%g mult=%g avg_idf=%g', $tw_safe, $iw, $mult, $avg_idf ) );
+                        $j++;
+                    }
+                    $lcm_local_idf_sample_logged = true;
+                }
+            }
+        }
     }
 
     $hasSignificantMatch = false;
@@ -1554,6 +1919,15 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         : array();
     $lcm_pre_scoring_candidates = array();
 
+    $resolved_idf     = transformer_model_lexical_context_resolve_runtime_local_idf( $documents );
+    $local_idf_map    = isset( $resolved_idf['map'] ) && is_array( $resolved_idf['map'] ) ? $resolved_idf['map'] : array();
+    $apply_local_idf  = ! empty( $resolved_idf['active'] );
+    $option_local_idf = transformer_model_lexical_context_local_idf_enabled();
+    $local_idf_reason = isset( $resolved_idf['reason'] ) ? $resolved_idf['reason'] : null;
+    $local_idf_source = isset( $resolved_idf['source'] ) ? (string) $resolved_idf['source'] : 'none';
+
+    transformer_model_lexical_context_diag_log_local_idf( $option_local_idf, $apply_local_idf, $local_idf_map, $documents, $local_idf_reason, $local_idf_source );
+
     foreach ( $documents as $doc ) {
         $pid = isset( $doc['post_id'] ) ? (int) $doc['post_id'] : 0;
         $chunks = array();
@@ -1604,7 +1978,7 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                 );
             }
 
-            $row = transformer_model_lexical_context_lexical_sentence_score_row( $trimmed, $searchWordsLower, $inputWordsLower );
+            $row = transformer_model_lexical_context_lexical_sentence_score_row( $trimmed, $searchWordsLower, $inputWordsLower, $local_idf_map, $apply_local_idf );
             if ( $row !== null ) {
                 $row['post_id'] = $pid;
                 $sentenceScores[] = $row;

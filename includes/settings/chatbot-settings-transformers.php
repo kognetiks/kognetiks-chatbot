@@ -175,7 +175,7 @@ function chatbot_transformer_model_cache_info_callback($args) {
         </a>
     </p>
     <p class="description">
-        This removes the existing lexical cache file and rebuilds it immediately. Depending on your site size, this may take a few minutes.
+        This removes the existing lexical cache file and rebuilds it immediately (PMI embeddings and LCM local IDF cache share the same corpus version). Depending on your site size, this may take a few minutes.
     </p>
     <?php
 
@@ -291,6 +291,19 @@ function chatbot_transformer_model_leading_token_ratio_callback($args) {
 
 }
 
+// LCM: optional corpus-local IDF multiplier on lexical sentence scores (default off).
+function chatbot_transformer_model_lexical_local_idf_callback( $args ) {
+
+    $lexical_local_idf = esc_attr( get_option( 'chatbot_transformer_model_lexical_local_idf', 'No' ) );
+    ?>
+    <select id="chatbot_transformer_model_lexical_local_idf" name="chatbot_transformer_model_lexical_local_idf">
+        <option value="No" <?php selected( $lexical_local_idf, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
+        <option value="Yes" <?php selected( $lexical_local_idf, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+    </select>
+    <p class="description"><?php echo esc_html( 'When Yes, LCM multiplies each chunk score by a conservative IDF factor from the current document set (not Knowledge Navigator TF-IDF tables). Use Delete & Rebuild Lexical Cache on the Transformer settings page to build the IDF file; chat requests only read the cache.' ); ?></p>
+    <?php
+}
+
 // Transformer Next Phrase Length Settings Callback - Ver 2.1.6
 function chatbot_transformer_model_sentence_response_length_callback($args) {
 
@@ -392,6 +405,7 @@ function chatbot_transformer_model_api_settings_init() {
     register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_similarity_threshold'); // Ver 2.2.1
     register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_leading_sentences_ratio'); // Ver 2.2.1
     register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_leading_token_ratio'); // Ver 2.2.1
+    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_lexical_local_idf');
 
     add_settings_section(
         'chatbot_transformer_model_api_model_general_section',
@@ -485,6 +499,14 @@ function chatbot_transformer_model_api_settings_init() {
         'chatbot_transformer_model_advanced_settings_section'
     );
 
+    add_settings_field(
+        'chatbot_transformer_model_lexical_local_idf',
+        'LCM local IDF weighting',
+        'chatbot_transformer_model_lexical_local_idf_callback',
+        'chatbot_transformer_model_advanced_settings',
+        'chatbot_transformer_model_advanced_settings_section'
+    );
+
 }
 
 if (!function_exists('chatbot_transformer_model_format_bytes')) {
@@ -535,12 +557,15 @@ function chatbot_transformer_model_handle_cache_rebuild() {
     require_once $chatbot_chatgpt_plugin_dir_path . 'includes/transformers/lexical-context-model.php';
 
     // Remove existing cache artefacts before rebuilding.
+    $localIdfCacheFile = $cacheDir . '/lexical_local_idf_cache.json';
+
     $filesToDelete = [
         $cacheFile,
         $cacheFile . '.gz',
         $cacheFile . '.ser',
         $cacheFile . '.old',
         $cacheVersionFile,
+        $localIdfCacheFile,
     ];
 
     foreach ($filesToDelete as $file) {
@@ -572,9 +597,14 @@ function chatbot_transformer_model_handle_cache_rebuild() {
     }
 
     $status = 'write_error';
+    $corpus_hash = hash('sha256', $corpus_flat);
     if (transformer_model_lexical_context_save_cache($cacheFile, $embeddings)) {
-        file_put_contents($cacheVersionFile, hash('sha256', $corpus_flat));
+        file_put_contents($cacheVersionFile, $corpus_hash);
         $status = 'success';
+        // Local IDF cache (same corpus hash as PMI); built here only — not on front-end chat requests.
+        if (!transformer_model_lexical_context_save_local_idf_cache_from_documents($documents, $corpus_hash) && function_exists('prod_trace')) {
+            prod_trace('NOTICE', 'Lexical PMI cache saved but LCM local IDF cache write failed; enable Local IDF only after fixing permissions or rebuilding.');
+        }
     }
 
     wp_safe_redirect(add_query_arg('lexical_cache_status', $status, $redirect_url));
