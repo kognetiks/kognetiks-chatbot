@@ -31,82 +31,220 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null 
         return "I didn't understand that, please try again.";
     }
 
-    // Fetch WordPress content
-    $corpus = transformer_model_lexical_context_fetch_wordpress_content();
-    
-    if (empty($corpus)) {
+    // Fetch WordPress content as discrete documents (posts/pages)
+    $documents = transformer_model_lexical_context_fetch_wordpress_documents();
+
+    if (empty($documents)) {
         return "I don't have enough content to generate a response. Please add some posts or pages to your WordPress site.";
     }
 
-    // Build embeddings
-    $embeddings = transformer_model_lexical_context_get_cached_embeddings($corpus);
+    // Build embeddings (PMI windows never cross document boundaries)
+    $embeddings = transformer_model_lexical_context_get_cached_embeddings($documents);
 
     if (empty($embeddings)) {
         return "I'm having trouble processing the content. Please try again later.";
     }
 
-    // Generate contextual response
-    $response = transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $corpus, $max_tokens);
+    // Generate contextual response from ranked document chunks
+    $response = transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $documents, $max_tokens);
 
     return $response;
 
 }
 
+/**
+ * Fetch published posts and pages as structured documents with normalized text and sentence chunks.
+ *
+ * @return array<int, array<string, mixed>> List of documents.
+ */
+function transformer_model_lexical_context_fetch_wordpress_documents() {
+
+    global $wpdb;
+
+    $results = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT ID, post_title, post_type, post_content FROM {$wpdb->posts}
+             WHERE post_status = %s AND (post_type = %s OR post_type = %s) AND post_content != ''
+             ORDER BY ID ASC",
+            'publish',
+            'post',
+            'page'
+        ),
+        ARRAY_A
+    );
+
+    if (empty($results) || !is_array($results)) {
+        return [];
+    }
+
+    $documents = [];
+
+    foreach ($results as $row) {
+        if (empty($row['post_content'])) {
+            continue;
+        }
+
+        $post_id   = isset($row['ID'] ) ? (int) $row['ID'] : 0;
+        $post_type = isset($row['post_type'] ) ? (string) $row['post_type'] : 'post';
+        $title     = isset($row['post_title'] ) ? $row['post_title'] : '';
+
+        $normalized = wp_strip_all_tags( (string) $row['post_content'] );
+        $normalized = preg_replace( '/\s+/', ' ', $normalized );
+        $normalized = trim( $normalized );
+
+        if ( $normalized === '' ) {
+            continue;
+        }
+
+        $permalink = '';
+        if ( $post_id > 0 && function_exists( 'get_permalink' ) ) {
+            $permalink = (string) get_permalink( $post_id );
+        }
+
+        $chunks = transformer_model_lexical_context_split_into_sentence_chunks( $normalized );
+
+        $documents[] = array(
+            'post_id'          => $post_id,
+            'post_title'       => $title,
+            'post_type'        => $post_type,
+            'permalink'        => $permalink,
+            'normalized_text'  => $normalized,
+            'chunks'           => $chunks,
+        );
+    }
+
+    return $documents;
+
+}
+
+/**
+ * Flatten structured documents into one string (cache fingerprint and legacy PMI compatibility).
+ *
+ * @param array<int, array<string, mixed>> $documents Documents from transformer_model_lexical_context_fetch_wordpress_documents().
+ * @return string
+ */
+function transformer_model_lexical_context_flatten_documents( $documents ) {
+
+    if ( empty( $documents ) || ! is_array( $documents ) ) {
+        return '';
+    }
+
+    $parts = array();
+    foreach ( $documents as $doc ) {
+        if ( ! empty( $doc['normalized_text'] ) ) {
+            $parts[] = $doc['normalized_text'];
+        }
+    }
+
+    return trim( implode( ' ', $parts ) );
+
+}
+
+/**
+ * Split normalized text into sentence-level chunks for retrieval ranking.
+ *
+ * @param string $text Normalized plain text.
+ * @return array<int, string>
+ */
+function transformer_model_lexical_context_split_into_sentence_chunks( $text ) {
+
+    $text = trim( (string) $text );
+    if ( $text === '' ) {
+        return array();
+    }
+
+    $sentences = preg_split( '/(?<=[.!?])\s+/', $text, -1, PREG_SPLIT_NO_EMPTY );
+    if ( ! is_array( $sentences ) ) {
+        return array();
+    }
+
+    $out = array();
+    foreach ( $sentences as $sentence ) {
+        $sentence = trim( $sentence );
+        if ( $sentence !== '' ) {
+            $out[] = $sentence;
+        }
+    }
+
+    return array_values( $out );
+
+}
+
 // Function to get cached embeddings
-function transformer_model_lexical_context_get_cached_embeddings($corpus, $windowSize = 3) {
+function transformer_model_lexical_context_get_cached_embeddings( $documents_or_corpus, $windowSize = null ) {
+
+    // Backward compatibility: single concatenated string treated as one synthetic document.
+    if ( is_string( $documents_or_corpus ) ) {
+        $corpus_flat = $documents_or_corpus;
+        $documents   = array(
+            array(
+                'post_id'         => 0,
+                'post_title'      => '',
+                'post_type'       => 'legacy',
+                'permalink'       => '',
+                'normalized_text' => $corpus_flat,
+                'chunks'          => transformer_model_lexical_context_split_into_sentence_chunks( $corpus_flat ),
+            ),
+        );
+    } else {
+        $documents = $documents_or_corpus;
+        if ( empty( $documents ) || ! is_array( $documents ) ) {
+            return array();
+        }
+        $corpus_flat = transformer_model_lexical_context_flatten_documents( $documents );
+    }
+
+    if ( $windowSize === null || ! is_numeric( $windowSize ) ) {
+        $windowSize = intval( esc_attr( get_option( 'chatbot_transformer_model_word_content_window_size', 3 ) ) );
+    }
+    $windowSize = max( 1, min( 50, intval( $windowSize ) ) );
 
     // Cache directory path
     $cacheDir = __DIR__ . '/lexical_embeddings_cache';
-    
+
     // Ensure cache directory exists
-    if (!file_exists($cacheDir)) {
-        if (!wp_mkdir_p($cacheDir)) {
-            // If directory creation fails, log error and return empty array
-            prod_trace('ERROR', 'Failed to create cache directory: ' . $cacheDir);
-            return [];
+    if ( ! file_exists( $cacheDir ) ) {
+        if ( ! wp_mkdir_p( $cacheDir ) ) {
+            prod_trace( 'ERROR', 'Failed to create cache directory: ' . $cacheDir );
+            return array();
         }
     }
-    
+
     // Create index.php for security if it doesn't exist
     $indexFile = $cacheDir . '/index.php';
-    if (!file_exists($indexFile)) {
+    if ( ! file_exists( $indexFile ) ) {
         $indexContent = "<?php\n// Silence is golden.\n";
-        file_put_contents($indexFile, $indexContent);
+        file_put_contents( $indexFile, $indexContent );
     }
-    
-    $cacheFile = $cacheDir . '/lexical_embeddings_cache.php';
-    $cacheVersionFile = $cacheDir . '/lexical_embeddings_cache_version.txt';
-    
-    // Calculate corpus hash for cache invalidation
-    $corpusHash = hash('sha256', $corpus);
-    $cacheValid = false;
 
-    // Check if cache exists and is valid
-    if (file_exists($cacheFile) && file_exists($cacheVersionFile)) {
-        $cachedHash = trim(file_get_contents($cacheVersionFile));
-        if ($cachedHash === $corpusHash) {
+    $cacheFile        = $cacheDir . '/lexical_embeddings_cache.php';
+    $cacheVersionFile = $cacheDir . '/lexical_embeddings_cache_version.txt';
+
+    // Corpus hash for cache invalidation (stable order via ORDER BY ID in fetch).
+    $corpusHash  = hash( 'sha256', $corpus_flat );
+    $cacheValid  = false;
+
+    if ( file_exists( $cacheFile ) && file_exists( $cacheVersionFile ) ) {
+        $cachedHash = trim( (string) file_get_contents( $cacheVersionFile ) );
+        if ( $cachedHash === $corpusHash ) {
             $cacheValid = true;
         }
     }
 
-    if ($cacheValid) {
-        $embeddings = transformer_model_lexical_context_load_cache($cacheFile);
-        // Validate cached embeddings structure
-        if (is_array($embeddings) && !empty($embeddings)) {
+    if ( $cacheValid ) {
+        $embeddings = transformer_model_lexical_context_load_cache( $cacheFile );
+        if ( is_array( $embeddings ) && ! empty( $embeddings ) ) {
             return $embeddings;
         }
     }
 
-    // Check for old uncompressed cache and migrate it
-    transformer_model_lexical_context_migrate_old_cache($cacheFile);
+    transformer_model_lexical_context_migrate_old_cache( $cacheFile );
 
-    // Rebuild cache if invalid or missing
-    $embeddings = transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize);
-    
-    if (!empty($embeddings)) {
-        // Write cache file with compression
-        if (transformer_model_lexical_context_save_cache($cacheFile, $embeddings)) {
-            file_put_contents($cacheVersionFile, $corpusHash);
+    $embeddings = transformer_model_lexical_context_build_pmi_matrix_from_documents( $documents, $windowSize );
+
+    if ( ! empty( $embeddings ) ) {
+        if ( transformer_model_lexical_context_save_cache( $cacheFile, $embeddings ) ) {
+            file_put_contents( $cacheVersionFile, $corpusHash );
         }
     }
 
@@ -114,124 +252,143 @@ function transformer_model_lexical_context_get_cached_embeddings($corpus, $windo
 
 }
 
-// Function to fetch WordPress content
+// Function to fetch WordPress content (backward compatibility: flattened documents).
 function transformer_model_lexical_context_fetch_wordpress_content() {
 
-    global $wpdb;
-
-    // Query to get post and page content with better error handling
-    $results = $wpdb->get_results(
-        $wpdb->prepare(
-            "SELECT post_content FROM {$wpdb->posts} WHERE post_status = %s AND (post_type = %s OR post_type = %s) AND post_content != ''",
-            'publish', 'post', 'page'
-        ),
-        ARRAY_A
-    );
-
-    if (empty($results) || !is_array($results)) {
-        return '';
-    }
-
-    // Combine all content into a single string
-    $content = '';
-    foreach ($results as $row) {
-        if (isset($row['post_content']) && !empty($row['post_content'])) {
-            $content .= ' ' . $row['post_content'];
-        }
-    }
-
-    // Clean and normalize content
-    $content = wp_strip_all_tags( $content ); // Remove HTML tags
-    $content = preg_replace('/\s+/', ' ', $content); // Normalize whitespace
-    $content = trim($content);
-
-    return $content;
+    $documents = transformer_model_lexical_context_fetch_wordpress_documents();
+    return transformer_model_lexical_context_flatten_documents( $documents );
 
 }
 
-// Function to build a PMI matrix for word embeddings
-function transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize = 3) {
+/**
+ * Accumulate co-occurrence counts within one token sequence (one document). Does not span sequences.
+ *
+ * @param array<int, string> $words Token sequence.
+ * @param int                $windowSize Context window radius.
+ * @param array<string, array<string, int>> $coOccurrenceCounts Mutable global counts (by reference).
+ * @param int                $totalCoOccurrences Mutable total pairs (by reference).
+ * @return void
+ */
+function transformer_model_lexical_context_accumulate_cooccurrences_within_sequence( $words, $windowSize, &$coOccurrenceCounts, &$totalCoOccurrences ) {
 
-    if (empty($corpus)) {
-        return [];
-    }
-
-    // Improved tokenization: handle punctuation and normalize
-    $corpus = preg_replace('/[^\w\s]/u', ' ', $corpus); // Remove punctuation but keep spaces
-    $words = preg_split('/\s+/', strtolower(trim($corpus)));
-    $words = array_filter($words, function($word) {
-        return !empty($word) && strlen($word) > 1; // Filter out single characters and empty strings
-    });
-    $words = array_values($words); // Re-index array
-
-    if (empty($words)) {
-        return [];
-    }
-
-    $vocab = array_unique($words);
-    $wordCounts = array_count_values($words);
-    $totalWords = count($words);
-    $totalCoOccurrences = 0; // Track total co-occurrence pairs
-
-    // Initialize co-occurrence counts
-    $coOccurrenceCounts = [];
-
-    $wordCount = count($words);
-    for ($i = 0; $i < $wordCount; $i++) {
-        $word = $words[$i];
-        if (empty($word)) {
+    $wordCount = count( $words );
+    for ( $i = 0; $i < $wordCount; $i++ ) {
+        $word = $words[ $i ];
+        if ( $word === '' ) {
             continue;
         }
-        
-        $contextStart = max(0, $i - $windowSize);
-        $contextEnd = min($wordCount - 1, $i + $windowSize);
-        
-        for ($j = $contextStart; $j <= $contextEnd; $j++) {
-            if ($i != $j && isset($words[$j]) && !empty($words[$j])) {
-                $contextWord = $words[$j];
-                if (!isset($coOccurrenceCounts[$word][$contextWord])) {
-                    $coOccurrenceCounts[$word][$contextWord] = 0;
+
+        $contextStart = max( 0, $i - $windowSize );
+        $contextEnd   = min( $wordCount - 1, $i + $windowSize );
+
+        for ( $j = $contextStart; $j <= $contextEnd; $j++ ) {
+            if ( $i !== $j && isset( $words[ $j ] ) && $words[ $j ] !== '' ) {
+                $contextWord = $words[ $j ];
+                if ( ! isset( $coOccurrenceCounts[ $word ][ $contextWord ] ) ) {
+                    $coOccurrenceCounts[ $word ][ $contextWord ] = 0;
                 }
-                $coOccurrenceCounts[$word][$contextWord] += 1;
-                $totalCoOccurrences += 1;
+                $coOccurrenceCounts[ $word ][ $contextWord ] += 1;
+                $totalCoOccurrences++;
             }
         }
     }
 
-    if ($totalCoOccurrences == 0) {
-        return [];
+}
+
+/**
+ * Build PMI matrix from multiple documents; sliding windows never cross document boundaries.
+ *
+ * @param array<int, array<string, mixed>> $documents Documents with normalized_text.
+ * @param int                               $windowSize Window radius.
+ * @return array<string, array<string, float>>
+ */
+function transformer_model_lexical_context_build_pmi_matrix_from_documents( $documents, $windowSize = 3 ) {
+
+    if ( empty( $documents ) || ! is_array( $documents ) ) {
+        return array();
     }
 
-    // Compute PMI values with corrected formula
-    $embeddings = [];
-    foreach ($coOccurrenceCounts as $word => $contexts) {
-        if (!isset($wordCounts[$word]) || $wordCounts[$word] == 0) {
+    $windowSize = max( 1, min( 50, intval( $windowSize ) ) );
+
+    $coOccurrenceCounts = array();
+    $totalCoOccurrences = 0;
+    $wordCounts         = array();
+    $totalWords         = 0;
+
+    foreach ( $documents as $doc ) {
+        $corpus = isset( $doc['normalized_text'] ) ? (string) $doc['normalized_text'] : '';
+        if ( $corpus === '' ) {
             continue;
         }
-        
-        foreach ($contexts as $contextWord => $count) {
-            if (!isset($wordCounts[$contextWord]) || $wordCounts[$contextWord] == 0) {
+
+        $corpus = preg_replace( '/[^\w\s]/u', ' ', $corpus );
+        $words  = preg_split( '/\s+/', strtolower( trim( $corpus ) ) );
+        $words  = array_filter(
+            $words,
+            function ( $word ) {
+                return ! empty( $word ) && strlen( $word ) > 1;
+            }
+        );
+        $words = array_values( $words );
+
+        if ( empty( $words ) ) {
+            continue;
+        }
+
+        foreach ( $words as $w ) {
+            if ( ! isset( $wordCounts[ $w ] ) ) {
+                $wordCounts[ $w ] = 0;
+            }
+            $wordCounts[ $w ]++;
+            $totalWords++;
+        }
+
+        transformer_model_lexical_context_accumulate_cooccurrences_within_sequence( $words, $windowSize, $coOccurrenceCounts, $totalCoOccurrences );
+    }
+
+    if ( $totalCoOccurrences === 0 || $totalWords === 0 ) {
+        return array();
+    }
+
+    return transformer_model_lexical_context_finalize_pmi_from_counts( $coOccurrenceCounts, $wordCounts, $totalWords, $totalCoOccurrences );
+
+}
+
+/**
+ * PMI matrix from global co-occurrence and word counts.
+ *
+ * @param array<string, array<string, int>> $coOccurrenceCounts
+ * @param array<string, int>                $wordCounts
+ * @param int                               $totalWords
+ * @param int                               $totalCoOccurrences
+ * @return array<string, array<string, float>>
+ */
+function transformer_model_lexical_context_finalize_pmi_from_counts( $coOccurrenceCounts, $wordCounts, $totalWords, $totalCoOccurrences ) {
+
+    $embeddings = array();
+
+    foreach ( $coOccurrenceCounts as $word => $contexts ) {
+        if ( ! isset( $wordCounts[ $word ] ) || (int) $wordCounts[ $word ] === 0 ) {
+            continue;
+        }
+
+        foreach ( $contexts as $contextWord => $count ) {
+            if ( ! isset( $wordCounts[ $contextWord ] ) || (int) $wordCounts[ $contextWord ] === 0 ) {
                 continue;
             }
-            
-            // Fixed PMI calculation
-            $p_word = $wordCounts[$word] / $totalWords;
-            $p_context = $wordCounts[$contextWord] / $totalWords;
-            $p_word_context = $count / $totalCoOccurrences; // Fixed: use total co-occurrences, not total words
-            
-            // Avoid division by zero and negative logarithms
-            if ($p_word > 0 && $p_context > 0 && $p_word_context > 0) {
-                $ratio = $p_word_context / ($p_word * $p_context);
-                if ($ratio > 0) {
-                    // Use log base 2 for PMI (standard in NLP)
-                    $pmi = log($ratio, 2);
-                    if ($pmi > 0 && is_finite($pmi)) {
-                        // Optimization: Filter out very low PMI values (sparse storage)
-                        // Only store PMI values above threshold (e.g., 0.1) to reduce file size
+
+            $p_word         = $wordCounts[ $word ] / $totalWords;
+            $p_context      = $wordCounts[ $contextWord ] / $totalWords;
+            $p_word_context = $count / $totalCoOccurrences;
+
+            if ( $p_word > 0 && $p_context > 0 && $p_word_context > 0 ) {
+                $ratio = $p_word_context / ( $p_word * $p_context );
+                if ( $ratio > 0 ) {
+                    $pmi = log( $ratio, 2 );
+                    if ( $pmi > 0 && is_finite( $pmi ) ) {
                         $pmiThreshold = 0.1;
-                        if ($pmi >= $pmiThreshold) {
-                            // Reduce precision to 3 decimal places to save space
-                            $embeddings[$word][$contextWord] = round($pmi, 3);
+                        if ( $pmi >= $pmiThreshold ) {
+                            $embeddings[ $word ][ $contextWord ] = round( $pmi, 3 );
                         }
                     }
                 }
@@ -240,7 +397,30 @@ function transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize
     }
 
     return $embeddings;
-    
+
+}
+
+// Function to build a PMI matrix for word embeddings (legacy: treats corpus as a single document).
+function transformer_model_lexical_context_build_pmi_matrix( $corpus, $windowSize = 3 ) {
+
+    if ( empty( $corpus ) ) {
+        return array();
+    }
+
+    return transformer_model_lexical_context_build_pmi_matrix_from_documents(
+        array(
+            array(
+                'post_id'          => 0,
+                'post_title'       => '',
+                'post_type'        => 'synthetic',
+                'permalink'        => '',
+                'normalized_text'  => $corpus,
+                'chunks'           => transformer_model_lexical_context_split_into_sentence_chunks( $corpus ),
+            ),
+        ),
+        $windowSize
+    );
+
 }
 
 // Function to migrate old cache format to compressed format
@@ -416,13 +596,31 @@ function transformer_model_lexical_context_cosine_similarity($vectorA, $vectorB)
 }
 
 // Function to generate a contextual response
-function transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $corpus, $responseLength = 50) {
+function transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $documents, $responseLength = 50) {
 
     global $stopWords;
 
     // Ensure stopWords is initialized
     if (!isset($stopWords) || !is_array($stopWords)) {
         $stopWords = [];
+    }
+
+    // Legacy: single concatenated corpus string.
+    if ( is_string( $documents ) ) {
+        $documents = array(
+            array(
+                'post_id'         => 0,
+                'post_title'      => '',
+                'post_type'       => 'legacy',
+                'permalink'       => '',
+                'normalized_text' => $documents,
+                'chunks'          => transformer_model_lexical_context_split_into_sentence_chunks( $documents ),
+            ),
+        );
+    }
+
+    if ( empty( $documents ) || ! is_array( $documents ) ) {
+        return "I don't have enough content to generate a response. Please add some posts or pages to your WordPress site.";
     }
 
     if (empty($embeddings)) {
@@ -563,10 +761,10 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
     // Try to find actual sentences from corpus that match the input query
     // Prioritize input words over similar words for better query-specific responses
     $queryWords = array_merge($inputWords, array_slice($topWords, 0, 10)); // Combine input words with top similar words
-    $response = transformer_model_lexical_context_build_sentences_from_corpus(
-        $corpus, 
-        $queryWords, 
-        $inputWords, 
+    $response = transformer_model_lexical_context_build_sentences_from_documents(
+        $documents,
+        $queryWords,
+        $inputWords,
         $responseLength,
         $sentenceResponseCount,
         $similarityThreshold,
@@ -589,225 +787,936 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
 
 }
 
-// Function to build sentences from corpus using query words
-function transformer_model_lexical_context_build_sentences_from_corpus($corpus, $searchWords, $inputWords, $maxWords, $sentenceResponseCount = 5, $similarityThreshold = 0.3, $leadingSentencesRatio = 0.2, $leadingTokenRatio = 0.2) {
-    
-    // Split corpus into sentences
-    $sentences = preg_split('/(?<=[.!?])\s+/', $corpus, -1, PREG_SPLIT_NO_EMPTY);
-    
-    if (empty($sentences)) {
-        return '';
+/**
+ * Compare two scored sentence rows (secondary ordering within the same document rank).
+ *
+ * @param array<string, mixed> $a
+ * @param array<string, mixed> $b
+ * @return int
+ */
+function transformer_model_lexical_context_compare_sentence_score_rows( $a, $b ) {
+
+    $aHasSig = isset( $a['hasSignificantMatch'] ) ? $a['hasSignificantMatch'] : false;
+    $bHasSig = isset( $b['hasSignificantMatch'] ) ? $b['hasSignificantMatch'] : false;
+    if ( $aHasSig != $bHasSig ) {
+        return $bHasSig ? 1 : -1;
     }
-    
-    // Score sentences based on how well they match the query
-    $sentenceScores = [];
-    $searchWordsLower = array_map('strtolower', $searchWords);
-    $inputWordsLower = array_map('strtolower', $inputWords);
-    
-    foreach ($sentences as $sentence) {
-        $sentenceLower = strtolower($sentence);
-        $sentenceTrimmed = trim($sentence);
-        $sentenceWordCount = str_word_count($sentenceTrimmed);
-        
-        // Skip very long sentences (>60 words) - they're likely run-on or contain too much filler
-        if ($sentenceWordCount > 60) {
+    if ( $a['inputAtStart'] != $b['inputAtStart'] ) {
+        return $b['inputAtStart'] - $a['inputAtStart'];
+    }
+    if ( $a['inputMatched'] != $b['inputMatched'] ) {
+        return $b['inputMatched'] - $a['inputMatched'];
+    }
+    if ( abs( $a['density'] - $b['density'] ) > 0.1 ) {
+        return $b['density'] > $a['density'] ? 1 : -1;
+    }
+    if ( $a['score'] != $b['score'] ) {
+        return $b['score'] - $a['score'];
+    }
+    if ( abs( $a['wordCount'] - $b['wordCount'] ) > 5 ) {
+        return $a['wordCount'] - $b['wordCount'];
+    }
+
+    return $b['matched'] - $a['matched'];
+}
+
+/**
+ * Rank documents by best chunk score, then reorder sentence rows (best documents first).
+ *
+ * @param array<int, array<string, mixed>> $sentenceScores
+ * @return array<int, array<string, mixed>>
+ */
+function transformer_model_lexical_context_sort_sentence_scores_with_document_priority( $sentenceScores ) {
+
+    $docMax = array();
+    foreach ( $sentenceScores as $row ) {
+        $pid = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
+        $s   = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
+        if ( ! isset( $docMax[ $pid ] ) || $s > $docMax[ $pid ] ) {
+            $docMax[ $pid ] = $s;
+        }
+    }
+
+    if ( empty( $docMax ) ) {
+        return $sentenceScores;
+    }
+
+    arsort( $docMax );
+    $docOrder = array_keys( $docMax );
+    $rankOf   = array_flip( $docOrder );
+
+    usort(
+        $sentenceScores,
+        function ( $a, $b ) use ( $rankOf ) {
+            $pa = isset( $a['post_id'] ) ? (int) $a['post_id'] : 0;
+            $pb = isset( $b['post_id'] ) ? (int) $b['post_id'] : 0;
+            $ra = isset( $rankOf[ $pa ] ) ? (int) $rankOf[ $pa ] : 9999;
+            $rb = isset( $rankOf[ $pb ] ) ? (int) $rankOf[ $pb ] : 9999;
+            if ( $ra !== $rb ) {
+                return $ra <=> $rb;
+            }
+
+            return transformer_model_lexical_context_compare_sentence_score_rows( $a, $b );
+        }
+    );
+
+    return $sentenceScores;
+}
+
+/**
+ * Drop sentence rows from documents whose best chunk score falls below a ratio of the top document’s max score.
+ * Keeps retrieval tight: prefer the winning post, only pull from other posts when they are nearly as strong.
+ *
+ * @param array<int, array<string, mixed>> $sentenceScores Already sorted (e.g. after sort_sentence_scores_with_document_priority).
+ * @param float                             $cross_document_score_ratio Min document max score vs best (e.g. 0.85 = 85%).
+ * @return array<int, array<string, mixed>>
+ */
+function transformer_model_lexical_context_filter_sentence_scores_cross_document_gate( $sentenceScores, $cross_document_score_ratio = 0.85 ) {
+
+    if ( empty( $sentenceScores ) ) {
+        return $sentenceScores;
+    }
+
+    $docMax = array();
+    foreach ( $sentenceScores as $row ) {
+        $pid = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
+        $s   = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
+        if ( ! isset( $docMax[ $pid ] ) || $s > $docMax[ $pid ] ) {
+            $docMax[ $pid ] = $s;
+        }
+    }
+
+    // Single-document corpus (legacy string path): no cross-document leakage to gate.
+    if ( count( $docMax ) <= 1 ) {
+        return $sentenceScores;
+    }
+
+    $cross_document_score_ratio = max( 0.0, min( 1.0, (float) $cross_document_score_ratio ) );
+
+    $bestDocScore = max( $docMax );
+    if ( $bestDocScore <= 0 ) {
+        return $sentenceScores;
+    }
+
+    $minDocMaxForInclusion = $bestDocScore * $cross_document_score_ratio;
+
+    $allowed = array();
+    foreach ( $docMax as $pid => $maxScore ) {
+        if ( $maxScore >= $minDocMaxForInclusion ) {
+            $allowed[ $pid ] = true;
+        }
+    }
+
+    $filtered = array();
+    foreach ( $sentenceScores as $row ) {
+        $pid = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
+        if ( ! empty( $allowed[ $pid ] ) ) {
+            $filtered[] = $row;
+        }
+    }
+
+    // If filtering removed everything (should not happen when best doc has rows), keep original for fallback.
+    return ! empty( $filtered ) ? $filtered : $sentenceScores;
+}
+
+/**
+ * Row-level score gate: after document filtering, keep only chunks whose score is near the best chunk’s score.
+ * Drops zero/near-zero scores to reduce generic filler, tags, and weak matches when a strong chunk exists.
+ *
+ * @param array<int, array<string, mixed>> $sentenceScores Output of cross-document gate (or equivalent).
+ * @param float                             $row_score_ratio Min row score vs best row (e.g. 0.65 = 65%).
+ * @return array<int, array<string, mixed>>
+ */
+function transformer_model_lexical_context_filter_sentence_scores_row_gate( $sentenceScores, $row_score_ratio = 0.65 ) {
+
+    if ( empty( $sentenceScores ) ) {
+        return $sentenceScores;
+    }
+
+    // Absolute floor for “no signal” rows (tags, boilerplate with incidental overlap).
+    $near_zero_cutoff = 0.05;
+
+    $best_row_score = 0.0;
+    foreach ( $sentenceScores as $row ) {
+        $s = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
+        if ( is_finite( $s ) && $s > $best_row_score ) {
+            $best_row_score = $s;
+        }
+    }
+
+    // Nothing meaningful to anchor ratio; leave list unchanged.
+    if ( $best_row_score <= $near_zero_cutoff ) {
+        return $sentenceScores;
+    }
+
+    $row_score_ratio = max( 0.0, min( 1.0, (float) $row_score_ratio ) );
+    $min_row_score   = $best_row_score * $row_score_ratio;
+
+    $filtered = array();
+    foreach ( $sentenceScores as $row ) {
+        $s = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
+        if ( ! is_finite( $s ) || $s <= $near_zero_cutoff ) {
             continue;
         }
-        
-        // Skip sentences that are mostly citations, author lists, or metadata
-        // These often start with patterns like "by Author Name" or contain lots of commas with names
-        $citationPatterns = [
-            '/^by\s+[A-Z][a-z]+\s+[A-Z]/', // "By Author Name"
-            '/^\d{4}[,\s]/', // Year at start
-            '/^[A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s+[A-Z][a-z]+/', // Multiple names
-        ];
-        $isCitation = false;
-        foreach ($citationPatterns as $pattern) {
-            if (preg_match($pattern, $sentenceTrimmed)) {
-                $isCitation = true;
-                break;
+        if ( $s >= $min_row_score ) {
+            $filtered[] = $row;
+        }
+    }
+
+    return ! empty( $filtered ) ? $filtered : $sentenceScores;
+}
+
+/**
+ * Normalize sentence text for deduplication when merging scored rows.
+ *
+ * @param string $sentence
+ * @return string
+ */
+function transformer_model_lexical_context_sentence_dedupe_key( $sentence ) {
+
+    $sentence = wp_strip_all_tags( (string) $sentence );
+    $sentence = preg_replace( '/\s+/', ' ', trim( $sentence ) );
+
+    return md5( strtolower( $sentence ) );
+}
+
+/**
+ * After row-level filtering, add extra chunks from the top-ranked document only (up to sentence response cap)
+ * so answers can include secondary sentences from the same post without dropping below the global row gate.
+ *
+ * @param array<int, array<string, mixed>> $after_doc_gate Rows after cross-document gate (full pool per allowed doc).
+ * @param array<int, array<string, mixed>> $after_row_gate   Rows after row gate (may be fallback = input).
+ * @param float                             $row_score_ratio Matches row gate ratio at call site (reserved / documented parity).
+ * @param int                               $max_sentences_per_top_doc Cap aligned with sentence response count setting.
+ * @return array<int, array<string, mixed>>
+ */
+function transformer_model_lexical_context_merge_top_document_expansion( $after_doc_gate, $after_row_gate, $row_score_ratio = 0.65, $max_sentences_per_top_doc = 5 ) {
+
+    if ( empty( $after_doc_gate ) ) {
+        return $after_row_gate;
+    }
+
+    $near_zero_cutoff = 0.05;
+
+    $doc_max = array();
+    foreach ( $after_doc_gate as $row ) {
+        $pid = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
+        $s   = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
+        if ( ! isset( $doc_max[ $pid ] ) || $s > $doc_max[ $pid ] ) {
+            $doc_max[ $pid ] = $s;
+        }
+    }
+
+    if ( empty( $doc_max ) ) {
+        return $after_row_gate;
+    }
+
+    arsort( $doc_max );
+    reset( $doc_max );
+    $top_doc_id = (int) key( $doc_max );
+
+    $merged = is_array( $after_row_gate ) ? $after_row_gate : array();
+
+    $seen = array();
+    foreach ( $merged as $r ) {
+        if ( ! empty( $r['sentence'] ) ) {
+            $seen[ transformer_model_lexical_context_sentence_dedupe_key( $r['sentence'] ) ] = true;
+        }
+    }
+
+    $from_top = 0;
+    foreach ( $merged as $r ) {
+        if ( (int) ( $r['post_id'] ?? 0 ) === $top_doc_id ) {
+            $from_top++;
+        }
+    }
+
+    $cap = max( 1, min( 50, (int) $max_sentences_per_top_doc ) );
+
+    $top_doc_rows = array();
+    foreach ( $after_doc_gate as $row ) {
+        if ( (int) ( $row['post_id'] ?? 0 ) === $top_doc_id ) {
+            $top_doc_rows[] = $row;
+        }
+    }
+
+    usort(
+        $top_doc_rows,
+        function ( $a, $b ) {
+            $sa = isset( $a['score'] ) ? (float) $a['score'] : 0.0;
+            $sb = isset( $b['score'] ) ? (float) $b['score'] : 0.0;
+            if ( $sa !== $sb ) {
+                return $sb <=> $sa;
+            }
+
+            return transformer_model_lexical_context_compare_sentence_score_rows( $a, $b );
+        }
+    );
+
+    // Fill up to $cap distinct sentences from the top-ranked document (score order), adding below–row-gate chunks when needed.
+    foreach ( $top_doc_rows as $row ) {
+        if ( $from_top >= $cap ) {
+            break;
+        }
+
+        $sentence = isset( $row['sentence'] ) ? $row['sentence'] : '';
+        $key      = transformer_model_lexical_context_sentence_dedupe_key( $sentence );
+        if ( isset( $seen[ $key ] ) ) {
+            continue;
+        }
+
+        $s = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
+        if ( ! is_finite( $s ) || $s <= $near_zero_cutoff ) {
+            continue;
+        }
+
+        $merged[]     = $row;
+        $seen[ $key ] = true;
+        $from_top++;
+    }
+
+    if ( empty( $merged ) ) {
+        return $after_row_gate;
+    }
+
+    return transformer_model_lexical_context_sort_sentence_scores_with_document_priority( $merged );
+}
+
+/**
+ * Score one sentence/chunk for lexical retrieval (query + PMI-expanded words).
+ *
+ * @param string               $sentenceTrimmed
+ * @param array<int, string>   $searchWordsLower
+ * @param array<int, string>   $inputWordsLower
+ * @return array<string, mixed>|null
+ */
+function transformer_model_lexical_context_lexical_sentence_score_row( $sentenceTrimmed, $searchWordsLower, $inputWordsLower ) {
+
+    $sentenceTrimmed = trim( $sentenceTrimmed );
+    if ( $sentenceTrimmed === '' ) {
+        return null;
+    }
+
+    $sentenceLower       = strtolower( $sentenceTrimmed );
+    $sentenceWordCount   = str_word_count( $sentenceTrimmed );
+
+    if ( $sentenceWordCount > 60 ) {
+        return null;
+    }
+
+    $citationPatterns = array(
+        '/^by\s+[A-Z][a-z]+\s+[A-Z]/',
+        '/^\d{4}[,\s]/',
+        '/^[A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s+[A-Z][a-z]+/',
+    );
+    foreach ( $citationPatterns as $pattern ) {
+        if ( preg_match( $pattern, $sentenceTrimmed ) ) {
+            return null;
+        }
+    }
+
+    $commaCount = substr_count( $sentenceTrimmed, ',' );
+    if ( $commaCount > 5 && $sentenceWordCount < 30 ) {
+        return null;
+    }
+
+    $questionPatterns = array(
+        '/^what\s+is\s+[^?]+\?$/i',
+        '/^what\s+are\s+[^?]+\?$/i',
+    );
+    foreach ( $questionPatterns as $pattern ) {
+        if ( preg_match( $pattern, $sentenceTrimmed ) ) {
+            $hasInputWords = false;
+            foreach ( $inputWordsLower as $inputWord ) {
+                if ( stripos( $sentenceLower, $inputWord ) !== false ) {
+                    $hasInputWords = true;
+                    break;
+                }
+            }
+            if ( ! $hasInputWords ) {
+                return null;
             }
         }
-        // Also check if sentence has too many commas (likely a list)
-        $commaCount = substr_count($sentenceTrimmed, ',');
-        if ($commaCount > 5 && $sentenceWordCount < 30) {
-            $isCitation = true; // Likely a citation or list
+    }
+
+    $score             = 0;
+    $matchedWords      = array();
+    $inputWordsMatched = 0;
+    $inputWordsAtStart = 0;
+
+    foreach ( $inputWordsLower as $word ) {
+        $pattern = '/\b' . preg_quote( $word, '/' ) . '\b/i';
+        $count   = preg_match_all( $pattern, $sentenceLower );
+        if ( $count > 0 ) {
+            $score += $count * 10;
+            $inputWordsMatched++;
+            if ( ! in_array( $word, $matchedWords, true ) ) {
+                $matchedWords[] = $word;
+            }
+            $firstWords = implode( ' ', array_slice( explode( ' ', $sentenceLower ), 0, 10 ) );
+            if ( preg_match( $pattern, $firstWords ) ) {
+                $inputWordsAtStart++;
+                $score += 5;
+            }
         }
-        
-        if ($isCitation) {
-            continue; // Skip citation-style sentences
+    }
+
+    foreach ( $searchWordsLower as $word ) {
+        if ( in_array( $word, $inputWordsLower, true ) ) {
+            continue;
         }
-        
-        // Skip sentences that are just questions without answers
-        // These often start with "What is" but don't contain the actual answer
-        $questionPatterns = [
-            '/^what\s+is\s+[^?]+\?$/i', // "What is X?" - just a question
-            '/^what\s+are\s+[^?]+\?$/i', // "What are X?" - just a question
-        ];
-        $isJustQuestion = false;
-        foreach ($questionPatterns as $pattern) {
-            if (preg_match($pattern, $sentenceTrimmed)) {
-                // Check if it contains any of our input words (if it does, it might be relevant)
-                $hasInputWords = false;
-                foreach ($inputWordsLower as $inputWord) {
-                    if (stripos($sentenceLower, $inputWord) !== false) {
-                        $hasInputWords = true;
-                        break;
-                    }
-                }
-                // If it's just a question and doesn't have our input words, skip it
-                if (!$hasInputWords) {
-                    $isJustQuestion = true;
+        $pattern = '/\b' . preg_quote( $word, '/' ) . '\b/i';
+        $count   = preg_match_all( $pattern, $sentenceLower );
+        if ( $count > 0 ) {
+            $score += $count;
+            if ( ! in_array( $word, $matchedWords, true ) ) {
+                $matchedWords[] = $word;
+            }
+        }
+    }
+
+    $relevantWordCount = count( $matchedWords );
+    $density           = $sentenceWordCount > 0 ? ( $relevantWordCount / $sentenceWordCount ) : 0;
+    $score            += $density * 5;
+
+    if ( $sentenceWordCount < 10 ) {
+        $score *= 0.8;
+    } elseif ( $sentenceWordCount > 40 ) {
+        $score *= 0.7;
+    } elseif ( $sentenceWordCount > 30 ) {
+        $score *= 0.9;
+    }
+
+    $hasSignificantMatch = false;
+    if ( ! empty( $inputWordsLower ) ) {
+        foreach ( $inputWordsLower as $inputWord ) {
+            if ( strlen( $inputWord ) >= 4 ) {
+                $pattern = '/\b' . preg_quote( $inputWord, '/' ) . '\b/i';
+                if ( preg_match( $pattern, $sentenceLower ) ) {
+                    $hasSignificantMatch = true;
                     break;
                 }
             }
         }
-        
-        if ($isJustQuestion) {
-            continue; // Skip sentences that are just questions
+    }
+
+    $allShortWords = true;
+    foreach ( $inputWordsLower as $word ) {
+        if ( strlen( $word ) >= 4 ) {
+            $allShortWords = false;
+            break;
         }
-        
-        $score = 0;
-        $matchedWords = [];
-        $inputWordsMatched = 0;
-        $inputWordsAtStart = 0; // Bonus for input words appearing early in sentence
-        
-        // Prioritize input words (weight them higher)
-        foreach ($inputWordsLower as $word) {
-            $pattern = '/\b' . preg_quote($word, '/') . '\b/i';
-            $count = preg_match_all($pattern, $sentenceLower);
-            if ($count > 0) {
-                $score += $count * 10; // Input words weighted 10x higher
-                $inputWordsMatched++;
-                if (!in_array($word, $matchedWords)) {
-                    $matchedWords[] = $word;
-                }
-                
-                // Bonus if input word appears in first 10 words (more direct/relevant)
-                $firstWords = implode(' ', array_slice(explode(' ', $sentenceLower), 0, 10));
-                if (preg_match($pattern, $firstWords)) {
-                    $inputWordsAtStart++;
-                    $score += 5; // Extra bonus for early appearance
-                }
-            }
+    }
+
+    $minScore = $inputWordsMatched > 0 ? 1 : 10;
+
+    if ( $hasSignificantMatch || $inputWordsMatched >= 2 || ( $allShortWords && $inputWordsMatched > 0 ) || $score >= $minScore ) {
+        return array(
+            'sentence'            => $sentenceTrimmed,
+            'score'               => $score,
+            'matched'             => count( $matchedWords ),
+            'inputMatched'        => $inputWordsMatched,
+            'wordCount'           => $sentenceWordCount,
+            'density'             => $density,
+            'inputAtStart'        => $inputWordsAtStart,
+            'hasSignificantMatch' => $hasSignificantMatch,
+        );
+    }
+
+    return null;
+}
+
+/**
+ * Detect boilerplate / navigation chunks that should not participate in lexical scoring.
+ *
+ * @param string $text Sentence or chunk text.
+ * @return bool True if this chunk should be skipped before scoring.
+ */
+function transformer_model_lexical_context_is_low_value_chunk( $text ) {
+
+    $text = trim( wp_strip_all_tags( (string) $text ) );
+    if ( $text === '' ) {
+        return true;
+    }
+
+    // Metadata / section headers: Tags, Related, Reference (whole-line or leading).
+    if ( preg_match( '/^\s*(tags|related|references?)(\s*[:\-–—]|\s*$)/i', $text ) ) {
+        return true;
+    }
+    if ( preg_match( '/^\s*tags\s+#/i', $text ) ) {
+        return true;
+    }
+    // Lines dominated by label words + hashtags (e.g. "Tags #x Related Reference - Other").
+    if ( preg_match( '/#/', $text ) && preg_match( '/\b(tags|related|reference)\b/i', $text ) && str_word_count( $text ) <= 14 ) {
+        return true;
+    }
+
+    $words = preg_split( '/\s+/', $text, -1, PREG_SPLIT_NO_EMPTY );
+    $n     = count( $words );
+    if ( $n === 0 ) {
+        return true;
+    }
+
+    $hash_count = 0;
+    foreach ( $words as $w ) {
+        if ( preg_match( '/^#/', $w ) ) {
+            $hash_count++;
         }
-        
-        // Also score based on similar words (but lower weight)
-        foreach ($searchWordsLower as $word) {
-            // Skip if already counted as input word
-            if (in_array($word, $inputWordsLower)) {
+    }
+    $hash_ratio = $hash_count / $n;
+
+    if ( $hash_ratio >= 0.28 ) {
+        return true;
+    }
+    if ( $n <= 12 && $hash_count >= 2 ) {
+        return true;
+    }
+
+    // Same token repeated too often (keyword / tag soup).
+    $norm = array();
+    foreach ( $words as $w ) {
+        $norm[] = strtolower( preg_replace( '/^#/', '', preg_replace( '/[.,!?;:]+$/', '', $w ) ) );
+    }
+    $freq = array_count_values( $norm );
+    arsort( $freq );
+    $top_c = (int) reset( $freq );
+    if ( $n >= 4 && ( $top_c / $n ) >= 0.5 ) {
+        return true;
+    }
+
+    // Mostly very short tokens and no word long enough to be substantive prose.
+    $long_words = 0;
+    $char_sum   = 0;
+    foreach ( $words as $w ) {
+        $bare = preg_replace( '/^#/', '', $w );
+        $bare = preg_replace( '/[.,!?;:]+$/', '', $bare );
+        $len  = strlen( $bare );
+        $char_sum += $len;
+        if ( $len >= 6 ) {
+            $long_words++;
+        }
+    }
+    $avg_len = $char_sum / $n;
+
+    if ( $n >= 5 && $long_words === 0 && $avg_len <= 3.6 ) {
+        return true;
+    }
+
+    // Thin lines: hashtags present but no substance and no typical verb/noun glue.
+    $has_substance_token = ( $long_words > 0 ) || preg_match( '/\b[a-z]{5,}\b/i', $text );
+    $has_verbish         = preg_match(
+        '/\b(is|are|was|were|been|being|have|has|had|do|does|did|will|would|could|should|may|might|can|must|shall|protect|using|include|help|read|work|make|made|see|get|go|use|uses|say|said|call|find|show|give|take|come|look|want|need|keep|let|put|mean|set|end|seem|may|might)\b/i',
+        $text
+    );
+
+    if ( $n <= 9 && $hash_count > 0 && ! $has_verbish && ! $has_substance_token ) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Stop words removed when deriving meaningful query tokens for the relevance guard.
+ *
+ * @return array<int, string>
+ */
+function transformer_model_lexical_context_relevance_guard_stop_words() {
+
+    return array(
+        'what',
+        'is',
+        'are',
+        'the',
+        'a',
+        'an',
+        'to',
+        'of',
+        'for',
+        'in',
+        'on',
+        'with',
+        'related',
+        'about',
+        'how',
+        'do',
+        'does',
+    );
+}
+
+/**
+ * Query tokens that must overlap a chunk for it to be scored (excludes guard stop words).
+ *
+ * @param array<int, string> $inputWordsLower Lowercased input words from the user query.
+ * @return array<int, string>
+ */
+function transformer_model_lexical_context_meaningful_query_tokens_for_relevance_guard( $inputWordsLower ) {
+
+    $stop = array_flip( transformer_model_lexical_context_relevance_guard_stop_words() );
+    $out  = array();
+
+    foreach ( $inputWordsLower as $w ) {
+        $w = strtolower( trim( (string) $w ) );
+        if ( strlen( $w ) < 2 ) {
+            continue;
+        }
+        if ( isset( $stop[ $w ] ) ) {
+            continue;
+        }
+        $out[] = $w;
+    }
+
+    return array_values( array_unique( $out ) );
+}
+
+/**
+ * True if the chunk contains at least one meaningful query token (whole-word / Unicode word chars).
+ *
+ * @param string               $chunkText
+ * @param array<int, string>   $meaningfulTokens
+ * @return bool
+ */
+function transformer_model_lexical_context_chunk_has_meaningful_query_overlap( $chunkText, $meaningfulTokens ) {
+
+    if ( empty( $meaningfulTokens ) ) {
+        return true;
+    }
+
+    $haystack = strtolower( wp_strip_all_tags( (string) $chunkText ) );
+
+    foreach ( $meaningfulTokens as $tok ) {
+        if ( strlen( $tok ) < 2 ) {
+            continue;
+        }
+        $pattern = '/(?<![\p{L}\p{N}_])' . preg_quote( $tok, '/' ) . '(?![\p{L}\p{N}_])/u';
+        if ( preg_match( $pattern, $haystack ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * User-facing message when meaningful query terms exist but no corpus chunk contains any of them.
+ *
+ * @return string
+ */
+function transformer_model_lexical_context_no_query_overlap_message() {
+
+    return "I'm sorry, but I couldn't find any relevant information on that topic. Would you like to try something else?";
+}
+
+/**
+ * Rank sentence chunks per document, prefer top matching posts, then assemble the reply.
+ *
+ * @param array<int, array<string, mixed>> $documents
+ * @return string
+ */
+function transformer_model_lexical_context_build_sentences_from_documents( $documents, $searchWords, $inputWords, $maxWords, $sentenceResponseCount = 5, $similarityThreshold = 0.3, $leadingSentencesRatio = 0.2, $leadingTokenRatio = 0.2 ) {
+
+    $sentenceScores   = array();
+    $searchWordsLower = array_map( 'strtolower', $searchWords );
+    $inputWordsLower  = array_map( 'strtolower', $inputWords );
+
+    $meaningful_query_tokens          = transformer_model_lexical_context_meaningful_query_tokens_for_relevance_guard( $inputWordsLower );
+    $corpus_had_meaningful_overlap    = false;
+
+    foreach ( $documents as $doc ) {
+        $pid = isset( $doc['post_id'] ) ? (int) $doc['post_id'] : 0;
+        $chunks = array();
+        if ( ! empty( $doc['chunks'] ) && is_array( $doc['chunks'] ) ) {
+            $chunks = $doc['chunks'];
+        } elseif ( ! empty( $doc['normalized_text'] ) ) {
+            $chunks = transformer_model_lexical_context_split_into_sentence_chunks( $doc['normalized_text'] );
+        }
+
+        $raw_chunks = $chunks;
+        $filtered   = array();
+        foreach ( $chunks as $sentence ) {
+            $trimmed = trim( $sentence );
+            if ( $trimmed === '' ) {
                 continue;
             }
-            
-            $pattern = '/\b' . preg_quote($word, '/') . '\b/i';
-            $count = preg_match_all($pattern, $sentenceLower);
-            if ($count > 0) {
-                $score += $count; // Similar words weighted normally
-                if (!in_array($word, $matchedWords)) {
-                    $matchedWords[] = $word;
+            if ( ! transformer_model_lexical_context_is_low_value_chunk( $trimmed ) ) {
+                $filtered[] = $trimmed;
+            }
+        }
+
+        if ( empty( $filtered ) && ! empty( $raw_chunks ) ) {
+            foreach ( $raw_chunks as $sentence ) {
+                $t = trim( $sentence );
+                if ( $t !== '' ) {
+                    $filtered[] = $t;
                 }
             }
         }
-        
-        // Calculate relevance density: how much of the sentence is actually relevant
-        // Higher density = more relevant words per total words
-        $relevantWordCount = count($matchedWords);
-        $density = $sentenceWordCount > 0 ? ($relevantWordCount / $sentenceWordCount) : 0;
-        
-        // Apply density bonus - prefer sentences where more words are relevant
-        $score += $density * 5;
-        
-        // Apply length penalty - prefer shorter, more concise sentences
-        // Ideal length is 10-25 words, penalize sentences outside this range
-        if ($sentenceWordCount < 10) {
-            $score *= 0.8; // Slightly penalize very short sentences
-        } elseif ($sentenceWordCount > 40) {
-            $score *= 0.7; // Penalize long sentences more
-        } elseif ($sentenceWordCount > 30) {
-            $score *= 0.9; // Slight penalty for longer sentences
-        }
-        
-        // REQUIRE that sentences must match at least one significant input word
-        // This prevents matching generic "what is" questions that don't answer the query
-        $hasSignificantMatch = false;
-        if (!empty($inputWordsLower)) {
-            foreach ($inputWordsLower as $inputWord) {
-                if (strlen($inputWord) >= 4) { // Only check words 4+ chars (significant terms)
-                    $pattern = '/\b' . preg_quote($inputWord, '/') . '\b/i';
-                    if (preg_match($pattern, $sentenceLower)) {
-                        $hasSignificantMatch = true;
-                        break;
-                    }
+
+        $chunks = $filtered;
+
+        foreach ( $chunks as $sentence ) {
+            $trimmed = trim( $sentence );
+            if ( ! empty( $meaningful_query_tokens ) ) {
+                if ( ! transformer_model_lexical_context_chunk_has_meaningful_query_overlap( $trimmed, $meaningful_query_tokens ) ) {
+                    continue;
                 }
+                $corpus_had_meaningful_overlap = true;
+            }
+            $row = transformer_model_lexical_context_lexical_sentence_score_row( $trimmed, $searchWordsLower, $inputWordsLower );
+            if ( $row !== null ) {
+                $row['post_id'] = $pid;
+                $sentenceScores[] = $row;
             }
         }
-        
-        // If we have input words but none match, require at least one match
-        // Exception: if all input words are short (<4 chars), be more lenient
-        $allShortWords = true;
-        foreach ($inputWordsLower as $word) {
-            if (strlen($word) >= 4) {
-                $allShortWords = false;
+    }
+
+    if ( empty( $sentenceScores ) ) {
+        if ( ! empty( $meaningful_query_tokens ) && ! $corpus_had_meaningful_overlap ) {
+            return transformer_model_lexical_context_no_query_overlap_message();
+        }
+
+        return '';
+    }
+
+    $sentenceScores = transformer_model_lexical_context_sort_sentence_scores_with_document_priority( $sentenceScores );
+    // Conservative cross-document gate: only include weaker posts if their document-level max score is within 85% of the best post’s max.
+    $after_doc_gate = transformer_model_lexical_context_filter_sentence_scores_cross_document_gate( $sentenceScores, 0.85 );
+    // Row-level gate: keep chunks near the best chunk score; drops weak filler when a strong match exists.
+    $after_row_gate = transformer_model_lexical_context_filter_sentence_scores_row_gate( $after_doc_gate, 0.65 );
+
+    // Enrich from the top-ranked document only (up to sentence response cap), including next-best same-post chunks.
+    $sentenceScores = transformer_model_lexical_context_merge_top_document_expansion(
+        $after_doc_gate,
+        $after_row_gate,
+        0.65,
+        $sentenceResponseCount
+    );
+
+    $sentenceScores = transformer_model_lexical_context_deduplicate_near_duplicate_sentence_rows( $sentenceScores );
+
+    return transformer_model_lexical_context_assemble_response_from_scored_sentences(
+        $sentenceScores,
+        $maxWords,
+        $sentenceResponseCount,
+        $similarityThreshold,
+        $leadingSentencesRatio,
+        $leadingTokenRatio
+    );
+}
+
+// Function to build sentences from corpus using query words (legacy single-string corpus).
+function transformer_model_lexical_context_build_sentences_from_corpus( $corpus, $searchWords, $inputWords, $maxWords, $sentenceResponseCount = 5, $similarityThreshold = 0.3, $leadingSentencesRatio = 0.2, $leadingTokenRatio = 0.2 ) {
+
+    $documents = array(
+        array(
+            'post_id'         => 0,
+            'post_title'      => '',
+            'post_type'       => 'legacy',
+            'permalink'       => '',
+            'normalized_text' => $corpus,
+            'chunks'          => transformer_model_lexical_context_split_into_sentence_chunks( $corpus ),
+        ),
+    );
+
+    return transformer_model_lexical_context_build_sentences_from_documents(
+        $documents,
+        $searchWords,
+        $inputWords,
+        $maxWords,
+        $sentenceResponseCount,
+        $similarityThreshold,
+        $leadingSentencesRatio,
+        $leadingTokenRatio
+    );
+}
+
+/**
+ * Stop words removed when comparing sentences for near-duplicate detection.
+ *
+ * @return array<int, string>
+ */
+function transformer_model_lexical_context_dedup_normalization_stop_words() {
+
+    return array(
+        'the', 'a', 'an', 'to', 'of', 'for', 'in', 'on', 'at', 'by', 'with', 'from', 'as', 'into', 'onto',
+        'and', 'or', 'but', 'nor', 'so', 'yet', 'both', 'either', 'neither', 'not', 'only', 'same', 'such',
+        'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did',
+        'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'shall',
+        'this', 'that', 'these', 'those', 'it', 'its', 'they', 'them', 'their', 'we', 'you', 'he', 'she',
+        'what', 'which', 'who', 'whom', 'whose', 'how', 'when', 'where', 'why',
+        'if', 'then', 'than', 'too', 'very', 'just', 'also', 'even', 'still', 'once',
+        'here', 'there', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'any', 'all',
+    );
+}
+
+/**
+ * Meaningful tokens for deduplication (lowercase, no punctuation, stop words removed).
+ *
+ * @param string $text
+ * @return array<int, string>
+ */
+function transformer_model_lexical_context_normalize_sentence_to_dedup_tokens( $text ) {
+
+    $text = strtolower( wp_strip_all_tags( (string) $text ) );
+    $text = preg_replace( '/[^\p{L}\p{N}\s]/u', ' ', $text );
+    $text = preg_replace( '/\s+/', ' ', trim( $text ) );
+
+    $words = preg_split( '/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY );
+    if ( empty( $words ) ) {
+        return array();
+    }
+
+    $stop = array_flip( transformer_model_lexical_context_dedup_normalization_stop_words() );
+    $out  = array();
+
+    foreach ( $words as $w ) {
+        if ( strlen( $w ) < 2 ) {
+            continue;
+        }
+        if ( isset( $stop[ $w ] ) ) {
+            continue;
+        }
+        $out[] = $w;
+    }
+
+    return $out;
+}
+
+/**
+ * Whether two sentences are near-duplicates by containment or high token overlap on meaningful tokens.
+ *
+ * @param string $a Raw sentence text.
+ * @param string $b Raw sentence text.
+ * @return bool
+ */
+function transformer_model_lexical_context_are_sentences_near_duplicates( $a, $b ) {
+
+    $a = trim( (string) $a );
+    $b = trim( (string) $b );
+
+    if ( $a === '' || $b === '' ) {
+        return false;
+    }
+
+    if ( strcasecmp( $a, $b ) === 0 ) {
+        return true;
+    }
+
+    $tok_a = transformer_model_lexical_context_normalize_sentence_to_dedup_tokens( $a );
+    $tok_b = transformer_model_lexical_context_normalize_sentence_to_dedup_tokens( $b );
+
+    $norm_a = implode( ' ', $tok_a );
+    $norm_b = implode( ' ', $tok_b );
+
+    if ( $norm_a !== '' && $norm_b !== '' ) {
+        if ( $norm_a === $norm_b ) {
+            return true;
+        }
+        if ( strpos( $norm_a, $norm_b ) !== false || strpos( $norm_b, $norm_a ) !== false ) {
+            return true;
+        }
+    }
+
+    if ( empty( $tok_a ) || empty( $tok_b ) ) {
+        $fa = preg_replace( '/[^\p{L}\p{N}]/u', '', strtolower( wp_strip_all_tags( $a ) ) );
+        $fb = preg_replace( '/[^\p{L}\p{N}]/u', '', strtolower( wp_strip_all_tags( $b ) ) );
+        if ( strlen( $fa ) >= 4 && strlen( $fb ) >= 4 ) {
+            return ( strpos( $fa, $fb ) !== false || strpos( $fb, $fa ) !== false );
+        }
+
+        return false;
+    }
+
+    $set_a = array_unique( $tok_a );
+    $set_b = array_unique( $tok_b );
+    $inter = count( array_intersect( $set_a, $set_b ) );
+    $min_c = min( count( $set_a ), count( $set_b ) );
+
+    if ( $min_c > 0 && ( $inter / $min_c ) >= 0.75 ) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Drop near-duplicate scored rows; keeps higher score, then longer sentence on ties (sort order).
+ *
+ * @param array<int, array<string, mixed>> $rows
+ * @return array<int, array<string, mixed>>
+ */
+function transformer_model_lexical_context_deduplicate_near_duplicate_sentence_rows( $rows ) {
+
+    if ( empty( $rows ) ) {
+        return $rows;
+    }
+
+    usort(
+        $rows,
+        function ( $a, $b ) {
+            $sa = isset( $a['score'] ) ? (float) $a['score'] : 0.0;
+            $sb = isset( $b['score'] ) ? (float) $b['score'] : 0.0;
+            if ( $sa !== $sb ) {
+                return $sb <=> $sa;
+            }
+            $la = strlen( isset( $a['sentence'] ) ? (string) $a['sentence'] : '' );
+            $lb = strlen( isset( $b['sentence'] ) ? (string) $b['sentence'] : '' );
+
+            return $lb <=> $la;
+        }
+    );
+
+    $kept = array();
+
+    foreach ( $rows as $row ) {
+        $sentence = isset( $row['sentence'] ) ? trim( (string) $row['sentence'] ) : '';
+        if ( $sentence === '' ) {
+            continue;
+        }
+
+        $tok_new = transformer_model_lexical_context_normalize_sentence_to_dedup_tokens( $sentence );
+        $join_new = implode( ' ', $tok_new );
+
+        // Longer sentence subsumes a shorter prefix already kept (same topic, more detail).
+        if ( $join_new !== '' ) {
+            foreach ( $kept as $ki => $existing ) {
+                $ex = isset( $existing['sentence'] ) ? trim( (string) $existing['sentence'] ) : '';
+                if ( $ex === '' ) {
+                    continue;
+                }
+                $join_ex = implode( ' ', transformer_model_lexical_context_normalize_sentence_to_dedup_tokens( $ex ) );
+                if ( $join_ex !== '' && strpos( $join_new, $join_ex ) !== false && strlen( $sentence ) > strlen( $ex ) ) {
+                    unset( $kept[ $ki ] );
+                }
+            }
+            $kept = array_values( $kept );
+        }
+
+        $skip = false;
+        foreach ( $kept as $existing ) {
+            $ex = isset( $existing['sentence'] ) ? trim( (string) $existing['sentence'] ) : '';
+            if ( $ex !== '' && transformer_model_lexical_context_are_sentences_near_duplicates( $sentence, $ex ) ) {
+                $skip = true;
                 break;
             }
         }
-        
-        // Include sentences that:
-        // 1. Match at least one significant input word (4+ chars), OR
-        // 2. Match multiple input words (even if short), OR  
-        // 3. Have very high similarity score (fallback)
-        $minScore = $inputWordsMatched > 0 ? 1 : 10; // Higher threshold if no input words matched
-        
-        if ($hasSignificantMatch || $inputWordsMatched >= 2 || ($allShortWords && $inputWordsMatched > 0) || $score >= $minScore) {
-            $sentenceScores[] = [
-                'sentence' => $sentenceTrimmed,
-                'score' => $score,
-                'matched' => count($matchedWords),
-                'inputMatched' => $inputWordsMatched,
-                'wordCount' => $sentenceWordCount,
-                'density' => $density,
-                'inputAtStart' => $inputWordsAtStart,
-                'hasSignificantMatch' => $hasSignificantMatch
-            ];
+
+        if ( ! $skip ) {
+            $kept[] = $row;
         }
     }
-    
-    if (empty($sentenceScores)) {
-        return '';
-    }
-    
-    // Sort by: prioritize concise, direct, relevant sentences
-    usort($sentenceScores, function($a, $b) {
-        // First priority: sentences with significant matches (actual query terms)
-        $aHasSig = isset($a['hasSignificantMatch']) ? $a['hasSignificantMatch'] : false;
-        $bHasSig = isset($b['hasSignificantMatch']) ? $b['hasSignificantMatch'] : false;
-        if ($aHasSig != $bHasSig) {
-            return $bHasSig ? 1 : -1; // Significant matches first
-        }
-        // Second priority: sentences with input words at the start (more direct)
-        if ($a['inputAtStart'] != $b['inputAtStart']) {
-            return $b['inputAtStart'] - $a['inputAtStart'];
-        }
-        // Third priority: sentences with more input words matched
-        if ($a['inputMatched'] != $b['inputMatched']) {
-            return $b['inputMatched'] - $a['inputMatched'];
-        }
-        // Fourth priority: relevance density (more relevant words per total words)
-        if (abs($a['density'] - $b['density']) > 0.1) {
-            return $b['density'] > $a['density'] ? 1 : -1;
-        }
-        // Fifth priority: total score
-        if ($a['score'] != $b['score']) {
-            return $b['score'] - $a['score'];
-        }
-        // Sixth priority: prefer shorter sentences when scores are similar
-        if (abs($a['wordCount'] - $b['wordCount']) > 5) {
-            return $a['wordCount'] - $b['wordCount']; // Shorter is better
-        }
-        // Seventh priority: number of unique words matched
-        return $b['matched'] - $a['matched'];
-    });
-    
+
+    return $kept;
+}
+
+/**
+ * Build stitched response from sorted/filtered sentence score rows.
+ *
+ * @param array<int, array<string, mixed>> $sentenceScores
+ * @return string
+ */
+function transformer_model_lexical_context_assemble_response_from_scored_sentences( $sentenceScores, $maxWords, $sentenceResponseCount, $similarityThreshold, $leadingSentencesRatio, $leadingTokenRatio ) {
+
     // Filter out lower quality matches using similarity threshold from settings
     // Calculate quality threshold based on top score and similarity threshold setting
     $topScore = !empty($sentenceScores) ? $sentenceScores[0]['score'] : 0;

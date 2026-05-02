@@ -549,8 +549,14 @@ function chatbot_transformer_model_handle_cache_rebuild() {
         }
     }
 
-    $corpus = transformer_model_lexical_context_fetch_wordpress_content();
-    if (empty($corpus)) {
+    $documents = transformer_model_lexical_context_fetch_wordpress_documents();
+    if (empty($documents)) {
+        wp_safe_redirect(add_query_arg('lexical_cache_status', 'empty_corpus', $redirect_url));
+        exit;
+    }
+
+    $corpus_flat = transformer_model_lexical_context_flatten_documents($documents);
+    if ($corpus_flat === '') {
         wp_safe_redirect(add_query_arg('lexical_cache_status', 'empty_corpus', $redirect_url));
         exit;
     }
@@ -558,7 +564,7 @@ function chatbot_transformer_model_handle_cache_rebuild() {
     $windowSize = intval(get_option('chatbot_transformer_model_word_content_window_size', 3));
     $windowSize = max(1, $windowSize);
 
-    $embeddings = transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize);
+    $embeddings = transformer_model_lexical_context_build_pmi_matrix_from_documents($documents, $windowSize);
 
     if (empty($embeddings)) {
         wp_safe_redirect(add_query_arg('lexical_cache_status', 'build_error', $redirect_url));
@@ -567,7 +573,7 @@ function chatbot_transformer_model_handle_cache_rebuild() {
 
     $status = 'write_error';
     if (transformer_model_lexical_context_save_cache($cacheFile, $embeddings)) {
-        file_put_contents($cacheVersionFile, hash('sha256', $corpus));
+        file_put_contents($cacheVersionFile, hash('sha256', $corpus_flat));
         $status = 'success';
     }
 
