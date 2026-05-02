@@ -100,8 +100,202 @@ function transformer_model_lexical_context_log_request_start_diagnostics( $docum
     );
 }
 
+/**
+ * Soft maximum runtime for one LCM chat request (seconds). Filterable; does not affect admin PMI rebuild.
+ *
+ * @return float
+ */
+function transformer_model_lexical_context_lcm_max_runtime_seconds() {
+
+    return max( 0.5, (float) apply_filters( 'chatbot_lcm_max_runtime_seconds', 20.0 ) );
+}
+
+/**
+ * True when total elapsed time has reached or exceeded the soft budget (whole request).
+ *
+ * @return bool
+ */
+function transformer_model_lexical_context_lcm_budget_hard_exceeded() {
+
+    return transformer_model_lexical_context_lcm_elapsed_total() >= transformer_model_lexical_context_lcm_max_runtime_seconds();
+}
+
+/**
+ * Elapsed seconds since {@see transformer_model_lexical_context_lcm_timing_init()} for this request.
+ *
+ * @return float
+ */
+function transformer_model_lexical_context_lcm_elapsed_total() {
+
+    $start = isset( $GLOBALS['chatbot_lcm_timing_start'] ) ? (float) $GLOBALS['chatbot_lcm_timing_start'] : null;
+    if ( $start === null ) {
+        return 0.0;
+    }
+
+    return microtime( true ) - $start;
+}
+
+/**
+ * Initialize per-request timing state (call once at LCM entry).
+ *
+ * @return void
+ */
+function transformer_model_lexical_context_lcm_timing_init() {
+
+    $now                                  = microtime( true );
+    $GLOBALS['chatbot_lcm_timing_start']  = $now;
+    $GLOBALS['chatbot_lcm_timing_last']   = $now;
+    $GLOBALS['chatbot_lcm_skip_pmi_load'] = false;
+    $GLOBALS['chatbot_lcm_skip_idf_load']  = false;
+}
+
+/**
+ * Mark a pipeline stage for [LCM][timing] logs (requires KOGNETIKS_LCM_DEBUG).
+ *
+ * @param string $stage Short slug (e.g. fetch_documents, pmi_cache_load).
+ * @return void
+ */
+function transformer_model_lexical_context_lcm_timing_segment( $stage ) {
+
+    $stage = preg_replace( '/[^\w.-]/', '', (string) $stage );
+    if ( $stage === '' ) {
+        $stage = 'unknown';
+    }
+
+    $now = microtime( true );
+    if ( empty( $GLOBALS['chatbot_lcm_timing_start'] ) ) {
+        $GLOBALS['chatbot_lcm_timing_start'] = $now;
+    }
+    if ( empty( $GLOBALS['chatbot_lcm_timing_last'] ) ) {
+        $GLOBALS['chatbot_lcm_timing_last'] = $GLOBALS['chatbot_lcm_timing_start'];
+    }
+
+    $start   = (float) $GLOBALS['chatbot_lcm_timing_start'];
+    $last    = (float) $GLOBALS['chatbot_lcm_timing_last'];
+    $elapsed = $now - $last;
+    $total   = $now - $start;
+
+    $GLOBALS['chatbot_lcm_timing_last'] = $now;
+
+    if ( ! transformer_model_lexical_context_is_lcm_diagnostics_enabled() || ! function_exists( 'back_trace' ) ) {
+        return;
+    }
+
+    back_trace(
+        'NOTICE',
+        sprintf( '[LCM][timing] stage=%s elapsed=%.3f total=%.3f', $stage, $elapsed, $total )
+    );
+}
+
+/**
+ * Mark oversized flat corpus so PMI / IDF file loads are skipped on this request (lexical-only + no IDF map).
+ *
+ * @param int $flat_len strlen of flattened corpus.
+ * @return void
+ */
+function transformer_model_lexical_context_lcm_maybe_flag_heavy_corpus_skips( $flat_len ) {
+
+    $flat_len = (int) $flat_len;
+    $max      = (int) apply_filters( 'chatbot_lcm_max_flat_corpus_chars_for_heavy_load', 2000000 );
+
+    if ( $max > 0 && $flat_len > $max ) {
+        $GLOBALS['chatbot_lcm_skip_pmi_load'] = true;
+        $GLOBALS['chatbot_lcm_skip_idf_load']  = true;
+    }
+}
+
+/**
+ * Whether to skip reading PMI cache bytes on this request (still no PMI math change — embeddings unset → lexical-only path).
+ *
+ * @param string $corpus_flat Flattened corpus string.
+ * @return bool
+ */
+function transformer_model_lexical_context_lcm_should_skip_pmi_cache_load( $corpus_flat ) {
+
+    if ( ! empty( $GLOBALS['chatbot_lcm_skip_pmi_load'] ) ) {
+        return true;
+    }
+
+    $max_chars = (int) apply_filters( 'chatbot_lcm_max_flat_corpus_chars_for_heavy_load', 2000000 );
+    if ( $max_chars > 0 && strlen( (string) $corpus_flat ) > $max_chars ) {
+        return true;
+    }
+
+    $cutoff = (float) apply_filters( 'chatbot_lcm_skip_pmi_if_elapsed_gte_seconds', 8.0 );
+    if ( $cutoff > 0 && transformer_model_lexical_context_lcm_elapsed_total() >= $cutoff ) {
+        return true;
+    }
+
+    $pmi_php  = __DIR__ . '/lexical_embeddings_cache/lexical_embeddings_cache.php';
+    $pmi_gz   = $pmi_php . '.gz';
+    $max_gz_b = (int) apply_filters( 'chatbot_lcm_max_pmi_gzip_cache_bytes', 0 );
+    if ( $max_gz_b > 0 && file_exists( $pmi_gz ) ) {
+        $fs = @filesize( $pmi_gz );
+        if ( is_int( $fs ) && $fs > $max_gz_b ) {
+            return true;
+        }
+    }
+
+    return (bool) apply_filters( 'chatbot_lcm_force_skip_pmi_cache_load', false, $corpus_flat );
+}
+
+/**
+ * Whether to skip loading local IDF JSON for this request.
+ *
+ * @return bool
+ */
+function transformer_model_lexical_context_lcm_should_skip_idf_load() {
+
+    if ( ! empty( $GLOBALS['chatbot_lcm_skip_idf_load'] ) ) {
+        return true;
+    }
+
+    $cutoff = (float) apply_filters( 'chatbot_lcm_skip_idf_if_elapsed_gte_seconds', 10.0 );
+    if ( $cutoff > 0 && transformer_model_lexical_context_lcm_elapsed_total() >= $cutoff ) {
+        return true;
+    }
+
+    return (bool) apply_filters( 'chatbot_lcm_force_skip_idf_load', false );
+}
+
+/**
+ * Friendly reply when assembly is cut short by runtime budget.
+ *
+ * @return string
+ */
+function transformer_model_lexical_context_lcm_assembly_fallback_message() {
+
+    $msg = 'I\'m taking longer than expected to finish that answer. Please try a shorter or more specific question.';
+
+    return (string) apply_filters( 'chatbot_lcm_budget_fallback_message', $msg );
+}
+
+/**
+ * Best-effort answer when the soft runtime budget is exceeded before assembly completes.
+ *
+ * @param array<int, array<string, mixed>> $sentenceScores Ranked rows (may be partial).
+ * @return string
+ */
+function transformer_model_lexical_context_lcm_assembly_budget_fallback( $sentenceScores ) {
+
+    if ( ! empty( $sentenceScores ) && is_array( $sentenceScores ) && ! empty( $sentenceScores[0]['sentence'] ) ) {
+        $s = trim( (string) $sentenceScores[0]['sentence'] );
+        if ( $s !== '' ) {
+            if ( ! preg_match( '/[.!?]$/', $s ) ) {
+                $s .= '.';
+            }
+
+            return $s;
+        }
+    }
+
+    return transformer_model_lexical_context_lcm_assembly_fallback_message();
+}
+
 // Main function to generate a response
 function transformer_model_lexical_context_response( $input, $max_tokens = null ) {
+
+    transformer_model_lexical_context_lcm_timing_init();
 
     // Maximum tokens - Fixed: removed hardcoded override
     if (empty($max_tokens) || !is_numeric($max_tokens)) {
@@ -122,6 +316,8 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null 
     // Fetch WordPress content as discrete documents (posts/pages)
     $documents = transformer_model_lexical_context_fetch_wordpress_documents();
 
+    transformer_model_lexical_context_lcm_timing_segment( 'fetch_documents' );
+
     if (empty($documents)) {
         return "I don't have enough content to generate a response. Please add some posts or pages to your WordPress site.";
     }
@@ -131,10 +327,14 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null 
     // Build embeddings (PMI windows never cross document boundaries). May skip rebuild on public requests.
     $embeddings = transformer_model_lexical_context_get_cached_embeddings($documents);
 
+    transformer_model_lexical_context_lcm_timing_segment( 'get_cached_embeddings' );
+
     transformer_model_lexical_context_log_request_start_diagnostics( $documents );
 
     // Generate contextual response (PMI expansion when embeddings exist; lexical-only path when cache miss without rebuild)
     $response = transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $documents, $max_tokens);
+
+    transformer_model_lexical_context_lcm_timing_segment( 'generate_contextual_response' );
 
     return $response;
 
@@ -312,6 +512,9 @@ function transformer_model_lexical_context_get_cached_embeddings( $documents_or_
     $corpusHash  = hash( 'sha256', $corpus_flat );
     $cacheValid  = false;
 
+    transformer_model_lexical_context_lcm_maybe_flag_heavy_corpus_skips( strlen( (string) $corpus_flat ) );
+    transformer_model_lexical_context_lcm_timing_segment( 'flatten_hash' );
+
     if ( file_exists( $cacheFile ) && file_exists( $cacheVersionFile ) ) {
         $cachedHash = trim( (string) file_get_contents( $cacheVersionFile ) );
         if ( $cachedHash === $corpusHash ) {
@@ -319,8 +522,22 @@ function transformer_model_lexical_context_get_cached_embeddings( $documents_or_
         }
     }
 
+    if ( $cacheValid && transformer_model_lexical_context_lcm_should_skip_pmi_cache_load( $corpus_flat ) ) {
+        transformer_model_lexical_context_pmi_cache_fetch_status( 'skipped_runtime_budget' );
+        transformer_model_lexical_context_lcm_timing_segment( 'pmi_cache_skipped' );
+        if ( function_exists( 'prod_trace' ) ) {
+            prod_trace(
+                'NOTICE',
+                '[LCM] Skipping PMI cache load for this request (elapsed budget or flat corpus size cap). Lexical-only ranking will be used.'
+            );
+        }
+
+        return array();
+    }
+
     if ( $cacheValid ) {
         $embeddings = transformer_model_lexical_context_load_cache( $cacheFile );
+        transformer_model_lexical_context_lcm_timing_segment( 'pmi_cache_load' );
         if ( is_array( $embeddings ) && ! empty( $embeddings ) ) {
             transformer_model_lexical_context_pmi_cache_fetch_status( 'hit' );
             return $embeddings;
@@ -762,6 +979,8 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
 
     // No PMI matrix (cache miss on public request, etc.): rank sentences using query words only — no PMI expansion.
     if ( empty( $embeddings ) ) {
+        transformer_model_lexical_context_lcm_timing_segment( 'lexical_only_path' );
+
         $sentenceResponseCount = intval( esc_attr( get_option( 'chatbot_transformer_model_sentence_response_length', '5' ) ) );
         $similarityThreshold     = floatval( esc_attr( get_option( 'chatbot_transformer_model_similarity_threshold', '0.3' ) ) );
         $leadingSentencesRatio   = floatval( esc_attr( get_option( 'chatbot_transformer_model_leading_sentences_ratio', '0.2' ) ) );
@@ -847,8 +1066,17 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
     $similarities = [];
     $excludeWords = array_merge($inputWords, $stopWords);
     $excludeWords = array_map('strtolower', $excludeWords);
-    
-    foreach ($embeddings as $word => $vector) {
+
+    transformer_model_lexical_context_lcm_timing_segment( 'pmi_vocab_similarity_scan' );
+
+    $lcm_vocab_scan_iterations = 0;
+
+    foreach ($embeddings as $word => $vector ) {
+        ++$lcm_vocab_scan_iterations;
+        if ( ( $lcm_vocab_scan_iterations % 2500 ) === 0 && transformer_model_lexical_context_lcm_budget_hard_exceeded() ) {
+            break;
+        }
+
         $wordLower = strtolower($word);
         // Skip stop words and words already in input
         if (in_array($wordLower, $excludeWords)) {
@@ -890,6 +1118,7 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
     // Try to find actual sentences from corpus that match the input query
     // Prioritize input words over similar words for better query-specific responses
     $queryWords = array_merge($inputWords, array_slice($topWords, 0, 10)); // Combine input words with top similar words
+
     $response = transformer_model_lexical_context_build_sentences_from_documents(
         $documents,
         $queryWords,
@@ -1651,6 +1880,8 @@ function transformer_model_lexical_context_load_local_idf_cache_for_corpus( $exp
         );
     }
 
+    transformer_model_lexical_context_lcm_timing_segment( 'idf_cache_load' );
+
     return array(
         'hit'       => true,
         'idf_map'   => $map,
@@ -1685,7 +1916,15 @@ function transformer_model_lexical_context_resolve_runtime_local_idf( $documents
     }
 
     $corpus_hash = hash( 'sha256', $corpus_flat );
-    $loaded      = transformer_model_lexical_context_load_local_idf_cache_for_corpus( $corpus_hash );
+
+    if ( transformer_model_lexical_context_lcm_should_skip_idf_load() ) {
+        $out['reason'] = 'skipped_runtime_budget';
+        transformer_model_lexical_context_lcm_timing_segment( 'idf_cache_skipped' );
+
+        return $out;
+    }
+
+    $loaded = transformer_model_lexical_context_load_local_idf_cache_for_corpus( $corpus_hash );
 
     if ( ! empty( $loaded['hit'] ) && ! empty( $loaded['idf_map'] ) && is_array( $loaded['idf_map'] ) ) {
         $out['map']    = $loaded['idf_map'];
@@ -2654,6 +2893,63 @@ function transformer_model_lexical_context_diag_log_pipeline_stage( $stage_slug,
 }
 
 /**
+ * Trim ranked candidate rows to a maximum count (best-first order preserved). Does not change scores.
+ *
+ * Caps are filterable via {@see 'chatbot_lcm_candidate_cap'} (args: $max, $stage_slug). Use $max <= 0 to disable.
+ *
+ * @param array<int, array<string, mixed>> $rows       Rows already ordered best-first for the pipeline stage.
+ * @param int                              $max_rows   Default cap for this stage before the filter runs.
+ * @param string                           $stage_slug Stable slug for filters and diagnostics (e.g. after_sort).
+ * @return array<int, array<string, mixed>>
+ */
+function transformer_model_lexical_context_cap_ranked_sentence_rows( $rows, $max_rows, $stage_slug ) {
+
+    if ( ! is_array( $rows ) ) {
+        return array();
+    }
+
+    $before = count( $rows );
+    $slug   = preg_replace( '/[^a-z0-9_]/', '', strtolower( (string) $stage_slug ) );
+    if ( $slug === '' ) {
+        $slug = 'unknown';
+    }
+
+    $max_rows = (int) apply_filters( 'chatbot_lcm_candidate_cap', (int) $max_rows, $slug );
+
+    if ( $max_rows <= 0 ) {
+        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            back_trace(
+                'NOTICE',
+                sprintf( '[LCM][cap:%s] candidates before=%d after=%d cap=disabled', $slug, $before, $before )
+            );
+        }
+        return $rows;
+    }
+
+    if ( $before <= $max_rows ) {
+        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            back_trace(
+                'NOTICE',
+                sprintf( '[LCM][cap:%s] candidates before=%d after=%d cap=%d', $slug, $before, $before, $max_rows )
+            );
+        }
+        return $rows;
+    }
+
+    $out   = array_slice( $rows, 0, $max_rows );
+    $after = count( $out );
+
+    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        back_trace(
+            'NOTICE',
+            sprintf( '[LCM][cap:%s] candidates before=%d after=%d cap=%d', $slug, $before, $after, $max_rows )
+        );
+    }
+
+    return $out;
+}
+
+/**
  * Rank sentence chunks per document, prefer top matching posts, then assemble the reply.
  *
  * @param array<int, array<string, mixed>> $documents
@@ -2684,6 +2980,8 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
     $local_idf_source = isset( $resolved_idf['source'] ) ? (string) $resolved_idf['source'] : 'none';
 
     transformer_model_lexical_context_diag_log_local_idf( $option_local_idf, $apply_local_idf, $local_idf_map, $documents, $local_idf_reason, $local_idf_source );
+
+    transformer_model_lexical_context_lcm_timing_segment( 'idf_resolve' );
 
     foreach ( $documents as $doc ) {
         $pid = isset( $doc['post_id'] ) ? (int) $doc['post_id'] : 0;
@@ -2718,6 +3016,10 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         $chunks = $filtered;
 
         foreach ( $chunks as $sentence ) {
+            if ( transformer_model_lexical_context_lcm_budget_hard_exceeded() ) {
+                break 2;
+            }
+
             $trimmed = trim( $sentence );
             if ( ! empty( $meaningful_query_tokens ) ) {
                 if ( ! transformer_model_lexical_context_chunk_has_meaningful_query_overlap( $trimmed, $meaningful_query_tokens ) ) {
@@ -2743,6 +3045,8 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         }
     }
 
+    transformer_model_lexical_context_lcm_timing_segment( 'scoring_loop' );
+
     transformer_model_lexical_context_diag_log_pipeline_stage( 'pre_scoring_candidates', $lcm_pre_scoring_candidates, $post_title_map );
 
     if ( empty( $sentenceScores ) ) {
@@ -2756,10 +3060,15 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_scoring', $sentenceScores, $post_title_map );
 
     $sentenceScores = transformer_model_lexical_context_sort_sentence_scores_with_document_priority( $sentenceScores );
+    $sentenceScores = transformer_model_lexical_context_cap_ranked_sentence_rows( $sentenceScores, 250, 'after_sort' );
+
     // Conservative cross-document gate: only include weaker posts if their document-level max score is within 85% of the best post’s max.
     $after_doc_gate = transformer_model_lexical_context_filter_sentence_scores_cross_document_gate( $sentenceScores, 0.85 );
+    $after_doc_gate = transformer_model_lexical_context_cap_ranked_sentence_rows( $after_doc_gate, 100, 'after_document_gate' );
+
     // Row-level gate: keep chunks near the best chunk score; drops weak filler when a strong match exists.
     $after_row_gate = transformer_model_lexical_context_filter_sentence_scores_row_gate( $after_doc_gate, 0.65 );
+    $after_row_gate = transformer_model_lexical_context_cap_ranked_sentence_rows( $after_row_gate, 50, 'after_row_gate' );
 
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_document_gate', $after_doc_gate, $post_title_map );
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_row_gate', $after_row_gate, $post_title_map );
@@ -2772,13 +3081,19 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         $sentenceResponseCount
     );
 
+    $sentenceScores = transformer_model_lexical_context_cap_ranked_sentence_rows( $sentenceScores, 50, 'after_expansion' );
+
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_expansion', $sentenceScores, $post_title_map );
 
     $sentenceScores = transformer_model_lexical_context_deduplicate_near_duplicate_sentence_rows( $sentenceScores );
 
+    $sentenceScores = transformer_model_lexical_context_cap_ranked_sentence_rows( $sentenceScores, 20, 'after_deduplication' );
+
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_deduplication', $sentenceScores, $post_title_map );
 
-    return transformer_model_lexical_context_assemble_response_from_scored_sentences(
+    transformer_model_lexical_context_lcm_timing_segment( 'pre_assembly' );
+
+    $assembled = transformer_model_lexical_context_assemble_response_from_scored_sentences(
         $sentenceScores,
         $maxWords,
         $sentenceResponseCount,
@@ -2786,6 +3101,10 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         $leadingSentencesRatio,
         $leadingTokenRatio
     );
+
+    transformer_model_lexical_context_lcm_timing_segment( 'assembly' );
+
+    return $assembled;
 }
 
 // Function to build sentences from corpus using query words (legacy single-string corpus).
@@ -3001,6 +3320,12 @@ function transformer_model_lexical_context_deduplicate_near_duplicate_sentence_r
  * @return string
  */
 function transformer_model_lexical_context_assemble_response_from_scored_sentences( $sentenceScores, $maxWords, $sentenceResponseCount, $similarityThreshold, $leadingSentencesRatio, $leadingTokenRatio ) {
+
+    if ( transformer_model_lexical_context_lcm_budget_hard_exceeded() ) {
+        transformer_model_lexical_context_lcm_timing_segment( 'assembly_budget_cutoff' );
+
+        return transformer_model_lexical_context_lcm_assembly_budget_fallback( $sentenceScores );
+    }
 
     // Filter out lower quality matches using similarity threshold from settings
     // Calculate quality threshold based on top score and similarity threshold setting
