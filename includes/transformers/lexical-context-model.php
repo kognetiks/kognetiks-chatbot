@@ -146,7 +146,6 @@ function transformer_model_lexical_context_lcm_timing_init() {
     $GLOBALS['chatbot_lcm_timing_start']  = $now;
     $GLOBALS['chatbot_lcm_timing_last']   = $now;
     $GLOBALS['chatbot_lcm_skip_pmi_load'] = false;
-    $GLOBALS['chatbot_lcm_skip_idf_load']  = false;
 }
 
 /**
@@ -188,7 +187,8 @@ function transformer_model_lexical_context_lcm_timing_segment( $stage ) {
 }
 
 /**
- * Mark oversized flat corpus so PMI / IDF file loads are skipped on this request (lexical-only + no IDF map).
+ * Mark oversized flat corpus so the PMI cache load is skipped on this request (lexical-only ranking).
+ * Local IDF JSON is not gated here — IDF is a small sidecar read and stays eligible when the option is Yes.
  *
  * @param int $flat_len strlen of flattened corpus.
  * @return void
@@ -200,7 +200,6 @@ function transformer_model_lexical_context_lcm_maybe_flag_heavy_corpus_skips( $f
 
     if ( $max > 0 && $flat_len > $max ) {
         $GLOBALS['chatbot_lcm_skip_pmi_load'] = true;
-        $GLOBALS['chatbot_lcm_skip_idf_load']  = true;
     }
 }
 
@@ -240,22 +239,65 @@ function transformer_model_lexical_context_lcm_should_skip_pmi_cache_load( $corp
 }
 
 /**
- * Whether to skip loading local IDF JSON for this request.
+ * Whether runtime guards block attempting to read the local IDF JSON cache (chat never rebuilds IDF here).
  *
- * @return bool
+ * @return array{ skip: bool, diag: string } diag is empty when skip is false.
  */
-function transformer_model_lexical_context_lcm_should_skip_idf_load() {
+function transformer_model_lexical_context_lcm_idf_load_skip_gate() {
 
-    if ( ! empty( $GLOBALS['chatbot_lcm_skip_idf_load'] ) ) {
-        return true;
+    if ( (bool) apply_filters( 'chatbot_lcm_force_skip_idf_load', false ) ) {
+        return array(
+            'skip' => true,
+            'diag' => 'skipped_force_filter',
+        );
     }
 
     $cutoff = (float) apply_filters( 'chatbot_lcm_skip_idf_if_elapsed_gte_seconds', 10.0 );
     if ( $cutoff > 0 && transformer_model_lexical_context_lcm_elapsed_total() >= $cutoff ) {
-        return true;
+        return array(
+            'skip' => true,
+            'diag' => 'skipped_elapsed_budget',
+        );
     }
 
-    return (bool) apply_filters( 'chatbot_lcm_force_skip_idf_load', false );
+    return array(
+        'skip' => false,
+        'diag' => '',
+    );
+}
+
+/**
+ * Log one IDF file I/O sub-phase for [LCM][timing] (stat/read/decode). Requires KOGNETIKS_LCM_DEBUG.
+ *
+ * @param string               $phase       stat|read|decode.
+ * @param float                $segment_start microtime( true ) at start of this phase.
+ * @param array<string, mixed> $extra       Optional keys: bytes (int).
+ * @return void
+ */
+function transformer_model_lexical_context_lcm_idf_io_timing_line( $phase, $segment_start, $extra = array() ) {
+
+    if ( ! transformer_model_lexical_context_is_lcm_diagnostics_enabled() || ! function_exists( 'back_trace' ) ) {
+        return;
+    }
+
+    $phase = preg_replace( '/[^\w]/', '', (string) $phase );
+    if ( $phase === '' ) {
+        $phase = 'io';
+    }
+
+    $now     = microtime( true );
+    $elapsed = $now - (float) $segment_start;
+    $total   = transformer_model_lexical_context_lcm_elapsed_total();
+
+    $suffix = '';
+    if ( ! empty( $extra['bytes'] ) && is_numeric( $extra['bytes'] ) ) {
+        $suffix = sprintf( ' bytes=%d', (int) $extra['bytes'] );
+    }
+
+    back_trace(
+        'NOTICE',
+        sprintf( '[LCM][timing] stage=idf_cache_%s elapsed=%.3f total=%.3f%s', $phase, $elapsed, $total, $suffix )
+    );
 }
 
 /**
@@ -1837,31 +1879,51 @@ function transformer_model_lexical_context_load_local_idf_cache_for_corpus( $exp
     if ( $expected_corpus_hash === '' ) {
         return array(
             'hit'    => false,
-            'reason' => 'empty_hash',
+            'reason' => 'empty_corpus',
         );
     }
 
     $path = transformer_model_lexical_context_local_idf_cache_path();
-    if ( ! file_exists( $path ) ) {
+    $t0   = microtime( true );
+
+    $exists = file_exists( $path );
+    $fs     = $exists ? @filesize( $path ) : false;
+    transformer_model_lexical_context_lcm_idf_io_timing_line(
+        'stat',
+        $t0,
+        array( 'bytes' => is_int( $fs ) ? $fs : 0 )
+    );
+
+    if ( ! $exists ) {
         return array(
             'hit'    => false,
-            'reason' => 'cache_missing',
+            'reason' => 'missing_cache',
         );
     }
 
+    $t1   = microtime( true );
     $json = file_get_contents( $path );
+    transformer_model_lexical_context_lcm_idf_io_timing_line(
+        'read',
+        $t1,
+        array( 'bytes' => is_string( $json ) ? strlen( $json ) : 0 )
+    );
+
     if ( $json === false || $json === '' ) {
         return array(
             'hit'    => false,
-            'reason' => 'cache_invalid',
+            'reason' => 'invalid_cache',
         );
     }
 
+    $t2   = microtime( true );
     $data = json_decode( $json, true );
+    transformer_model_lexical_context_lcm_idf_io_timing_line( 'decode', $t2 );
+
     if ( ! is_array( $data ) || empty( $data['corpus_hash'] ) || ! isset( $data['idf_map'] ) ) {
         return array(
             'hit'    => false,
-            'reason' => 'cache_invalid',
+            'reason' => 'invalid_cache',
         );
     }
 
@@ -1876,17 +1938,16 @@ function transformer_model_lexical_context_load_local_idf_cache_for_corpus( $exp
     if ( ! is_array( $map ) ) {
         return array(
             'hit'    => false,
-            'reason' => 'cache_invalid',
+            'reason' => 'invalid_cache',
         );
     }
-
-    transformer_model_lexical_context_lcm_timing_segment( 'idf_cache_load' );
 
     return array(
         'hit'       => true,
         'idf_map'   => $map,
         'N_docs'    => isset( $data['N_docs'] ) ? (int) $data['N_docs'] : 0,
         'created_at'=> isset( $data['created_at'] ) ? (string) $data['created_at'] : '',
+        'reason'    => 'loaded',
     );
 }
 
@@ -1917,8 +1978,9 @@ function transformer_model_lexical_context_resolve_runtime_local_idf( $documents
 
     $corpus_hash = hash( 'sha256', $corpus_flat );
 
-    if ( transformer_model_lexical_context_lcm_should_skip_idf_load() ) {
-        $out['reason'] = 'skipped_runtime_budget';
+    $idf_gate = transformer_model_lexical_context_lcm_idf_load_skip_gate();
+    if ( ! empty( $idf_gate['skip'] ) ) {
+        $out['reason'] = isset( $idf_gate['diag'] ) ? (string) $idf_gate['diag'] : 'skipped_elapsed_budget';
         transformer_model_lexical_context_lcm_timing_segment( 'idf_cache_skipped' );
 
         return $out;
@@ -1930,15 +1992,19 @@ function transformer_model_lexical_context_resolve_runtime_local_idf( $documents
         $out['map']    = $loaded['idf_map'];
         $out['active'] = true;
         $out['source'] = 'cache';
+        $out['reason'] = 'loaded';
+
         return $out;
     }
 
     if ( ! empty( $loaded['hit'] ) && empty( $loaded['idf_map'] ) ) {
-        $out['reason'] = 'cache_empty';
+        $out['reason'] = 'invalid_cache';
+
         return $out;
     }
 
-    $out['reason'] = isset( $loaded['reason'] ) ? (string) $loaded['reason'] : 'cache_missing';
+    $out['reason'] = isset( $loaded['reason'] ) ? (string) $loaded['reason'] : 'missing_cache';
+
     return $out;
 }
 
@@ -1961,7 +2027,7 @@ function transformer_model_lexical_context_local_idf_enabled() {
  * @param bool                      $active      Non-empty IDF map will be applied to scoring.
  * @param array<string, float>      $idf_map
  * @param array<int, array<string, mixed>> $documents
- * @param string|null               $inactive_reason When option on but inactive (cache miss/stale/etc.).
+ * @param string|null               $inactive_reason Canonical diag token when option on but inactive.
  * @param string                    $source          'cache' when loaded from file.
  * @return void
  */
@@ -1988,22 +2054,21 @@ function transformer_model_lexical_context_diag_log_local_idf( $option_on, $acti
         back_trace(
             'NOTICE',
             sprintf(
-                '[LCM][local_idf] option=1 active=1 source=%s N_docs=%d map_terms=%d',
+                '[LCM][local_idf] option=1 active=1 diag=loaded source=%s N_docs=%d map_terms=%d',
                 $source,
                 $n_docs,
                 $map_terms
             )
         );
     } else {
-        $reason = $inactive_reason !== null && $inactive_reason !== '' ? $inactive_reason : 'inactive';
+        $diag = $inactive_reason !== null && $inactive_reason !== '' ? $inactive_reason : 'inactive';
         back_trace(
             'NOTICE',
             sprintf(
-                '[LCM][local_idf] option=1 active=0 reason=%s',
-                str_replace( array( "\r", "\n" ), ' ', $reason )
+                '[LCM][local_idf] option=1 active=0 diag=%s',
+                str_replace( array( "\r", "\n" ), ' ', $diag )
             )
         );
-        return;
     }
 }
 

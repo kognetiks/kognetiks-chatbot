@@ -535,7 +535,7 @@ function chatbot_transformer_model_lexical_local_idf_callback( $args ) {
         <option value="No" <?php selected( $lexical_local_idf, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
         <option value="Yes" <?php selected( $lexical_local_idf, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
     </select>
-    <p class="description"><?php echo esc_html( 'When Yes, LCM multiplies each chunk score by a conservative IDF factor from the current document set (not Knowledge Navigator TF-IDF tables). Use Delete & Rebuild Lexical Cache on the Transformer settings page to build the IDF file; chat requests only read the cache.' ); ?></p>
+    <p class="description"><?php echo esc_html( 'When enabled, LCM boosts results using a conservative IDF-based relevance bonus derived from the current document set. This highlights rarer, more specific query terms. Use “Delete & Rebuild Lexical Cache” to generate the IDF file; chat requests read the cached data only.' ); ?></p>
     <?php
 }
 
