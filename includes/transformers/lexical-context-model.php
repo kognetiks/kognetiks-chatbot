@@ -12,6 +12,94 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+/**
+ * Last PMI embeddings cache outcome for diagnostics (hit | miss_no_rebuild | miss_rebuilt | unknown).
+ *
+ * @param string|null $status Set status, or null to read current.
+ * @return string
+ */
+function transformer_model_lexical_context_pmi_cache_fetch_status( $status = null ) {
+
+    static $stored = 'unknown';
+
+    if ( $status !== null ) {
+        $stored = (string) $status;
+    }
+
+    return $stored;
+}
+
+/**
+ * Whether get_cached_embeddings may run PMI build on cache miss (default: false — use admin rebuild).
+ *
+ * @return bool
+ */
+function transformer_model_lexical_context_may_rebuild_pmi_on_cache_miss() {
+
+    if ( defined( 'WP_CLI' ) && WP_CLI ) {
+        return (bool) apply_filters( 'kognetiks_lcm_allow_pmi_rebuild_on_cache_miss', true );
+    }
+
+    return (bool) apply_filters( 'kognetiks_lcm_allow_pmi_rebuild_on_cache_miss', false );
+}
+
+/**
+ * Count sentence chunks across structured documents (for diagnostics).
+ *
+ * @param array<int, array<string, mixed>> $documents
+ * @return int
+ */
+function transformer_model_lexical_context_count_document_chunks( $documents ) {
+
+    if ( empty( $documents ) || ! is_array( $documents ) ) {
+        return 0;
+    }
+
+    $n = 0;
+    foreach ( $documents as $doc ) {
+        if ( ! empty( $doc['chunks'] ) && is_array( $doc['chunks'] ) ) {
+            $n += count( $doc['chunks'] );
+        } elseif ( ! empty( $doc['normalized_text'] ) ) {
+            $n += count( transformer_model_lexical_context_split_into_sentence_chunks( $doc['normalized_text'] ) );
+        }
+    }
+
+    return $n;
+}
+
+/**
+ * One-line LCM request summary when KOGNETIKS_LCM_DEBUG is true.
+ *
+ * @param array<int, array<string, mixed>> $documents
+ * @return void
+ */
+function transformer_model_lexical_context_log_request_start_diagnostics( $documents ) {
+
+    if ( ! transformer_model_lexical_context_is_lcm_diagnostics_enabled() || ! function_exists( 'back_trace' ) ) {
+        return;
+    }
+
+    $intent_opt = get_option( 'chatbot_lcm_query_intent_expansion', 'No' );
+    $intent_on  = transformer_model_lexical_context_query_intent_expansion_enabled();
+    $idf_on     = transformer_model_lexical_context_local_idf_enabled();
+    $pmi        = transformer_model_lexical_context_pmi_cache_fetch_status();
+    $doc_n      = count( $documents );
+    $chunk_n    = transformer_model_lexical_context_count_document_chunks( $documents );
+
+    back_trace(
+        'NOTICE',
+        sprintf(
+            '[LCM][start] intent_expansion_enabled=%s intent_opt=%s local_idf_enabled=%s pmi_cache=%s document_count=%d chunk_count=%d',
+            $intent_on ? '1' : '0',
+            $intent_opt,
+            $idf_on ? '1' : '0',
+            $pmi,
+            $doc_n,
+            $chunk_n
+        )
+    );
+}
+
 // Main function to generate a response
 function transformer_model_lexical_context_response( $input, $max_tokens = null ) {
 
@@ -38,14 +126,14 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null 
         return "I don't have enough content to generate a response. Please add some posts or pages to your WordPress site.";
     }
 
-    // Build embeddings (PMI windows never cross document boundaries)
+    transformer_model_lexical_context_pmi_cache_fetch_status( 'unknown' );
+
+    // Build embeddings (PMI windows never cross document boundaries). May skip rebuild on public requests.
     $embeddings = transformer_model_lexical_context_get_cached_embeddings($documents);
 
-    if (empty($embeddings)) {
-        return "I'm having trouble processing the content. Please try again later.";
-    }
+    transformer_model_lexical_context_log_request_start_diagnostics( $documents );
 
-    // Generate contextual response from ranked document chunks
+    // Generate contextual response (PMI expansion when embeddings exist; lexical-only path when cache miss without rebuild)
     $response = transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $documents, $max_tokens);
 
     return $response;
@@ -234,11 +322,23 @@ function transformer_model_lexical_context_get_cached_embeddings( $documents_or_
     if ( $cacheValid ) {
         $embeddings = transformer_model_lexical_context_load_cache( $cacheFile );
         if ( is_array( $embeddings ) && ! empty( $embeddings ) ) {
+            transformer_model_lexical_context_pmi_cache_fetch_status( 'hit' );
             return $embeddings;
         }
     }
 
     transformer_model_lexical_context_migrate_old_cache( $cacheFile );
+
+    if ( ! transformer_model_lexical_context_may_rebuild_pmi_on_cache_miss() ) {
+        transformer_model_lexical_context_pmi_cache_fetch_status( 'miss_no_rebuild' );
+        if ( function_exists( 'prod_trace' ) ) {
+            prod_trace(
+                'NOTICE',
+                '[LCM][pmi_cache] Embeddings cache missing or stale; PMI rebuild skipped on this request. Rebuild in WordPress → Chatbot → API/Transformer → Delete & Rebuild Lexical Cache (admin).'
+            );
+        }
+        return array();
+    }
 
     $embeddings = transformer_model_lexical_context_build_pmi_matrix_from_documents( $documents, $windowSize );
 
@@ -246,6 +346,9 @@ function transformer_model_lexical_context_get_cached_embeddings( $documents_or_
         if ( transformer_model_lexical_context_save_cache( $cacheFile, $embeddings ) ) {
             file_put_contents( $cacheVersionFile, $corpusHash );
         }
+        transformer_model_lexical_context_pmi_cache_fetch_status( 'miss_rebuilt' );
+    } else {
+        transformer_model_lexical_context_pmi_cache_fetch_status( 'miss_rebuilt' );
     }
 
     return $embeddings;
@@ -623,9 +726,7 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
         return "I don't have enough content to generate a response. Please add some posts or pages to your WordPress site.";
     }
 
-    if (empty($embeddings)) {
-        return "I'm having trouble understanding that. Could you rephrase your question?";
-    }
+    $input_text_for_intent = is_string( $input ) ? $input : '';
 
     // Improved input preprocessing - filter out stop words
     $input = preg_replace('/[^\w\s]/u', ' ', $input); // Remove punctuation
@@ -657,6 +758,34 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
 
     if (empty($inputWords)) {
         return "I didn't understand that, please try again.";
+    }
+
+    // No PMI matrix (cache miss on public request, etc.): rank sentences using query words only — no PMI expansion.
+    if ( empty( $embeddings ) ) {
+        $sentenceResponseCount = intval( esc_attr( get_option( 'chatbot_transformer_model_sentence_response_length', '5' ) ) );
+        $similarityThreshold     = floatval( esc_attr( get_option( 'chatbot_transformer_model_similarity_threshold', '0.3' ) ) );
+        $leadingSentencesRatio   = floatval( esc_attr( get_option( 'chatbot_transformer_model_leading_sentences_ratio', '0.2' ) ) );
+        $leadingTokenRatio       = floatval( esc_attr( get_option( 'chatbot_transformer_model_leading_token_ratio', '0.2' ) ) );
+
+        $response = transformer_model_lexical_context_build_sentences_from_documents(
+            $documents,
+            $inputWords,
+            $inputWords,
+            $responseLength,
+            $sentenceResponseCount,
+            $similarityThreshold,
+            $leadingSentencesRatio,
+            $leadingTokenRatio,
+            $input_text_for_intent
+        );
+
+        if ( empty( $response ) ) {
+            return 'The lexical knowledge index is not ready or did not match your question. A site administrator can build it under Transformer settings (Delete & Rebuild Lexical Cache), or try rephrasing your question.';
+        }
+
+        $response = removeStopWordFromEnd( $response, $stopWords );
+
+        return transformer_model_lexical_context_format_response( $response );
     }
 
     // Build input embedding by aggregating word embeddings
@@ -769,7 +898,8 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
         $sentenceResponseCount,
         $similarityThreshold,
         $leadingSentencesRatio,
-        $leadingTokenRatio
+        $leadingTokenRatio,
+        $input_text_for_intent
     );
     
     // If we couldn't build sentences from corpus, create structured response from words
@@ -1165,16 +1295,21 @@ function transformer_model_lexical_context_local_idf_cache_path() {
  *
  * @param array<int, array<string, mixed>> $documents Same structure as fetch_wordpress_documents().
  * @param string                           $corpus_hash SHA-256 of flattened corpus (same as embeddings version file).
+ * @param string|null                      $output_path Optional absolute path for JSON (default: standard lexical_local_idf_cache.json).
  * @return bool True if written successfully.
  */
-function transformer_model_lexical_context_save_local_idf_cache_from_documents( $documents, $corpus_hash ) {
+function transformer_model_lexical_context_save_local_idf_cache_from_documents( $documents, $corpus_hash, $output_path = null ) {
 
     $corpus_hash = is_string( $corpus_hash ) ? trim( $corpus_hash ) : '';
     if ( $corpus_hash === '' ) {
         return false;
     }
 
-    $cache_dir = dirname( transformer_model_lexical_context_local_idf_cache_path() );
+    $default_dir = dirname( transformer_model_lexical_context_local_idf_cache_path() );
+    $cache_dir   = ( $output_path !== null && $output_path !== '' )
+        ? dirname( $output_path )
+        : $default_dir;
+
     if ( ! file_exists( $cache_dir ) ) {
         if ( ! wp_mkdir_p( $cache_dir ) ) {
             if ( function_exists( 'prod_trace' ) ) {
@@ -1208,7 +1343,7 @@ function transformer_model_lexical_context_save_local_idf_cache_from_documents( 
         return false;
     }
 
-    $path = transformer_model_lexical_context_local_idf_cache_path();
+    $path = ( $output_path !== null && $output_path !== '' ) ? $output_path : transformer_model_lexical_context_local_idf_cache_path();
     $ok   = ( false !== file_put_contents( $path, $json, LOCK_EX ) );
 
     if ( ! $ok && function_exists( 'prod_trace' ) ) {
@@ -1216,6 +1351,249 @@ function transformer_model_lexical_context_save_local_idf_cache_from_documents( 
     }
 
     return $ok;
+}
+
+/**
+ * Corpus size metrics for lexical cache rebuild scheduling.
+ *
+ * @param array<int, array<string, mixed>> $documents
+ * @return array{ document_count: int, chunk_count: int, corpus_bytes: int }
+ */
+function transformer_model_lexical_context_lexical_rebuild_corpus_metrics( $documents ) {
+
+    $flat = transformer_model_lexical_context_flatten_documents( $documents );
+
+    return array(
+        'document_count' => is_array( $documents ) ? count( $documents ) : 0,
+        'chunk_count'    => transformer_model_lexical_context_count_document_chunks( $documents ),
+        'corpus_bytes'   => strlen( $flat ),
+    );
+}
+
+/**
+ * Whether a synchronous browser/admin-post rebuild should be deferred to WP-Cron (large corpus).
+ *
+ * @param array{ document_count: int, chunk_count: int, corpus_bytes: int } $metrics
+ * @return bool True = defer to background cron.
+ */
+function transformer_model_lexical_context_lexical_rebuild_should_defer_to_cron( $metrics ) {
+
+    $max_docs   = (int) apply_filters( 'chatbot_lexical_rebuild_sync_max_documents', 75 );
+    $max_bytes  = (int) apply_filters( 'chatbot_lexical_rebuild_sync_max_corpus_bytes', 1500000 );
+
+    if ( ! empty( $metrics['document_count'] ) && (int) $metrics['document_count'] > $max_docs ) {
+        return true;
+    }
+    if ( ! empty( $metrics['corpus_bytes'] ) && (int) $metrics['corpus_bytes'] > $max_bytes ) {
+        return true;
+    }
+
+    return (bool) apply_filters( 'chatbot_lexical_rebuild_force_async', false );
+}
+
+/**
+ * Log line for lexical cache rebuild orchestration.
+ *
+ * @param string $message
+ * @return void
+ */
+function transformer_model_lexical_context_lexical_rebuild_log( $message ) {
+
+    if ( function_exists( 'prod_trace' ) ) {
+        prod_trace( 'NOTICE', '[LCM][rebuild] ' . $message );
+    }
+}
+
+/**
+ * Remove temporary staging files matching a token (best-effort).
+ *
+ * @param string $cache_dir
+ * @param string $token     Unique staging token.
+ * @return void
+ */
+function transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cache_dir, $token ) {
+
+    $cache_dir = trailingslashit( $cache_dir );
+    $patterns  = array(
+        $cache_dir . 'lexical_embeddings_cache.staging.' . $token . '.php',
+        $cache_dir . 'lexical_embeddings_cache.staging.' . $token . '.php.gz',
+        $cache_dir . 'lexical_embeddings_cache.staging.' . $token . '.php.ser',
+        $cache_dir . 'lexical_embeddings_cache_version.staging.' . $token . '.txt',
+        $cache_dir . 'lexical_local_idf_cache.staging.' . $token . '.json',
+    );
+
+    foreach ( $patterns as $p ) {
+        if ( $p && file_exists( $p ) ) {
+            @unlink( $p );
+        }
+    }
+}
+
+/**
+ * Build PMI + IDF and atomically replace production cache files (existing cache kept if anything fails).
+ *
+ * @param string $context Source label for logs: browser_sync|wp_cron|cron|wp_cli (legacy).
+ * @return array{ ok: bool, error?: string }
+ */
+function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $context = 'cron' ) {
+
+    transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=rebuild_started' );
+
+    $documents = transformer_model_lexical_context_fetch_wordpress_documents();
+    if ( empty( $documents ) ) {
+        transformer_model_lexical_context_lexical_rebuild_log( 'step=aborted reason=empty_corpus' );
+        return array( 'ok' => false, 'error' => 'empty_corpus' );
+    }
+
+    $metrics = transformer_model_lexical_context_lexical_rebuild_corpus_metrics( $documents );
+    transformer_model_lexical_context_lexical_rebuild_log(
+        sprintf(
+            'step=corpus_metrics document_count=%d chunk_count=%d corpus_bytes=%d',
+            $metrics['document_count'],
+            $metrics['chunk_count'],
+            $metrics['corpus_bytes']
+        )
+    );
+
+    $corpus_flat = transformer_model_lexical_context_flatten_documents( $documents );
+    if ( $corpus_flat === '' ) {
+        transformer_model_lexical_context_lexical_rebuild_log( 'step=aborted reason=empty_flat_corpus' );
+        return array( 'ok' => false, 'error' => 'empty_corpus' );
+    }
+
+    $corpus_hash = hash( 'sha256', $corpus_flat );
+
+    $window_size = intval( get_option( 'chatbot_transformer_model_word_content_window_size', 3 ) );
+    $window_size = max( 1, $window_size );
+
+    transformer_model_lexical_context_lexical_rebuild_log( 'step=pmi_build_started' );
+
+    $embeddings = transformer_model_lexical_context_build_pmi_matrix_from_documents( $documents, $window_size );
+
+    transformer_model_lexical_context_lexical_rebuild_log(
+        'step=pmi_build_finished embedding_roots=' . ( is_array( $embeddings ) ? count( $embeddings ) : 0 )
+    );
+
+    if ( empty( $embeddings ) ) {
+        transformer_model_lexical_context_lexical_rebuild_log( 'step=aborted reason=pmi_empty' );
+        return array( 'ok' => false, 'error' => 'build_error' );
+    }
+
+    $cache_dir = __DIR__ . '/lexical_embeddings_cache';
+    if ( ! file_exists( $cache_dir ) ) {
+        if ( ! wp_mkdir_p( $cache_dir ) ) {
+            transformer_model_lexical_context_lexical_rebuild_log( 'step=aborted reason=cache_dir' );
+            return array( 'ok' => false, 'error' => 'write_error' );
+        }
+    }
+
+    $token = function_exists( 'random_bytes' )
+        ? substr( bin2hex( random_bytes( 8 ) ), 0, 16 )
+        : substr( md5( uniqid( (string) wp_rand(), true ) ), 0, 16 );
+    $staging_php = $cache_dir . '/lexical_embeddings_cache.staging.' . $token . '.php';
+
+    transformer_model_lexical_context_lexical_rebuild_log( 'step=pmi_save_started staging=' . $token );
+
+    if ( ! transformer_model_lexical_context_save_cache( $staging_php, $embeddings ) ) {
+        transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cache_dir, $token );
+        transformer_model_lexical_context_lexical_rebuild_log( 'step=aborted reason=pmi_staging_write_failed' );
+        return array( 'ok' => false, 'error' => 'write_error' );
+    }
+
+    $loaded_check = transformer_model_lexical_context_load_cache( $staging_php );
+    if ( empty( $loaded_check ) ) {
+        transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cache_dir, $token );
+        transformer_model_lexical_context_lexical_rebuild_log( 'step=aborted reason=pmi_staging_verify_failed' );
+        return array( 'ok' => false, 'error' => 'write_error' );
+    }
+
+    transformer_model_lexical_context_lexical_rebuild_log( 'step=pmi_save_completed' );
+
+    $idf_staging = $cache_dir . '/lexical_local_idf_cache.staging.' . $token . '.json';
+
+    transformer_model_lexical_context_lexical_rebuild_log( 'step=idf_save_started' );
+
+    if ( ! transformer_model_lexical_context_save_local_idf_cache_from_documents( $documents, $corpus_hash, $idf_staging ) ) {
+        transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cache_dir, $token );
+        transformer_model_lexical_context_lexical_rebuild_log( 'step=aborted reason=idf_staging_write_failed' );
+        return array( 'ok' => false, 'error' => 'write_error' );
+    }
+
+    transformer_model_lexical_context_lexical_rebuild_log( 'step=idf_save_completed' );
+
+    $ver_staging = $cache_dir . '/lexical_embeddings_cache_version.staging.' . $token . '.txt';
+    if ( false === file_put_contents( $ver_staging, $corpus_hash, LOCK_EX ) ) {
+        transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cache_dir, $token );
+        @unlink( $ver_staging );
+        transformer_model_lexical_context_lexical_rebuild_log( 'step=aborted reason=version_staging_write_failed' );
+        return array( 'ok' => false, 'error' => 'write_error' );
+    }
+
+    $final_php = $cache_dir . '/lexical_embeddings_cache.php';
+    $final_ver = $cache_dir . '/lexical_embeddings_cache_version.txt';
+    $final_idf = $cache_dir . '/lexical_local_idf_cache.json';
+
+    $backup_sfx = '.lcm_bak_' . $token;
+
+    /**
+     * Install staging file over production; roll back one step if rename fails.
+     *
+     * @param string $staging_path Absolute staging path.
+     * @param string $final_path   Absolute production path.
+     * @return bool
+     */
+    $install_one = static function ( $staging_path, $final_path ) use ( $backup_sfx ) {
+
+        if ( ! file_exists( $staging_path ) ) {
+            return false;
+        }
+        if ( file_exists( $final_path ) ) {
+            if ( ! @rename( $final_path, $final_path . $backup_sfx ) ) {
+                return false;
+            }
+        }
+        if ( ! @rename( $staging_path, $final_path ) ) {
+            if ( file_exists( $final_path . $backup_sfx ) ) {
+                @rename( $final_path . $backup_sfx, $final_path );
+            }
+            return false;
+        }
+        if ( file_exists( $final_path . $backup_sfx ) ) {
+            @unlink( $final_path . $backup_sfx );
+        }
+
+        return true;
+    };
+
+    transformer_model_lexical_context_lexical_rebuild_log( 'step=atomic_swap_started' );
+
+    $ok_move = $install_one( $staging_php, $final_php );
+
+    $gz_staging = $staging_php . '.gz';
+    if ( $ok_move && file_exists( $gz_staging ) ) {
+        $ok_move = $install_one( $gz_staging, $final_php . '.gz' );
+    }
+
+    $ser_staging = $staging_php . '.ser';
+    if ( $ok_move && file_exists( $ser_staging ) ) {
+        $ok_move = $install_one( $ser_staging, $final_php . '.ser' );
+    }
+
+    if ( $ok_move ) {
+        $ok_move = $install_one( $ver_staging, $final_ver );
+    }
+    if ( $ok_move ) {
+        $ok_move = $install_one( $idf_staging, $final_idf );
+    }
+
+    if ( ! $ok_move ) {
+        transformer_model_lexical_context_lexical_rebuild_log( 'step=atomic_swap_failed' );
+        return array( 'ok' => false, 'error' => 'write_error' );
+    }
+
+    transformer_model_lexical_context_lexical_rebuild_log( 'step=rebuild_completed_ok' );
+
+    return array( 'ok' => true );
 }
 
 /**
@@ -1493,16 +1871,226 @@ function transformer_model_lexical_context_compute_phrase_proximity_bonus( $sent
 }
 
 /**
+ * Whether LCM query-intent expansion (Kognetiks/WordPress content) is applied for scoring bonus only.
+ *
+ * Default off (`chatbot_lcm_query_intent_expansion` !== Yes). Override with filter `kognetiks_lcm_query_intent_expansion_enabled`.
+ *
+ * @return bool
+ */
+function transformer_model_lexical_context_query_intent_expansion_enabled() {
+
+    $opt = get_option( 'chatbot_lcm_query_intent_expansion', 'No' );
+    $on  = ( $opt === 'Yes' || $opt === '1' || $opt === 1 || $opt === true );
+
+    return (bool) apply_filters( 'kognetiks_lcm_query_intent_expansion_enabled', $on );
+}
+
+/**
+ * Return plugin-specific intent expansion terms when the user query matches content-use patterns.
+ * Used for scoring bonus only; does not affect the relevance guard.
+ *
+ * @param array<int, string> $meaningful_query_tokens Meaningful direct-query tokens (for filters; not used for guard).
+ * @param string             $input_text              Original user query text.
+ * @return array{singles: array<int, string>, phrases: array<int, string>}
+ */
+function transformer_model_lexical_context_expand_query_intent_terms( $meaningful_query_tokens, $input_text ) {
+
+    $empty = array(
+        'singles' => array(),
+        'phrases' => array(),
+    );
+
+    if ( ! transformer_model_lexical_context_query_intent_expansion_enabled() ) {
+        return $empty;
+    }
+
+    $t = strtolower( wp_strip_all_tags( (string) $input_text ) );
+    if ( $t === '' ) {
+        return $empty;
+    }
+
+    $qtoks = transformer_model_lexical_context_tokenize_for_local_idf( $t );
+    $qflip = array_flip( $qtoks );
+
+    $has_wordpress = isset( $qflip['wordpress'] );
+    $has_content   = isset( $qflip['content'] );
+    $has_site      = isset( $qflip['site'] );
+
+    $trigger = ( $has_wordpress && $has_content )
+        || ( $has_site && $has_content )
+        || ( false !== stripos( $t, 'use content' ) )
+        || ( false !== stripos( $t, 'uses content' ) )
+        || ( false !== stripos( $t, 'website content' ) );
+
+    if ( ! $trigger ) {
+        return $empty;
+    }
+
+    $singles = array( 'posts', 'pages' );
+    $phrases = array(
+        'site content',
+        'knowledge navigator',
+        'knowledge base',
+        'indexed content',
+        'content discovery',
+        'content retrieval',
+    );
+
+    $pack = array(
+        'singles' => $singles,
+        'phrases' => $phrases,
+    );
+
+    /**
+     * Filter expanded singles/phrases for intent scoring (after triggers matched).
+     *
+     * @param array{singles: array<int, string>, phrases: array<int, string>} $pack
+     * @param array<int, string>                                                $meaningful_query_tokens
+     * @param string                                                            $input_text
+     */
+    return apply_filters( 'kognetiks_lcm_query_intent_expansion_terms', $pack, $meaningful_query_tokens, $input_text );
+}
+
+/**
+ * Build intent expansion package once per request (filters run once). Returns null when inactive or empty.
+ *
+ * @param array<int, string> $inputWordsLower Lowercased query words.
+ * @param string             $input_text_raw  Original query text for triggers.
+ * @return array{ active: true, singles: array<int, string>, phrase_seqs: array<int, array<int, string>> }|null
+ */
+function transformer_model_lexical_context_precompute_intent_expansion_for_request( $inputWordsLower, $input_text_raw ) {
+
+    if ( ! transformer_model_lexical_context_query_intent_expansion_enabled() ) {
+        return null;
+    }
+
+    $meaningful = transformer_model_lexical_context_meaningful_query_tokens_for_relevance_guard( $inputWordsLower );
+    $pack       = transformer_model_lexical_context_expand_query_intent_terms( $meaningful, $input_text_raw );
+
+    if ( empty( $pack['phrases'] ) && empty( $pack['singles'] ) ) {
+        return null;
+    }
+
+    $singles = array();
+    if ( ! empty( $pack['singles'] ) && is_array( $pack['singles'] ) ) {
+        foreach ( $pack['singles'] as $w ) {
+            $w = strtolower( trim( (string) $w ) );
+            if ( $w !== '' ) {
+                $singles[] = $w;
+            }
+        }
+    }
+    $singles = array_values( array_unique( $singles ) );
+
+    $phrase_seqs = array();
+    if ( ! empty( $pack['phrases'] ) && is_array( $pack['phrases'] ) ) {
+        foreach ( $pack['phrases'] as $ph ) {
+            $parts = preg_split( '/\s+/u', strtolower( trim( (string) $ph ) ), -1, PREG_SPLIT_NO_EMPTY );
+            if ( count( $parts ) >= 2 ) {
+                $phrase_seqs[] = $parts;
+            }
+        }
+    }
+
+    return array(
+        'active'      => true,
+        'singles'     => $singles,
+        'phrase_seqs' => $phrase_seqs,
+    );
+}
+
+/**
+ * True if consecutive token sequence $seq appears in $chunk_tokens (LCM tokenizer; no regex).
+ *
+ * @param array<int, string> $chunk_tokens
+ * @param array<int, string> $seq
+ * @return bool
+ */
+function transformer_model_lexical_context_chunk_contains_token_sequence( $chunk_tokens, $seq ) {
+
+    $sn = count( $seq );
+    $tn = count( $chunk_tokens );
+    if ( $sn < 2 || $tn < $sn ) {
+        return false;
+    }
+
+    for ( $i = 0; $i <= $tn - $sn; $i++ ) {
+        $ok = true;
+        for ( $j = 0; $j < $sn; $j++ ) {
+            if ( $chunk_tokens[ $i + $j ] !== $seq[ $j ] ) {
+                $ok = false;
+                break;
+            }
+        }
+        if ( $ok ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Intent bonus from precomputed singles / phrase token sequences (cap 20). One tokenize per chunk; no regex.
+ *
+ * @param string                                                                                                  $sentenceTrimmed
+ * @param array{ active?: bool, singles?: array<int, string>, phrase_seqs?: array<int, array<int, string>> }|null $precomputed
+ * @return array{ bonus: float, matched: array<int, string> }
+ */
+function transformer_model_lexical_context_apply_precomputed_intent_bonus( $sentenceTrimmed, $precomputed ) {
+
+    $out = array(
+        'bonus'   => 0.0,
+        'matched' => array(),
+    );
+
+    if ( empty( $precomputed ) || empty( $precomputed['active'] ) ) {
+        return $out;
+    }
+
+    $chunk_tokens = transformer_model_lexical_context_tokenize_for_local_idf( $sentenceTrimmed );
+    $token_flip   = array_flip( $chunk_tokens );
+
+    $raw = 0.0;
+
+    if ( ! empty( $precomputed['singles'] ) ) {
+        foreach ( $precomputed['singles'] as $w ) {
+            if ( isset( $token_flip[ $w ] ) ) {
+                $raw += 4.0;
+                $out['matched'][] = $w;
+            }
+        }
+    }
+
+    if ( ! empty( $precomputed['phrase_seqs'] ) ) {
+        foreach ( $precomputed['phrase_seqs'] as $seq ) {
+            if ( ! is_array( $seq ) || count( $seq ) < 2 ) {
+                continue;
+            }
+            if ( transformer_model_lexical_context_chunk_contains_token_sequence( $chunk_tokens, $seq ) ) {
+                $raw += 10.0;
+                $out['matched'][] = implode( ' ', $seq );
+            }
+        }
+    }
+
+    $out['bonus'] = min( 20.0, $raw );
+
+    return $out;
+}
+
+/**
  * Score one sentence/chunk for lexical retrieval (query + PMI-expanded words).
  *
  * @param string               $sentenceTrimmed
  * @param array<int, string>   $searchWordsLower
  * @param array<int, string>   $inputWordsLower
  * @param array<string, float>|null $local_idf_map Optional IDF weights (runtime: from lexical_local_idf_cache.json when corpus hash matches).
- * @param bool                 $apply_local_idf   When true and map non-empty, add a small direct-query-only IDF bonus (not expansion).
+ * @param bool                 $apply_local_idf        When true and map non-empty, add a small direct-query-only IDF bonus (not expansion).
+ * @param array<string, mixed>|null $intent_precomputed From precompute_intent_expansion_for_request(); null skips intent scoring.
  * @return array<string, mixed>|null
  */
-function transformer_model_lexical_context_lexical_sentence_score_row( $sentenceTrimmed, $searchWordsLower, $inputWordsLower, $local_idf_map = null, $apply_local_idf = false ) {
+function transformer_model_lexical_context_lexical_sentence_score_row( $sentenceTrimmed, $searchWordsLower, $inputWordsLower, $local_idf_map = null, $apply_local_idf = false, $intent_precomputed = null ) {
 
     $sentenceTrimmed = trim( $sentenceTrimmed );
     if ( $sentenceTrimmed === '' ) {
@@ -1621,6 +2209,28 @@ function transformer_model_lexical_context_lexical_sentence_score_row( $sentence
                 )
             );
             $lcm_phrase_bonus_sample_logged = true;
+        }
+    }
+
+    $intent_pack = transformer_model_lexical_context_apply_precomputed_intent_bonus( $sentenceTrimmed, $intent_precomputed );
+    $score      += $intent_pack['bonus'];
+
+    if ( $intent_pack['bonus'] > 0.0 && transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        static $lcm_intent_bonus_sample_logged = false;
+        if ( ! $lcm_intent_bonus_sample_logged ) {
+            $matched_safe = array();
+            foreach ( $intent_pack['matched'] as $m ) {
+                $matched_safe[] = str_replace( array( "\r", "\n", '|' ), array( ' ', ' ', '/' ), (string) $m );
+            }
+            back_trace(
+                'NOTICE',
+                sprintf(
+                    '[LCM][intent_bonus] bonus=%g matched=[%s]',
+                    $intent_pack['bonus'],
+                    implode( '|', $matched_safe )
+                )
+            );
+            $lcm_intent_bonus_sample_logged = true;
         }
     }
 
@@ -2047,13 +2657,16 @@ function transformer_model_lexical_context_diag_log_pipeline_stage( $stage_slug,
  * Rank sentence chunks per document, prefer top matching posts, then assemble the reply.
  *
  * @param array<int, array<string, mixed>> $documents
+ * @param string                           $input_text_raw Optional original user query for intent expansion scoring (not used for relevance guard).
  * @return string
  */
-function transformer_model_lexical_context_build_sentences_from_documents( $documents, $searchWords, $inputWords, $maxWords, $sentenceResponseCount = 5, $similarityThreshold = 0.3, $leadingSentencesRatio = 0.2, $leadingTokenRatio = 0.2 ) {
+function transformer_model_lexical_context_build_sentences_from_documents( $documents, $searchWords, $inputWords, $maxWords, $sentenceResponseCount = 5, $similarityThreshold = 0.3, $leadingSentencesRatio = 0.2, $leadingTokenRatio = 0.2, $input_text_raw = '' ) {
 
     $sentenceScores   = array();
     $searchWordsLower = array_map( 'strtolower', $searchWords );
     $inputWordsLower  = array_map( 'strtolower', $inputWords );
+
+    $intent_precomputed = transformer_model_lexical_context_precompute_intent_expansion_for_request( $inputWordsLower, $input_text_raw );
 
     $meaningful_query_tokens          = transformer_model_lexical_context_meaningful_query_tokens_for_relevance_guard( $inputWordsLower );
     $corpus_had_meaningful_overlap    = false;
@@ -2122,7 +2735,7 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                 );
             }
 
-            $row = transformer_model_lexical_context_lexical_sentence_score_row( $trimmed, $searchWordsLower, $inputWordsLower, $local_idf_map, $apply_local_idf );
+            $row = transformer_model_lexical_context_lexical_sentence_score_row( $trimmed, $searchWordsLower, $inputWordsLower, $local_idf_map, $apply_local_idf, $intent_precomputed );
             if ( $row !== null ) {
                 $row['post_id'] = $pid;
                 $sentenceScores[] = $row;
@@ -2197,7 +2810,8 @@ function transformer_model_lexical_context_build_sentences_from_corpus( $corpus,
         $sentenceResponseCount,
         $similarityThreshold,
         $leadingSentencesRatio,
-        $leadingTokenRatio
+        $leadingTokenRatio,
+        ''
     );
 }
 

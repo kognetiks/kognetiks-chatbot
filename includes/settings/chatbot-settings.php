@@ -628,6 +628,9 @@ function chatbot_chatgpt_settings_page() {
                 $selected_transformer_model = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
                 if ('lexical-context-model' === $selected_transformer_model) {
                     echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                    do_settings_sections('chatbot_lcm_lexical_cache_schedule');
+                    echo '</div>';
+                    echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                     do_settings_sections('chatbot_transformer_model_cache_info');
                     echo '</div>';
                 }
