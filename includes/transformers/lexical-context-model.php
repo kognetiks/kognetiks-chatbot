@@ -1408,6 +1408,133 @@ function transformer_model_lexical_context_no_query_overlap_message() {
 }
 
 /**
+ * Whether Lexical Context Model pipeline diagnostics are enabled (logs only; no behavior change).
+ *
+ * @return bool
+ */
+function transformer_model_lexical_context_is_lcm_diagnostics_enabled() {
+
+    return defined( 'KOGNETIKS_LCM_DEBUG' ) && KOGNETIKS_LCM_DEBUG;
+}
+
+/**
+ * Map post_id => post_title for diagnostic lines.
+ *
+ * @param array<int, array<string, mixed>> $documents
+ * @return array<int, string>
+ */
+function transformer_model_lexical_context_post_title_map_from_documents( $documents ) {
+
+    $map = array();
+    if ( empty( $documents ) || ! is_array( $documents ) ) {
+        return $map;
+    }
+
+    foreach ( $documents as $doc ) {
+        $pid = isset( $doc['post_id'] ) ? (int) $doc['post_id'] : 0;
+        $map[ $pid ] = isset( $doc['post_title'] ) ? (string) $doc['post_title'] : '';
+    }
+
+    return $map;
+}
+
+/**
+ * Short plain-text preview for logs (HTML stripped, whitespace normalized).
+ *
+ * @param string $text    Raw chunk/sentence text.
+ * @param int    $max_len Max characters before ellipsis (default ~165).
+ * @return string
+ */
+function transformer_model_lexical_context_diag_preview_text( $text, $max_len = 165 ) {
+
+    $text = wp_strip_all_tags( (string) $text );
+    $text = preg_replace( '/\s+/', ' ', trim( $text ) );
+
+    if ( strlen( $text ) > $max_len ) {
+        return substr( $text, 0, max( 0, $max_len - 3 ) ) . '...';
+    }
+
+    return $text;
+}
+
+/**
+ * Log top candidate rows for one pipeline stage via back_trace() (NOTICE).
+ *
+ * @param string                             $stage_slug      Short stage name for [LCM][slug].
+ * @param array<int, array<string, mixed>>   $rows            Candidate rows (partial rows allowed for pre-scoring).
+ * @param array<int, string>                 $post_title_map  Fallback titles by post_id.
+ * @return void
+ */
+function transformer_model_lexical_context_diag_log_pipeline_stage( $stage_slug, $rows, $post_title_map ) {
+
+    if ( ! transformer_model_lexical_context_is_lcm_diagnostics_enabled() || ! function_exists( 'back_trace' ) ) {
+        return;
+    }
+
+    $stage_slug = preg_replace( '/[^\w.-]/', '', (string) $stage_slug );
+    if ( $stage_slug === '' ) {
+        $stage_slug = 'stage';
+    }
+
+    if ( empty( $rows ) ) {
+        back_trace( 'NOTICE', '[LCM][' . $stage_slug . '] no candidates' );
+
+        return;
+    }
+
+    $work = array_values( $rows );
+    $has_score = false;
+
+    foreach ( $work as $r ) {
+        if ( isset( $r['score'] ) && is_numeric( $r['score'] ) ) {
+            $has_score = true;
+            break;
+        }
+    }
+
+    if ( $has_score ) {
+        usort(
+            $work,
+            function ( $a, $b ) {
+                return ( (float) ( $b['score'] ?? 0 ) ) <=> ( (float) ( $a['score'] ?? 0 ) );
+            }
+        );
+    }
+
+    $work = array_slice( $work, 0, 5 );
+
+    foreach ( $work as $row ) {
+        $score = 'n/a';
+        if ( isset( $row['score'] ) && is_numeric( $row['score'] ) ) {
+            $score = sprintf( '%g', (float) $row['score'] );
+        }
+
+        $pid = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
+
+        $title = isset( $row['post_title'] ) ? (string) $row['post_title'] : '';
+        if ( $title === '' && isset( $post_title_map[ $pid ] ) ) {
+            $title = $post_title_map[ $pid ];
+        }
+
+        $sentence       = isset( $row['sentence'] ) ? $row['sentence'] : '';
+        $preview        = transformer_model_lexical_context_diag_preview_text( $sentence, 165 );
+        $title_safe     = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $title );
+        $preview_safe   = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
+
+        $line = sprintf(
+            '[LCM][%s] score=%s | post_id=%d | title="%s" | text="%s"',
+            $stage_slug,
+            $score,
+            $pid,
+            $title_safe,
+            $preview_safe
+        );
+
+        back_trace( 'NOTICE', $line );
+    }
+}
+
+/**
  * Rank sentence chunks per document, prefer top matching posts, then assemble the reply.
  *
  * @param array<int, array<string, mixed>> $documents
@@ -1421,6 +1548,11 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
 
     $meaningful_query_tokens          = transformer_model_lexical_context_meaningful_query_tokens_for_relevance_guard( $inputWordsLower );
     $corpus_had_meaningful_overlap    = false;
+
+    $post_title_map             = transformer_model_lexical_context_is_lcm_diagnostics_enabled()
+        ? transformer_model_lexical_context_post_title_map_from_documents( $documents )
+        : array();
+    $lcm_pre_scoring_candidates = array();
 
     foreach ( $documents as $doc ) {
         $pid = isset( $doc['post_id'] ) ? (int) $doc['post_id'] : 0;
@@ -1462,6 +1594,16 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                 }
                 $corpus_had_meaningful_overlap = true;
             }
+
+            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() ) {
+                $lcm_pre_scoring_candidates[] = array(
+                    'sentence'   => $trimmed,
+                    'post_id'    => $pid,
+                    'post_title' => isset( $doc['post_title'] ) ? (string) $doc['post_title'] : '',
+                    'score'      => null,
+                );
+            }
+
             $row = transformer_model_lexical_context_lexical_sentence_score_row( $trimmed, $searchWordsLower, $inputWordsLower );
             if ( $row !== null ) {
                 $row['post_id'] = $pid;
@@ -1469,6 +1611,8 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
             }
         }
     }
+
+    transformer_model_lexical_context_diag_log_pipeline_stage( 'pre_scoring_candidates', $lcm_pre_scoring_candidates, $post_title_map );
 
     if ( empty( $sentenceScores ) ) {
         if ( ! empty( $meaningful_query_tokens ) && ! $corpus_had_meaningful_overlap ) {
@@ -1478,11 +1622,16 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         return '';
     }
 
+    transformer_model_lexical_context_diag_log_pipeline_stage( 'after_scoring', $sentenceScores, $post_title_map );
+
     $sentenceScores = transformer_model_lexical_context_sort_sentence_scores_with_document_priority( $sentenceScores );
     // Conservative cross-document gate: only include weaker posts if their document-level max score is within 85% of the best post’s max.
     $after_doc_gate = transformer_model_lexical_context_filter_sentence_scores_cross_document_gate( $sentenceScores, 0.85 );
     // Row-level gate: keep chunks near the best chunk score; drops weak filler when a strong match exists.
     $after_row_gate = transformer_model_lexical_context_filter_sentence_scores_row_gate( $after_doc_gate, 0.65 );
+
+    transformer_model_lexical_context_diag_log_pipeline_stage( 'after_document_gate', $after_doc_gate, $post_title_map );
+    transformer_model_lexical_context_diag_log_pipeline_stage( 'after_row_gate', $after_row_gate, $post_title_map );
 
     // Enrich from the top-ranked document only (up to sentence response cap), including next-best same-post chunks.
     $sentenceScores = transformer_model_lexical_context_merge_top_document_expansion(
@@ -1492,7 +1641,11 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         $sentenceResponseCount
     );
 
+    transformer_model_lexical_context_diag_log_pipeline_stage( 'after_expansion', $sentenceScores, $post_title_map );
+
     $sentenceScores = transformer_model_lexical_context_deduplicate_near_duplicate_sentence_rows( $sentenceScores );
+
+    transformer_model_lexical_context_diag_log_pipeline_stage( 'after_deduplication', $sentenceScores, $post_title_map );
 
     return transformer_model_lexical_context_assemble_response_from_scored_sentences(
         $sentenceScores,
