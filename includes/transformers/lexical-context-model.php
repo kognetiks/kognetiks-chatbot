@@ -999,14 +999,18 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
         $stopWords = array();
     }
 
-    $guard_flip = array_flip( transformer_model_lexical_context_relevance_guard_stop_words() );
+    $guard_flip   = array_flip( transformer_model_lexical_context_relevance_guard_stop_words() );
+    $acronym_flip = transformer_model_lexical_context_lcm_short_acronym_allowlist_flip();
 
     // Filter: length, global stop words, and LCM relevance-guard list (aligns inputWords with meaningful tokens).
     $inputWords = array_filter(
         $inputWords,
-        function ( $word ) use ( $stopWords, $guard_flip ) {
+        function ( $word ) use ( $stopWords, $guard_flip, $acronym_flip ) {
             $word = strtolower( trim( (string) $word ) );
-            if ( $word === '' || strlen( $word ) < 3 ) {
+            if ( $word === '' ) {
+                return false;
+            }
+            if ( strlen( $word ) < 3 && ! isset( $acronym_flip[ $word ] ) ) {
                 return false;
             }
             if ( in_array( $word, $stopWords, true ) ) {
@@ -1025,9 +1029,12 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
         $allWords = preg_split( '/\s+/', strtolower( $input ) );
         $inputWords = array_filter(
             $allWords,
-            function ( $word ) use ( $stopWords, $guard_flip ) {
+            function ( $word ) use ( $stopWords, $guard_flip, $acronym_flip ) {
                 $word = strtolower( trim( (string) $word ) );
-                if ( $word === '' || strlen( $word ) < 4 ) {
+                if ( $word === '' ) {
+                    return false;
+                }
+                if ( strlen( $word ) < 4 && ! isset( $acronym_flip[ $word ] ) ) {
                     return false;
                 }
                 if ( in_array( $word, $stopWords, true ) ) {
@@ -3087,6 +3094,46 @@ function transformer_model_lexical_context_diag_log_query_token_pipeline( $raw_q
 }
 
 /**
+ * Short domain acronyms allowed in LCM query tokenization even when below the usual 3-character minimum.
+ * Does not affect corpus/chunk processing — only {@see transformer_model_lexical_context_generate_contextual_response()} inputWords.
+ *
+ * Filter: {@see 'chatbot_lcm_query_short_acronym_allowlist'} — pass array of lowercase tokens; merged into defaults.
+ *
+ * @return array<string, true> Token (lowercase) => true for O(1) lookup.
+ */
+function transformer_model_lexical_context_lcm_short_acronym_allowlist_flip() {
+
+    $defaults = array(
+        'ai',
+        'agi',
+        'llm',
+        'slm',
+        'gpt',
+        'api',
+        'pmi',
+        'idf',
+        'tf',
+        'tfidf',
+        'seo',
+        'ux',
+        'ui',
+        'wp',
+    );
+
+    $merged = (array) apply_filters( 'chatbot_lcm_query_short_acronym_allowlist', $defaults );
+    $flip   = array();
+    foreach ( $merged as $t ) {
+        $t = strtolower( trim( (string) $t ) );
+        if ( $t === '' || strlen( $t ) > 12 ) {
+            continue;
+        }
+        $flip[ $t ] = true;
+    }
+
+    return $flip;
+}
+
+/**
  * Stop words removed when deriving meaningful query tokens for the relevance guard and local IDF bonus.
  *
  * Merges the built-in LCM list with global `$stopWords` (from translations/globals) when that variable
@@ -3272,6 +3319,576 @@ function transformer_model_lexical_context_filter_relation_intent_tokens( array 
     }
 
     return array_values( $out );
+}
+
+/**
+ * Conservative query-shape classifier (diagnostics + informational answer-shape bias; see apply_answer_shape_bias).
+ *
+ * @param string             $raw_query               Original user query (may contain entities / punctuation).
+ * @param string             $normalized_query        Normalized single-line query used for tokenization (already punctuation-collapsed).
+ * @param array<int, string> $input_words             Lowercased query tokens after filters (same list used for scoring).
+ * @param array<int, string> $meaningful_query_tokens Meaningful direct-query tokens (relevance guard).
+ * @return array{ shape: string, confidence: float, signals: array<int, string> }
+ */
+function transformer_model_lexical_context_classify_query_shape( $raw_query, $normalized_query, $input_words, $meaningful_query_tokens ) {
+
+    $input_words             = is_array( $input_words ) ? $input_words : array();
+    $meaningful_query_tokens = is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array();
+
+    $raw_l  = strtolower( wp_strip_all_tags( (string) $raw_query ) );
+    $norm_l = strtolower( trim( preg_replace( '/\s+/u', ' ', (string) $normalized_query ) ) );
+
+    $signals = array();
+
+    $m_n = count( $meaningful_query_tokens );
+
+    if ( $m_n === 0 ) {
+        return array(
+            'shape'      => 'empty_query',
+            'confidence' => 0.95,
+            'signals'    => array( 'no_meaningful_tokens' ),
+        );
+    }
+
+    $relation_intent = transformer_model_lexical_context_query_matches_relation_intent_pattern( $norm_l );
+    if ( $relation_intent ) {
+        $signals[] = 'relation_intent_pattern';
+    }
+
+    // Question/action structure signals.
+    $question_words = array( 'what', 'why', 'how', 'when', 'where', 'who', 'whom', 'whose', 'which' );
+    $action_words   = array( 'explain', 'describe', 'define', 'compare', 'summarize' );
+    $has_question   = false;
+    foreach ( $question_words as $w ) {
+        if ( preg_match( '/\b' . preg_quote( $w, '/' ) . '\b/i', $raw_l ) || preg_match( '/\b' . preg_quote( $w, '/' ) . '\b/i', $norm_l ) ) {
+            $has_question = true;
+            $signals[]    = 'question_word:' . $w;
+            break;
+        }
+    }
+    $has_action = false;
+    foreach ( $action_words as $w ) {
+        if ( preg_match( '/\b' . preg_quote( $w, '/' ) . '\b/i', $raw_l ) || preg_match( '/\b' . preg_quote( $w, '/' ) . '\b/i', $norm_l ) ) {
+            $has_action = true;
+            $signals[]  = 'action_word:' . $w;
+            break;
+        }
+    }
+
+    // Loose term-list signal: many tokens, few glue words/punctuation, no question/action, no relation intent.
+    $looks_like_bag = false;
+    if ( $m_n >= 3 && ! $has_question && ! $has_action && ! $relation_intent ) {
+        // If the query is mostly tokens and short (few commas/periods) it tends to be a bag query.
+        $glue = preg_match( '/\b(and|or|vs|with|without)\b/i', $norm_l );
+        $has_punct = preg_match( '/[,;:]/', (string) $normalized_query );
+        if ( ! $glue && ! $has_punct ) {
+            $looks_like_bag = true;
+            $signals[]      = 'term_list_look';
+        }
+    }
+
+    if ( $relation_intent ) {
+        return array(
+            'shape'      => 'relation_query',
+            'confidence' => 0.80,
+            'signals'    => $signals,
+        );
+    }
+
+    if ( $m_n === 1 ) {
+        return array(
+            'shape'      => 'short_anchor_query',
+            'confidence' => 0.85,
+            'signals'    => array_merge( $signals, array( 'single_meaningful_token' ) ),
+        );
+    }
+
+    // Relation-intent reduction can yield one anchor token even if the raw query had more words.
+    if ( $m_n === 1 && count( $input_words ) >= 1 ) {
+        return array(
+            'shape'      => 'short_anchor_query',
+            'confidence' => 0.80,
+            'signals'    => array_merge( $signals, array( 'relation_reduced_anchor' ) ),
+        );
+    }
+
+    if ( ( $has_question || $has_action ) && $m_n >= 2 ) {
+        return array(
+            'shape'      => 'informational_query',
+            'confidence' => 0.72,
+            'signals'    => $signals,
+        );
+    }
+
+    if ( $looks_like_bag ) {
+        return array(
+            'shape'      => 'keyword_bag_query',
+            'confidence' => 0.68,
+            'signals'    => $signals,
+        );
+    }
+
+    // Default: looks like a normal informational query but without explicit question/action tokens.
+    return array(
+        'shape'      => 'informational_query',
+        'confidence' => 0.55,
+        'signals'    => array_merge( $signals, array( 'default_fallback' ) ),
+    );
+}
+
+/**
+ * Query “action” words: shape signals only — excluded from answer-shape anchors (not definition targets).
+ *
+ * Filter {@see 'chatbot_lcm_answer_shape_query_action_words'} may append additional lowercase tokens.
+ *
+ * @return array<string, true>
+ */
+function transformer_model_lexical_context_answer_shape_query_action_words_flip() {
+
+    $tokens = array( 'explain', 'describe', 'define', 'summarize', 'compare' );
+    $extra  = apply_filters( 'chatbot_lcm_answer_shape_query_action_words', array() );
+    foreach ( (array) $extra as $t ) {
+        $t = strtolower( trim( (string) $t ) );
+        if ( $t !== '' ) {
+            $tokens[] = $t;
+        }
+    }
+    $flip = array();
+    foreach ( $tokens as $t ) {
+        $flip[ strtolower( trim( (string) $t ) ) ] = true;
+    }
+
+    return $flip;
+}
+
+/**
+ * Meaningful tokens minus query action words → content anchors for answer-shape bias.
+ *
+ * @param array<int, string> $meaningful_lower Unique lowercased meaningful tokens.
+ * @return array<int, string>
+ */
+function transformer_model_lexical_context_answer_shape_content_tokens( array $meaningful_lower ) {
+
+    $action_flip = transformer_model_lexical_context_answer_shape_query_action_words_flip();
+    $out         = array();
+    foreach ( $meaningful_lower as $w ) {
+        $w = strtolower( trim( (string) $w ) );
+        if ( strlen( $w ) < 2 || isset( $action_flip[ $w ] ) ) {
+            continue;
+        }
+        $out[] = $w;
+    }
+
+    return array_values( $out );
+}
+
+/**
+ * Ordered definition cues for answer-shape bias (longer / more specific first within each tier).
+ * Strong → full {@see 'chatbot_lcm_answer_shape_definition_bonus'}; medium → fraction via {@see 'chatbot_lcm_answer_shape_definition_bonus_medium_ratio'}.
+ * No standalone “is”, bare “can”, or “explain”. Specs without `strength` default to strong.
+ *
+ * @return array<int, array{ label: string, pattern: string, strength?: string }>
+ */
+function transformer_model_lexical_context_answer_shape_definition_cue_specs() {
+
+    $specs = array(
+        // Strong: direct definitional phrasing.
+        array( 'label' => 'is defined as', 'pattern' => '\bis\s+defined\s+as\b', 'strength' => 'strong' ),
+        array( 'label' => 'refers to', 'pattern' => '\brefers\s+to\b', 'strength' => 'strong' ),
+        array( 'label' => 'is an', 'pattern' => '\bis\s+an\b', 'strength' => 'strong' ),
+        array( 'label' => 'is a', 'pattern' => '\bis\s+a\b', 'strength' => 'strong' ),
+        array( 'label' => 'means', 'pattern' => '\bmeans\b', 'strength' => 'strong' ),
+        // Medium: examples / capability — smaller bonus.
+        array( 'label' => 'examples of', 'pattern' => '\bexamples\s+of\b', 'strength' => 'medium' ),
+        array( 'label' => 'includes', 'pattern' => '\bincludes\b', 'strength' => 'medium' ),
+        array( 'label' => 'include', 'pattern' => '\binclude\b', 'strength' => 'medium' ),
+        array( 'label' => 'can generate', 'pattern' => '\bcan\s+generate\b', 'strength' => 'medium' ),
+        array( 'label' => 'can be used', 'pattern' => '\bcan\s+be\s+used\b', 'strength' => 'medium' ),
+    );
+
+    return (array) apply_filters( 'chatbot_lcm_answer_shape_definition_cue_specs', $specs );
+}
+
+/**
+ * Whole-token anchor regex from 2–3 lowercase meaningful tokens (phrase).
+ *
+ * @param array<int, string> $tokens
+ * @return string|null
+ */
+function transformer_model_lexical_context_answer_shape_anchor_regex_phrase( array $tokens ) {
+
+    $parts = array();
+    foreach ( $tokens as $t ) {
+        $t = strtolower( trim( (string) $t ) );
+        if ( strlen( $t ) < 2 ) {
+            continue;
+        }
+        $parts[] = preg_quote( $t, '/' );
+    }
+    if ( count( $parts ) < 2 ) {
+        return null;
+    }
+
+    return '(?<![\p{L}\p{N}_])' . implode( '\s+', $parts ) . '(?![\p{L}\p{N}_])';
+}
+
+/**
+ * Whole-token anchor regex for a single term.
+ *
+ * @param string $word
+ * @return string|null
+ */
+function transformer_model_lexical_context_answer_shape_anchor_regex_word( $word ) {
+
+    $w = strtolower( trim( (string) $word ) );
+    if ( strlen( $w ) < 2 ) {
+        return null;
+    }
+
+    return '(?<![\p{L}\p{N}_])' . preg_quote( $w, '/' ) . '(?![\p{L}\p{N}_])';
+}
+
+/**
+ * First matching definition cue near anchor (either order). Tries strong cues before medium so direct definitions win ties.
+ *
+ * @param string $sentence_lower Stripped lowercased sentence.
+ * @param string $anchor_regex   Anchor fragment (no delimiters).
+ * @param int    $win            Max characters between anchor and cue.
+ * @return array{ hit: bool, cue: string, strength: string }
+ */
+function transformer_model_lexical_context_answer_shape_row_definition_match_detail( $sentence_lower, $anchor_regex, $win = 55 ) {
+
+    $empty = array(
+        'hit'      => false,
+        'cue'      => '',
+        'strength' => '',
+    );
+
+    if ( $anchor_regex === null || $anchor_regex === '' ) {
+        return $empty;
+    }
+
+    $win = max( 12, min( 120, (int) $win ) );
+
+    foreach ( array( 'strong', 'medium' ) as $tier ) {
+        foreach ( transformer_model_lexical_context_answer_shape_definition_cue_specs() as $spec ) {
+            if ( empty( $spec['pattern'] ) ) {
+                continue;
+            }
+            $strength = isset( $spec['strength'] ) ? strtolower( trim( (string) $spec['strength'] ) ) : 'strong';
+            $bucket   = ( $strength === 'medium' ) ? 'medium' : 'strong';
+            if ( $bucket !== $tier ) {
+                continue;
+            }
+
+            $cue   = (string) $spec['pattern'];
+            $label = isset( $spec['label'] ) ? (string) $spec['label'] : $cue;
+
+            $forward = '/' . $anchor_regex . '.{0,' . $win . '}(' . $cue . ')/iu';
+            $back    = '/(' . $cue . ').{0,' . $win . '}' . $anchor_regex . '/iu';
+
+            if ( preg_match( $forward, $sentence_lower ) || preg_match( $back, $sentence_lower ) ) {
+                return array(
+                    'hit'      => true,
+                    'cue'      => $label,
+                    'strength' => $tier,
+                );
+            }
+        }
+    }
+
+    return $empty;
+}
+
+/**
+ * Changelog / admin-meta style heuristic for informational queries (penalized when query shape is informational).
+ *
+ * @param string $sentence
+ * @return bool
+ */
+function transformer_model_lexical_context_answer_shape_row_looks_meta_changelog( $sentence ) {
+
+    $s = strtolower( wp_strip_all_tags( (string) $sentence ) );
+
+    $patterns = array(
+        '/^\s*(updated|moved|added|removed)\b/i',
+        // "Foo Analysis: Moved …" / "Foo Update: Updated …"
+        '/\b\w+\s+analysis\s*:\s*(moved|updated|added|removed)\b/i',
+        '/\b\w+\s+update\s*:\s*(updated|moved|added|removed)\b/i',
+        '/\banalysis\s*:\s*(moved|updated|added|removed)\b/i',
+        '/\bupdate\s*:\s*updated\b/i',
+        // "Moved … to the … tab"
+        '/\bmoved\b.{0,160}\bto\s+the\b.{0,60}\btab\b/is',
+        // "Analysis … export … tab" (changelog / export UI)
+        '/\banalysis\b.{0,120}\bexport\b.{0,80}\btab\b/is',
+        '/\bexport\b.{0,80}\btab\b/is',
+        // "Options … settings …" style admin copy
+        '/\b(settings|options)\b.{0,100}\b(settings|options)\b/i',
+        '/\bversion\b/i',
+        '/what\'?s\s+new\b/i',
+    );
+
+    foreach ( $patterns as $p ) {
+        if ( preg_match( $p, $s ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Informational queries only: modest score boost for definition-shaped rows; stronger penalty for meta/changelog rows (no boost on meta rows).
+ * Does not remove candidates — adjusts scores and re-sorts by score (then existing row compare).
+ *
+ * Filter: {@see 'chatbot_lcm_answer_shape_definition_bonus'} default 15 (strong cues).
+ * Filter: {@see 'chatbot_lcm_answer_shape_definition_bonus_medium_ratio'} default 0.5 (medium cue bonus = strong × ratio).
+ * Filter: {@see 'chatbot_lcm_answer_shape_meta_penalty'} default 35.
+ *
+ * @param array<int, array<string, mixed>> $sentence_scores
+ * @param array{ shape?: string, confidence?: float, signals?: array<int, string> } $query_shape
+ * @param array<int, string>             $meaningful_query_tokens
+ * @return array<int, array<string, mixed>>
+ */
+function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_scores, $query_shape, $meaningful_query_tokens ) {
+
+    $result = is_array( $sentence_scores ) ? $sentence_scores : array();
+    $shape  = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
+
+    if ( $shape !== 'informational_query' ) {
+        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            back_trace(
+                'NOTICE',
+                sprintf(
+                    '[LCM][answer_shape_bias] applied=0 reason=%s',
+                    $shape !== '' ? $shape : 'missing_shape'
+                )
+            );
+        }
+
+        return $result;
+    }
+
+    $meaningful_query_tokens = is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array();
+    $norm                    = array();
+    foreach ( $meaningful_query_tokens as $w ) {
+        $w = strtolower( trim( (string) $w ) );
+        if ( strlen( $w ) >= 2 ) {
+            $norm[] = $w;
+        }
+    }
+    $norm = array_values( array_unique( $norm ) );
+    $m    = count( $norm );
+
+    if ( $m < 1 ) {
+        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            back_trace( 'NOTICE', '[LCM][answer_shape_bias] applied=0 reason=no_meaningful_tokens' );
+        }
+
+        return $result;
+    }
+
+    $content = transformer_model_lexical_context_answer_shape_content_tokens( $norm );
+    $c       = count( $content );
+
+    if ( $c < 1 ) {
+        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            back_trace( 'NOTICE', '[LCM][answer_shape_bias] applied=0 reason=no_content_anchors' );
+        }
+
+        return $result;
+    }
+
+    $phrase_tokens = array();
+    if ( $c >= 2 && $c <= 3 ) {
+        $phrase_tokens = $content;
+    } elseif ( $c > 3 ) {
+        $phrase_tokens = array_slice( $content, -3 );
+    }
+
+    $phrase_re = array();
+    if ( count( $phrase_tokens ) >= 2 ) {
+        $pr = transformer_model_lexical_context_answer_shape_anchor_regex_phrase( $phrase_tokens );
+        if ( $pr !== null && $pr !== '' ) {
+            $phrase_re = array(
+                'regex' => $pr,
+                'label' => implode( ' ', $phrase_tokens ),
+            );
+        }
+    }
+
+    $word_re = transformer_model_lexical_context_answer_shape_anchor_regex_word( $content[ $c - 1 ] );
+
+    $anchors_diag = array();
+    if ( $phrase_re !== array() ) {
+        $anchors_diag[] = $phrase_re['label'];
+        $anchors_diag[] = $content[ $c - 1 ];
+    } else {
+        $anchors_diag[] = $content[ $c - 1 ];
+    }
+
+    $bonus_strong = (float) apply_filters( 'chatbot_lcm_answer_shape_definition_bonus', 15.0 );
+    $medium_ratio = (float) apply_filters( 'chatbot_lcm_answer_shape_definition_bonus_medium_ratio', 0.5 );
+    if ( $medium_ratio < 0.0 ) {
+        $medium_ratio = 0.0;
+    }
+    if ( $medium_ratio > 1.0 ) {
+        $medium_ratio = 1.0;
+    }
+    $bonus_medium = $bonus_strong * $medium_ratio;
+    $penalty      = (float) apply_filters( 'chatbot_lcm_answer_shape_meta_penalty', 35.0 );
+
+    $boosted      = 0;
+    $penalized    = 0;
+    $row_affected = array();
+    $total_rows   = 0;
+
+    foreach ( $result as $idx => $row ) {
+        if ( ! is_array( $row ) ) {
+            continue;
+        }
+
+        ++$total_rows;
+
+        $sentence = isset( $row['sentence'] ) ? $row['sentence'] : '';
+        $slower   = strtolower( wp_strip_all_tags( (string) $sentence ) );
+
+        $meta_hit = transformer_model_lexical_context_answer_shape_row_looks_meta_changelog( $sentence );
+
+        $def_hit         = false;
+        $match_anchor    = '';
+        $match_cue       = '';
+        $match_cue_tier  = '';
+        if ( ! $meta_hit ) {
+            if ( $phrase_re !== array() ) {
+                $detail = transformer_model_lexical_context_answer_shape_row_definition_match_detail( $slower, $phrase_re['regex'] );
+                if ( $detail['hit'] ) {
+                    $def_hit        = true;
+                    $match_anchor   = $phrase_re['label'];
+                    $match_cue      = $detail['cue'];
+                    $match_cue_tier = (string) $detail['strength'];
+                }
+            } elseif ( $word_re !== null && $word_re !== '' ) {
+                $detail = transformer_model_lexical_context_answer_shape_row_definition_match_detail( $slower, $word_re );
+                if ( $detail['hit'] ) {
+                    $def_hit        = true;
+                    $match_anchor   = $content[ $c - 1 ];
+                    $match_cue      = $detail['cue'];
+                    $match_cue_tier = (string) $detail['strength'];
+                }
+            }
+        }
+
+        $delta = 0.0;
+        if ( $def_hit ) {
+            if ( $match_cue_tier === 'medium' ) {
+                $delta += $bonus_medium;
+            } else {
+                $delta += $bonus_strong;
+            }
+            ++$boosted;
+        }
+        if ( $meta_hit ) {
+            $delta -= $penalty;
+            ++$penalized;
+        }
+
+        $base = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
+        if ( 0.0 !== $delta ) {
+            $after = $base + $delta;
+            $result[ $idx ]['score'] = $after;
+            $row_affected[]          = array(
+                'boosted'        => ( $def_hit ? 1 : 0 ),
+                'penalized'      => ( $meta_hit ? 1 : 0 ),
+                'before'         => $base,
+                'after'          => $after,
+                'sentence'       => $sentence,
+                'match_anchor'   => $match_anchor,
+                'match_cue'      => $match_cue,
+                'cue_strength'   => $match_cue_tier,
+            );
+        }
+    }
+
+    usort(
+        $result,
+        function ( $a, $b ) {
+            $sa = isset( $a['score'] ) ? (float) $a['score'] : 0.0;
+            $sb = isset( $b['score'] ) ? (float) $b['score'] : 0.0;
+            if ( $sa !== $sb ) {
+                return $sb <=> $sa;
+            }
+
+            return transformer_model_lexical_context_compare_sentence_score_rows( $a, $b );
+        }
+    );
+
+    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        $anchors_json = wp_json_encode( $anchors_diag );
+        if ( ! is_string( $anchors_json ) ) {
+            $anchors_json = '[]';
+        }
+
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][answer_shape_bias] applied=1 anchors=%s boosted=%d penalized=%d shape=informational_query',
+                $anchors_json,
+                $boosted,
+                $penalized
+            )
+        );
+
+        if ( $total_rows > 0 && ( $boosted > 100 || $boosted > (int) floor( 0.1 * $total_rows ) ) ) {
+            back_trace(
+                'NOTICE',
+                sprintf(
+                    '[LCM][answer_shape_bias] warning=boost_overbroad boosted=%d total=%d',
+                    $boosted,
+                    $total_rows
+                )
+            );
+        }
+
+        if ( $row_affected !== array() ) {
+            usort(
+                $row_affected,
+                static function ( $a, $b ) {
+                    $da = abs( (float) $a['after'] - (float) $a['before'] );
+                    $db = abs( (float) $b['after'] - (float) $b['before'] );
+
+                    return $db <=> $da;
+                }
+            );
+            $row_affected = array_slice( $row_affected, 0, 10 );
+            foreach ( $row_affected as $e ) {
+                $preview = transformer_model_lexical_context_diag_preview_text( isset( $e['sentence'] ) ? (string) $e['sentence'] : '', 140 );
+                $preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
+                $anc      = isset( $e['match_anchor'] ) ? (string) $e['match_anchor'] : '';
+                $cue      = isset( $e['match_cue'] ) ? (string) $e['match_cue'] : '';
+                $cue_str  = isset( $e['cue_strength'] ) ? (string) $e['cue_strength'] : '';
+                $anc      = str_replace( '"', "'", $anc );
+                $cue      = str_replace( '"', "'", $cue );
+                $cue_str  = str_replace( '"', "'", $cue_str );
+                back_trace(
+                    'NOTICE',
+                    sprintf(
+                        '[LCM][answer_shape_bias_row] boosted=%d penalized=%d anchor="%s" cue="%s" cue_strength="%s" before=%g after=%g text="%s"',
+                        (int) $e['boosted'],
+                        (int) $e['penalized'],
+                        $anc,
+                        $cue,
+                        $cue_str,
+                        (float) $e['before'],
+                        (float) $e['after'],
+                        $preview
+                    )
+                );
+            }
+        }
+    }
+
+    return $result;
 }
 
 /**
@@ -3924,6 +4541,36 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         $meaningful_query_tokens
     );
 
+    // Shape drives diagnostics; informational_query also gets a modest definition/meta score bias before document sort.
+    $query_shape = transformer_model_lexical_context_classify_query_shape(
+        $input_text_raw,
+        $normalized_for_diag,
+        $inputWordsLower,
+        $meaningful_query_tokens
+    );
+    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        static $lcm_query_shape_logged = false;
+        if ( ! $lcm_query_shape_logged ) {
+            $shape = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
+            $conf  = isset( $query_shape['confidence'] ) ? (float) $query_shape['confidence'] : 0.0;
+            $sig   = isset( $query_shape['signals'] ) && is_array( $query_shape['signals'] ) ? $query_shape['signals'] : array();
+            $sig_s = implode(
+                ',',
+                array_map(
+                    static function ( $s ) {
+                        return str_replace( array( "\r", "\n", '|', ',' ), array( ' ', ' ', '/', '' ), (string) $s );
+                    },
+                    $sig
+                )
+            );
+            back_trace(
+                'NOTICE',
+                sprintf( '[LCM][query_shape] shape=%s confidence=%g signals=[%s]', $shape, $conf, $sig_s )
+            );
+            $lcm_query_shape_logged = true;
+        }
+    }
+
     $post_title_map             = transformer_model_lexical_context_is_lcm_diagnostics_enabled()
         ? transformer_model_lexical_context_post_title_map_from_documents( $documents )
         : array();
@@ -4013,6 +4660,12 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
 
         return '';
     }
+
+    $sentenceScores = transformer_model_lexical_context_apply_answer_shape_bias(
+        $sentenceScores,
+        $query_shape,
+        $meaningful_query_tokens
+    );
 
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_scoring', $sentenceScores, $post_title_map );
 
