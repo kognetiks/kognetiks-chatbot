@@ -987,32 +987,59 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
 
     $input_text_for_intent = is_string( $input ) ? $input : '';
 
-    // Improved input preprocessing - filter out stop words
-    $input = preg_replace('/[^\w\s]/u', ' ', $input); // Remove punctuation
-    $inputWords = preg_split('/\s+/', strtolower(trim($input)));
-    
+    // Possessives / apostrophes first (e.g. Job's → jobs), then strip remaining punctuation for tokenization.
+    $input = transformer_model_lexical_context_normalize_lexical_query_string( $input );
+    $input = preg_replace( '/[^\w\s]/u', ' ', $input );
+    $input = preg_replace( '/\s+/u', ' ', trim( $input ) );
+
+    $inputWords = preg_split( '/\s+/', strtolower( $input ) );
+
     // Ensure stopWords is initialized
-    if (!isset($stopWords) || !is_array($stopWords)) {
-        $stopWords = [];
+    if ( ! isset( $stopWords ) || ! is_array( $stopWords ) ) {
+        $stopWords = array();
     }
-    
-    // Filter out stop words using the global $stopWords list
-    $inputWords = array_filter($inputWords, function($word) use ($stopWords) {
-        return !empty($word) && 
-               strlen($word) > 2 && // At least 3 characters
-               !in_array($word, $stopWords, true); // Use strict comparison
-    });
-    $inputWords = array_values($inputWords);
-    
-    // If we filtered out everything, keep at least the longer words (likely the actual query terms)
-    if (empty($inputWords)) {
-        $allWords = preg_split('/\s+/', strtolower(trim($input)));
-        $inputWords = array_filter($allWords, function($word) use ($stopWords) {
-            return !empty($word) && 
-                   strlen($word) > 3 && // Keep words longer than 3 chars
-                   !in_array($word, $stopWords, true); // Still filter stop words
-        });
-        $inputWords = array_values($inputWords);
+
+    $guard_flip = array_flip( transformer_model_lexical_context_relevance_guard_stop_words() );
+
+    // Filter: length, global stop words, and LCM relevance-guard list (aligns inputWords with meaningful tokens).
+    $inputWords = array_filter(
+        $inputWords,
+        function ( $word ) use ( $stopWords, $guard_flip ) {
+            $word = strtolower( trim( (string) $word ) );
+            if ( $word === '' || strlen( $word ) < 3 ) {
+                return false;
+            }
+            if ( in_array( $word, $stopWords, true ) ) {
+                return false;
+            }
+            if ( isset( $guard_flip[ $word ] ) ) {
+                return false;
+            }
+            return true;
+        }
+    );
+    $inputWords = array_values( $inputWords );
+
+    // If we filtered out everything, keep at least longer words (likely the actual query terms).
+    if ( empty( $inputWords ) ) {
+        $allWords = preg_split( '/\s+/', strtolower( $input ) );
+        $inputWords = array_filter(
+            $allWords,
+            function ( $word ) use ( $stopWords, $guard_flip ) {
+                $word = strtolower( trim( (string) $word ) );
+                if ( $word === '' || strlen( $word ) < 4 ) {
+                    return false;
+                }
+                if ( in_array( $word, $stopWords, true ) ) {
+                    return false;
+                }
+                if ( isset( $guard_flip[ $word ] ) ) {
+                    return false;
+                }
+                return true;
+            }
+        );
+        $inputWords = array_values( $inputWords );
     }
 
     if (empty($inputWords)) {
@@ -2717,6 +2744,98 @@ function transformer_model_lexical_context_is_low_value_chunk( $text ) {
 }
 
 /**
+ * Normalize user query text before lexical tokenization: HTML entities, apostrophes / possessives so tokens are not split or mangled.
+ *
+ * @param string $text Raw query (after sanitize_text_field where applicable).
+ * @return string
+ */
+function transformer_model_lexical_context_normalize_lexical_query_string( $text ) {
+
+    $text = (string) $text;
+    // Decode entities (e.g. &#x27; → ') before apostrophe/possessive handling.
+    $text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+    $text = wp_strip_all_tags( $text );
+    // Common Unicode apostrophes / primes → ASCII apostrophe (Job's, Steve Jobs's).
+    $text = str_replace(
+        array( "\xE2\x80\x99", "\xE2\x80\x98", "\xE2\x80\x9C", "\xE2\x80\x9D", '`', '´' ),
+        "'",
+        $text
+    );
+
+    // Possessive / plural-with-apostrophe: Job's → Jobs, Steve Jobs's → Steve Jobss (rare); it's → its.
+    $text = preg_replace( "/([\p{L}]{2,})'s\b/u", '$1s', $text );
+
+    return trim( $text );
+}
+
+/**
+ * Adjacent phrase candidates used only for diagnostics (same ordering as phrase bonus: meaningful tokens only).
+ *
+ * @param array<int, string> $meaningful Meaningful direct-query tokens (relevance guard).
+ * @return array{ 0: array<int, string>, 1: array<int, string> } bigrams, trigrams.
+ */
+function transformer_model_lexical_context_phrase_candidates_from_meaningful_tokens( array $meaningful ) {
+
+    $bigrams   = array();
+    $trigrams  = array();
+    $n         = count( $meaningful );
+
+    for ( $i = 0; $i < $n - 1; $i++ ) {
+        $bigrams[] = $meaningful[ $i ] . ' ' . $meaningful[ $i + 1 ];
+    }
+    for ( $i = 0; $i < $n - 2; $i++ ) {
+        $trigrams[] = $meaningful[ $i ] . ' ' . $meaningful[ $i + 1 ] . ' ' . $meaningful[ $i + 2 ];
+    }
+
+    return array( $bigrams, $trigrams );
+}
+
+/**
+ * Log query normalization pipeline when KOGNETIKS_LCM_DEBUG (once per request path).
+ * Includes decoded= (html_entity_decode only) alongside raw and normalized for entity-heavy queries.
+ *
+ * @param string               $raw_query             Original user query text for this path.
+ * @param string               $normalized_query_text Same normalization as generate_contextual_response (post-strip).
+ * @param array<int, string>   $inputWordsLower     Words driving lexical scoring after filters.
+ * @param array<int, string>   $meaningful_query_tokens Tokens after relevance guard.
+ * @return void
+ */
+function transformer_model_lexical_context_diag_log_query_token_pipeline( $raw_query, $normalized_query_text, $inputWordsLower, $meaningful_query_tokens ) {
+
+    if ( ! transformer_model_lexical_context_is_lcm_diagnostics_enabled() || ! function_exists( 'back_trace' ) ) {
+        return;
+    }
+
+    static $logged = false;
+    if ( $logged ) {
+        return;
+    }
+    $logged = true;
+
+    $meaningful_query_tokens = is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array();
+    list( $bigrams, $trigrams ) = transformer_model_lexical_context_phrase_candidates_from_meaningful_tokens( $meaningful_query_tokens );
+
+    $safe_raw  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $raw_query );
+    $decoded   = html_entity_decode( (string) $raw_query, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+    $safe_dec  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $decoded );
+    $safe_norm = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $normalized_query_text );
+
+    back_trace(
+        'NOTICE',
+        sprintf(
+            '[LCM][query_tokens] raw="%s" decoded="%s" normalized="%s" inputWords=[%s] meaningful=[%s] phrase_bigrams=[%s] phrase_trigrams=[%s]',
+            $safe_raw,
+            $safe_dec,
+            $safe_norm,
+            implode( ',', array_map( 'strval', (array) $inputWordsLower ) ),
+            implode( ',', $meaningful_query_tokens ),
+            implode( '|', $bigrams ),
+            implode( '|', $trigrams )
+        )
+    );
+}
+
+/**
  * Stop words removed when deriving meaningful query tokens for the relevance guard and local IDF bonus.
  *
  * Merges the built-in LCM list with global `$stopWords` (from translations/globals) when that variable
@@ -2728,8 +2847,36 @@ function transformer_model_lexical_context_relevance_guard_stop_words() {
 
     $local = array(
         'what',
+        'which',
+        'who',
+        'whom',
+        'whose',
+        'where',
+        'when',
+        'why',
+        'how',
         'is',
         'are',
+        'was',
+        'were',
+        'be',
+        'been',
+        'being',
+        'have',
+        'has',
+        'had',
+        'do',
+        'does',
+        'did',
+        'will',
+        'would',
+        'could',
+        'should',
+        'may',
+        'might',
+        'must',
+        'can',
+        'shall',
         'the',
         'a',
         'an',
@@ -2738,12 +2885,30 @@ function transformer_model_lexical_context_relevance_guard_stop_words() {
         'for',
         'in',
         'on',
+        'at',
+        'by',
         'with',
+        'from',
+        'as',
+        'into',
+        'onto',
         'related',
         'about',
-        'how',
-        'do',
-        'does',
+        'this',
+        'that',
+        'these',
+        'those',
+        'it',
+        'its',
+        // Weak/generic modifiers — phrase bonus uses only meaningful tokens; keep queries focused on content words.
+        'one',
+        'two',
+        'big',
+        'bigger',
+        'biggest',
+        'small',
+        'smaller',
+        'smallest',
     );
 
     $merged = array();
@@ -3015,6 +3180,191 @@ function transformer_model_lexical_context_cap_ranked_sentence_rows( $rows, $max
 }
 
 /**
+ * Default user-facing string when the return gate rejects low-confidence scored rows.
+ *
+ * @return string
+ */
+function transformer_model_lexical_context_lcm_insufficient_confidence_message() {
+
+    return 'I don\'t have enough relevant information in the site content to answer that confidently.';
+}
+
+/**
+ * Message returned when the post-deduplication return gate blocks assembly (filter may substitute site copy).
+ *
+ * @return string
+ */
+function transformer_model_lexical_context_return_gate_blocked_user_message() {
+
+    return (string) apply_filters(
+        'chatbot_lcm_return_gate_blocked_message',
+        transformer_model_lexical_context_lcm_insufficient_confidence_message()
+    );
+}
+
+/**
+ * Rare exact-token bypass for the return gate: direct meaningful query token appears whole-word in the top row
+ * and has local IDF ≥ threshold (expansion terms excluded). Does not change scoring.
+ *
+ * @param array<int, array<string, mixed>> $rows                      Best-first rows.
+ * @param array<int, string>|null         $meaningful_direct_tokens Same as relevance guard (not PMI expansion).
+ * @param array<string, float>|null       $local_idf_map             Runtime IDF map when active.
+ * @param bool                            $local_idf_available       True when local IDF cache was loaded for this request.
+ * @return array{ allow: bool, terms_log: string } terms_log is e.g. "terms=[kumquat=6.48687]" for diagnostics.
+ */
+function transformer_model_lexical_context_return_gate_evaluate_rare_exact_token_override( $rows, $meaningful_direct_tokens, $local_idf_map, $local_idf_available ) {
+
+    $empty = array(
+        'allow'     => false,
+        'terms_log' => '',
+    );
+
+    if ( ! $local_idf_available || empty( $local_idf_map ) || ! is_array( $local_idf_map ) ) {
+        return $empty;
+    }
+
+    $rows = is_array( $rows ) ? $rows : array();
+    if ( empty( $rows[0] ) || ! isset( $rows[0]['sentence'] ) ) {
+        return $empty;
+    }
+
+    $meaningful_direct_tokens = is_array( $meaningful_direct_tokens ) ? $meaningful_direct_tokens : array();
+    if ( empty( $meaningful_direct_tokens ) ) {
+        return $empty;
+    }
+
+    $sentence = wp_strip_all_tags( (string) $rows[0]['sentence'] );
+    $haystack = strtolower( $sentence );
+    $min_idf  = (float) apply_filters( 'chatbot_lcm_rare_exact_token_min_idf', 3.0 );
+
+    $pairs = array();
+
+    foreach ( $meaningful_direct_tokens as $tok ) {
+        $tok = strtolower( trim( (string) $tok ) );
+        if ( strlen( $tok ) < 2 ) {
+            continue;
+        }
+        if ( ! isset( $local_idf_map[ $tok ] ) ) {
+            continue;
+        }
+
+        $idf_val = (float) $local_idf_map[ $tok ];
+        if ( $idf_val < $min_idf ) {
+            continue;
+        }
+
+        $pattern = '/(?<![\p{L}\p{N}_])' . preg_quote( $tok, '/' ) . '(?![\p{L}\p{N}_])/u';
+        if ( preg_match( $pattern, $haystack ) ) {
+            $pairs[ $tok ] = $idf_val;
+        }
+    }
+
+    if ( empty( $pairs ) ) {
+        return $empty;
+    }
+
+    $parts = array();
+    foreach ( $pairs as $t => $v ) {
+        $parts[] = sprintf( '%s=%g', $t, $v );
+    }
+
+    return array(
+        'allow'     => true,
+        'terms_log' => 'terms=[' . implode( ',', $parts ) . ']',
+    );
+}
+
+/**
+ * Conservative gate: whether assembled reply should run given ranked rows after deduplication.
+ * Does not alter scores — decisions use existing row scores only.
+ *
+ * @param array<int, array<string, mixed>> $rows                      Best-first scored rows (same order as assembly input).
+ * @param array<int, string>               $inputWordsLower           Lowercased query tokens.
+ * @param array<int, string>|null          $meaningful_direct_tokens Meaningful direct query tokens (relevance guard list); null derives from inputWordsLower.
+ * @param array<string, float>|null        $local_idf_map             Runtime local IDF map when active.
+ * @param bool                             $local_idf_available       Whether local IDF was loaded for this request (option on + cache hit).
+ * @return array{ allow: bool, reason: string, top_score: float, candidate_count: int }
+ */
+function transformer_model_lexical_context_should_return_scored_rows( $rows, $inputWordsLower, $meaningful_direct_tokens = null, $local_idf_map = null, $local_idf_available = false ) {
+
+    $rows             = is_array( $rows ) ? $rows : array();
+    $inputWordsLower  = is_array( $inputWordsLower ) ? $inputWordsLower : array();
+    $local_idf_map    = ( $local_idf_map !== null && is_array( $local_idf_map ) ) ? $local_idf_map : array();
+    $local_idf_available = (bool) $local_idf_available;
+
+    if ( $meaningful_direct_tokens === null ) {
+        $meaningful_direct_tokens = transformer_model_lexical_context_meaningful_query_tokens_for_relevance_guard( $inputWordsLower );
+    } else {
+        $meaningful_direct_tokens = is_array( $meaningful_direct_tokens ) ? $meaningful_direct_tokens : array();
+    }
+
+    $candidate_count  = count( $rows );
+    $top_score        = 0.0;
+
+    if ( $candidate_count > 0 && isset( $rows[0]['score'] ) && is_numeric( $rows[0]['score'] ) ) {
+        $top_score = (float) $rows[0]['score'];
+    }
+
+    $result = array(
+        'allow'             => true,
+        'reason'            => 'passed',
+        'top_score'         => $top_score,
+        'candidate_count'   => $candidate_count,
+    );
+
+    $return_gate_terms_suffix = '';
+
+    if ( $candidate_count === 0 ) {
+        $result['allow']     = false;
+        $result['reason']    = 'no_candidates';
+        $result['top_score'] = 0.0;
+    } else {
+        $min_top    = (float) apply_filters( 'chatbot_lcm_min_return_top_score', 20.0 );
+        $min_single = (float) apply_filters( 'chatbot_lcm_min_single_candidate_score', 30.0 );
+
+        if ( $top_score < $min_top ) {
+            $result['allow']  = false;
+            $result['reason'] = 'top_score_below_min';
+        } elseif ( $candidate_count === 1 && $top_score < $min_single ) {
+            $result['allow']  = false;
+            $result['reason'] = 'single_weak_candidate';
+        }
+
+        if ( empty( $result['allow'] ) && isset( $result['reason'] ) && $result['reason'] === 'top_score_below_min' ) {
+            $rare = transformer_model_lexical_context_return_gate_evaluate_rare_exact_token_override(
+                $rows,
+                $meaningful_direct_tokens,
+                $local_idf_map,
+                $local_idf_available
+            );
+            if ( ! empty( $rare['allow'] ) ) {
+                $result['allow']  = true;
+                $result['reason'] = 'rare_exact_token_match';
+                if ( ! empty( $rare['terms_log'] ) ) {
+                    $return_gate_terms_suffix = ' ' . $rare['terms_log'];
+                }
+            }
+        }
+    }
+
+    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][return_gate] allow=%d reason=%s top_score=%g candidates=%d%s',
+                ! empty( $result['allow'] ) ? 1 : 0,
+                isset( $result['reason'] ) ? (string) $result['reason'] : '',
+                isset( $result['top_score'] ) ? (float) $result['top_score'] : 0.0,
+                isset( $result['candidate_count'] ) ? (int) $result['candidate_count'] : 0,
+                $return_gate_terms_suffix
+            )
+        );
+    }
+
+    return $result;
+}
+
+/**
  * Rank sentence chunks per document, prefer top matching posts, then assemble the reply.
  *
  * @param array<int, array<string, mixed>> $documents
@@ -3031,6 +3381,17 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
 
     $meaningful_query_tokens          = transformer_model_lexical_context_meaningful_query_tokens_for_relevance_guard( $inputWordsLower );
     $corpus_had_meaningful_overlap    = false;
+
+    $normalized_for_diag = transformer_model_lexical_context_normalize_lexical_query_string( $input_text_raw );
+    $normalized_for_diag = preg_replace( '/[^\w\s]/u', ' ', $normalized_for_diag );
+    $normalized_for_diag = preg_replace( '/\s+/u', ' ', trim( $normalized_for_diag ) );
+
+    transformer_model_lexical_context_diag_log_query_token_pipeline(
+        $input_text_raw,
+        $normalized_for_diag,
+        $inputWordsLower,
+        $meaningful_query_tokens
+    );
 
     $post_title_map             = transformer_model_lexical_context_is_lcm_diagnostics_enabled()
         ? transformer_model_lexical_context_post_title_map_from_documents( $documents )
@@ -3155,6 +3516,17 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
     $sentenceScores = transformer_model_lexical_context_cap_ranked_sentence_rows( $sentenceScores, 20, 'after_deduplication' );
 
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_deduplication', $sentenceScores, $post_title_map );
+
+    $return_gate = transformer_model_lexical_context_should_return_scored_rows(
+        $sentenceScores,
+        $inputWordsLower,
+        $meaningful_query_tokens,
+        $local_idf_map,
+        $apply_local_idf
+    );
+    if ( empty( $return_gate['allow'] ) ) {
+        return transformer_model_lexical_context_return_gate_blocked_user_message();
+    }
 
     transformer_model_lexical_context_lcm_timing_segment( 'pre_assembly' );
 
