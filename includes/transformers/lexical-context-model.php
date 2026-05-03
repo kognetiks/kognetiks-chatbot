@@ -1042,6 +1042,12 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
         $inputWords = array_values( $inputWords );
     }
 
+    $inputWords = transformer_model_lexical_context_filter_relation_intent_tokens(
+        $inputWords,
+        strtolower( trim( $input ) )
+    );
+    $inputWords = array_values( $inputWords );
+
     if (empty($inputWords)) {
         return "I didn't understand that, please try again.";
     }
@@ -2744,6 +2750,251 @@ function transformer_model_lexical_context_is_low_value_chunk( $text ) {
 }
 
 /**
+ * Count metadata/navigation signals in the opening of a sentence (merged sidebar/boilerplate strings).
+ * Each category counts at most once. Designed for prefix windows (~180 chars).
+ *
+ * @param string $prefix Normalized single-line prefix.
+ * @return int Number of distinct marker categories found.
+ */
+function transformer_model_lexical_context_sentence_row_metadata_marker_tally( $prefix ) {
+
+    $prefix = (string) $prefix;
+    if ( $prefix === '' ) {
+        return 0;
+    }
+
+    $has_newsletter = (bool) preg_match( '/\bNEWSLETTERS?\b/i', $prefix );
+    $has_tags       = (bool) preg_match( '/^\s*Tags\b|\bTags\s*#|\bTags\s*[:\-–—]/i', $prefix );
+    // Related as widget header, not unqualified mid-prose "related studies".
+    $has_related    = (bool) preg_match( '/^\s*Related\b|\bRelated\s*[:\-–—]|\bRelated\s+(posts|articles|stories|content)\b/i', $prefix );
+    $has_ref_dup    = (bool) preg_match( '/\bReference\s+Reference\b/i', $prefix );
+    $has_see_also   = (bool) preg_match( '/\bSee\s+also\b/i', $prefix );
+
+    // Share / Subscribe: merged rows only here (leading CTAs return earlier in is_low_value_sentence_row).
+    // Exclude "i subscribe …" prose when pairing Subscribe with other markers.
+    $base_ui       = $has_newsletter || $has_tags || $has_related || $has_ref_dup || $has_see_also;
+    $has_share_ui  = $base_ui && (bool) preg_match( '/\bShare\b/i', $prefix )
+        && ! preg_match( '/\b(?:authors|researchers|they|we|studies)\s+share\b/i', $prefix );
+    $has_sub_ui    = $base_ui && (bool) preg_match( '/\bSubscribe\b/i', $prefix )
+        && ! preg_match( '/\bi\s+subscribe\b/i', $prefix );
+
+    return (int) $has_newsletter
+        + (int) $has_tags
+        + (int) $has_related
+        + (int) $has_ref_dup
+        + (int) $has_see_also
+        + (int) $has_share_ui
+        + (int) $has_sub_ui;
+}
+
+/**
+ * Post-scoring: detect metadata, navigation, or boilerplate sentence rows (conservative; does not change scores).
+ *
+ * @param array<string, mixed> $row Scored row with `sentence` text.
+ * @return bool True if this row should be dropped before assembly.
+ */
+function transformer_model_lexical_context_is_low_value_sentence_row( $row ) {
+
+    if ( ! is_array( $row ) ) {
+        return true;
+    }
+
+    $raw = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
+    if ( trim( $raw ) === '' ) {
+        return true;
+    }
+
+    // Reuse chunk heuristics (line-anchored tags/related/reference, hashtag soup, etc.).
+    if ( transformer_model_lexical_context_is_low_value_chunk( $raw ) ) {
+        return true;
+    }
+
+    $text = trim( wp_strip_all_tags( $raw ) );
+    if ( $text === '' ) {
+        return true;
+    }
+
+    $line = preg_replace( '/\s+/u', ' ', $text );
+    $len  = strlen( $line );
+
+    // Merged boilerplate at sentence start (not limited to short whole lines).
+    if ( preg_match( '/^\s*NEWSLETTERS?\b/i', $line ) ) {
+        return true;
+    }
+    if ( preg_match( '/^\s*Tags\s*#/i', $line ) ) {
+        return true;
+    }
+    if ( preg_match( '/^\s*Reference\s+Reference\b/i', $line ) ) {
+        return true;
+    }
+    if ( preg_match( '/^\s*Share\b/i', $line ) ) {
+        return true;
+    }
+    if ( preg_match( '/^\s*Subscribe\b/i', $line ) ) {
+        return true;
+    }
+    if ( preg_match( '/^\s*Related(\s*[:\-–—]|\s+posts\b|\s+articles\b|\s+stories\b|\s+content\b)/i', $line ) ) {
+        return true;
+    }
+
+    // Concatenated UI blocks: several markers near the beginning (e.g. NEWSLETTERS … Tags … Related …).
+    $prefix = $line;
+    if ( function_exists( 'mb_strlen' ) && function_exists( 'mb_substr' ) && mb_strlen( $line, 'UTF-8' ) > 180 ) {
+        $prefix = mb_substr( $line, 0, 180, 'UTF-8' );
+    } elseif ( strlen( $line ) > 180 ) {
+        $prefix = substr( $line, 0, 180 );
+    }
+    if ( transformer_model_lexical_context_sentence_row_metadata_marker_tally( $prefix ) >= 2 ) {
+        return true;
+    }
+
+    // Unexpanded shortcode fragments or caption attributes (assembly-only path).
+    if ( preg_match( '/\[\/?[a-z][a-z0-9_-]*\b/i', $raw ) ) {
+        return true;
+    }
+    if ( preg_match( '/\bcaption\s*=/i', $raw ) ) {
+        return true;
+    }
+
+    // Pagination / nav stubs (whole-line; avoids "Previous research showed…").
+    if ( preg_match( '/^\s*(previous|next)\s*([«»]{1,2}|[\x{2190}-\x{2192}]|→|←)?\s*\.?\s*$/iu', $line ) ) {
+        return true;
+    }
+
+    // Button / widget lines (short, leading).
+    if ( $len <= 80 ) {
+        if ( preg_match( '/^\s*see\s+also\b/i', $line ) ) {
+            return true;
+        }
+        if ( preg_match( '/^\s*(share(\s+on|\s+this)?|subscribe(\s+now|\s+today)?)\b/i', $line ) ) {
+            return true;
+        }
+        if ( preg_match( '/^\s*read\s+more\b/i', $line ) && $len <= 40 ) {
+            return true;
+        }
+        if ( preg_match( '/newsletters?\b/i', $line ) && $len <= 60 ) {
+            return true;
+        }
+        if ( preg_match( '/^\s*(posted\s+in|filed\s+under)\b/i', $line ) ) {
+            return true;
+        }
+        if ( preg_match( '/^\s*(category|categories|tags?)\s*[:\-–—]/i', $line ) ) {
+            return true;
+        }
+    }
+
+    // ALL-CAPS newsletter / menu banners (no lowercase prose).
+    if ( $len >= 6 && $len <= 120 ) {
+        $letters = preg_replace( '/[^a-zA-Z]/', '', $line );
+        if ( strlen( $letters ) >= 8 && $letters === strtoupper( $letters ) ) {
+            if ( preg_match( '/NEWSLETTER|SUBSCRIBE|RELATED|TAGS|SEARCH|ARCHIVES|SHARE|PREVIOUS|NEXT/i', $line ) ) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Post-scoring: remove low-value rows while preserving order; optional LCM diagnostics.
+ *
+ * @param array<int, array<string, mixed>> $rows       Candidate rows (best-first).
+ * @param string                           $stage_slug For [LCM][quality_filter:slug] logs.
+ * @return array<int, array<string, mixed>>
+ */
+function transformer_model_lexical_context_filter_low_value_sentence_rows( $rows, $stage_slug ) {
+
+    if ( ! is_array( $rows ) ) {
+        return array();
+    }
+
+    $before = count( $rows );
+    $slug   = preg_replace( '/[^\w.-]/', '', (string) $stage_slug );
+    if ( $slug === '' ) {
+        $slug = 'quality_filter';
+    }
+
+    $out = array();
+    foreach ( $rows as $row ) {
+        if ( ! transformer_model_lexical_context_is_low_value_sentence_row( $row ) ) {
+            $out[] = $row;
+        }
+    }
+
+    $after = count( $out );
+
+    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][quality_filter:%s] candidates before=%d after=%d removed=%d',
+                $slug,
+                $before,
+                $after,
+                max( 0, $before - $after )
+            )
+        );
+    }
+
+    return $out;
+}
+
+/**
+ * Limit how many scored rows are kept per document (post_id) while preserving global order.
+ *
+ * Filter: {@see 'chatbot_lcm_max_rows_per_document'} — default 2; use <= 0 to disable.
+ *
+ * @param array<int, array<string, mixed>> $rows Rows in assembly order.
+ * @param int|null                         $max_per_document Optional override before filter (null = use filter default).
+ * @return array<int, array<string, mixed>>
+ */
+function transformer_model_lexical_context_limit_rows_per_document( $rows, $max_per_document = null ) {
+
+    if ( ! is_array( $rows ) || $rows === array() ) {
+        return is_array( $rows ) ? $rows : array();
+    }
+
+    $before = count( $rows );
+    $base = $max_per_document !== null ? (int) $max_per_document : 2;
+    $max  = (int) apply_filters( 'chatbot_lcm_max_rows_per_document', $base );
+
+    if ( $max <= 0 ) {
+        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            back_trace(
+                'NOTICE',
+                sprintf( '[LCM][doc_limit] candidates before=%d after=%d max_per_document=%d', $before, $before, 0 )
+            );
+        }
+        return $rows;
+    }
+
+    $per_doc = array();
+    $out     = array();
+
+    foreach ( $rows as $row ) {
+        $pid = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
+        $n   = isset( $per_doc[ $pid ] ) ? (int) $per_doc[ $pid ] : 0;
+        if ( $n >= $max ) {
+            continue;
+        }
+        $out[]            = $row;
+        $per_doc[ $pid ] = $n + 1;
+    }
+
+    $after = count( $out );
+
+    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        back_trace(
+            'NOTICE',
+            sprintf( '[LCM][doc_limit] candidates before=%d after=%d max_per_document=%d', $before, $after, $max )
+        );
+    }
+
+    return $out;
+}
+
+/**
  * Normalize user query text before lexical tokenization: HTML entities, apostrophes / possessives so tokens are not split or mangled.
  *
  * @param string $text Raw query (after sanitize_text_field where applicable).
@@ -2892,7 +3143,7 @@ function transformer_model_lexical_context_relevance_guard_stop_words() {
         'as',
         'into',
         'onto',
-        'related',
+        // 'related',
         'about',
         'this',
         'that',
@@ -2930,6 +3181,97 @@ function transformer_model_lexical_context_relevance_guard_stop_words() {
     }
 
     return array_keys( $merged );
+}
+
+/**
+ * Whether the normalized query is a short “related to X” / “relates to X” intent pattern (not substantive “related + noun”).
+ *
+ * @param string $normalized_query_lower Lowercased single-line query after normalize_lexical_query_string + punctuation collapse.
+ * @return bool
+ */
+function transformer_model_lexical_context_query_matches_relation_intent_pattern( $normalized_query_lower ) {
+
+    $q = trim( preg_replace( '/\s+/u', ' ', (string) $normalized_query_lower ) );
+    if ( $q === '' ) {
+        return false;
+    }
+
+    $end = '[?.!,;:]*\s*$';
+
+    // Requires a non-empty anchor after "to" where applicable (avoids bare “related to”).
+    if ( preg_match( '/^what\'s\s+related\s+to\s+\S+' . $end . '/iu', $q ) ) {
+        return true;
+    }
+    // Possessive apostrophe stripped without spacing (“What’s” → “Whats”) before punctuation collapse.
+    if ( preg_match( '/^whats\s+related\s+to\s+\S+' . $end . '/iu', $q ) ) {
+        return true;
+    }
+    if ( preg_match( '/^what\s+is\s+related\s+to\s+\S+' . $end . '/iu', $q ) ) {
+        return true;
+    }
+    if ( preg_match( '/^related\s+to\s+\S+' . $end . '/iu', $q ) ) {
+        return true;
+    }
+    if ( preg_match( '/^what\s+relates\s+to\s+\S+' . $end . '/iu', $q ) ) {
+        return true;
+    }
+    // “How is X related” / “How is X related to Y” — distinct from “How are related products …”.
+    if ( preg_match( '/^how\s+is\s+\S+\s+related(\s+to\s+\S+)?' . $end . '/iu', $q ) ) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Remove discourse “related” for relation-intent queries so the content anchor (e.g. kumquat) dominates retrieval.
+ * Does not remove “related” globally; does not empty the token list.
+ *
+ * @param array<int, string> $tokens                    Lowercased query tokens after stop/guard filters.
+ * @param string             $normalized_query_for_pattern Same normalized query string used to tokenize (lowercase).
+ * @return array<int, string>
+ */
+function transformer_model_lexical_context_filter_relation_intent_tokens( array $tokens, $normalized_query_for_pattern ) {
+
+    if ( count( $tokens ) < 2 ) {
+        return $tokens;
+    }
+
+    $has_related = false;
+    foreach ( $tokens as $t ) {
+        if ( strtolower( (string) $t ) === 'related' ) {
+            $has_related = true;
+            break;
+        }
+    }
+    if ( ! $has_related ) {
+        return $tokens;
+    }
+
+    if ( ! transformer_model_lexical_context_query_matches_relation_intent_pattern( $normalized_query_for_pattern ) ) {
+        return $tokens;
+    }
+
+    // “What’s” often normalizes to “Whats” (one token); drop it with “related to” intent so the anchor remains.
+    $strip_whats_artifact = (bool) preg_match( '/^whats\s+related\s+to/i', $normalized_query_for_pattern );
+
+    $out = array();
+    foreach ( $tokens as $t ) {
+        $tl = strtolower( (string) $t );
+        if ( 'related' === $tl ) {
+            continue;
+        }
+        if ( $strip_whats_artifact && 'whats' === $tl ) {
+            continue;
+        }
+        $out[] = $t;
+    }
+
+    if ( $out === array() ) {
+        return $tokens;
+    }
+
+    return array_values( $out );
 }
 
 /**
@@ -3275,6 +3617,195 @@ function transformer_model_lexical_context_return_gate_evaluate_rare_exact_token
 }
 
 /**
+ * Which coverage tokens (subset of meaningful query tokens) appear whole-word in sentence text.
+ *
+ * @param string               $sentence        Row sentence text.
+ * @param array<int, string>   $coverage_tokens Lowercased tokens (weak action words already removed).
+ * @return array<int, string> Matched token strings.
+ */
+function transformer_model_lexical_context_sentence_coverage_token_matches( $sentence, array $coverage_tokens ) {
+
+    $haystack = strtolower( wp_strip_all_tags( (string) $sentence ) );
+    $matched   = array();
+
+    foreach ( $coverage_tokens as $tok ) {
+        $tok = strtolower( trim( (string) $tok ) );
+        if ( strlen( $tok ) < 2 ) {
+            continue;
+        }
+        $pattern = '/(?<![\p{L}\p{N}_])' . preg_quote( $tok, '/' ) . '(?![\p{L}\p{N}_])/u';
+        if ( preg_match( $pattern, $haystack ) ) {
+            $matched[] = $tok;
+        }
+    }
+
+    return array_values( array_unique( $matched ) );
+}
+
+/**
+ * Log coverage gate outcome when KOGNETIKS_LCM_DEBUG (one line per evaluation).
+ *
+ * @param array{ allow?: bool, reason?: string, matched?: array<int, string> } $coverage_gate Result from evaluate_query_coverage_gate.
+ * @return void
+ */
+function transformer_model_lexical_context_diag_log_coverage_gate_result( $coverage_gate ) {
+
+    if ( ! transformer_model_lexical_context_is_lcm_diagnostics_enabled() || ! function_exists( 'back_trace' ) ) {
+        return;
+    }
+
+    $allow  = ! empty( $coverage_gate['allow'] ) ? 1 : 0;
+    $reason = isset( $coverage_gate['reason'] ) ? (string) $coverage_gate['reason'] : '';
+
+    $matched_list = isset( $coverage_gate['matched'] ) && is_array( $coverage_gate['matched'] ) ? $coverage_gate['matched'] : array();
+    $matched_safe = implode(
+        ',',
+        array_map(
+            static function ( $t ) {
+                return str_replace( array( '|', ',' ), '', (string) $t );
+            },
+            $matched_list
+        )
+    );
+
+    if ( 'skipped_meaningful_lt_3' === $reason || 'skipped_rare_exact_token_match' === $reason ) {
+        back_trace(
+            'NOTICE',
+            sprintf( '[LCM][coverage_gate] allow=%d reason=%s', $allow, $reason )
+        );
+
+        return;
+    }
+
+    back_trace(
+        'NOTICE',
+        sprintf(
+            '[LCM][coverage_gate] allow=%d reason=%s matched=[%s] required=2',
+            $allow,
+            $reason,
+            $matched_safe
+        )
+    );
+}
+
+/**
+ * Final relevance coverage gate (after dedupe/doc limit, before return_gate). Does not change scores.
+ *
+ * When there are 3+ meaningful query tokens, require strong lexical overlap unless a single-content-token
+ * rare lookup bypass applies ({@see transformer_model_lexical_context_return_gate_evaluate_rare_exact_token_override}
+ * only when exactly one coverage token remains after weak-action filtering).
+ *
+ * @param array<int, array<string, mixed>> $rows                      Best-first rows (same as assembly input).
+ * @param array<int, string>               $meaningful_query_tokens Meaningful direct-query tokens.
+ * @param array<string, float>|null        $local_idf_map             Runtime local IDF map.
+ * @param bool                             $local_idf_available       Same as return_gate / rare-token override.
+ * @return array{ allow: bool, reason: string, matched: array<int, string> }
+ */
+function transformer_model_lexical_context_evaluate_query_coverage_gate( $rows, $meaningful_query_tokens, $local_idf_map, $local_idf_available ) {
+
+    $empty_matched = array();
+
+    $rows                      = is_array( $rows ) ? $rows : array();
+    $meaningful_query_tokens   = is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array();
+    $local_idf_map             = ( $local_idf_map !== null && is_array( $local_idf_map ) ) ? $local_idf_map : array();
+    $local_idf_available       = (bool) $local_idf_available;
+
+    if ( count( $meaningful_query_tokens ) < 3 ) {
+        return array(
+            'allow'   => true,
+            'reason'  => 'skipped_meaningful_lt_3',
+            'matched' => $empty_matched,
+        );
+    }
+
+    $weak_flip = array_flip(
+        array(
+            'used',
+            'use',
+            'using',
+            'does',
+            'do',
+            'explain',
+        )
+    );
+
+    $coverage_tokens = array();
+    foreach ( $meaningful_query_tokens as $t ) {
+        $t = strtolower( trim( (string) $t ) );
+        if ( strlen( $t ) < 2 || isset( $weak_flip[ $t ] ) ) {
+            continue;
+        }
+        $coverage_tokens[] = $t;
+    }
+
+    if ( $coverage_tokens === array() ) {
+        return array(
+            'allow'   => true,
+            'reason'  => 'skipped_no_coverage_tokens_after_weak_filter',
+            'matched' => $empty_matched,
+        );
+    }
+
+    // Rare exact-token bypass only for single remaining content token (e.g. many weak fillers + one rare term).
+    // Multi-token conceptual queries always run normal coverage matching.
+    if ( count( $coverage_tokens ) === 1 ) {
+        $rare = transformer_model_lexical_context_return_gate_evaluate_rare_exact_token_override(
+            $rows,
+            $meaningful_query_tokens,
+            $local_idf_map,
+            $local_idf_available
+        );
+        if ( ! empty( $rare['allow'] ) ) {
+            return array(
+                'allow'   => true,
+                'reason'  => 'skipped_rare_exact_token_match',
+                'matched' => $coverage_tokens,
+            );
+        }
+    }
+
+    $union_flip = array();
+
+    $top_matches = array();
+    if ( ! empty( $rows[0]['sentence'] ) ) {
+        $top_matches = transformer_model_lexical_context_sentence_coverage_token_matches( $rows[0]['sentence'], $coverage_tokens );
+        foreach ( $top_matches as $t ) {
+            $union_flip[ $t ] = true;
+        }
+    }
+
+    foreach ( $rows as $row ) {
+        if ( empty( $row['sentence'] ) ) {
+            continue;
+        }
+        $m = transformer_model_lexical_context_sentence_coverage_token_matches( $row['sentence'], $coverage_tokens );
+        foreach ( $m as $t ) {
+            $union_flip[ $t ] = true;
+        }
+    }
+
+    $matched_list = array_keys( $union_flip );
+    sort( $matched_list );
+
+    $top_ok        = count( $top_matches ) >= 2;
+    $collective_ok = count( $union_flip ) >= 2;
+
+    if ( $top_ok || $collective_ok ) {
+        return array(
+            'allow'   => true,
+            'reason'  => 'passed',
+            'matched' => $matched_list,
+        );
+    }
+
+    return array(
+        'allow'   => false,
+        'reason'  => 'insufficient_query_token_coverage',
+        'matched' => $matched_list,
+    );
+}
+
+/**
  * Conservative gate: whether assembled reply should run given ranked rows after deduplication.
  * Does not alter scores — decisions use existing row scores only.
  *
@@ -3499,6 +4030,10 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_document_gate', $after_doc_gate, $post_title_map );
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_row_gate', $after_row_gate, $post_title_map );
 
+    $after_row_gate = transformer_model_lexical_context_filter_low_value_sentence_rows( $after_row_gate, 'after_row_gate_quality' );
+
+    transformer_model_lexical_context_diag_log_pipeline_stage( 'after_row_gate_quality', $after_row_gate, $post_title_map );
+
     // Enrich from the top-ranked document only (up to sentence response cap), including next-best same-post chunks.
     $sentenceScores = transformer_model_lexical_context_merge_top_document_expansion(
         $after_doc_gate,
@@ -3509,13 +4044,28 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
 
     $sentenceScores = transformer_model_lexical_context_cap_ranked_sentence_rows( $sentenceScores, 50, 'after_expansion' );
 
+    $sentenceScores = transformer_model_lexical_context_filter_low_value_sentence_rows( $sentenceScores, 'after_expansion_quality' );
+
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_expansion', $sentenceScores, $post_title_map );
 
     $sentenceScores = transformer_model_lexical_context_deduplicate_near_duplicate_sentence_rows( $sentenceScores );
 
     $sentenceScores = transformer_model_lexical_context_cap_ranked_sentence_rows( $sentenceScores, 20, 'after_deduplication' );
 
+    $sentenceScores = transformer_model_lexical_context_limit_rows_per_document( $sentenceScores );
+
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_deduplication', $sentenceScores, $post_title_map );
+
+    $coverage_gate = transformer_model_lexical_context_evaluate_query_coverage_gate(
+        $sentenceScores,
+        $meaningful_query_tokens,
+        $local_idf_map,
+        $apply_local_idf
+    );
+    transformer_model_lexical_context_diag_log_coverage_gate_result( $coverage_gate );
+    if ( empty( $coverage_gate['allow'] ) ) {
+        return transformer_model_lexical_context_return_gate_blocked_user_message();
+    }
 
     $return_gate = transformer_model_lexical_context_should_return_scored_rows(
         $sentenceScores,
