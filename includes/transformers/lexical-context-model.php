@@ -1361,6 +1361,76 @@ function transformer_model_lexical_context_filter_sentence_scores_cross_document
 }
 
 /**
+ * Apply document gate with optional informational-query expansion.
+ *
+ * For informational queries, ensure up to N documents (default 3) are retained by expanding the allowed set
+ * if the strict ratio-based gate yields fewer than N. This is additive (keeps the doc gate) and does not
+ * change scoring, row gates, quality filters, expansion, or deduplication logic.
+ *
+ * @param array<int, array<string, mixed>> $sentenceScores Ranked rows (best-first).
+ * @param array{ shape?: string }         $query_shape   Query shape pack (as used by answer-shape bias).
+ * @param float                           $cross_document_score_ratio Same ratio as the existing cross-document gate.
+ * @return array<int, array<string, mixed>>
+ */
+function transformer_model_lexical_context_apply_document_gate( $sentenceScores, $query_shape, $cross_document_score_ratio = 0.85 ) {
+
+    $sentenceScores = is_array( $sentenceScores ) ? $sentenceScores : array();
+    $shape = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
+    $max_documents = ( $shape === 'informational_query' ) ? 3 : 1;
+
+    if ( $shape === 'informational_query' && transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        back_trace( 'NOTICE', sprintf( '[LCM][document_gate_adjusted] shape=informational_query max_documents=%d', $max_documents ) );
+    }
+
+    if ( empty( $sentenceScores ) ) {
+        return $sentenceScores;
+    }
+
+    // First, apply the existing strict ratio-based gate unchanged.
+    $strict = transformer_model_lexical_context_filter_sentence_scores_cross_document_gate( $sentenceScores, $cross_document_score_ratio );
+
+    if ( $shape !== 'informational_query' ) {
+        return $strict;
+    }
+
+    // Determine how many documents survived.
+    $docMaxStrict = array();
+    foreach ( $strict as $row ) {
+        $pid = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
+        $s   = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
+        if ( ! isset( $docMaxStrict[ $pid ] ) || $s > $docMaxStrict[ $pid ] ) {
+            $docMaxStrict[ $pid ] = $s;
+        }
+    }
+    if ( count( $docMaxStrict ) >= $max_documents ) {
+        return $strict;
+    }
+
+    // Expand allowed documents up to max_documents using original doc max scores (best-first).
+    $docMaxAll = array();
+    foreach ( $sentenceScores as $row ) {
+        $pid = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
+        $s   = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
+        if ( ! isset( $docMaxAll[ $pid ] ) || $s > $docMaxAll[ $pid ] ) {
+            $docMaxAll[ $pid ] = $s;
+        }
+    }
+    arsort( $docMaxAll );
+    $top_pids = array_slice( array_keys( $docMaxAll ), 0, $max_documents );
+    $allow = array_fill_keys( $top_pids, true );
+
+    $expanded = array();
+    foreach ( $sentenceScores as $row ) {
+        $pid = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
+        if ( ! empty( $allow[ $pid ] ) ) {
+            $expanded[] = $row;
+        }
+    }
+
+    return $expanded !== array() ? $expanded : $strict;
+}
+
+/**
  * Row-level score gate: after document filtering, keep only chunks whose score is near the best chunk’s score.
  * Drops zero/near-zero scores to reduce generic filler, tags, and weak matches when a strong chunk exists.
  *
@@ -2795,6 +2865,31 @@ function transformer_model_lexical_context_sentence_row_metadata_marker_tally( $
 }
 
 /**
+ * Strip WordPress caption shortcodes and generic shortcode wrappers, keeping any remaining prose.
+ * Diagnostic/quality-filter helper only; does not affect scoring.
+ *
+ * @param string $text
+ * @return string
+ */
+function transformer_model_lexical_context_strip_shortcodes_and_captions( $text ) {
+
+    if ( ! is_string( $text ) || $text === '' ) {
+        return (string) $text;
+    }
+
+    // Remove [caption]...[/caption]
+    $text = preg_replace( '/\[caption[^\]]*\].*?\[\/caption\]/is', ' ', $text );
+
+    // Remove any remaining shortcodes like [chatbot-1], [gallery], etc.
+    $text = preg_replace( '/\[[^\]]+\]/', ' ', $text );
+
+    // Normalize whitespace.
+    $text = preg_replace( '/\s+/u', ' ', (string) $text );
+
+    return trim( (string) $text );
+}
+
+/**
  * Post-scoring: detect metadata, navigation, or boilerplate sentence rows (conservative; does not change scores).
  *
  * @param array<string, mixed> $row Scored row with `sentence` text.
@@ -2806,19 +2901,38 @@ function transformer_model_lexical_context_is_low_value_sentence_row( $row ) {
         return true;
     }
 
+    // Diagnostic-only instrumentation: reasons are computed in a separate helper to help identify
+    // false positives in this low-value/content-quality filter. Filtering behavior is unchanged.
+    $reasons = transformer_model_lexical_context_low_value_sentence_row_reason_codes( $row );
+    return $reasons !== array();
+}
+
+/**
+ * Diagnostic helper: collect machine-readable reason codes for why a scored row is considered low-value.
+ * IMPORTANT: The checks and their order must mirror the low-value filter behavior.
+ *
+ * @param array<string, mixed> $row
+ * @return array<int, string> Reason codes (empty => keep row).
+ */
+function transformer_model_lexical_context_low_value_sentence_row_reason_codes( $row ) {
+
+    if ( ! is_array( $row ) ) {
+        return array( 'invalid_row' );
+    }
+
     $raw = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
     if ( trim( $raw ) === '' ) {
-        return true;
+        return array( 'empty_sentence' );
     }
 
     // Reuse chunk heuristics (line-anchored tags/related/reference, hashtag soup, etc.).
     if ( transformer_model_lexical_context_is_low_value_chunk( $raw ) ) {
-        return true;
+        return array( 'low_value_metadata' );
     }
 
     $text = trim( wp_strip_all_tags( $raw ) );
     if ( $text === '' ) {
-        return true;
+        return array( 'empty_stripped' );
     }
 
     $line = preg_replace( '/\s+/u', ' ', $text );
@@ -2826,22 +2940,22 @@ function transformer_model_lexical_context_is_low_value_sentence_row( $row ) {
 
     // Merged boilerplate at sentence start (not limited to short whole lines).
     if ( preg_match( '/^\s*NEWSLETTERS?\b/i', $line ) ) {
-        return true;
+        return array( 'low_value_metadata' );
     }
     if ( preg_match( '/^\s*Tags\s*#/i', $line ) ) {
-        return true;
+        return array( 'low_value_metadata' );
     }
     if ( preg_match( '/^\s*Reference\s+Reference\b/i', $line ) ) {
-        return true;
+        return array( 'low_value_metadata' );
     }
     if ( preg_match( '/^\s*Share\b/i', $line ) ) {
-        return true;
+        return array( 'low_value_metadata' );
     }
     if ( preg_match( '/^\s*Subscribe\b/i', $line ) ) {
-        return true;
+        return array( 'low_value_metadata' );
     }
     if ( preg_match( '/^\s*Related(\s*[:\-–—]|\s+posts\b|\s+articles\b|\s+stories\b|\s+content\b)/i', $line ) ) {
-        return true;
+        return array( 'low_value_metadata' );
     }
 
     // Concatenated UI blocks: several markers near the beginning (e.g. NEWSLETTERS … Tags … Related …).
@@ -2852,41 +2966,62 @@ function transformer_model_lexical_context_is_low_value_sentence_row( $row ) {
         $prefix = substr( $line, 0, 180 );
     }
     if ( transformer_model_lexical_context_sentence_row_metadata_marker_tally( $prefix ) >= 2 ) {
-        return true;
+        return array( 'low_value_metadata' );
     }
 
     // Unexpanded shortcode fragments or caption attributes (assembly-only path).
-    if ( preg_match( '/\[\/?[a-z][a-z0-9_-]*\b/i', $raw ) ) {
-        return true;
-    }
-    if ( preg_match( '/\bcaption\s*=/i', $raw ) ) {
-        return true;
+    if ( preg_match( '/\[\/?[a-z][a-z0-9_-]*\b/i', $raw ) || preg_match( '/\bcaption\s*=/i', $raw ) ) {
+        $cleaned = transformer_model_lexical_context_strip_shortcodes_and_captions( $raw );
+        // If useful prose remains, re-evaluate the cleaned text instead of discarding the whole row.
+        if ( $cleaned !== '' && strlen( $cleaned ) > 20 ) {
+            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                $orig_prev   = transformer_model_lexical_context_diag_preview_text( $raw, 165 );
+                $clean_prev  = transformer_model_lexical_context_diag_preview_text( $cleaned, 165 );
+                $orig_prev   = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $orig_prev );
+                $clean_prev  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $clean_prev );
+                back_trace(
+                    'NOTICE',
+                    sprintf(
+                        '[LCM][quality_filter_salvaged:caption] original="%s" cleaned="%s"',
+                        $orig_prev,
+                        $clean_prev
+                    )
+                );
+            }
+
+            // Re-run the same checks against the cleaned sentence.
+            $row_clean = $row;
+            $row_clean['sentence'] = $cleaned;
+            return transformer_model_lexical_context_low_value_sentence_row_reason_codes( $row_clean );
+        }
+
+        return array( 'caption_or_shortcode' );
     }
 
     // Pagination / nav stubs (whole-line; avoids "Previous research showed…").
     if ( preg_match( '/^\s*(previous|next)\s*([«»]{1,2}|[\x{2190}-\x{2192}]|→|←)?\s*\.?\s*$/iu', $line ) ) {
-        return true;
+        return array( 'nav_or_pagination' );
     }
 
     // Button / widget lines (short, leading).
     if ( $len <= 80 ) {
         if ( preg_match( '/^\s*see\s+also\b/i', $line ) ) {
-            return true;
+            return array( 'nav_or_pagination' );
         }
         if ( preg_match( '/^\s*(share(\s+on|\s+this)?|subscribe(\s+now|\s+today)?)\b/i', $line ) ) {
-            return true;
+            return array( 'low_value_metadata' );
         }
         if ( preg_match( '/^\s*read\s+more\b/i', $line ) && $len <= 40 ) {
-            return true;
+            return array( 'nav_or_pagination' );
         }
         if ( preg_match( '/newsletters?\b/i', $line ) && $len <= 60 ) {
-            return true;
+            return array( 'low_value_metadata' );
         }
         if ( preg_match( '/^\s*(posted\s+in|filed\s+under)\b/i', $line ) ) {
-            return true;
+            return array( 'low_value_metadata' );
         }
         if ( preg_match( '/^\s*(category|categories|tags?)\s*[:\-–—]/i', $line ) ) {
-            return true;
+            return array( 'low_value_metadata' );
         }
     }
 
@@ -2895,12 +3030,12 @@ function transformer_model_lexical_context_is_low_value_sentence_row( $row ) {
         $letters = preg_replace( '/[^a-zA-Z]/', '', $line );
         if ( strlen( $letters ) >= 8 && $letters === strtoupper( $letters ) ) {
             if ( preg_match( '/NEWSLETTER|SUBSCRIBE|RELATED|TAGS|SEARCH|ARCHIVES|SHARE|PREVIOUS|NEXT/i', $line ) ) {
-                return true;
+                return array( 'low_value_metadata' );
             }
         }
     }
 
-    return false;
+    return array();
 }
 
 /**
@@ -2923,9 +3058,71 @@ function transformer_model_lexical_context_filter_low_value_sentence_rows( $rows
     }
 
     $out = array();
+    $removed_logged = 0;
     foreach ( $rows as $row ) {
+        // Caption/shortcode salvage: normalize row text before the existing low-value decision.
+        // Diagnostic-only intent: avoid false positives where wrappers cause good content to be dropped.
+        // Behavior invariant: we do not short-circuit — we only replace the sentence text, then run the same checks.
+        if ( is_array( $row ) && isset( $row['sentence'] ) && is_string( $row['sentence'] ) ) {
+            $raw_sentence = $row['sentence'];
+            if ( preg_match( '/\[\/?[a-z][a-z0-9_-]*\b/i', $raw_sentence ) || preg_match( '/\bcaption\s*=/i', $raw_sentence ) ) {
+                $cleaned = transformer_model_lexical_context_strip_shortcodes_and_captions( $raw_sentence );
+                if ( $cleaned !== '' && strlen( $cleaned ) > 20 ) {
+                    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                        $orig_prev  = transformer_model_lexical_context_diag_preview_text( $raw_sentence, 165 );
+                        $clean_prev = transformer_model_lexical_context_diag_preview_text( $cleaned, 165 );
+                        $orig_prev  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $orig_prev );
+                        $clean_prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $clean_prev );
+                        back_trace(
+                            'NOTICE',
+                            sprintf(
+                                '[LCM][quality_filter_salvaged:caption] original="%s" cleaned="%s"',
+                                $orig_prev,
+                                $clean_prev
+                            )
+                        );
+                    }
+
+                    // Core fix: cleaned text flows downstream and is re-evaluated by existing checks.
+                    $row['sentence'] = $cleaned;
+                }
+            }
+        }
+
         if ( ! transformer_model_lexical_context_is_low_value_sentence_row( $row ) ) {
             $out[] = $row;
+            continue;
+        }
+
+        // Diagnostic-only instrumentation: log why rows were removed (first 10 per stage).
+        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) && $removed_logged < 10 ) {
+            $reasons = transformer_model_lexical_context_low_value_sentence_row_reason_codes( is_array( $row ) ? $row : array() );
+            if ( $reasons === array() ) {
+                $reasons = array( 'unknown' );
+            }
+            $pid   = isset( $row['post_id'] ) ? (string) $row['post_id'] : '';
+            $score = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
+            $title = isset( $row['post_title'] ) ? (string) $row['post_title'] : '';
+            $sent  = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
+
+            $preview = transformer_model_lexical_context_diag_preview_text( $sent, 165 );
+            $title   = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $title );
+            $preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
+            $reason_join = implode( '|', array_values( array_unique( $reasons ) ) );
+
+            back_trace(
+                'NOTICE',
+                sprintf(
+                    '[LCM][quality_filter_removed:%s] reason=[%s] score=%.4f post_id=%s title="%s" text="%s"',
+                    $slug,
+                    $reason_join,
+                    $score,
+                    $pid,
+                    $title,
+                    $preview
+                )
+            );
+            ++$removed_logged;
         }
     }
 
@@ -3742,6 +3939,9 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
     $penalized    = 0;
     $row_affected = array();
     $total_rows   = 0;
+    $defpat_logged = 0;
+    $action_logged = 0;
+    $penalty_logged = 0;
 
     foreach ( $result as $idx => $row ) {
         if ( ! is_array( $row ) ) {
@@ -3754,6 +3954,14 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
         $slower   = strtolower( wp_strip_all_tags( (string) $sentence ) );
 
         $meta_hit = transformer_model_lexical_context_answer_shape_row_looks_meta_changelog( $sentence );
+
+        // Anchor detection for additive action/mechanism cue boost (diagnostic-only instrumentation).
+        $has_anchor = false;
+        if ( $phrase_re !== array() ) {
+            $has_anchor = (bool) preg_match( '/' . $phrase_re['regex'] . '/iu', $slower );
+        } elseif ( $word_re !== null && $word_re !== '' ) {
+            $has_anchor = (bool) preg_match( '/' . $word_re . '/iu', $slower );
+        }
 
         $def_hit         = false;
         $match_anchor    = '';
@@ -3787,6 +3995,121 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
                 $delta += $bonus_strong;
             }
             ++$boosted;
+        }
+
+        // Lightweight definitional bias: small additive boost when a row contains simple definition-like phrasing.
+        // Runs alongside anchor-based answer-shape boosting; does not short-circuit any existing logic.
+        $defpat_boost   = 8.0;
+        $defpat_pattern = '';
+        if ( ! $meta_hit ) {
+            $patterns = array(
+                ' is defined as '      => 'is defined as',
+                ' refers to '          => 'refers to',
+                ' is a feature that '  => 'is a feature that',
+                ' allows you to '      => 'allows you to',
+                ' is an ai '           => 'is an ai',
+                ' is a '               => 'is a',
+                ' is an '              => 'is an',
+                ' is the '             => 'is the',
+            );
+            foreach ( $patterns as $needle => $label ) {
+                if ( strpos( $slower, $needle ) !== false ) {
+                    $defpat_pattern = $label;
+                    break;
+                }
+            }
+            if ( $defpat_pattern !== '' ) {
+                $delta += $defpat_boost;
+                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) && $defpat_logged < 10 ) {
+                    $base_dbg = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
+                    $after_dbg = $base_dbg + $delta;
+                    $preview = transformer_model_lexical_context_diag_preview_text( (string) $sentence, 165 );
+                    $preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
+                    back_trace(
+                        'NOTICE',
+                        sprintf(
+                            '[LCM][answer_shape_bias_definition] boost=%g pattern="%s" before=%g after=%g text="%s"',
+                            $defpat_boost,
+                            $defpat_pattern,
+                            $base_dbg,
+                            $after_dbg,
+                            $preview
+                        )
+                    );
+                    ++$defpat_logged;
+                }
+            }
+        }
+
+        // Additive action/mechanism preference: anchor must be present + a simple mechanism verb cue.
+        // Does not change existing boosts/penalties and applies at most once per row.
+        if ( ! $meta_hit && $has_anchor ) {
+            $action_boost = 10.0;
+            $action_cues  = array( 'uses', 'use', 'allows', 'allow', 'helps', 'help', 'enables', 'enable', 'provides', 'provide', 'analyzes', 'analyze' );
+            $hit_cue      = '';
+            foreach ( $action_cues as $c ) {
+                $needle = ' ' . $c . ' ';
+                if ( strpos( $slower, $needle ) !== false ) {
+                    $hit_cue = $c;
+                    break;
+                }
+            }
+            if ( $hit_cue !== '' ) {
+                $delta += $action_boost;
+                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) && $action_logged < 10 ) {
+                    $base_dbg  = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
+                    $after_dbg = $base_dbg + $delta;
+                    $preview   = transformer_model_lexical_context_diag_preview_text( (string) $sentence, 165 );
+                    $preview   = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
+                    back_trace(
+                        'NOTICE',
+                        sprintf(
+                            '[LCM][answer_shape_bias_action] boost=%g cue="%s" before=%g after=%g text="%s"',
+                            $action_boost,
+                            $hit_cue,
+                            $base_dbg,
+                            $after_dbg,
+                            $preview
+                        )
+                    );
+                    ++$action_logged;
+                }
+            }
+        }
+
+        // Additive penalty: anchor-heavy but non-informational rows (no info cues) for informational queries.
+        // Does not change existing boosts/thresholds/gates and applies at most once per row.
+        if ( ! $meta_hit && $has_anchor ) {
+            $info_cues = array( 'uses', 'use', 'allows', 'allow', 'helps', 'help', 'enables', 'enable', 'provides', 'provide', 'analyzes', 'analyze' );
+            $has_info  = false;
+            foreach ( $info_cues as $c ) {
+                $needle = ' ' . $c . ' ';
+                if ( strpos( $slower, $needle ) !== false ) {
+                    $has_info = true;
+                    break;
+                }
+            }
+            if ( ! $has_info ) {
+                $pen = -8.0;
+                $delta += $pen;
+                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) && $penalty_logged < 10 ) {
+                    $base_dbg  = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
+                    $after_dbg = $base_dbg + $delta;
+                    $preview   = transformer_model_lexical_context_diag_preview_text( (string) $sentence, 165 );
+                    $preview   = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
+                    back_trace(
+                        'NOTICE',
+                        sprintf(
+                            '[LCM][answer_shape_bias_penalty] penalty=%g reason="anchor_no_info" before=%g after=%g text="%s"',
+                            $pen,
+                            $base_dbg,
+                            $after_dbg,
+                            $preview
+                        )
+                    );
+                    ++$penalty_logged;
+                }
+            }
         }
         if ( $meta_hit ) {
             $delta -= $penalty;
@@ -4234,6 +4557,61 @@ function transformer_model_lexical_context_diag_log_semantic_cohesion( $cohesion
             )
         );
     }
+}
+
+/**
+ * Lightweight answerability check for informational queries: requires anchor + either mechanism signal or definitional pattern.
+ * Intended as a post-ranking filter (does not change scoring/boosting); keep conservative and fast.
+ *
+ * @param string $text
+ * @param bool   $has_anchor
+ * @return bool
+ */
+function transformer_model_lcm_is_answerable_row( $text, $has_anchor ) {
+
+    if ( ! $has_anchor ) {
+        return false;
+    }
+
+    $slower = strtolower( wp_strip_all_tags( (string) $text ) );
+
+    // Mechanism signals (how it works).
+    $mechanism_terms = array(
+        'algorithm',
+        'tf-idf',
+        'term frequency',
+        'inverse document frequency',
+        'scoring',
+        'ranking',
+        'analyzes',
+        'analyze',
+        'calculates',
+        'compute',
+        'process',
+    );
+
+    foreach ( $mechanism_terms as $term ) {
+        if ( $term !== '' && strpos( $slower, $term ) !== false ) {
+            return true;
+        }
+    }
+
+    // Definitional patterns (what it is).
+    $definition_patterns = array(
+        ' is a ',
+        ' is an ',
+        ' refers to ',
+        ' is the process of ',
+        ' is the method of ',
+    );
+
+    foreach ( $definition_patterns as $pattern ) {
+        if ( $pattern !== '' && strpos( $slower, $pattern ) !== false ) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -4905,7 +5283,7 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
     $sentenceScores = transformer_model_lexical_context_cap_ranked_sentence_rows( $sentenceScores, 250, 'after_sort' );
 
     // Conservative cross-document gate: only include weaker posts if their document-level max score is within 85% of the best post’s max.
-    $after_doc_gate = transformer_model_lexical_context_filter_sentence_scores_cross_document_gate( $sentenceScores, 0.85 );
+    $after_doc_gate = transformer_model_lexical_context_apply_document_gate( $sentenceScores, $query_shape, 0.85 );
     $after_doc_gate = transformer_model_lexical_context_cap_ranked_sentence_rows( $after_doc_gate, 100, 'after_document_gate' );
 
     // Row-level gate: keep chunks near the best chunk score; drops weak filler when a strong match exists.
@@ -4955,6 +5333,89 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
     transformer_model_lexical_context_diag_log_coverage_gate_result( $coverage_gate );
     if ( empty( $coverage_gate['allow'] ) ) {
         return transformer_model_lexical_context_return_gate_blocked_user_message();
+    }
+
+    // Answerability gate (informational queries only): filter already-ranked rows without changing scores.
+    // IMPORTANT: This runs after coverage gate and before return gate; it preserves order and only removes rows.
+    if ( isset( $query_shape['shape'] ) && (string) $query_shape['shape'] === 'informational_query' ) {
+        $content = transformer_model_lexical_context_answer_shape_content_tokens(
+            array_values(
+                array_unique(
+                    array_map(
+                        static function ( $w ) {
+                            return strtolower( trim( (string) $w ) );
+                        },
+                        is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array()
+                    )
+                )
+            )
+        );
+
+        $phrase_re = array();
+        if ( count( $content ) >= 2 ) {
+            $phrase_tokens = count( $content ) <= 3 ? $content : array_slice( $content, -3 );
+            $pr = transformer_model_lexical_context_answer_shape_anchor_regex_phrase( $phrase_tokens );
+            if ( $pr !== null && $pr !== '' ) {
+                $phrase_re = array( 'regex' => $pr );
+            }
+        }
+        $word_re = count( $content ) >= 1 ? transformer_model_lexical_context_answer_shape_anchor_regex_word( $content[ count( $content ) - 1 ] ) : null;
+
+        $filtered  = array();
+        $skipped   = 0;
+        $log_count = 0;
+
+        foreach ( $sentenceScores as $row ) {
+            if ( ! is_array( $row ) ) {
+                continue;
+            }
+
+            $text   = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
+            $slower = strtolower( wp_strip_all_tags( $text ) );
+
+            $has_anchor = false;
+            if ( $phrase_re !== array() ) {
+                $has_anchor = (bool) preg_match( '/' . $phrase_re['regex'] . '/iu', $slower );
+            } elseif ( $word_re !== null && $word_re !== '' ) {
+                $has_anchor = (bool) preg_match( '/' . $word_re . '/iu', $slower );
+            }
+
+            if ( transformer_model_lcm_is_answerable_row( $text, $has_anchor ) ) {
+                $filtered[] = $row;
+            } else {
+                ++$skipped;
+                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) && $log_count < 10 ) {
+                    $preview = transformer_model_lexical_context_diag_preview_text( $text, 120 );
+                    $preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
+                    back_trace(
+                        'NOTICE',
+                        sprintf(
+                            '[LCM][answerability_gate_row] skipped=1 reason="not_answerable" text="%s"',
+                            $preview
+                        )
+                    );
+                    ++$log_count;
+                }
+            }
+        }
+
+        if ( $filtered !== array() ) {
+            $sentenceScores = $filtered;
+            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                back_trace(
+                    'NOTICE',
+                    sprintf(
+                        '[LCM][answerability_gate] applied=1 kept=%d skipped=%d',
+                        count( $filtered ),
+                        $skipped
+                    )
+                );
+            }
+        } else {
+            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                back_trace( 'NOTICE', '[LCM][answerability_gate] fallback=1 reason="no_valid_rows"' );
+            }
+        }
     }
 
     $return_gate = transformer_model_lexical_context_should_return_scored_rows(
