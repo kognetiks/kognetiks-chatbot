@@ -4615,6 +4615,61 @@ function transformer_model_lcm_is_answerable_row( $text, $has_anchor ) {
 }
 
 /**
+ * Answer strength tier for informational queries (diagnostics + reordering only; does not change scores).
+ *
+ * 3 = mechanism (how it works), 2 = definition (what it is), 1 = anchor-only, 0 = no anchor.
+ *
+ * @param string $text
+ * @param bool   $has_anchor
+ * @return int
+ */
+function transformer_model_lcm_get_answer_strength( $text, $has_anchor ) {
+
+    if ( ! $has_anchor ) {
+        return 0;
+    }
+
+    $slower = strtolower( wp_strip_all_tags( (string) $text ) );
+
+    // Tier 3: Mechanism (strongest).
+    $mechanism_terms = array(
+        'algorithm',
+        'tf-idf',
+        'term frequency',
+        'inverse document frequency',
+        'scoring',
+        'ranking',
+        'analyzes',
+        'analyze',
+        'calculates',
+        'compute',
+        'process',
+    );
+    foreach ( $mechanism_terms as $term ) {
+        if ( $term !== '' && strpos( $slower, $term ) !== false ) {
+            return 3;
+        }
+    }
+
+    // Tier 2: Definition.
+    $definition_patterns = array(
+        ' is a ',
+        ' is an ',
+        ' refers to ',
+        ' is the process of ',
+        ' is the method of ',
+    );
+    foreach ( $definition_patterns as $pattern ) {
+        if ( $pattern !== '' && strpos( $slower, $pattern ) !== false ) {
+            return 2;
+        }
+    }
+
+    // Tier 1: Anchor-only (weak but allowed).
+    return 1;
+}
+
+/**
  * Log top candidate rows for one pipeline stage via back_trace() (NOTICE).
  *
  * @param string                             $stage_slug      Short stage name for [LCM][slug].
@@ -5414,6 +5469,75 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         } else {
             if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
                 back_trace( 'NOTICE', '[LCM][answerability_gate] fallback=1 reason="no_valid_rows"' );
+            }
+        }
+
+        // Tiered answer strength reordering (informational queries only): re-rank within the already-ranked list
+        // without changing scores. Stronger explanatory rows float above anchor-only mentions.
+        foreach ( $sentenceScores as $i => $r ) {
+            if ( ! is_array( $r ) ) {
+                continue;
+            }
+            $text   = isset( $r['sentence'] ) ? (string) $r['sentence'] : '';
+            $slower = strtolower( wp_strip_all_tags( $text ) );
+
+            $has_anchor = false;
+            if ( $phrase_re !== array() ) {
+                $has_anchor = (bool) preg_match( '/' . $phrase_re['regex'] . '/iu', $slower );
+            } elseif ( $word_re !== null && $word_re !== '' ) {
+                $has_anchor = (bool) preg_match( '/' . $word_re . '/iu', $slower );
+            }
+
+            $sentenceScores[ $i ]['_answer_strength'] = transformer_model_lcm_get_answer_strength( $text, $has_anchor );
+            $sentenceScores[ $i ]['_orig_rank']       = (int) $i;
+        }
+
+        usort(
+            $sentenceScores,
+            static function ( $a, $b ) {
+                $as = isset( $a['_answer_strength'] ) ? (int) $a['_answer_strength'] : 0;
+                $bs = isset( $b['_answer_strength'] ) ? (int) $b['_answer_strength'] : 0;
+                if ( $as !== $bs ) {
+                    return $bs <=> $as;
+                }
+
+                $sa = isset( $a['score'] ) ? (float) $a['score'] : 0.0;
+                $sb = isset( $b['score'] ) ? (float) $b['score'] : 0.0;
+                if ( $sa !== $sb ) {
+                    return $sb <=> $sa;
+                }
+
+                $ra = isset( $a['_orig_rank'] ) ? (int) $a['_orig_rank'] : 0;
+                $rb = isset( $b['_orig_rank'] ) ? (int) $b['_orig_rank'] : 0;
+
+                return $ra <=> $rb;
+            }
+        );
+
+        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            $log_n = 0;
+            foreach ( $sentenceScores as $r ) {
+                if ( $log_n >= 10 ) {
+                    break;
+                }
+                if ( ! is_array( $r ) ) {
+                    continue;
+                }
+                $tier  = isset( $r['_answer_strength'] ) ? (int) $r['_answer_strength'] : 0;
+                $score = isset( $r['score'] ) ? (float) $r['score'] : 0.0;
+                $text  = isset( $r['sentence'] ) ? (string) $r['sentence'] : '';
+                $prev  = transformer_model_lexical_context_diag_preview_text( $text, 120 );
+                $prev  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
+                back_trace(
+                    'NOTICE',
+                    sprintf(
+                        '[LCM][answer_strength] tier=%d score=%.4f text="%s"',
+                        $tier,
+                        $score,
+                        $prev
+                    )
+                );
+                ++$log_n;
             }
         }
     }
