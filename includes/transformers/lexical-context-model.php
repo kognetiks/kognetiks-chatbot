@@ -391,14 +391,18 @@ function transformer_model_lexical_context_fetch_wordpress_documents() {
 
     global $wpdb;
 
+    transformer_model_lexical_context_lexical_rebuild_log( 'before fetch_wordpress_documents' );
+
     $results = $wpdb->get_results(
         $wpdb->prepare(
-            "SELECT ID, post_title, post_type, post_content FROM {$wpdb->posts}
-             WHERE post_status = %s AND (post_type = %s OR post_type = %s) AND post_content != ''
+            "SELECT ID, post_title, post_type, post_status, post_content FROM {$wpdb->posts}
+             WHERE post_status IN (%s, %s) AND (post_type = %s OR post_type = %s OR post_type = %s) AND post_content != ''
              ORDER BY ID ASC",
             'publish',
+            'private',
             'post',
-            'page'
+            'page',
+            'apple_note'
         ),
         ARRAY_A
     );
@@ -407,15 +411,36 @@ function transformer_model_lexical_context_fetch_wordpress_documents() {
         return [];
     }
 
+    transformer_model_lexical_context_lexical_rebuild_log( 'after fetch_wordpress_documents' );
+
+    transformer_model_lexical_context_lexical_rebuild_log( 'before documents' );
+
     $documents = [];
 
+    transformer_model_lexical_context_lexical_rebuild_log( 'before foreach' );
+
+    $loop_counter = 0;
+
     foreach ($results as $row) {
+
+        $loop_counter++;
+        if ( $loop_counter % 100 === 0 ) {
+            transformer_model_lexical_context_lexical_rebuild_log( 'loop_counter ' . $loop_counter );
+        }
+        // Minimal post-status filter:
+        // - Always allow published content
+        // - Allow private only for apple_note
+        $post_status = isset( $row['post_status'] ) ? (string) $row['post_status'] : '';
+        $post_type   = isset( $row['post_type'] ) ? (string) $row['post_type'] : 'post';
+        if ( $post_status !== 'publish' && ! ( $post_status === 'private' && $post_type === 'apple_note' ) ) {
+            continue;
+        }
+
         if (empty($row['post_content'])) {
             continue;
         }
 
         $post_id   = isset($row['ID'] ) ? (int) $row['ID'] : 0;
-        $post_type = isset($row['post_type'] ) ? (string) $row['post_type'] : 'post';
         $title     = isset($row['post_title'] ) ? $row['post_title'] : '';
 
         $normalized = wp_strip_all_tags( (string) $row['post_content'] );
@@ -442,6 +467,10 @@ function transformer_model_lexical_context_fetch_wordpress_documents() {
             'chunks'           => $chunks,
         );
     }
+
+    transformer_model_lexical_context_lexical_rebuild_log( 'after foreach' );
+
+    transformer_model_lexical_context_lexical_rebuild_log( 'before return' );
 
     return $documents;
 
@@ -599,6 +628,13 @@ function transformer_model_lexical_context_get_cached_embeddings( $documents_or_
         return array();
     }
 
+    $pmi_metrics = array(
+        'document_count' => count( $documents ),
+        'chunk_count'    => transformer_model_lexical_context_count_document_chunks( $documents ),
+        'corpus_bytes'   => strlen( (string) $corpus_flat ),
+    );
+    transformer_model_lexical_context_maybe_raise_memory_for_rebuild( 'pmi_cache_miss', $pmi_metrics );
+
     $embeddings = transformer_model_lexical_context_build_pmi_matrix_from_documents( $documents, $windowSize );
 
     if ( ! empty( $embeddings ) ) {
@@ -677,7 +713,19 @@ function transformer_model_lexical_context_build_pmi_matrix_from_documents( $doc
     $wordCounts         = array();
     $totalWords         = 0;
 
+    $pmi_total = count( $documents );
+    transformer_model_lexical_context_lexical_rebuild_log( 'pmi_build total_documents=' . $pmi_total );
+
+    $pmi_doc_i = 0;
     foreach ( $documents as $doc ) {
+        $pmi_doc_i++;
+        if ( $pmi_doc_i === 1 || $pmi_doc_i % 25 === 0 ) {
+            $peak = function_exists( 'memory_get_peak_usage' ) ? memory_get_peak_usage( true ) : 0;
+            transformer_model_lexical_context_lexical_rebuild_log(
+                sprintf( 'pmi_build documents=%d/%d peak_mem_bytes=%s', $pmi_doc_i, $pmi_total, number_format( (float) $peak ) )
+            );
+        }
+
         $corpus = isset( $doc['normalized_text'] ) ? (string) $doc['normalized_text'] : '';
         if ( $corpus === '' ) {
             continue;
@@ -729,9 +777,25 @@ function transformer_model_lexical_context_finalize_pmi_from_counts( $coOccurren
 
     $embeddings = array();
 
+    $max_pairs = (int) apply_filters( 'chatbot_lcm_pmi_max_cooccurrence_pairs_per_root', 150 );
+    if ( $max_pairs < 0 ) {
+        $max_pairs = 0;
+    }
+
+    $pmi_root_i = 0;
     foreach ( $coOccurrenceCounts as $word => $contexts ) {
+        $pmi_root_i++;
+        if ( $pmi_root_i % 500 === 0 ) {
+            transformer_model_lexical_context_lexical_rebuild_log( 'pmi_finalize root_words ' . $pmi_root_i );
+        }
+
         if ( ! isset( $wordCounts[ $word ] ) || (int) $wordCounts[ $word ] === 0 ) {
             continue;
+        }
+
+        if ( $max_pairs > 0 && count( $contexts ) > $max_pairs ) {
+            arsort( $contexts, SORT_NUMERIC );
+            $contexts = array_slice( $contexts, 0, $max_pairs, true );
         }
 
         foreach ( $contexts as $contextWord => $count ) {
@@ -1752,6 +1816,45 @@ function transformer_model_lexical_context_lexical_rebuild_corpus_metrics( $docu
 }
 
 /**
+ * Fast aggregate for the same SQL scope as transformer_model_lexical_context_fetch_wordpress_documents().
+ * Lets admin-post defer to WP-Cron before loading all post_content rows into PHP (prevents FastCGI idle timeouts).
+ *
+ * @return array{ row_count: int, content_bytes: int }
+ */
+function transformer_model_lexical_context_lexical_corpus_sql_aggregate() {
+
+    global $wpdb;
+
+    $row = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT COUNT(*) AS row_count, COALESCE(SUM(CHAR_LENGTH(post_content)), 0) AS content_bytes
+             FROM {$wpdb->posts}
+             WHERE post_status IN (%s, %s)
+             AND (post_type = %s OR post_type = %s OR post_type = %s)
+             AND post_content != ''",
+            'publish',
+            'private',
+            'post',
+            'page',
+            'apple_note'
+        ),
+        ARRAY_A
+    );
+
+    if ( ! is_array( $row ) ) {
+        return array(
+            'row_count'     => 0,
+            'content_bytes' => 0,
+        );
+    }
+
+    return array(
+        'row_count'     => (int) ( $row['row_count'] ?? 0 ),
+        'content_bytes' => (int) ( $row['content_bytes'] ?? 0 ),
+    );
+}
+
+/**
  * Whether a synchronous browser/admin-post rebuild should be deferred to WP-Cron (large corpus).
  *
  * @param array{ document_count: int, chunk_count: int, corpus_bytes: int } $metrics
@@ -1759,13 +1862,17 @@ function transformer_model_lexical_context_lexical_rebuild_corpus_metrics( $docu
  */
 function transformer_model_lexical_context_lexical_rebuild_should_defer_to_cron( $metrics ) {
 
-    $max_docs   = (int) apply_filters( 'chatbot_lexical_rebuild_sync_max_documents', 75 );
-    $max_bytes  = (int) apply_filters( 'chatbot_lexical_rebuild_sync_max_corpus_bytes', 1500000 );
+    $max_docs    = (int) apply_filters( 'chatbot_lexical_rebuild_sync_max_documents', 40 );
+    $max_bytes   = (int) apply_filters( 'chatbot_lexical_rebuild_sync_max_corpus_bytes', 1200000 );
+    $max_chunks  = (int) apply_filters( 'chatbot_lexical_rebuild_sync_max_chunks', 6000 );
 
     if ( ! empty( $metrics['document_count'] ) && (int) $metrics['document_count'] > $max_docs ) {
         return true;
     }
     if ( ! empty( $metrics['corpus_bytes'] ) && (int) $metrics['corpus_bytes'] > $max_bytes ) {
+        return true;
+    }
+    if ( isset( $metrics['chunk_count'] ) && (int) $metrics['chunk_count'] > $max_chunks ) {
         return true;
     }
 
@@ -1811,6 +1918,68 @@ function transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cac
 }
 
 /**
+ * If the full lexical rebuild exits without finishing (fatal, OOM, max execution time), log what we can.
+ *
+ * @return void
+ */
+/**
+ * Raise PHP memory_limit on large PMI jobs (filterable). Does not shrink co-occurrence storage; pair cap handles output size.
+ *
+ * @param string $context Rebuild source label.
+ * @param array{ document_count?: int, chunk_count?: int, corpus_bytes?: int } $metrics
+ * @return void
+ */
+function transformer_model_lexical_context_maybe_raise_memory_for_rebuild( $context, array $metrics ) {
+
+    $chunks = (int) ( $metrics['chunk_count'] ?? 0 );
+    $bytes  = (int) ( $metrics['corpus_bytes'] ?? 0 );
+
+    $default = null;
+    if ( $chunks > 50000 || $bytes > 8000000 ) {
+        $default = '768M';
+    } elseif ( $chunks > 20000 || $bytes > 4000000 ) {
+        $default = '512M';
+    }
+
+    $limit = apply_filters( 'chatbot_lexical_rebuild_memory_limit', $default, $context, $metrics );
+
+    if ( $limit === false || $limit === null || $limit === '' ) {
+        return;
+    }
+
+    if ( is_string( $limit ) ) {
+        @ini_set( 'memory_limit', $limit );
+        transformer_model_lexical_context_lexical_rebuild_log( 'step=memory_limit value=' . $limit );
+    }
+}
+
+function transformer_model_lexical_context_lexical_rebuild_shutdown_probe() {
+
+    if ( empty( $GLOBALS['chatbot_lcm_full_rebuild_watch'] ) ) {
+        return;
+    }
+
+    $e = function_exists( 'error_get_last' ) ? error_get_last() : null;
+    $parts = array( 'step=rebuild_abnormal_shutdown' );
+
+    if ( is_array( $e ) && isset( $e['type'] ) ) {
+        $parts[] = 'type=' . $e['type'];
+        $parts[] = 'msg=' . substr( (string) ( $e['message'] ?? '' ), 0, 400 );
+        $parts[] = 'file=' . basename( (string) ( $e['file'] ?? '' ) );
+        $parts[] = 'line=' . (int) ( $e['line'] ?? 0 );
+    } else {
+        $parts[] = 'last_error=none';
+        $parts[] = 'hint=timeout_oom_or_kill';
+    }
+
+    if ( function_exists( 'memory_get_peak_usage' ) ) {
+        $parts[] = 'peak_mem_bytes=' . memory_get_peak_usage( true );
+    }
+
+    transformer_model_lexical_context_lexical_rebuild_log( implode( ' ', $parts ) );
+}
+
+/**
  * Build PMI + IDF and atomically replace production cache files (existing cache kept if anything fails).
  *
  * @param string $context Source label for logs: browser_sync|wp_cron|cron|wp_cli (legacy).
@@ -1819,6 +1988,25 @@ function transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cac
 function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $context = 'cron' ) {
 
     transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=rebuild_started' );
+
+    static $lcm_shutdown_registered = false;
+    if ( ! $lcm_shutdown_registered ) {
+        $lcm_shutdown_registered = true;
+        register_shutdown_function( 'transformer_model_lexical_context_lexical_rebuild_shutdown_probe' );
+    }
+    $GLOBALS['chatbot_lcm_full_rebuild_watch'] = true;
+
+    try {
+
+    // WP-Cron runs over HTTP and often inherits ~30s max_execution_time; PMI on large sites needs unlimited time.
+    if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+        if ( function_exists( 'ignore_user_abort' ) ) {
+            @ignore_user_abort( true );
+        }
+        if ( function_exists( 'set_time_limit' ) ) {
+            @set_time_limit( 0 );
+        }
+    }
 
     $documents = transformer_model_lexical_context_fetch_wordpress_documents();
     if ( empty( $documents ) ) {
@@ -1835,6 +2023,8 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $cont
             $metrics['corpus_bytes']
         )
     );
+
+    transformer_model_lexical_context_maybe_raise_memory_for_rebuild( $context, $metrics );
 
     $corpus_flat = transformer_model_lexical_context_flatten_documents( $documents );
     if ( $corpus_flat === '' ) {
@@ -1975,6 +2165,10 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $cont
     transformer_model_lexical_context_lexical_rebuild_log( 'step=rebuild_completed_ok' );
 
     return array( 'ok' => true );
+
+    } finally {
+        $GLOBALS['chatbot_lcm_full_rebuild_watch'] = false;
+    }
 }
 
 /**
@@ -4738,6 +4932,132 @@ function transformer_model_lcm_get_answer_strength( $text, $has_anchor ) {
 }
 
 /**
+ * Lightweight answer-shape signal for informational queries only (ordering hint; does not change retrieval scores).
+ *
+ * @param string               $text                    Sentence row text.
+ * @param array{ shape?: string } $query_shape          Query shape pack.
+ * @param array<int, string>   $meaningful_query_tokens Meaningful query tokens (lowercase).
+ * @param string               $raw_query_text          Raw user query.
+ * @return int Small integer; 0 if not informational_query or neutral.
+ */
+function transformer_model_lcm_get_answer_directness_score( $text, $query_shape, $meaningful_query_tokens, $raw_query_text ) {
+
+    $shape = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
+    if ( $shape !== 'informational_query' ) {
+        return 0;
+    }
+
+    $slower = strtolower( wp_strip_all_tags( (string) $text ) );
+    $slower = preg_replace( '/\s+/u', ' ', trim( $slower ) );
+
+    $tokens = array();
+    if ( is_array( $meaningful_query_tokens ) ) {
+        foreach ( $meaningful_query_tokens as $t ) {
+            $w = strtolower( trim( (string) $t ) );
+            if ( $w !== '' && strlen( $w ) > 1 ) {
+                $tokens[] = $w;
+            }
+        }
+    }
+
+    $subject = implode( ' ', $tokens );
+    if ( $subject === '' ) {
+        $rq = strtolower( wp_strip_all_tags( (string) $raw_query_text ) );
+        $rq = preg_replace( '/\s+/u', ' ', trim( $rq ) );
+        if ( $rq !== '' ) {
+            $bits = preg_split( '/\s+/u', $rq, -1, PREG_SPLIT_NO_EMPTY );
+            $stop = array_flip( transformer_model_lexical_context_dedup_normalization_stop_words() );
+            $keep = array();
+            foreach ( $bits as $b ) {
+                $b = preg_replace( '/[^\p{L}\p{N}]/u', '', $b );
+                if ( $b === '' || strlen( $b ) < 2 ) {
+                    continue;
+                }
+                $bl = strtolower( $b );
+                if ( isset( $stop[ $bl ] ) ) {
+                    continue;
+                }
+                $keep[] = $bl;
+            }
+            $n = count( $keep );
+            if ( $n >= 2 ) {
+                $subject = implode( ' ', array_slice( $keep, -3 ) );
+            } elseif ( $n === 1 ) {
+                $subject = $keep[0];
+            }
+        }
+    }
+
+    $positive = 0;
+
+    if ( $subject !== '' ) {
+        $sq = preg_quote( $subject, '/' );
+        $def_checks = array(
+            '/' . $sq . '\s+is\b/u',
+            '/' . $sq . '\s+refers\s+to\b/u',
+            '/' . $sq . '\s+is\s+defined\s+as\b/u',
+            '/' . $sq . '\s+means\b/u',
+            '/' . $sq . '\s+describes\b/u',
+        );
+        foreach ( $def_checks as $re ) {
+            if ( @preg_match( $re, $slower ) ) {
+                $positive = 4;
+                break;
+            }
+        }
+
+        if ( $positive < 4 ) {
+            $mech_checks = array(
+                '/' . $sq . '\s+uses\b/u',
+                '/' . $sq . '\s+helps\b/u',
+                '/' . $sq . '\s+enables\b/u',
+                '/' . $sq . '\s+allows\b/u',
+                '/' . $sq . '\s+provides\b/u',
+                '/' . $sq . '\s+analyzes\b/u',
+            );
+            foreach ( $mech_checks as $re ) {
+                if ( @preg_match( $re, $slower ) ) {
+                    $positive = max( $positive, 3 );
+                    break;
+                }
+            }
+        }
+    }
+
+    if ( $positive < 2 && count( $tokens ) > 0 ) {
+        $matched = 0;
+        foreach ( $tokens as $tok ) {
+            if ( @preg_match( '/\b' . preg_quote( $tok, '/' ) . '\b/u', $slower ) ) {
+                ++$matched;
+            }
+        }
+        $need   = (int) max( 1, ceil( count( $tokens ) * 0.6 ) );
+        $vverbs = '/\b(is|are|means|refers|helps|uses|enables|provides|supports|improves|reduces|increases)\b/u';
+        if ( $matched >= $need && @preg_match( $vverbs, $slower ) ) {
+            $positive = max( $positive, 2 );
+        }
+    }
+
+    $score = $positive;
+
+    $lead = preg_replace( '/^[\s\*#"\']+/u', '', $slower );
+    if ( @preg_match( "/^(in conclusion|tags\\b|related\\b|reference\\b|newsletters\\b|what's new|whats new)\b/iu", $lead ) ) {
+        $score -= 3;
+    }
+
+    $expl_verbs = '/\b(is|are|was|were|means|refers|helps|uses|enables|provides|supports|describes|defines|includes|allows|analyzes)\b/u';
+    $word_count = 0;
+    if ( $slower !== '' ) {
+        $word_count = count( preg_split( '/\s+/u', $slower, -1, PREG_SPLIT_NO_EMPTY ) );
+    }
+    if ( mb_strlen( $slower ) > 0 && mb_strlen( $slower ) < 100 && $word_count > 0 && $word_count <= 12 && ! @preg_match( $expl_verbs, $slower ) ) {
+        $score -= 2;
+    }
+
+    return (int) $score;
+}
+
+/**
  * Internal diagnostic state: last constraint gate meta for the current request.
  *
  * @param array<string, mixed>|null $set
@@ -6049,8 +6369,8 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
             }
         }
 
-        // Tiered answer strength reordering (informational queries only): re-rank within the already-ranked list
-        // without changing scores. Stronger explanatory rows float above anchor-only mentions.
+        // Tiered answer strength + answer-directness reordering (informational queries only): re-rank within the
+        // already-ranked list without changing retrieval scores.
         foreach ( $sentenceScores as $i => $r ) {
             if ( ! is_array( $r ) ) {
                 continue;
@@ -6069,6 +6389,19 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
             $sentenceScores[ $i ]['_orig_rank']       = (int) $i;
         }
 
+        foreach ( $sentenceScores as $i => $r ) {
+            if ( ! is_array( $r ) ) {
+                continue;
+            }
+            $text = isset( $r['sentence'] ) ? (string) $r['sentence'] : '';
+            $sentenceScores[ $i ]['_answer_directness'] = transformer_model_lcm_get_answer_directness_score(
+                $text,
+                $query_shape,
+                $meaningful_query_tokens,
+                $constraint_query_text
+            );
+        }
+
         usort(
             $sentenceScores,
             static function ( $a, $b ) {
@@ -6076,6 +6409,12 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                 $bs = isset( $b['_answer_strength'] ) ? (int) $b['_answer_strength'] : 0;
                 if ( $as !== $bs ) {
                     return $bs <=> $as;
+                }
+
+                $ad = isset( $a['_answer_directness'] ) ? (int) $a['_answer_directness'] : 0;
+                $bd = isset( $b['_answer_directness'] ) ? (int) $b['_answer_directness'] : 0;
+                if ( $ad !== $bd ) {
+                    return $bd <=> $ad;
                 }
 
                 $sa = isset( $a['score'] ) ? (float) $a['score'] : 0.0;
@@ -6092,6 +6431,13 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         );
 
         if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            back_trace(
+                'NOTICE',
+                sprintf(
+                    '[LCM][answer_directness_order] applied=1 candidates=%d',
+                    count( $sentenceScores )
+                )
+            );
             $log_n = 0;
             foreach ( $sentenceScores as $r ) {
                 if ( $log_n >= 10 ) {
@@ -6100,6 +6446,7 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                 if ( ! is_array( $r ) ) {
                     continue;
                 }
+                $dir   = isset( $r['_answer_directness'] ) ? (int) $r['_answer_directness'] : 0;
                 $tier  = isset( $r['_answer_strength'] ) ? (int) $r['_answer_strength'] : 0;
                 $score = isset( $r['score'] ) ? (float) $r['score'] : 0.0;
                 $text  = isset( $r['sentence'] ) ? (string) $r['sentence'] : '';
@@ -6108,7 +6455,8 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                 back_trace(
                     'NOTICE',
                     sprintf(
-                        '[LCM][answer_strength] tier=%d score=%.4f text="%s"',
+                        '[LCM][answer_directness] directness=%d strength=%d score=%.4f text="%s"',
+                        $dir,
                         $tier,
                         $score,
                         $prev

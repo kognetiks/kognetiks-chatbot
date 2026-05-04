@@ -864,6 +864,39 @@ function chatbot_transformer_model_handle_cache_rebuild() {
 
     require_once $chatbot_chatgpt_plugin_dir_path . 'includes/transformers/lexical-context-model.php';
 
+    $sql_agg = transformer_model_lexical_context_lexical_corpus_sql_aggregate();
+    $pre_metrics = array(
+        'document_count' => (int) ( $sql_agg['row_count'] ?? 0 ),
+        'chunk_count'    => 0,
+        'corpus_bytes'   => (int) ( $sql_agg['content_bytes'] ?? 0 ),
+    );
+
+    if (transformer_model_lexical_context_lexical_rebuild_should_defer_to_cron($pre_metrics)) {
+        if (get_transient('chatbot_lexical_rebuild_job_pending') || chatbot_lcm_lexical_cache_pending_one_shot_scheduled()) {
+            wp_safe_redirect(add_query_arg('lexical_cache_status', 'already_scheduled', $redirect_url));
+            exit;
+        }
+
+        wp_schedule_single_event(time() + 10, chatbot_lcm_lexical_cache_rebuild_cron_hook(), array( 'once' ));
+        set_transient('chatbot_lexical_rebuild_job_pending', 1, 2 * HOUR_IN_SECONDS);
+
+        if (function_exists('spawn_cron')) {
+            spawn_cron();
+        }
+
+        if (function_exists('transformer_model_lexical_context_lexical_rebuild_log')) {
+            transformer_model_lexical_context_lexical_rebuild_log('admin_rebuild deferred to wp-cron (SQL aggregate / large corpus)');
+        }
+
+        wp_safe_redirect(add_query_arg('lexical_cache_status', 'scheduled', $redirect_url));
+        exit;
+    }
+
+    if ((int) ($sql_agg['row_count'] ?? 0) === 0) {
+        wp_safe_redirect(add_query_arg('lexical_cache_status', 'empty_corpus', $redirect_url));
+        exit;
+    }
+
     $documents = transformer_model_lexical_context_fetch_wordpress_documents();
     if (empty($documents)) {
         wp_safe_redirect(add_query_arg('lexical_cache_status', 'empty_corpus', $redirect_url));
