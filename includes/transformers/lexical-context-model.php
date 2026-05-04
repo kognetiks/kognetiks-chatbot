@@ -4684,6 +4684,311 @@ function transformer_model_lcm_get_answer_strength( $text, $has_anchor ) {
 }
 
 /**
+ * Internal diagnostic state: last constraint gate meta for the current request.
+ *
+ * @param array<string, mixed>|null $set
+ * @return array<string, mixed>
+ */
+function transformer_model_lexical_context_constraint_gate_last_meta( $set = null ) {
+    static $meta = array();
+    if ( is_array( $set ) ) {
+        $meta = $set;
+    }
+    return $meta;
+}
+
+/**
+ * Constraint gate (informational queries only): explicit domain / negation / contrast mismatch protection.
+ *
+ * Design:
+ * - No-op unless the query includes an explicit constraint (e.g. "in finance", "not marketing related", "X vs Y difference").
+ * - Never changes scores or ordering; only removes rows.
+ * - If a domain/negation constraint removes everything, return empty so the existing return gate produces the standard no-answer response.
+ *
+ * @param array<int, array<string, mixed>> $rows
+ * @param array{ shape?: string }         $query_shape
+ * @param string                          $raw_query_text
+ * @return array<int, array<string, mixed>>
+ */
+function transformer_model_lexical_context_apply_constraint_gate( $rows, $query_shape, $raw_query_text ) {
+
+    $rows  = is_array( $rows ) ? $rows : array();
+    $shape = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
+    if ( $shape !== 'informational_query' || $rows === array() ) {
+        return $rows;
+    }
+
+    transformer_model_lexical_context_constraint_gate_last_meta(
+        array(
+            'applied'     => 0,
+            'type'        => '',
+            'constraint'  => '',
+            'kept'        => count( $rows ),
+            'removed'     => 0,
+            'reason'      => '',
+        )
+    );
+
+    $q = strtolower( wp_strip_all_tags( (string) $raw_query_text ) );
+    $q = preg_replace( '/\s+/u', ' ', trim( (string) $q ) );
+    if ( $q === '' ) {
+        return $rows;
+    }
+
+    // Domain qualifiers ("in X").
+    $domain = '';
+    $domain_patterns = array(
+        'biology'     => '/\bin\s+biology\b/i',
+        'finance'     => '/\bin\s+finance\b/i',
+        'medicine'    => '/\bin\s+medicine\b/i',
+        'law'         => '/\bin\s+(law|legal)\b/i',
+        'physics'     => '/\bin\s+physics\b/i',
+        'chemistry'   => '/\bin\s+chemistry\b/i',
+        'accounting'  => '/\bin\s+accounting\b/i',
+        'real_estate' => '/\bin\s+real\s+estate\b/i',
+        'marketing'   => '/\bin\s+marketing\b/i',
+        'sales'       => '/\bin\s+sales\b/i',
+    );
+    foreach ( $domain_patterns as $k => $re ) {
+        if ( preg_match( $re, $q ) ) {
+            $domain = $k;
+            break;
+        }
+    }
+
+    // Negated domain constraints ("not marketing related", "not sales related").
+    $negated = '';
+    $neg_patterns = array(
+        'marketing' => '/\bnot\s+marketing\s+related\b/i',
+        'sales'     => '/\bnot\s+sales\s+related\b/i',
+    );
+    foreach ( $neg_patterns as $k => $re ) {
+        if ( preg_match( $re, $q ) ) {
+            $negated = $k;
+            break;
+        }
+    }
+
+    // Contrast/difference constraints.
+    $has_contrast = (bool) preg_match( '/\b(vs|versus|difference|different\s+from)\b/i', $q );
+
+    if ( $domain === '' && $negated === '' && ! $has_contrast ) {
+        return $rows; // No explicit constraint signal; preserve existing behavior.
+    }
+
+    // Small, generic domain marker map.
+    $markers = array(
+        // Keep markers small and generic. Use whole-word/phrase matching to avoid substring collisions (e.g. "gene" vs "generate").
+        'biology' => array( 'biology', 'biological', 'organism', 'organisms', 'cell', 'cells', 'gene', 'genes', 'protein', 'proteins', 'species', 'ecosystem', 'evolution', 'dna' ),
+        'finance' => array( 'finance', 'financial', 'banking', 'investment', 'accounting', 'revenue' ),
+        'medicine' => array( 'medicine', 'medical', 'health', 'clinical', 'patient' ),
+        'law' => array( 'law', 'legal', 'attorney', 'court', 'contract' ),
+        'physics' => array( 'physics', 'quantum', 'energy', 'force', 'matter' ),
+        'chemistry' => array( 'chemistry', 'chemical', 'molecule', 'compound' ),
+        'accounting' => array( 'accounting', 'tax', 'balance', 'ledger', 'financial' ),
+        'real_estate' => array( 'real estate', 'property', 'housing', 'condo', 'mortgage' ),
+        'marketing' => array( 'marketing', 'campaign', 'audience', 'conversion', 'lead generation' ),
+        'sales' => array( 'sales', 'prospect', 'pipeline', 'deal', 'lead generation' ),
+        // Generic contrast companion for common “electrical” ambiguity cases (not corpus-specific).
+        'electrical' => array( 'electrical', 'electronics', 'voltage', 'current', 'circuit', 'wire' ),
+    );
+
+    $match_marker = static function ( $text_lower, $marker ) {
+        $marker = strtolower( trim( (string) $marker ) );
+        if ( $marker === '' ) {
+            return false;
+        }
+        // Whole-phrase match with token boundaries.
+        if ( strpos( $marker, ' ' ) !== false ) {
+            $parts = preg_split( '/\s+/u', $marker, -1, PREG_SPLIT_NO_EMPTY );
+            if ( ! is_array( $parts ) || $parts === array() ) {
+                return false;
+            }
+            $re = '(?<![\p{L}\p{N}_])' . implode( '\s+', array_map( static function ( $p ) {
+                return preg_quote( (string) $p, '/' );
+            }, $parts ) ) . '(?![\p{L}\p{N}_])';
+            return (bool) preg_match( '/' . $re . '/iu', $text_lower );
+        }
+        // Whole-word match.
+        $re = '(?<![\p{L}\p{N}_])' . preg_quote( $marker, '/' ) . '(?![\p{L}\p{N}_])';
+        return (bool) preg_match( '/' . $re . '/iu', $text_lower );
+    };
+
+    $match_row = static function ( $text_lower, $domain_key ) use ( $markers ) {
+        if ( $domain_key === '' || ! isset( $markers[ $domain_key ] ) ) {
+            return false;
+        }
+        foreach ( $markers[ $domain_key ] as $m ) {
+            if ( $m !== '' && strpos( $text_lower, (string) $m ) !== false ) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    // Override: use boundary-aware marker matching (prevents substring false positives).
+    $match_row = static function ( $text_lower, $domain_key ) use ( $markers, $match_marker ) {
+        if ( $domain_key === '' || ! isset( $markers[ $domain_key ] ) ) {
+            return false;
+        }
+        foreach ( $markers[ $domain_key ] as $m ) {
+            if ( $match_marker( $text_lower, $m ) ) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    $before  = count( $rows );
+    $removed = 0;
+    $kept    = 0;
+    $removed_rows_logged = 0;
+    $type = '';
+    $constraint = '';
+
+    // 1) Negation: remove rows that match the negated domain markers.
+    if ( $negated !== '' ) {
+        $type = 'negation';
+        $constraint = 'not ' . $negated . ' related';
+        $out = array();
+        foreach ( $rows as $row ) {
+            $text = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
+            $tl   = strtolower( wp_strip_all_tags( $text ) );
+            if ( $match_row( $tl, $negated ) ) {
+                ++$removed;
+                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) && $removed_rows_logged < 10 ) {
+                    $preview = transformer_model_lexical_context_diag_preview_text( $text, 120 );
+                    $preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
+                    back_trace(
+                        'NOTICE',
+                        sprintf(
+                            '[LCM][constraint_gate_row] removed=1 reason="negated_domain" text="%s"',
+                            $preview
+                        )
+                    );
+                    ++$removed_rows_logged;
+                }
+                continue;
+            }
+            $out[] = $row;
+        }
+        $rows = $out;
+    }
+
+    // 2) Domain qualifier: keep rows matching the domain markers.
+    if ( $domain !== '' ) {
+        $type = $type !== '' ? $type : 'domain';
+        $constraint = $constraint !== '' ? $constraint : ( 'in ' . str_replace( '_', ' ', $domain ) );
+        $out = array();
+        $removed_here = 0;
+        foreach ( $rows as $row ) {
+            $text = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
+            $tl   = strtolower( wp_strip_all_tags( $text ) );
+            // Must match explicit domain markers; do not allow base topic terms to satisfy the constraint.
+            if ( $match_row( $tl, $domain ) ) {
+                $out[] = $row;
+            } else {
+                ++$removed_here;
+                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) && $removed_rows_logged < 10 ) {
+                    $preview = transformer_model_lexical_context_diag_preview_text( $text, 120 );
+                    $preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
+                    back_trace(
+                        'NOTICE',
+                        sprintf(
+                            '[LCM][constraint_gate_row] removed=1 reason="domain_mismatch" text="%s"',
+                            $preview
+                        )
+                    );
+                    ++$removed_rows_logged;
+                }
+            }
+        }
+        $removed += $removed_here;
+        $rows = $out;
+    }
+
+    // 3) Contrast/difference: only apply if the query shows a clear competing side.
+    if ( $has_contrast ) {
+        $domains_in_query = array();
+        foreach ( array_keys( $markers ) as $k ) {
+            foreach ( $markers[ $k ] as $m ) {
+                if ( $m !== '' && strpos( $q, $m ) !== false ) {
+                    $domains_in_query[ $k ] = true;
+                    break;
+                }
+            }
+        }
+        $domains_in_query = array_values( array_keys( $domains_in_query ) );
+
+        if ( count( $domains_in_query ) >= 2 ) {
+            $type = $type !== '' ? $type : 'contrast';
+            $constraint = $constraint !== '' ? $constraint : 'contrast';
+            $a = $domains_in_query[0];
+            $b = $domains_in_query[1];
+
+            $both = array();
+            $only_b = array();
+            foreach ( $rows as $row ) {
+                $text = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
+                $tl   = strtolower( wp_strip_all_tags( $text ) );
+                $ma = $match_row( $tl, $a );
+                $mb = $match_row( $tl, $b );
+                if ( $ma && $mb ) {
+                    $both[] = $row;
+                } elseif ( $mb ) {
+                    $only_b[] = $row;
+                }
+            }
+
+            // Prefer rows that support both sides; else prefer rows for the non-default side if present.
+            if ( $both !== array() ) {
+                $rows = $both;
+            } elseif ( $only_b !== array() ) {
+                $rows = $only_b;
+            } else {
+                // No support for contrast sides in candidates → preserve existing fallback behavior (no filtering).
+            }
+        }
+    }
+
+    $after = count( $rows );
+    $kept  = $after;
+
+    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        $reason = '';
+        if ( $type === 'domain' && $domain !== '' && $kept === 0 ) {
+            $reason = ' reason="no_domain_match"';
+        }
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][constraint_gate] applied=1 type="%s" constraint="%s" kept=%d removed=%d%s',
+                $type !== '' ? $type : 'unknown',
+                str_replace( '"', "'", $constraint !== '' ? $constraint : 'n/a' ),
+                $kept,
+                max( 0, $before - $after ),
+                $reason
+            )
+        );
+    }
+
+    transformer_model_lexical_context_constraint_gate_last_meta(
+        array(
+            'applied'     => 1,
+            'type'        => $type !== '' ? $type : 'unknown',
+            'constraint'  => $constraint !== '' ? $constraint : 'n/a',
+            'kept'        => $kept,
+            'removed'     => max( 0, $before - $after ),
+            'reason'      => ( $type === 'domain' && $domain !== '' && $kept === 0 ) ? 'no_domain_match' : '',
+        )
+    );
+
+    // Explicit mismatch constraint: do not restore rows if everything was removed.
+    // Returning empty allows the existing return gate to emit the standard no-answer response.
+    return $rows;
+}
+
+/**
  * Log top candidate rows for one pipeline stage via back_trace() (NOTICE).
  *
  * @param string                             $stage_slug      Short stage name for [LCM][slug].
@@ -5404,6 +5709,11 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         return transformer_model_lexical_context_return_gate_blocked_user_message();
     }
 
+    // Constraint gate (informational queries only): explicit domain/negation/contrast mismatch protection.
+    // Placement: after coverage gate pass, immediately before answerability gate (least invasive).
+    $constraint_query_text = $input_text_raw !== '' ? (string) $input_text_raw : implode( ' ', (array) $inputWordsLower );
+    $sentenceScores = transformer_model_lexical_context_apply_constraint_gate( $sentenceScores, $query_shape, $constraint_query_text );
+
     // Answerability gate (informational queries only): filter already-ranked rows without changing scores.
     // IMPORTANT: This runs after coverage gate and before return gate; it preserves order and only removes rows.
     if ( isset( $query_shape['shape'] ) && (string) $query_shape['shape'] === 'informational_query' ) {
@@ -5481,8 +5791,20 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                 );
             }
         } else {
-            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                back_trace( 'NOTICE', '[LCM][answerability_gate] fallback=1 reason="no_valid_rows"' );
+            $cg = transformer_model_lexical_context_constraint_gate_last_meta();
+            $cg_applied = ! empty( $cg['applied'] );
+            $cg_type    = isset( $cg['type'] ) ? (string) $cg['type'] : '';
+            // If an explicit domain/negation constraint gate already ran, do not fallback to weak rows.
+            // Leave empty so the existing return gate produces the standard no-answer response.
+            if ( $cg_applied && ( $cg_type === 'domain' || $cg_type === 'negation' ) ) {
+                $sentenceScores = array();
+                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                    back_trace( 'NOTICE', '[LCM][answerability_gate] fallback=0 reason="constraint_gate_applied"' );
+                }
+            } else {
+                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                    back_trace( 'NOTICE', '[LCM][answerability_gate] fallback=1 reason="no_valid_rows"' );
+                }
             }
         }
 
