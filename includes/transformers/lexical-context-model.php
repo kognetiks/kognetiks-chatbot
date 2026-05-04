@@ -4005,6 +4005,238 @@ function transformer_model_lexical_context_diag_preview_text( $text, $max_len = 
 }
 
 /**
+ * Token set for a scored row (diagnostics / analysis only). Uses the same sentence/text field conventions as scoring.
+ *
+ * - Lowercases and strips punctuation to spaces.
+ * - Splits on whitespace.
+ * - Removes relevance-guard stop words and weak high-frequency LCM terms.
+ *
+ * @param array<string, mixed> $row
+ * @return array<int, string> Unique tokens.
+ */
+function transformer_model_lexical_context_row_token_set( $row ) {
+
+    $row = is_array( $row ) ? $row : array();
+
+    $text = '';
+    if ( isset( $row['sentence'] ) && is_string( $row['sentence'] ) ) {
+        $text = $row['sentence'];
+    } elseif ( isset( $row['text'] ) && is_string( $row['text'] ) ) {
+        $text = $row['text'];
+    } elseif ( isset( $row['chunk'] ) && is_string( $row['chunk'] ) ) {
+        $text = $row['chunk'];
+    }
+
+    $text = strtolower( wp_strip_all_tags( (string) $text ) );
+    $text = preg_replace( '/[^\p{L}\p{N}\s]+/u', ' ', $text );
+    $text = preg_replace( '/\s+/u', ' ', trim( (string) $text ) );
+
+    if ( $text === '' ) {
+        return array();
+    }
+
+    $tokens = preg_split( '/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY );
+    if ( ! is_array( $tokens ) || $tokens === array() ) {
+        return array();
+    }
+
+    $stop_flip = array_flip( transformer_model_lexical_context_relevance_guard_stop_words() );
+    $weak_flip = array_flip(
+        array_merge(
+            // Weak high-frequency terms already treated as non-coverage anchors.
+            array( 'used', 'use', 'using', 'does', 'do', 'explain' ),
+            // Action words are shape signals; exclude from cohesion anchors too.
+            array_keys( transformer_model_lexical_context_answer_shape_query_action_words_flip() )
+        )
+    );
+
+    $set = array();
+    foreach ( $tokens as $t ) {
+        $t = strtolower( trim( (string) $t ) );
+        if ( strlen( $t ) < 2 ) {
+            continue;
+        }
+        if ( isset( $stop_flip[ $t ] ) || isset( $weak_flip[ $t ] ) ) {
+            continue;
+        }
+        $set[ $t ] = true;
+    }
+
+    return array_values( array_keys( $set ) );
+}
+
+/**
+ * Jaccard similarity between two token sets.
+ *
+ * @param array<int, string> $tokens_a
+ * @param array<int, string> $tokens_b
+ * @return float
+ */
+function transformer_model_lexical_context_jaccard_similarity( $tokens_a, $tokens_b ) {
+
+    $a = is_array( $tokens_a ) ? array_values( array_unique( $tokens_a ) ) : array();
+    $b = is_array( $tokens_b ) ? array_values( array_unique( $tokens_b ) ) : array();
+    if ( $a === array() || $b === array() ) {
+        return 0.0;
+    }
+
+    $af = array_fill_keys( $a, true );
+    $bf = array_fill_keys( $b, true );
+
+    $inter = 0;
+    foreach ( $af as $t => $_ ) {
+        if ( isset( $bf[ $t ] ) ) {
+            ++$inter;
+        }
+    }
+
+    $union = count( $af ) + count( $bf ) - $inter;
+    if ( $union <= 0 ) {
+        return 0.0;
+    }
+
+    return (float) ( $inter / $union );
+}
+
+/**
+ * Evaluate semantic cohesion of ranked rows (diagnostics only). Does not modify rows or scores.
+ *
+ * Anchor row is the current top-ranked row (post-dedupe/doc-limit).
+ *
+ * @param array<int, array<string, mixed>> $sentence_scores
+ * @param array<int, string>              $meaningful_query_tokens
+ * @return array{
+ *   count: int,
+ *   anchor_preview: string,
+ *   average_cohesion: float,
+ *   min_cohesion: float,
+ *   rows: array<int, array{
+ *     post_id: string,
+ *     score: float,
+ *     cohesion: float,
+ *     anchor_overlap: float,
+ *     query_overlap: float,
+ *     preview: string
+ *   }>
+ * }
+ */
+function transformer_model_lexical_context_evaluate_semantic_cohesion( $sentence_scores, $meaningful_query_tokens ) {
+
+    $rows = is_array( $sentence_scores ) ? array_values( $sentence_scores ) : array();
+    $meaningful_query_tokens = is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array();
+
+    $out = array(
+        'count'           => count( $rows ),
+        'anchor_preview'  => '',
+        'average_cohesion'=> 0.0,
+        'min_cohesion'    => 0.0,
+        'rows'            => array(),
+    );
+
+    if ( $rows === array() ) {
+        return $out;
+    }
+
+    $anchor_row    = $rows[0];
+    $anchor_tokens = transformer_model_lexical_context_row_token_set( $anchor_row );
+    $anchor_text   = isset( $anchor_row['sentence'] ) ? (string) $anchor_row['sentence'] : '';
+    $out['anchor_preview'] = transformer_model_lexical_context_diag_preview_text( $anchor_text, 165 );
+
+    // Query token set (same stop/weak filtering as row_token_set).
+    $q_row = array( 'sentence' => implode( ' ', array_map( 'strval', $meaningful_query_tokens ) ) );
+    $query_tokens = transformer_model_lexical_context_row_token_set( $q_row );
+
+    $sum = 0.0;
+    $min = null;
+
+    foreach ( $rows as $r ) {
+        $rtok = transformer_model_lexical_context_row_token_set( $r );
+        $anchor_overlap = transformer_model_lexical_context_jaccard_similarity( $rtok, $anchor_tokens );
+        $query_overlap  = transformer_model_lexical_context_jaccard_similarity( $rtok, $query_tokens );
+        $cohesion       = 0.5 * ( $anchor_overlap + $query_overlap );
+
+        $sum += $cohesion;
+        if ( $min === null || $cohesion < $min ) {
+            $min = $cohesion;
+        }
+
+        $pid = isset( $r['post_id'] ) ? (string) $r['post_id'] : '';
+        $score = isset( $r['score'] ) ? (float) $r['score'] : 0.0;
+        $sent  = isset( $r['sentence'] ) ? (string) $r['sentence'] : '';
+        $preview = transformer_model_lexical_context_diag_preview_text( $sent, 165 );
+
+        $out['rows'][] = array(
+            'post_id'        => $pid,
+            'score'          => $score,
+            'cohesion'       => (float) $cohesion,
+            'anchor_overlap' => (float) $anchor_overlap,
+            'query_overlap'  => (float) $query_overlap,
+            'preview'        => $preview,
+        );
+    }
+
+    $n = max( 1, count( $rows ) );
+    $out['average_cohesion'] = (float) ( $sum / $n );
+    $out['min_cohesion']     = (float) ( $min === null ? 0.0 : $min );
+
+    return $out;
+}
+
+/**
+ * Debug log semantic cohesion diagnostics.
+ *
+ * @param array<string, mixed> $cohesion Result from evaluate_semantic_cohesion().
+ * @return void
+ */
+function transformer_model_lexical_context_diag_log_semantic_cohesion( $cohesion ) {
+
+    if ( ! transformer_model_lexical_context_is_lcm_diagnostics_enabled() || ! function_exists( 'back_trace' ) ) {
+        return;
+    }
+
+    $cohesion = is_array( $cohesion ) ? $cohesion : array();
+    $count = isset( $cohesion['count'] ) ? (int) $cohesion['count'] : 0;
+    $avg   = isset( $cohesion['average_cohesion'] ) ? (float) $cohesion['average_cohesion'] : 0.0;
+    $min   = isset( $cohesion['min_cohesion'] ) ? (float) $cohesion['min_cohesion'] : 0.0;
+    $anchor_preview = isset( $cohesion['anchor_preview'] ) ? (string) $cohesion['anchor_preview'] : '';
+    $anchor_preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $anchor_preview );
+
+    back_trace(
+        'NOTICE',
+        sprintf(
+            '[LCM][semantic_cohesion] count=%d avg=%.4f min=%.4f anchor="%s"',
+            $count,
+            $avg,
+            $min,
+            $anchor_preview
+        )
+    );
+
+    $rows = isset( $cohesion['rows'] ) && is_array( $cohesion['rows'] ) ? $cohesion['rows'] : array();
+    $rows = array_slice( $rows, 0, 10 );
+    foreach ( $rows as $r ) {
+        if ( ! is_array( $r ) ) {
+            continue;
+        }
+        $preview = isset( $r['preview'] ) ? (string) $r['preview'] : '';
+        $preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
+
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][semantic_cohesion_row] cohesion=%.4f anchor_overlap=%.4f query_overlap=%.4f score=%.4f post_id=%s text="%s"',
+                (float) ( $r['cohesion'] ?? 0.0 ),
+                (float) ( $r['anchor_overlap'] ?? 0.0 ),
+                (float) ( $r['query_overlap'] ?? 0.0 ),
+                (float) ( $r['score'] ?? 0.0 ),
+                (string) ( $r['post_id'] ?? '' ),
+                $preview
+            )
+        );
+    }
+}
+
+/**
  * Log top candidate rows for one pipeline stage via back_trace() (NOTICE).
  *
  * @param string                             $stage_slug      Short stage name for [LCM][slug].
@@ -4708,6 +4940,11 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
     $sentenceScores = transformer_model_lexical_context_limit_rows_per_document( $sentenceScores );
 
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_deduplication', $sentenceScores, $post_title_map );
+
+    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() ) {
+        $cohesion = transformer_model_lexical_context_evaluate_semantic_cohesion( $sentenceScores, $meaningful_query_tokens );
+        transformer_model_lexical_context_diag_log_semantic_cohesion( $cohesion );
+    }
 
     $coverage_gate = transformer_model_lexical_context_evaluate_query_coverage_gate(
         $sentenceScores,
