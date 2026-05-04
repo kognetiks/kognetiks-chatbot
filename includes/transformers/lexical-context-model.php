@@ -1870,7 +1870,7 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $cont
 
     $token = function_exists( 'random_bytes' )
         ? substr( bin2hex( random_bytes( 8 ) ), 0, 16 )
-        : substr( md5( uniqid( (string) wp_rand(), true ) ), 0, 16 );
+        : substr( hash( 'sha256', uniqid( (string) wp_rand(), true ) ), 0, 16 );
     $staging_php = $cache_dir . '/lexical_embeddings_cache.staging.' . $token . '.php';
 
     transformer_model_lexical_context_lexical_rebuild_log( 'step=pmi_save_started staging=' . $token );
@@ -3914,12 +3914,16 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
         }
     }
 
-    $word_re = transformer_model_lexical_context_answer_shape_anchor_regex_word( $content[ $c - 1 ] );
+    $suppressed_single = '';
+    $word_re           = transformer_model_lexical_context_answer_shape_anchor_regex_word( $content[ $c - 1 ] );
 
     $anchors_diag = array();
     if ( $phrase_re !== array() ) {
         $anchors_diag[] = $phrase_re['label'];
-        $anchors_diag[] = $content[ $c - 1 ];
+        // Prefer phrase anchors for informational queries; suppress single-token fallback when a phrase anchor exists.
+        // This avoids weak last-token anchors (often proper nouns / common words) from being treated as an anchor target.
+        $suppressed_single = $content[ $c - 1 ];
+        $word_re           = null;
     } else {
         $anchors_diag[] = $content[ $c - 1 ];
     }
@@ -4147,6 +4151,16 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
     );
 
     if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        if ( $suppressed_single !== '' && $phrase_re !== array() ) {
+            back_trace(
+                'NOTICE',
+                sprintf(
+                    '[LCM][answer_shape_anchor] suppressed_single="%s" reason="phrase_anchor_available" phrase_anchor="%s"',
+                    str_replace( '"', "'", $suppressed_single ),
+                    str_replace( '"', "'", (string) $phrase_re['label'] )
+                )
+            );
+        }
         $anchors_json = wp_json_encode( $anchors_diag );
         if ( ! is_string( $anchors_json ) ) {
             $anchors_json = '[]';
