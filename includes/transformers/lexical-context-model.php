@@ -4520,6 +4520,60 @@ function transformer_model_lexical_context_evaluate_semantic_cohesion( $sentence
 }
 
 /**
+ * Aggregate meaningful-token overlap across candidate rows (diagnostic/rejection gate helper).
+ * Ratio = matched_meaningful_tokens / total_meaningful_tokens.
+ *
+ * Uses whole-token matching to avoid substring collisions.
+ *
+ * @param array<int, array<string, mixed>> $rows
+ * @param array<int, string>              $meaningful_query_tokens
+ * @return float
+ */
+function transformer_model_lexical_context_semantic_cohesion_query_overlap_ratio( $rows, $meaningful_query_tokens ) {
+
+    $rows = is_array( $rows ) ? $rows : array();
+    $meaningful_query_tokens = is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array();
+
+    $tokens = array();
+    foreach ( $meaningful_query_tokens as $t ) {
+        $t = strtolower( trim( (string) $t ) );
+        if ( strlen( $t ) >= 2 ) {
+            $tokens[] = $t;
+        }
+    }
+    $tokens = array_values( array_unique( $tokens ) );
+    $total  = count( $tokens );
+    if ( $total === 0 || $rows === array() ) {
+        return 0.0;
+    }
+
+    $hay = '';
+    foreach ( $rows as $r ) {
+        if ( ! is_array( $r ) ) {
+            continue;
+        }
+        $s = isset( $r['sentence'] ) ? (string) $r['sentence'] : '';
+        if ( $s === '' ) {
+            continue;
+        }
+        $hay .= ' ' . strtolower( wp_strip_all_tags( $s ) );
+    }
+    if ( trim( $hay ) === '' ) {
+        return 0.0;
+    }
+
+    $matched = 0;
+    foreach ( $tokens as $t ) {
+        $re = '(?<![\p{L}\p{N}_])' . preg_quote( $t, '/' ) . '(?![\p{L}\p{N}_])';
+        if ( preg_match( '/' . $re . '/iu', $hay ) ) {
+            ++$matched;
+        }
+    }
+
+    return (float) ( $matched / $total );
+}
+
+/**
  * Debug log semantic cohesion diagnostics.
  *
  * @param array<string, mixed> $cohesion Result from evaluate_semantic_cohesion().
@@ -4986,6 +5040,150 @@ function transformer_model_lexical_context_apply_constraint_gate( $rows, $query_
     // Explicit mismatch constraint: do not restore rows if everything was removed.
     // Returning empty allows the existing return gate to emit the standard no-answer response.
     return $rows;
+}
+
+/**
+ * Case-sense ambiguity guard (informational queries only): remove rows where a lowercase query token
+ * appears primarily as a capitalized proper noun in the row, and the row lacks support from other
+ * meaningful query terms.
+ *
+ * This is intended to reduce harmful false positives from common-word/proper-name collisions
+ * (e.g. "cook" matching "Cook" as a name) without hardcoding any names.
+ *
+ * Behavior:
+ * - Only applies when the token appears lowercase in the raw query text.
+ * - Only removes a row when it has a proper-noun match for token T and does NOT include any other
+ *   meaningful query token besides T.
+ * - If everything is removed, return empty so the return gate yields the standard no-answer response.
+ *
+ * @param array<int, array<string, mixed>> $rows
+ * @param array<int, string>              $meaningful_query_tokens
+ * @param array{ shape?: string }         $query_shape
+ * @param string                          $raw_query_text
+ * @return array<int, array<string, mixed>>
+ */
+function transformer_model_lexical_context_apply_case_sense_guard( $rows, $meaningful_query_tokens, $query_shape, $raw_query_text ) {
+
+    $rows  = is_array( $rows ) ? $rows : array();
+    $shape = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
+    if ( $shape !== 'informational_query' || $rows === array() ) {
+        return $rows;
+    }
+
+    $meaningful_query_tokens = is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array();
+    $raw_q = strtolower( wp_strip_all_tags( (string) $raw_query_text ) );
+    if ( $raw_q === '' || count( $meaningful_query_tokens ) < 2 ) {
+        return $rows;
+    }
+
+    $tokens = array();
+    foreach ( $meaningful_query_tokens as $t ) {
+        $t = strtolower( trim( (string) $t ) );
+        // Require alpha-ish tokens long enough to plausibly be a name collision.
+        if ( strlen( $t ) < 3 || ! preg_match( '/^[\p{L}]+$/u', $t ) ) {
+            continue;
+        }
+        // Only apply when the user typed this token in lowercase somewhere in the raw query.
+        if ( strpos( $raw_q, $t ) === false ) {
+            continue;
+        }
+        $tokens[] = $t;
+    }
+    $tokens = array_values( array_unique( $tokens ) );
+    if ( $tokens === array() ) {
+        return $rows;
+    }
+
+    $before = count( $rows );
+    $out = array();
+    $removed = 0;
+    $removed_logged = 0;
+
+    foreach ( $rows as $row ) {
+        if ( ! is_array( $row ) ) {
+            continue;
+        }
+        $text = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
+        if ( $text === '' ) {
+            $out[] = $row;
+            continue;
+        }
+        $plain = wp_strip_all_tags( $text );
+        $lower = strtolower( $plain );
+
+        $drop = false;
+        $hit_token = '';
+
+        foreach ( $tokens as $t ) {
+            // Proper-noun token match: " Cook " (Title Case).
+            $cap = strtoupper( substr( $t, 0, 1 ) ) . substr( $t, 1 );
+            $re_cap = '(?<![\\p{L}\\p{N}_])' . preg_quote( $cap, '/' ) . '(?![\\p{L}\\p{N}_])';
+            if ( ! preg_match( '/' . $re_cap . '/u', $plain ) ) {
+                continue;
+            }
+
+            // If the row also contains the lowercase/common-word sense, do not treat as collision.
+            $re_low = '(?<![\\p{L}\\p{N}_])' . preg_quote( $t, '/' ) . '(?![\\p{L}\\p{N}_])';
+            if ( preg_match( '/' . $re_low . '/u', $plain ) ) {
+                continue;
+            }
+
+            // Require lack of support: no other meaningful token present in the row.
+            $has_other = false;
+            foreach ( $meaningful_query_tokens as $ot ) {
+                $ot = strtolower( trim( (string) $ot ) );
+                if ( $ot === '' || $ot === $t ) {
+                    continue;
+                }
+                $re_ot = '(?<![\\p{L}\\p{N}_])' . preg_quote( $ot, '/' ) . '(?![\\p{L}\\p{N}_])';
+                if ( preg_match( '/' . $re_ot . '/iu', $lower ) ) {
+                    $has_other = true;
+                    break;
+                }
+            }
+            if ( $has_other ) {
+                continue;
+            }
+
+            $drop = true;
+            $hit_token = $t;
+            break;
+        }
+
+        if ( $drop ) {
+            ++$removed;
+            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) && $removed_logged < 10 ) {
+                $preview = transformer_model_lexical_context_diag_preview_text( $text, 120 );
+                $preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
+                back_trace(
+                    'NOTICE',
+                    sprintf(
+                        '[LCM][case_sense_guard_row] removed=1 token="%s" reason="proper_name_collision" text="%s"',
+                        str_replace( '"', "'", $hit_token ),
+                        $preview
+                    )
+                );
+                ++$removed_logged;
+            }
+            continue;
+        }
+
+        $out[] = $row;
+    }
+
+    $after = count( $out );
+    if ( $removed > 0 && transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][case_sense_guard] applied=1 kept=%d removed=%d',
+                $after,
+                max( 0, $before - $after )
+            )
+        );
+    }
+
+    return $out;
 }
 
 /**
@@ -5693,9 +5891,48 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
 
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_deduplication', $sentenceScores, $post_title_map );
 
-    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() ) {
+    $cohesion = null;
+    if ( isset( $query_shape['shape'] ) && (string) $query_shape['shape'] === 'informational_query' ) {
+        // Compute semantic cohesion for downstream diagnostic/rejection gating (token-based; no embeddings).
         $cohesion = transformer_model_lexical_context_evaluate_semantic_cohesion( $sentenceScores, $meaningful_query_tokens );
-        transformer_model_lexical_context_diag_log_semantic_cohesion( $cohesion );
+        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() ) {
+            transformer_model_lexical_context_diag_log_semantic_cohesion( $cohesion );
+        }
+
+        // Semantic cohesion rejection gate (informational only): kill-switch for clearly unrelated candidate sets.
+        $avg = isset( $cohesion['average_cohesion'] ) ? (float) $cohesion['average_cohesion'] : 0.0;
+        $qo  = transformer_model_lexical_context_semantic_cohesion_query_overlap_ratio( $sentenceScores, $meaningful_query_tokens );
+        $n   = count( $sentenceScores );
+
+        // Only apply when meaningful token count is non-zero (otherwise overlap ratio is meaningless).
+        if ( is_array( $meaningful_query_tokens ) && count( $meaningful_query_tokens ) > 0 ) {
+            if ( $avg < 0.20 && $qo < 0.15 ) {
+                $sentenceScores = array();
+                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                    back_trace(
+                        'NOTICE',
+                        sprintf(
+                            '[LCM][semantic_cohesion_gate] allow=0 reason="low_cohesion_low_query_overlap" avg=%.4f query_overlap=%.4f candidates=%d',
+                            $avg,
+                            $qo,
+                            $n
+                        )
+                    );
+                }
+            } else {
+                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                    back_trace(
+                        'NOTICE',
+                        sprintf(
+                            '[LCM][semantic_cohesion_gate] allow=1 avg=%.4f query_overlap=%.4f candidates=%d',
+                            $avg,
+                            $qo,
+                            $n
+                        )
+                    );
+                }
+            }
+        }
     }
 
     $coverage_gate = transformer_model_lexical_context_evaluate_query_coverage_gate(
@@ -5713,6 +5950,10 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
     // Placement: after coverage gate pass, immediately before answerability gate (least invasive).
     $constraint_query_text = $input_text_raw !== '' ? (string) $input_text_raw : implode( ' ', (array) $inputWordsLower );
     $sentenceScores = transformer_model_lexical_context_apply_constraint_gate( $sentenceScores, $query_shape, $constraint_query_text );
+
+    // Case-sense ambiguity guard (informational queries only): proper-name vs common-word collision protection.
+    // Placement: after constraint gate, before answerability gate (does not change scores; removes rows only).
+    $sentenceScores = transformer_model_lexical_context_apply_case_sense_guard( $sentenceScores, $meaningful_query_tokens, $query_shape, $constraint_query_text );
 
     // Answerability gate (informational queries only): filter already-ranked rows without changing scores.
     // IMPORTANT: This runs after coverage gate and before return gate; it preserves order and only removes rows.
