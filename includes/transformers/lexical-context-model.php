@@ -5058,6 +5058,627 @@ function transformer_model_lcm_get_answer_directness_score( $text, $query_shape,
 }
 
 /**
+ * Weak/generic tokens for vague informational query detection (ordering only / gate input; not corpus-specific).
+ *
+ * @return array<string, true>
+ */
+function transformer_model_lcm_vague_query_weak_token_flip() {
+
+    static $flip = null;
+
+    if ( $flip !== null ) {
+        return $flip;
+    }
+
+    $weak = array(
+        'work',
+        'works',
+        'matter',
+        'matters',
+        'improved',
+        'improve',
+        'best',
+        'way',
+        'approach',
+        'this',
+        'it',
+        'does',
+        'can',
+        'how',
+        'why',
+        'good',
+        'bad',
+        'idk',
+    );
+
+    $flip = array();
+    foreach ( $weak as $w ) {
+        $flip[ $w ] = true;
+    }
+
+    return $flip;
+}
+
+/**
+ * Whether the raw query matches generic vague question scaffolding (pronoun-heavy; no named entity).
+ *
+ * @param string $raw_query_text
+ * @return bool
+ */
+function transformer_model_lcm_raw_query_matches_vague_question_structure( $raw_query_text ) {
+
+    $s = strtolower( wp_strip_all_tags( (string) $raw_query_text ) );
+    $s = preg_replace( '/\s+/u', ' ', trim( $s ) );
+    if ( $s === '' ) {
+        return false;
+    }
+
+    $patterns = array(
+        '/\bhow\s+does\s+it\b/u',
+        '/\bhow\s+do\s+you\b/u',
+        '/\bwhy\s+does\s+this\b/u',
+        '/\bwhy\s+does\s+it\b/u',
+        '/\bcan\s+this\s+be\b/u',
+        '/\bcan\s+it\s+be\b/u',
+    );
+
+    foreach ( $patterns as $re ) {
+        if ( preg_match( $re, $s ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * True when two consecutive words in the raw query appear in meaningful tokens and are not both weak-generic.
+ *
+ * @param string               $raw_query_text
+ * @param array<int, string>   $meaningful_lower Unique lowercase meaningful tokens.
+ * @param array<string, true>  $weak_flip
+ * @return bool
+ */
+function transformer_model_lcm_meaningful_non_weak_bigram_in_raw( $raw_query_text, array $meaningful_lower, array $weak_flip ) {
+
+    $raw_l = strtolower( wp_strip_all_tags( (string) $raw_query_text ) );
+    $raw_l = preg_replace( '/\s+/u', ' ', trim( $raw_l ) );
+    if ( $raw_l === '' ) {
+        return false;
+    }
+
+    $mw = array_flip( $meaningful_lower );
+
+    $words = preg_split( '/\s+/u', $raw_l, -1, PREG_SPLIT_NO_EMPTY );
+    $n     = count( $words );
+    for ( $i = 0; $i < $n - 1; $i++ ) {
+        $a = preg_replace( '/[^\p{L}\p{N}]/u', '', $words[ $i ] );
+        $b = preg_replace( '/[^\p{L}\p{N}]/u', '', $words[ $i + 1 ] );
+        $a = strtolower( $a );
+        $b = strtolower( $b );
+        if ( $a === '' || $b === '' ) {
+            continue;
+        }
+        if ( ! isset( $mw[ $a ] ) || ! isset( $mw[ $b ] ) ) {
+            continue;
+        }
+        if ( isset( $weak_flip[ $a ] ) && isset( $weak_flip[ $b ] ) ) {
+            continue;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Evaluate vague-query classification with token breakdown (for diagnostics).
+ *
+ * @param string             $raw_query_text
+ * @param array<int, string> $meaningful_query_tokens
+ * @return array{
+ *   is_vague: int,
+ *   reason: string,
+ *   meaningful_tokens: string,
+ *   weak_tokens: string,
+ *   non_weak_tokens: string
+ * }
+ */
+function transformer_model_lcm_evaluate_vague_informational_query( $raw_query_text, $meaningful_query_tokens ) {
+
+    $out = array(
+        'is_vague'          => 0,
+        'reason'            => 'empty_meaningful',
+        'meaningful_tokens' => '',
+        'weak_tokens'       => '',
+        'non_weak_tokens'   => '',
+    );
+
+    if ( ! is_array( $meaningful_query_tokens ) || $meaningful_query_tokens === array() ) {
+        return $out;
+    }
+
+    $weak_flip = transformer_model_lcm_vague_query_weak_token_flip();
+
+    $mw = array();
+    foreach ( $meaningful_query_tokens as $t ) {
+        $w = strtolower( trim( (string) $t ) );
+        if ( $w !== '' ) {
+            $mw[] = $w;
+        }
+    }
+    $mw = array_values( array_unique( $mw ) );
+
+    $weak_list = array();
+    $non_weak  = array();
+    foreach ( $mw as $t ) {
+        if ( isset( $weak_flip[ $t ] ) ) {
+            $weak_list[] = $t;
+        } else {
+            $non_weak[] = $t;
+        }
+    }
+
+    $out['meaningful_tokens'] = implode( ',', $mw );
+    $out['weak_tokens']       = implode( ',', $weak_list );
+    $out['non_weak_tokens']   = implode( ',', $non_weak );
+
+    if ( count( $non_weak ) >= 2 ) {
+        $out['reason'] = 'not_vague_min_two_non_weak';
+
+        return $out;
+    }
+
+    $long_non_weak = array();
+    foreach ( $mw as $t ) {
+        if ( ! isset( $weak_flip[ $t ] ) && strlen( $t ) >= 5 ) {
+            $long_non_weak[] = $t;
+        }
+    }
+
+    if ( count( $long_non_weak ) >= 2 ) {
+        $out['reason'] = 'not_vague_min_two_long_non_weak';
+
+        return $out;
+    }
+
+    if ( transformer_model_lcm_meaningful_non_weak_bigram_in_raw( $raw_query_text, $mw, $weak_flip ) ) {
+        $out['reason'] = 'not_vague_non_weak_bigram_in_query';
+
+        return $out;
+    }
+
+    $out['is_vague'] = 1;
+    $out['reason']   = 'vague_generic_or_insufficient_anchor';
+
+    return $out;
+}
+
+/**
+ * Whether an informational query is too vague (generic tokens only) for confident retrieval. Caller should only
+ * invoke when query_shape is informational_query.
+ *
+ * @param string             $raw_query_text
+ * @param array<int, string> $meaningful_query_tokens
+ * @return bool
+ */
+function transformer_model_lcm_is_vague_informational_query( $raw_query_text, $meaningful_query_tokens ) {
+
+    $ev = transformer_model_lcm_evaluate_vague_informational_query( $raw_query_text, $meaningful_query_tokens );
+
+    return (int) $ev['is_vague'] === 1;
+}
+
+/**
+ * Shared vague-query gate: uses transformer_model_lcm_evaluate_vague_informational_query(); clears rows when vague and no strong anchor.
+ *
+ * @param array<int, array<string, mixed>> $sentenceScores Mutable candidate rows (by reference).
+ * @param string                           $vague_raw
+ * @param array<int, string>               $meaningful_query_tokens
+ * @return array{ eval: array<string, mixed>, strong_anchor: int, matched_preview: string, cleared: bool }
+ */
+function transformer_model_lcm_apply_vague_query_gate_core( &$sentenceScores, $vague_raw, $meaningful_query_tokens ) {
+
+    $vague_eval = transformer_model_lcm_evaluate_vague_informational_query( $vague_raw, $meaningful_query_tokens );
+
+    $result = array(
+        'eval'            => $vague_eval,
+        'strong_anchor'   => 0,
+        'matched_preview' => '',
+        'cleared'         => false,
+    );
+
+    if ( (int) $vague_eval['is_vague'] !== 1 ) {
+        return $result;
+    }
+
+    foreach ( $sentenceScores as $row ) {
+        if ( ! is_array( $row ) ) {
+            continue;
+        }
+        $st = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
+        if ( transformer_model_lcm_vague_query_row_has_strong_anchor( $st, $vague_raw, $meaningful_query_tokens ) ) {
+            $result['strong_anchor']   = 1;
+            $result['matched_preview'] = transformer_model_lexical_context_diag_preview_text( $st, 160 );
+
+            return $result;
+        }
+    }
+
+    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        $nr = 0;
+        foreach ( $sentenceScores as $row ) {
+            if ( $nr >= 10 ) {
+                break;
+            }
+            if ( ! is_array( $row ) ) {
+                continue;
+            }
+            $st   = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
+            $prev = transformer_model_lexical_context_diag_preview_text( $st, 120 );
+            $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
+            back_trace(
+                'NOTICE',
+                sprintf( '[LCM][vague_query_gate_row] candidate=1 text="%s"', $prev )
+            );
+            ++$nr;
+        }
+    }
+
+    $sentenceScores    = array();
+    $result['cleared'] = true;
+
+    return $result;
+}
+
+/**
+ * One-line summary when the vague guard runs for informational_query (same diagnostics gate as other [LCM] logs).
+ *
+ * @param string               $raw_query
+ * @param array<string, mixed> $eval From transformer_model_lcm_evaluate_vague_informational_query().
+ * @return void
+ */
+function transformer_model_lcm_log_vague_query_gate_check( $raw_query, array $eval ) {
+
+    if ( ! transformer_model_lexical_context_is_lcm_diagnostics_enabled() || ! function_exists( 'back_trace' ) ) {
+        return;
+    }
+
+    $esc = static function ( $s ) {
+        $s = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $s );
+        if ( strlen( $s ) > 350 ) {
+            $s = substr( $s, 0, 350 ) . '...';
+        }
+
+        return $s;
+    };
+
+    $mt = isset( $eval['meaningful_tokens'] ) ? (string) $eval['meaningful_tokens'] : '';
+
+    back_trace(
+        'NOTICE',
+        sprintf(
+            '[LCM][vague_query_gate_check] raw="%s" meaningful=[%s] is_vague=%d reason="%s"',
+            $esc( $raw_query ),
+            $esc( $mt ),
+            isset( $eval['is_vague'] ) ? (int) $eval['is_vague'] : 0,
+            $esc( isset( $eval['reason'] ) ? $eval['reason'] : '' )
+        )
+    );
+}
+
+/**
+ * Emit one [LCM][vague_query_decision] line (KOGNETIKS_LCM_DEBUG only).
+ *
+ * @param string               $raw_query
+ * @param array<string, mixed> $eval           From transformer_model_lcm_evaluate_vague_informational_query().
+ * @param int                  $strong_anchor  0|1
+ * @param string               $matched_preview
+ * @return void
+ */
+function transformer_model_lcm_log_vague_query_decision( $raw_query, array $eval, $strong_anchor, $matched_preview ) {
+
+    if ( ! transformer_model_lexical_context_is_lcm_diagnostics_enabled() || ! function_exists( 'back_trace' ) ) {
+        return;
+    }
+
+    $esc = static function ( $s ) {
+        $s = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $s );
+        if ( strlen( $s ) > 400 ) {
+            $s = substr( $s, 0, 400 ) . '...';
+        }
+
+        return $s;
+    };
+
+    back_trace(
+        'NOTICE',
+        sprintf(
+            '[LCM][vague_query_decision] raw_query="%s" meaningful_tokens="%s" weak_tokens="%s" non_weak_tokens="%s" is_vague=%d reason=%s strong_anchor_matched=%d matched_row_preview="%s"',
+            $esc( $raw_query ),
+            $esc( isset( $eval['meaningful_tokens'] ) ? $eval['meaningful_tokens'] : '' ),
+            $esc( isset( $eval['weak_tokens'] ) ? $eval['weak_tokens'] : '' ),
+            $esc( isset( $eval['non_weak_tokens'] ) ? $eval['non_weak_tokens'] : '' ),
+            isset( $eval['is_vague'] ) ? (int) $eval['is_vague'] : 0,
+            $esc( isset( $eval['reason'] ) ? $eval['reason'] : '' ),
+            (int) (bool) $strong_anchor,
+            $esc( $matched_preview )
+        )
+    );
+}
+
+/**
+ * Whether a candidate row matches query strongly enough to bypass vague-query clearing (2+ non-weak tokens or anchored phrase in text).
+ *
+ * @param string               $sentence_text
+ * @param string               $raw_query_text
+ * @param array<int, string>   $meaningful_query_tokens
+ * @return bool
+ */
+function transformer_model_lcm_vague_query_row_has_strong_anchor( $sentence_text, $raw_query_text, $meaningful_query_tokens ) {
+
+    $weak_flip = transformer_model_lcm_vague_query_weak_token_flip();
+    $slower    = strtolower( wp_strip_all_tags( (string) $sentence_text ) );
+    $slower    = preg_replace( '/\s+/u', ' ', trim( $slower ) );
+
+    $mw = array();
+    foreach ( (array) $meaningful_query_tokens as $t ) {
+        $w = strtolower( trim( (string) $t ) );
+        if ( $w !== '' ) {
+            $mw[] = $w;
+        }
+    }
+    $mw = array_values( array_unique( $mw ) );
+
+    $non_weak = array();
+    foreach ( $mw as $t ) {
+        if ( ! isset( $weak_flip[ $t ] ) ) {
+            $non_weak[] = $t;
+        }
+    }
+
+    $hits = 0;
+    foreach ( $non_weak as $t ) {
+        if ( @preg_match( '/\b' . preg_quote( $t, '/' ) . '\b/u', $slower ) ) {
+            ++$hits;
+        }
+    }
+    if ( $hits >= 2 ) {
+        return true;
+    }
+
+    $raw_l = strtolower( wp_strip_all_tags( (string) $raw_query_text ) );
+    $raw_l = preg_replace( '/\s+/u', ' ', trim( $raw_l ) );
+    $words = preg_split( '/\s+/u', $raw_l, -1, PREG_SPLIT_NO_EMPTY );
+    $mwset = array_flip( $mw );
+    $n     = count( $words );
+
+    for ( $i = 0; $i < $n - 1; $i++ ) {
+        $a = preg_replace( '/[^\p{L}\p{N}]/u', '', $words[ $i ] );
+        $b = preg_replace( '/[^\p{L}\p{N}]/u', '', $words[ $i + 1 ] );
+        $a = strtolower( $a );
+        $b = strtolower( $b );
+        if ( $a === '' || $b === '' ) {
+            continue;
+        }
+        if ( ! isset( $mwset[ $a ] ) || ! isset( $mwset[ $b ] ) ) {
+            continue;
+        }
+        if ( isset( $weak_flip[ $a ] ) && isset( $weak_flip[ $b ] ) ) {
+            continue;
+        }
+        $re = '/\b' . preg_quote( $a, '/' ) . '\s+' . preg_quote( $b, '/' ) . '\b/u';
+        if ( @preg_match( $re, $slower ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Internet/slang tokens treated as non-substantive for fragment-query anchoring (generic; not corpus-specific).
+ *
+ * @return array<string, true>
+ */
+function transformer_model_lcm_fragment_noise_tokens_flip() {
+
+    static $flip = null;
+
+    if ( $flip !== null ) {
+        return $flip;
+    }
+
+    $noise = array(
+        'idk',
+        'lol',
+        'lmao',
+        'lmfao',
+        'rofl',
+        'omg',
+        'wtf',
+        'ngl',
+        'tbh',
+        'imo',
+        'srsly',
+        'pls',
+        'plz',
+        'tho',
+        'bc',
+        'fyi',
+        'afaik',
+        'jk',
+        'meh',
+        'huh',
+        'umm',
+        'uh',
+        'eh',
+        'nah',
+        'yep',
+        'nope',
+        'kinda',
+        'sorta',
+        'gonna',
+        'wanna',
+        'gotta',
+        'lemme',
+        'dunno',
+    );
+
+    $flip = array();
+    foreach ( $noise as $w ) {
+        $flip[ strtolower( $w ) ] = true;
+    }
+
+    return $flip;
+}
+
+/**
+ * Weak tokens for fragment anchor resolution: vague generic weak list ∪ fragment noise.
+ *
+ * @return array<string, true>
+ */
+function transformer_model_lcm_fragment_anchor_weak_union_flip() {
+
+    static $union = null;
+
+    if ( $union !== null ) {
+        return $union;
+    }
+
+    $union = transformer_model_lcm_vague_query_weak_token_flip();
+    foreach ( transformer_model_lcm_fragment_noise_tokens_flip() as $k => $_ ) {
+        $union[ $k ] = true;
+    }
+
+    return $union;
+}
+
+/**
+ * Whether the query is a low-quality fragment (slang-heavy / junk-heavy) vs a substantive lookup.
+ *
+ * @param string               $raw_query_text
+ * @param array<int, string>   $meaningful_query_tokens From relevance guard.
+ * @return bool
+ */
+function transformer_model_lcm_is_low_quality_fragment_query( $raw_query_text, $meaningful_query_tokens ) {
+
+    $noise = transformer_model_lcm_fragment_noise_tokens_flip();
+
+    $mw = array();
+    if ( is_array( $meaningful_query_tokens ) ) {
+        foreach ( $meaningful_query_tokens as $t ) {
+            $w = strtolower( trim( (string) $t ) );
+            if ( $w !== '' ) {
+                $mw[] = $w;
+            }
+        }
+    }
+    $mw = array_values( array_unique( $mw ) );
+
+    foreach ( $mw as $t ) {
+        if ( strlen( $t ) >= 6 && ! isset( $noise[ $t ] ) ) {
+            return false;
+        }
+    }
+
+    $raw = strtolower( wp_strip_all_tags( (string) $raw_query_text ) );
+    $raw = preg_replace( '/\s+/u', ' ', trim( $raw ) );
+    if ( $raw === '' ) {
+        return false;
+    }
+
+    $words = preg_split( '/\s+/u', $raw, -1, PREG_SPLIT_NO_EMPTY );
+    $wc    = count( $words );
+    if ( $wc > 8 ) {
+        return false;
+    }
+
+    $has_slang_word = false;
+    foreach ( $words as $w ) {
+        $wl = strtolower( preg_replace( '/[^\p{L}\p{N}]/u', '', $w ) );
+        if ( $wl !== '' && isset( $noise[ $wl ] ) ) {
+            $has_slang_word = true;
+            break;
+        }
+    }
+
+    $has_slang_regex = (bool) preg_match( '/\b(idk|lol|lmao|dunno|ngl|tbh|imo)\b/u', $raw );
+
+    return $has_slang_word || $has_slang_regex;
+}
+
+/**
+ * Row strongly anchors to substantive query material for fragment guard (same structure as vague anchor, wider weak union).
+ *
+ * @param string               $sentence_text
+ * @param string               $raw_query_text
+ * @param array<int, string>   $meaningful_query_tokens
+ * @return bool
+ */
+function transformer_model_lcm_fragment_row_has_strong_anchor( $sentence_text, $raw_query_text, $meaningful_query_tokens ) {
+
+    $weak_flip = transformer_model_lcm_fragment_anchor_weak_union_flip();
+    $slower    = strtolower( wp_strip_all_tags( (string) $sentence_text ) );
+    $slower    = preg_replace( '/\s+/u', ' ', trim( $slower ) );
+
+    $mw = array();
+    foreach ( (array) $meaningful_query_tokens as $t ) {
+        $w = strtolower( trim( (string) $t ) );
+        if ( $w !== '' ) {
+            $mw[] = $w;
+        }
+    }
+    $mw = array_values( array_unique( $mw ) );
+
+    $non_weak = array();
+    foreach ( $mw as $t ) {
+        if ( ! isset( $weak_flip[ $t ] ) ) {
+            $non_weak[] = $t;
+        }
+    }
+
+    $hits = 0;
+    foreach ( $non_weak as $t ) {
+        if ( @preg_match( '/\b' . preg_quote( $t, '/' ) . '\b/u', $slower ) ) {
+            ++$hits;
+        }
+    }
+    if ( $hits >= 2 ) {
+        return true;
+    }
+
+    $raw_l = strtolower( wp_strip_all_tags( (string) $raw_query_text ) );
+    $raw_l = preg_replace( '/\s+/u', ' ', trim( $raw_l ) );
+    $words = preg_split( '/\s+/u', $raw_l, -1, PREG_SPLIT_NO_EMPTY );
+    $mwset = array_flip( $mw );
+    $n     = count( $words );
+
+    for ( $i = 0; $i < $n - 1; $i++ ) {
+        $a = preg_replace( '/[^\p{L}\p{N}]/u', '', $words[ $i ] );
+        $b = preg_replace( '/[^\p{L}\p{N}]/u', '', $words[ $i + 1 ] );
+        $a = strtolower( $a );
+        $b = strtolower( $b );
+        if ( $a === '' || $b === '' ) {
+            continue;
+        }
+        if ( ! isset( $mwset[ $a ] ) || ! isset( $mwset[ $b ] ) ) {
+            continue;
+        }
+        if ( isset( $weak_flip[ $a ] ) && isset( $weak_flip[ $b ] ) ) {
+            continue;
+        }
+        $re = '/\b' . preg_quote( $a, '/' ) . '\s+' . preg_quote( $b, '/' ) . '\b/u';
+        if ( @preg_match( $re, $slower ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
  * Internal diagnostic state: last constraint gate meta for the current request.
  *
  * @param array<string, mixed>|null $set
@@ -6252,6 +6873,168 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                     );
                 }
             }
+        }
+    }
+
+    // Vague query guard: informational_query (full); short_anchor_query only for vague-question phrasing (see transformer_model_lcm_raw_query_matches_vague_question_structure).
+    $vague_raw = $input_text_raw !== '' ? (string) $input_text_raw : implode( ' ', (array) $inputWordsLower );
+    $shape_s   = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
+
+    if ( $shape_s === 'informational_query' ) {
+        $vg = transformer_model_lcm_apply_vague_query_gate_core( $sentenceScores, $vague_raw, $meaningful_query_tokens );
+
+        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            transformer_model_lcm_log_vague_query_gate_check( $vague_raw, $vg['eval'] );
+            transformer_model_lcm_log_vague_query_decision(
+                $vague_raw,
+                $vg['eval'],
+                $vg['strong_anchor'],
+                $vg['matched_preview']
+            );
+        }
+
+        if ( (int) $vg['eval']['is_vague'] === 1 ) {
+            $mt_log = is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array();
+            $mt_log = array_map( 'strval', $mt_log );
+            $toks   = implode( ',', $mt_log );
+            if ( strlen( $toks ) > 200 ) {
+                $toks = substr( $toks, 0, 200 ) . '...';
+            }
+
+            $rescued = ( 1 === $vg['strong_anchor'] );
+
+            if ( ! $rescued ) {
+                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                    back_trace(
+                        'NOTICE',
+                        sprintf( '[LCM][vague_query_gate] allow=0 reason="no_strong_anchor" tokens="%s"', $toks )
+                    );
+                }
+            } elseif ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                back_trace(
+                    'NOTICE',
+                    sprintf( '[LCM][vague_query_gate] allow=1 reason="strong_anchor_found" tokens="%s"', $toks )
+                );
+            }
+        }
+    } elseif ( $shape_s === 'short_anchor_query' && transformer_model_lcm_raw_query_matches_vague_question_structure( $vague_raw ) ) {
+        $vg = transformer_model_lcm_apply_vague_query_gate_core( $sentenceScores, $vague_raw, $meaningful_query_tokens );
+
+        $mt_join = implode(
+            ',',
+            array_map(
+                static function ( $t ) {
+                    return str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $t );
+                },
+                is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array()
+            )
+        );
+
+        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            transformer_model_lcm_log_vague_query_gate_check( $vague_raw, $vg['eval'] );
+            transformer_model_lcm_log_vague_query_decision(
+                $vague_raw,
+                $vg['eval'],
+                $vg['strong_anchor'],
+                $vg['matched_preview']
+            );
+
+            if ( (int) $vg['eval']['is_vague'] !== 1 ) {
+                $sa_reason = 'eval_not_vague';
+                $sa_allow  = 1;
+            } elseif ( ! empty( $vg['strong_anchor'] ) ) {
+                $sa_reason = 'strong_anchor_found';
+                $sa_allow  = 1;
+            } else {
+                $sa_reason = 'no_strong_anchor';
+                $sa_allow  = 0;
+            }
+
+            $vr_esc = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $vague_raw );
+            if ( strlen( $vr_esc ) > 350 ) {
+                $vr_esc = substr( $vr_esc, 0, 350 ) . '...';
+            }
+
+            back_trace(
+                'NOTICE',
+                sprintf(
+                    '[LCM][vague_query_gate_short_anchor] allow=%d reason="%s" raw="%s" meaningful=[%s]',
+                    (int) (bool) $sa_allow,
+                    str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $sa_reason ),
+                    $vr_esc,
+                    $mt_join
+                )
+            );
+        }
+    } elseif ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        $shape_lbl = $shape_s;
+        $shape_lbl = str_replace( array( '|', ',', '"' ), '', $shape_lbl );
+        $mt_join   = implode(
+            ',',
+            array_map(
+                static function ( $t ) {
+                    return str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $t );
+                },
+                is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array()
+            )
+        );
+        $vr_esc = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $vague_raw );
+        if ( strlen( $vr_esc ) > 350 ) {
+            $vr_esc = substr( $vr_esc, 0, 350 ) . '...';
+        }
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][vague_query_gate_skip] shape=%s raw="%s" meaningful=[%s] note=vague_guard_not_applicable',
+                $shape_lbl,
+                $vr_esc,
+                $mt_join
+            )
+        );
+    }
+
+    // Low-quality fragment guard (slang/junk-heavy queries): separate from vague-query gate; clears rows if no strong anchor.
+    if ( transformer_model_lcm_is_low_quality_fragment_query( $vague_raw, $meaningful_query_tokens ) ) {
+        $frag_rescued = false;
+        foreach ( $sentenceScores as $frag_row ) {
+            if ( ! is_array( $frag_row ) ) {
+                continue;
+            }
+            $fst = isset( $frag_row['sentence'] ) ? (string) $frag_row['sentence'] : '';
+            if ( transformer_model_lcm_fragment_row_has_strong_anchor( $fst, $vague_raw, $meaningful_query_tokens ) ) {
+                $frag_rescued = true;
+                break;
+            }
+        }
+
+        if ( ! $frag_rescued ) {
+            $sentenceScores = array();
+        }
+
+        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            $mt_frag = implode(
+                ',',
+                array_map(
+                    static function ( $t ) {
+                        return str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $t );
+                    },
+                    is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array()
+                )
+            );
+            $vr_frag = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $vague_raw );
+            if ( strlen( $vr_frag ) > 350 ) {
+                $vr_frag = substr( $vr_frag, 0, 350 ) . '...';
+            }
+            back_trace(
+                'NOTICE',
+                sprintf(
+                    '[LCM][fragment_query_gate] allow=%d reason="%s" raw="%s" meaningful=[%s]',
+                    $frag_rescued ? 1 : 0,
+                    $frag_rescued ? 'strong_anchor_found' : 'no_strong_anchor',
+                    $vr_frag,
+                    $mt_frag
+                )
+            );
         }
     }
 
