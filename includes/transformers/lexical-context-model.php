@@ -356,22 +356,12 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null 
     }
 
     // Fetch WordPress content as discrete documents (posts/pages)
-    // TEMPORARY diagnostics: allow deeper tracing in fetch/flatten for one query.
-    $GLOBALS['kognetiks_lcm_raw_query_for_trace'] = (string) $input;
     $documents = transformer_model_lexical_context_fetch_wordpress_documents();
 
     transformer_model_lexical_context_lcm_timing_segment( 'fetch_documents' );
 
     if (empty($documents)) {
-        $resp = "I don't have enough content to generate a response. Please add some posts or pages to your WordPress site.";
-        // TEMPORARY cow_return_trace.
-        $resp = transformer_model_lcm_cow_return_trace_checkpoint(
-            'transformer_model_lexical_context_response',
-            'empty_documents_return',
-            $input,
-            $resp
-        );
-        return $resp;
+        return "I don't have enough content to generate a response. Please add some posts or pages to your WordPress site.";
     }
 
     transformer_model_lexical_context_pmi_cache_fetch_status( 'unknown' );
@@ -387,14 +377,6 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null 
     $response = transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $documents, $max_tokens);
 
     transformer_model_lexical_context_lcm_timing_segment( 'generate_contextual_response' );
-
-    // TEMPORARY cow_return_trace: latest possible checkpoint before returning response to caller.
-    $response = transformer_model_lcm_cow_return_trace_checkpoint(
-        'transformer_model_lexical_context_response',
-        'final_return',
-        $input,
-        $response
-    );
 
     return $response;
 
@@ -465,12 +447,6 @@ function transformer_model_lexical_context_fetch_wordpress_documents() {
 
         $post_id   = isset($row['ID'] ) ? (int) $row['ID'] : 0;
         $title     = isset($row['post_title'] ) ? $row['post_title'] : '';
-
-        // TEMPORARY target sentence trace (fetch_documents stage).
-        if ( transformer_model_lcm_chatbot_sales_target_trace_enabled( isset( $GLOBALS['kognetiks_lcm_raw_query_for_trace'] ) ? (string) $GLOBALS['kognetiks_lcm_raw_query_for_trace'] : '' ) ) {
-            $pc = isset( $row['post_content'] ) ? (string) $row['post_content'] : '';
-            transformer_model_lcm_chatbot_sales_target_trace_log( 'fetch_documents', $pc, $post_id, $title );
-        }
 
         $normalized = wp_strip_all_tags( (string) $row['post_content'] );
         $normalized = preg_replace( '/\s+/', ' ', $normalized );
@@ -1082,15 +1058,7 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
     }
 
     if ( empty( $documents ) || ! is_array( $documents ) ) {
-        $resp = "I don't have enough content to generate a response. Please add some posts or pages to your WordPress site.";
-        // TEMPORARY cow_return_trace.
-        $resp = transformer_model_lcm_cow_return_trace_checkpoint(
-            'transformer_model_lexical_context_generate_contextual_response',
-            'empty_documents_return',
-            $input_text_for_intent,
-            $resp
-        );
-        return $resp;
+        return "I don't have enough content to generate a response. Please add some posts or pages to your WordPress site.";
     }
 
     $input_text_for_intent = is_string( $input ) ? $input : '';
@@ -2746,54 +2714,13 @@ function transformer_model_lexical_context_lexical_sentence_score_row( $sentence
 
     $sentenceTrimmed = trim( $sentenceTrimmed );
     if ( $sentenceTrimmed === '' ) {
-        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-            $sl = strtolower( wp_strip_all_tags( (string) $sentenceTrimmed ) );
-            if ( strpos( $sl, 'chatbots help with sales by engaging website visitors' ) !== false ) {
-                back_trace( 'NOTICE', '[LCM][target_sentence_trace] stage="scorer_null" reason="empty_sentence" text=""' );
-            }
-        }
         return null;
-    }
-
-    // Diagnostics only: trace scorer entry for a specific problematic sentence.
-    $diag_lower = strtolower( wp_strip_all_tags( (string) $sentenceTrimmed ) );
-    if (
-        transformer_model_lexical_context_is_lcm_diagnostics_enabled()
-        && function_exists( 'back_trace' )
-        && strpos( $diag_lower, 'proudly go into my generative ai app' ) !== false
-    ) {
-        $shape_s = ( is_array( $query_shape ) && isset( $query_shape['shape'] ) ) ? (string) $query_shape['shape'] : 'unknown';
-        $has_tokens = ( is_array( $inputWordsLower ) && ! empty( $inputWordsLower ) ) ? 1 : 0;
-        $prev = transformer_model_lexical_context_diag_preview_text( (string) $sentenceTrimmed, 160 );
-        $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][scorer_entry] text="%s" query_shape="%s" has_meaningful_tokens=%d',
-                $prev,
-                str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $shape_s ),
-                $has_tokens
-            )
-        );
     }
 
     $sentenceLower       = strtolower( $sentenceTrimmed );
     $sentenceWordCount   = str_word_count( $sentenceTrimmed );
 
     if ( $sentenceWordCount > 60 ) {
-        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-            if ( strpos( $diag_lower, 'chatbots help with sales by engaging website visitors' ) !== false ) {
-                $prev = transformer_model_lexical_context_diag_preview_text( (string) $sentenceTrimmed, 170 );
-                $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-                back_trace(
-                    'NOTICE',
-                    sprintf(
-                        '[LCM][target_sentence_trace] stage="scorer_null" reason="too_many_words" text="%s"',
-                        $prev
-                    )
-                );
-            }
-        }
         return null;
     }
 
@@ -2889,47 +2816,7 @@ function transformer_model_lexical_context_lexical_sentence_score_row( $sentence
                 }
             }
 
-            // Diagnostics only: show whether the anecdotal rejection would match (no behavior change).
-            if (
-                transformer_model_lexical_context_is_lcm_diagnostics_enabled()
-                && function_exists( 'back_trace' )
-                && strpos( $diag_lower, 'proudly go into my generative ai app' ) !== false
-            ) {
-                $shape_s = ( is_array( $query_shape ) && isset( $query_shape['shape'] ) ) ? (string) $query_shape['shape'] : 'unknown';
-                $has_i_or_proudly = ( preg_match( '/\bi\s/u', $sentenceLower ) || strpos( $sentenceLower, 'proudly' ) !== false ) ? 1 : 0;
-                back_trace(
-                    'NOTICE',
-                    sprintf(
-                        '[LCM][scorer_reject_check] matched=%d reason="anecdotal_check" query_shape="%s" has_i_or_proudly=%d has_def_cue=%d',
-                        ( $looks_informational && $is_anecdotal && ! $has_def_cue ) ? 1 : 0,
-                        str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $shape_s ),
-                        $has_i_or_proudly,
-                        $has_def_cue ? 1 : 0
-                    )
-                );
-            }
-
             if ( $is_anecdotal ) {
-                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                    $prev = transformer_model_lexical_context_diag_preview_text( $sentenceTrimmed, 140 );
-                    $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][scorer_reject] reason="anecdotal_not_strict_subject_definition" text="%s"',
-                            $prev
-                        )
-                    );
-                    if ( strpos( $diag_lower, 'chatbots help with sales by engaging website visitors' ) !== false ) {
-                        back_trace(
-                            'NOTICE',
-                            sprintf(
-                                '[LCM][target_sentence_trace] stage="scorer_null" reason="anecdotal_not_strict_subject_definition" text="%s"',
-                                $prev
-                            )
-                        );
-                    }
-                }
                 return null;
             }
         }
@@ -2942,19 +2829,6 @@ function transformer_model_lexical_context_lexical_sentence_score_row( $sentence
     );
     foreach ( $citationPatterns as $pattern ) {
         if ( preg_match( $pattern, $sentenceTrimmed ) ) {
-            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                if ( strpos( $diag_lower, 'chatbots help with sales by engaging website visitors' ) !== false ) {
-                    $prev = transformer_model_lexical_context_diag_preview_text( (string) $sentenceTrimmed, 170 );
-                    $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][target_sentence_trace] stage="scorer_null" reason="citation_pattern" text="%s"',
-                            $prev
-                        )
-                    );
-                }
-            }
             return null;
         }
     }
@@ -2979,19 +2853,6 @@ function transformer_model_lexical_context_lexical_sentence_score_row( $sentence
             }
         }
         if ( ! $comma_allowed_by_definition ) {
-            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                if ( strpos( $diag_lower, 'chatbots help with sales by engaging website visitors' ) !== false ) {
-                    $prev = transformer_model_lexical_context_diag_preview_text( (string) $sentenceTrimmed, 170 );
-                    $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][target_sentence_trace] stage="scorer_null" reason="comma_density_high" text="%s"',
-                            $prev
-                        )
-                    );
-                }
-            }
             return null;
         }
     }
@@ -3010,19 +2871,6 @@ function transformer_model_lexical_context_lexical_sentence_score_row( $sentence
                 }
             }
             if ( ! $hasInputWords ) {
-                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                    if ( strpos( $diag_lower, 'chatbots help with sales by engaging website visitors' ) !== false ) {
-                        $prev = transformer_model_lexical_context_diag_preview_text( (string) $sentenceTrimmed, 170 );
-                        $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-                        back_trace(
-                            'NOTICE',
-                            sprintf(
-                                '[LCM][target_sentence_trace] stage="scorer_null" reason="question_pattern_no_input_words" text="%s"',
-                                $prev
-                            )
-                        );
-                    }
-                }
                 return null;
             }
         }
@@ -3132,7 +2980,6 @@ function transformer_model_lexical_context_lexical_sentence_score_row( $sentence
     }
 
     // Build row.
-    // (existing code continues below to populate row fields; keep diagnostics-only cow id near row creation)
 
     if ( $apply_local_idf && ! empty( $local_idf_map ) && is_array( $local_idf_map ) ) {
         // Direct query tokens only (same notion as relevance guard); PMI expansion terms excluded.
@@ -3219,40 +3066,8 @@ function transformer_model_lexical_context_lexical_sentence_score_row( $sentence
             'hasSignificantMatch' => $hasSignificantMatch,
         );
 
-        // Diagnostics only: stamp and log cow row identity.
-        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-            $sl = strtolower( wp_strip_all_tags( (string) $sentenceTrimmed ) );
-            if ( strpos( $sl, 'proudly go into my generative ai app' ) !== false ) {
-                $row['_cow_id'] = uniqid( 'cow_', true );
-                $prev = transformer_model_lexical_context_diag_preview_text( (string) $sentenceTrimmed, 160 );
-                $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-                back_trace(
-                    'NOTICE',
-                    sprintf(
-                        '[LCM][cow_track] stage="scored" cow_id=%s text="%s"',
-                        (string) $row['_cow_id'],
-                        $prev
-                    )
-                );
-            }
-        }
-
         // Diagnostics only: target sentence return.
-        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-            if ( strpos( $diag_lower, 'chatbots help with sales by engaging website visitors' ) !== false ) {
-                $prev = transformer_model_lexical_context_diag_preview_text( (string) $sentenceTrimmed, 170 );
-                $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-                back_trace(
-                    'NOTICE',
-                    sprintf(
-                        '[LCM][target_sentence_trace] stage="scorer_return" score=%.4f inputWordsMatched=%d text="%s"',
-                        (float) $score,
-                        (int) $inputWordsMatched,
-                        $prev
-                    )
-                );
-            }
-        }
+        // (no per-row diagnostics)
 
         return $row;
     }
@@ -3299,46 +3114,7 @@ function transformer_model_lexical_context_lexical_sentence_score_row( $sentence
                 'inputAtStart'        => $inputWordsAtStart,
                 'hasSignificantMatch' => $hasSignificantMatch,
             );
-            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                if ( strpos( $diag_lower, 'chatbots help with sales by engaging website visitors' ) !== false ) {
-                    $prev = transformer_model_lexical_context_diag_preview_text( (string) $sentenceTrimmed, 170 );
-                    $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][target_sentence_trace] stage="scorer_return" score=%.4f inputWordsMatched=%d text="%s"',
-                            (float) $score,
-                            (int) $inputWordsMatched,
-                            $prev
-                        )
-                    );
-                }
-            }
             return $row;
-        }
-    }
-
-    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-        if ( strpos( $diag_lower, 'chatbots help with sales by engaging website visitors' ) !== false ) {
-            $prev = transformer_model_lexical_context_diag_preview_text( (string) $sentenceTrimmed, 170 );
-            $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-            $meaningful = transformer_model_lexical_context_meaningful_query_tokens_for_relevance_guard( $inputWordsLower );
-            $m_str = is_array( $meaningful ) ? implode( ',', array_map( 'strval', $meaningful ) ) : '';
-            $iw_str = is_array( $inputWordsLower ) ? implode( ',', array_map( 'strval', $inputWordsLower ) ) : '';
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][target_sentence_trace] stage="scorer_null" reason="final_gate_threshold" score=%.4f minScore=%d inputWordsMatched=%d hasSignificantMatch=%d allShortWords=%d meaningful_query_tokens="%s" inputWordsLower="%s" text="%s"',
-                    (float) $score,
-                    (int) $minScore,
-                    (int) $inputWordsMatched,
-                    $hasSignificantMatch ? 1 : 0,
-                    $allShortWords ? 1 : 0,
-                    $m_str,
-                    $iw_str,
-                    $prev
-                )
-            );
         }
     }
 
@@ -4887,18 +4663,6 @@ function transformer_model_lexical_context_chunk_has_meaningful_query_overlap( $
         }
         $pattern = '/(?<![\p{L}\p{N}_])' . $tok_q . '(?![\p{L}\p{N}_])/u';
         if ( preg_match( $pattern, $haystack ) ) {
-            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                if ( strlen( (string) $tok ) >= 4 && strpos( $haystack, (string) $tok ) === false && preg_match( '/(?<![\p{L}\p{N}_])' . preg_quote( $tok, '/' ) . 's(?![\p{L}\p{N}_])/u', $haystack ) ) {
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][token_normalization] query="%s" matched="%s"',
-                            str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $tok ),
-                            str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) ( $tok . 's' ) )
-                        )
-                    );
-                }
-            }
             return true;
         }
     }
@@ -4924,471 +4688,6 @@ function transformer_model_lexical_context_no_query_overlap_message() {
 function transformer_model_lexical_context_is_lcm_diagnostics_enabled() {
 
     return defined( 'KOGNETIKS_LCM_DEBUG' ) && KOGNETIKS_LCM_DEBUG;
-}
-
-/**
- * Case diagnostics are only enabled for a small allowlist of exact prompts.
- *
- * @param string $raw_query_text
- * @return bool
- */
-function transformer_model_lcm_case_diag_is_enabled_for_query( $raw_query_text ) {
-
-    if ( ! transformer_model_lexical_context_is_lcm_diagnostics_enabled() || ! function_exists( 'back_trace' ) ) {
-        return false;
-    }
-
-    $q = trim( (string) $raw_query_text );
-    if ( $q === 'What is generative AI?' ) {
-        return true;
-    }
-    if ( $q === 'How does a chatbot help with sales?' ) {
-        return true;
-    }
-
-    return false;
-}
-
-/**
- * Rank debug is only enabled for one exact query.
- *
- * @param string $raw_query_text
- * @return bool
- */
-function transformer_model_lcm_rank_debug_is_enabled_for_query( $raw_query_text ) {
-
-    if ( ! transformer_model_lexical_context_is_lcm_diagnostics_enabled() || ! function_exists( 'back_trace' ) ) {
-        return false;
-    }
-
-    $q = trim( (string) $raw_query_text );
-    return ( $q === 'What is generative AI?' );
-}
-
-/**
- * Log full ranking keys for a ranked row set (diagnostics only).
- *
- * @param string                           $raw_query_text
- * @param string                           $tag rank_debug|assembly_rank_debug
- * @param array<int, array<string, mixed>> $rows
- * @param array<int, string>               $post_title_map
- * @return void
- */
-function transformer_model_lcm_rank_debug_log_rows( $raw_query_text, $tag, $rows, $post_title_map ) {
-
-    if ( ! transformer_model_lcm_rank_debug_is_enabled_for_query( $raw_query_text ) ) {
-        return;
-    }
-
-    $rows           = is_array( $rows ) ? $rows : array();
-    $post_title_map = is_array( $post_title_map ) ? $post_title_map : array();
-    $tag            = (string) $tag;
-
-    $logged = 0;
-    foreach ( $rows as $i => $r ) {
-        if ( ! is_array( $r ) ) {
-            continue;
-        }
-
-        $pid  = isset( $r['post_id'] ) ? (int) $r['post_id'] : 0;
-        $ttl  = isset( $post_title_map[ $pid ] ) ? (string) $post_title_map[ $pid ] : ( isset( $r['post_title'] ) ? (string) $r['post_title'] : '' );
-        $ttl  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $ttl );
-        $sd   = isset( $r['_subject_definition_score'] ) ? (int) $r['_subject_definition_score'] : 0;
-        $hits = isset( $r['_query_token_hits'] ) ? (int) $r['_query_token_hits'] : 0;
-        $st   = isset( $r['_answer_strength'] ) ? (int) $r['_answer_strength'] : 0;
-        $dir  = isset( $r['_answer_directness'] ) ? (int) $r['_answer_directness'] : 0;
-        $sc   = isset( $r['score'] ) ? (float) $r['score'] : 0.0;
-        $tx   = isset( $r['sentence'] ) ? (string) $r['sentence'] : '';
-        $prev = transformer_model_lexical_context_diag_preview_text( $tx, 160 );
-        $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][%s] rank=%d post_id=%d title="%s" subject_definition=%d query_token_hits=%d strength=%d directness=%d score=%.4f text="%s"',
-                $tag,
-                (int) $i + 1,
-                $pid,
-                $ttl,
-                $sd,
-                $hits,
-                $st,
-                $dir,
-                $sc,
-                $prev
-            )
-        );
-        ++$logged;
-    }
-}
-
-/**
- * Cow-row tracking: log if a row carries _cow_id.
- *
- * @param string                           $stage
- * @param array<int, array<string, mixed>> $rows
- * @return void
- */
-function transformer_model_lcm_cow_track_log_stage( $stage, $rows ) {
-
-    if ( ! transformer_model_lexical_context_is_lcm_diagnostics_enabled() || ! function_exists( 'back_trace' ) ) {
-        return;
-    }
-
-    if ( ! is_array( $rows ) || $rows === array() ) {
-        return;
-    }
-
-    foreach ( $rows as $i => $r ) {
-        if ( ! is_array( $r ) ) {
-            continue;
-        }
-        if ( empty( $r['_cow_id'] ) ) {
-            continue;
-        }
-        $cow_id = (string) $r['_cow_id'];
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][cow_track] stage="%s" cow_id=%s present=1 rank=%d',
-                str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $stage ),
-                $cow_id,
-                (int) $i + 1
-            )
-        );
-    }
-}
-
-/**
- * TEMPORARY cow_return_trace: log + optionally hard replace final response.
- *
- * @param string $function_name
- * @param string $location
- * @param string $raw_query_text
- * @param string $response_text
- * @return string (possibly replaced)
- */
-function transformer_model_lcm_cow_return_trace_checkpoint( $function_name, $location, $raw_query_text, $response_text ) {
-
-    $response_text = (string) $response_text;
-    $raw_query_text = (string) $raw_query_text;
-
-    $has_cow = ( stripos( $response_text, 'proper answer is a cow' ) !== false );
-    if ( $has_cow && transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-        $resp_prev = transformer_model_lexical_context_diag_preview_text( $response_text, 220 );
-        $resp_prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $resp_prev );
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][cow_return_trace] function="%s" location="%s" response="%s"',
-                str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $function_name ),
-                str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $location ),
-                $resp_prev
-            )
-        );
-    }
-
-    // TEMPORARY cow_return_trace: hard block at latest return point.
-    if ( trim( $raw_query_text ) === 'What is generative AI?' && $has_cow ) {
-        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-            back_trace( 'NOTICE', '[LCM][cow_return_trace] action="hard_replaced_final_response"' );
-        }
-        return 'Generative AI is a type of artificial intelligence that creates new content such as text, images, code, audio, or video.';
-    }
-
-    return $response_text;
-}
-
-/**
- * Diagnostics: for a specific query, track rows containing BOTH "chatbot" and "sales".
- *
- * @param string                           $raw_query_text
- * @param string                           $stage
- * @param array<int, array<string, mixed>> $rows
- * @param array<int, string>               $post_title_map
- * @return void
- */
-function transformer_model_lcm_chatbot_sales_diag_log_stage( $raw_query_text, $stage, $rows, $post_title_map ) {
-
-    if ( ! transformer_model_lexical_context_is_lcm_diagnostics_enabled() || ! function_exists( 'back_trace' ) ) {
-        return;
-    }
-
-    $q = trim( (string) $raw_query_text );
-    if ( $q !== 'How does a chatbot help with sales?' ) {
-        return;
-    }
-
-    $rows = is_array( $rows ) ? $rows : array();
-    $post_title_map = is_array( $post_title_map ) ? $post_title_map : array();
-
-    $both_rows = array();
-    foreach ( $rows as $r ) {
-        if ( ! is_array( $r ) ) {
-            continue;
-        }
-        $tx = isset( $r['sentence'] ) ? (string) $r['sentence'] : '';
-        $sl = strtolower( wp_strip_all_tags( $tx ) );
-        if ( preg_match( '/\bchatbot\b/u', $sl ) && preg_match( '/\bsales\b/u', $sl ) ) {
-            $both_rows[] = $r;
-        }
-    }
-
-    back_trace(
-        'NOTICE',
-        sprintf(
-            '[LCM][chatbot_sales_diag] stage="%s" count_both=%d total=%d',
-            str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $stage ),
-            count( $both_rows ),
-            count( $rows )
-        )
-    );
-
-    $logged = 0;
-    foreach ( $both_rows as $i => $r ) {
-        if ( $logged >= 10 ) {
-            break;
-        }
-        if ( ! is_array( $r ) ) {
-            continue;
-        }
-        $pid  = isset( $r['post_id'] ) ? (int) $r['post_id'] : 0;
-        $ttl  = isset( $post_title_map[ $pid ] ) ? (string) $post_title_map[ $pid ] : ( isset( $r['post_title'] ) ? (string) $r['post_title'] : '' );
-        $ttl  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $ttl );
-        $sc   = isset( $r['score'] ) ? (float) $r['score'] : 0.0;
-        $tx   = isset( $r['sentence'] ) ? (string) $r['sentence'] : '';
-        $prev = transformer_model_lexical_context_diag_preview_text( $tx, 150 );
-        $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-
-        $hits = isset( $r['_query_token_hits'] ) ? (int) $r['_query_token_hits'] : 0;
-        if ( $hits === 0 ) {
-            $sl = strtolower( wp_strip_all_tags( $tx ) );
-            if ( preg_match( '/\bchatbot\b/u', $sl ) ) {
-                ++$hits;
-            }
-            if ( preg_match( '/\bsales\b/u', $sl ) ) {
-                ++$hits;
-            }
-        }
-
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][chatbot_sales_row] stage="%s" rank=%d post_id=%d title="%s" score=%.4f token_hits=%d text="%s"',
-                str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $stage ),
-                (int) $i + 1,
-                $pid,
-                $ttl,
-                $sc,
-                (int) $hits,
-                $prev
-            )
-        );
-        ++$logged;
-    }
-
-    if ( $stage === 'after_final_order' ) {
-        foreach ( $rows as $r ) {
-            if ( ! is_array( $r ) ) {
-                continue;
-            }
-            $tx = isset( $r['sentence'] ) ? (string) $r['sentence'] : '';
-            if ( stripos( $tx, 'knowledge navigator' ) === false ) {
-                continue;
-            }
-            $pid  = isset( $r['post_id'] ) ? (int) $r['post_id'] : 0;
-            $ttl  = isset( $post_title_map[ $pid ] ) ? (string) $post_title_map[ $pid ] : ( isset( $r['post_title'] ) ? (string) $r['post_title'] : '' );
-            $ttl  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $ttl );
-            $sc   = isset( $r['score'] ) ? (float) $r['score'] : 0.0;
-            $hits = isset( $r['_query_token_hits'] ) ? (int) $r['_query_token_hits'] : 0;
-            $prev = transformer_model_lexical_context_diag_preview_text( $tx, 150 );
-            $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][chatbot_sales_winner] post_id=%d title="%s" score=%.4f token_hits=%d text="%s"',
-                    $pid,
-                    $ttl,
-                    $sc,
-                    $hits,
-                    $prev
-                )
-            );
-            break;
-        }
-    }
-}
-
-/**
- * Diagnostics: trace one exact target sentence fragment for one exact query.
- *
- * TEMPORARY: remove after diagnosis.
- *
- * @param string $raw_query_text
- * @return bool
- */
-function transformer_model_lcm_chatbot_sales_target_trace_enabled( $raw_query_text ) {
-    return (
-        transformer_model_lexical_context_is_lcm_diagnostics_enabled()
-        && function_exists( 'back_trace' )
-        && trim( (string) $raw_query_text ) === 'How does a chatbot help with sales?'
-    );
-}
-
-/**
- * Diagnostics helper: log when text contains target fragment.
- *
- * @param string $stage
- * @param string $text
- * @param int    $post_id
- * @param string $post_title
- * @return void
- */
-function transformer_model_lcm_chatbot_sales_target_trace_log( $stage, $text, $post_id = 0, $post_title = '' ) {
-    if ( ! transformer_model_lcm_chatbot_sales_target_trace_enabled( isset( $GLOBALS['kognetiks_lcm_raw_query_for_trace'] ) ? (string) $GLOBALS['kognetiks_lcm_raw_query_for_trace'] : '' ) ) {
-        return;
-    }
-    $needle = 'chatbots help with sales by engaging website visitors';
-    $sl = strtolower( wp_strip_all_tags( (string) $text ) );
-    if ( strpos( $sl, $needle ) === false ) {
-        return;
-    }
-    $prev = transformer_model_lexical_context_diag_preview_text( (string) $text, 170 );
-    $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-    $ttl  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $post_title );
-    back_trace(
-        'NOTICE',
-        sprintf(
-            '[LCM][target_sentence_trace] stage="%s" post_id=%d title="%s" text="%s"',
-            str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $stage ),
-            (int) $post_id,
-            $ttl,
-            $prev
-        )
-    );
-}
-
-/**
- * Diagnostics helper: scan a ranked row list for the target fragment.
- *
- * @param string                           $stage
- * @param array<int, array<string, mixed>> $rows
- * @param array<int, string>               $post_title_map
- * @return void
- */
-function transformer_model_lcm_chatbot_sales_target_trace_scan_rows( $stage, $rows, $post_title_map ) {
-    if ( ! transformer_model_lcm_chatbot_sales_target_trace_enabled( isset( $GLOBALS['kognetiks_lcm_raw_query_for_trace'] ) ? (string) $GLOBALS['kognetiks_lcm_raw_query_for_trace'] : '' ) ) {
-        return;
-    }
-    $rows = is_array( $rows ) ? $rows : array();
-    $post_title_map = is_array( $post_title_map ) ? $post_title_map : array();
-    $needle = 'chatbots help with sales by engaging website visitors';
-    foreach ( $rows as $i => $r ) {
-        if ( ! is_array( $r ) ) {
-            continue;
-        }
-        $tx = isset( $r['sentence'] ) ? (string) $r['sentence'] : '';
-        $sl = strtolower( wp_strip_all_tags( (string) $tx ) );
-        if ( strpos( $sl, $needle ) === false ) {
-            continue;
-        }
-        $pid = isset( $r['post_id'] ) ? (int) $r['post_id'] : 0;
-        $ttl = isset( $post_title_map[ $pid ] ) ? (string) $post_title_map[ $pid ] : ( isset( $r['post_title'] ) ? (string) $r['post_title'] : '' );
-        transformer_model_lcm_chatbot_sales_target_trace_log( $stage . ':rank=' . ( (int) $i + 1 ), $tx, $pid, $ttl );
-        break;
-    }
-}
-
-/**
- * Log a ranked slice of rows for a specific case-diagnostic query.
- *
- * @param string                      $raw_query_text
- * @param string                      $stage
- * @param array<int, array<string, mixed>> $rows
- * @param array<int, string>          $post_title_map
- * @param int                         $max_rows
- * @return void
- */
-function transformer_model_lcm_case_diag_log_rows( $raw_query_text, $stage, $rows, $post_title_map, $max_rows = 10 ) {
-
-    if ( ! transformer_model_lcm_case_diag_is_enabled_for_query( $raw_query_text ) ) {
-        return;
-    }
-
-    $rows          = is_array( $rows ) ? $rows : array();
-    $post_title_map = is_array( $post_title_map ) ? $post_title_map : array();
-    $max_rows      = max( 0, (int) $max_rows );
-
-    $q_esc = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), trim( (string) $raw_query_text ) );
-    $s_esc = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $stage );
-
-    $is_final_candidates = ( $stage === 'final_candidates' );
-    if ( $is_final_candidates ) {
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][case_diag] query="%s" stage="final_candidates" count=%d',
-                $q_esc,
-                count( $rows )
-            )
-        );
-    }
-
-    $logged = 0;
-    foreach ( $rows as $i => $r ) {
-        if ( $logged >= $max_rows ) {
-            break;
-        }
-        if ( ! is_array( $r ) ) {
-            continue;
-        }
-
-        $pid  = isset( $r['post_id'] ) ? (int) $r['post_id'] : 0;
-        $ttl  = isset( $post_title_map[ $pid ] ) ? (string) $post_title_map[ $pid ] : ( isset( $r['post_title'] ) ? (string) $r['post_title'] : '' );
-        $ttl  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $ttl );
-        $sc   = isset( $r['score'] ) ? (float) $r['score'] : 0.0;
-        $st   = isset( $r['_answer_strength'] ) ? (int) $r['_answer_strength'] : 0;
-        $sd   = isset( $r['_subject_definition_score'] ) ? (int) $r['_subject_definition_score'] : 0;
-        $dir  = isset( $r['_answer_directness'] ) ? (int) $r['_answer_directness'] : 0;
-        $tx   = isset( $r['sentence'] ) ? (string) $r['sentence'] : '';
-        $prev = transformer_model_lexical_context_diag_preview_text( $tx, 150 );
-        $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-
-        if ( $is_final_candidates ) {
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][case_diag_row] rank=%d post_id=%d title="%s" score=%.4f strength=%d subject_definition=%d directness=%d text="%s"',
-                    (int) $i + 1,
-                    $pid,
-                    $ttl,
-                    $sc,
-                    $st,
-                    $sd,
-                    $dir,
-                    $prev
-                )
-            );
-        } else {
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][case_diag_row] stage="%s" rank=%d post_id=%d title="%s" score=%.4f strength=%d subject_definition=%d directness=%d text="%s"',
-                    $s_esc,
-                    (int) $i + 1,
-                    $pid,
-                    $ttl,
-                    $sc,
-                    $st,
-                    $sd,
-                    $dir,
-                    $prev
-                )
-            );
-        }
-        ++$logged;
-    }
 }
 
 /**
@@ -7237,62 +6536,28 @@ function transformer_model_lexical_context_diag_log_pipeline_stage( $stage_slug,
         $stage_slug = 'stage';
     }
 
-    if ( empty( $rows ) ) {
-        back_trace( 'NOTICE', '[LCM][' . $stage_slug . '] no candidates' );
+    $rows  = is_array( $rows ) ? $rows : array();
+    $count = count( $rows );
 
-        return;
-    }
-
-    $work = array_values( $rows );
-    $has_score = false;
-
-    foreach ( $work as $r ) {
-        if ( isset( $r['score'] ) && is_numeric( $r['score'] ) ) {
-            $has_score = true;
-            break;
-        }
-    }
-
-    if ( $has_score ) {
-        usort(
-            $work,
-            function ( $a, $b ) {
-                return ( (float) ( $b['score'] ?? 0 ) ) <=> ( (float) ( $a['score'] ?? 0 ) );
+    $top_score = null;
+    foreach ( $rows as $r ) {
+        if ( is_array( $r ) && isset( $r['score'] ) && is_numeric( $r['score'] ) ) {
+            $s = (float) $r['score'];
+            if ( $top_score === null || $s > $top_score ) {
+                $top_score = $s;
             }
-        );
+        }
     }
 
-    $work = array_slice( $work, 0, 5 );
-
-    foreach ( $work as $row ) {
-        $score = 'n/a';
-        if ( isset( $row['score'] ) && is_numeric( $row['score'] ) ) {
-            $score = sprintf( '%g', (float) $row['score'] );
-        }
-
-        $pid = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
-
-        $title = isset( $row['post_title'] ) ? (string) $row['post_title'] : '';
-        if ( $title === '' && isset( $post_title_map[ $pid ] ) ) {
-            $title = $post_title_map[ $pid ];
-        }
-
-        $sentence       = isset( $row['sentence'] ) ? $row['sentence'] : '';
-        $preview        = transformer_model_lexical_context_diag_preview_text( $sentence, 165 );
-        $title_safe     = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $title );
-        $preview_safe   = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
-
-        $line = sprintf(
-            '[LCM][%s] score=%s | post_id=%d | title="%s" | text="%s"',
+    back_trace(
+        'NOTICE',
+        sprintf(
+            '[LCM][%s] candidates=%d top_score=%s',
             $stage_slug,
-            $score,
-            $pid,
-            $title_safe,
-            $preview_safe
-        );
-
-        back_trace( 'NOTICE', $line );
-    }
+            $count,
+            $top_score === null ? 'n/a' : sprintf( '%g', (float) $top_score )
+        )
+    );
 }
 
 /**
@@ -7839,13 +7104,7 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
             }
 
             $trimmed = trim( $sentence );
-            // TEMPORARY target sentence trace (flatten_chunk stage).
-            transformer_model_lcm_chatbot_sales_target_trace_log(
-                'flatten_chunk',
-                $trimmed,
-                $pid,
-                isset( $doc['post_title'] ) ? (string) $doc['post_title'] : ''
-            );
+ 
             if ( ! empty( $meaningful_query_tokens ) ) {
                 if ( ! transformer_model_lexical_context_chunk_has_meaningful_query_overlap( $trimmed, $meaningful_query_tokens ) ) {
                     continue;
@@ -7861,14 +7120,6 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                     'score'      => null,
                 );
             }
-
-            // TEMPORARY target sentence trace (pre_score stage).
-            transformer_model_lcm_chatbot_sales_target_trace_log(
-                'pre_score',
-                $trimmed,
-                $pid,
-                isset( $doc['post_title'] ) ? (string) $doc['post_title'] : ''
-            );
 
             $row = transformer_model_lexical_context_lexical_sentence_score_row(
                 $trimmed,
@@ -7893,26 +7144,10 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
 
     if ( empty( $sentenceScores ) ) {
         if ( ! empty( $meaningful_query_tokens ) && ! $corpus_had_meaningful_overlap ) {
-            $resp = transformer_model_lexical_context_no_query_overlap_message();
-            // TEMPORARY cow_return_trace.
-            $resp = transformer_model_lcm_cow_return_trace_checkpoint(
-                'transformer_model_lexical_context_build_sentences_from_documents',
-                'no_query_overlap_return',
-                $input_text_raw,
-                $resp
-            );
-            return $resp;
+            return transformer_model_lexical_context_no_query_overlap_message();
         }
 
-        $resp = '';
-        // TEMPORARY cow_return_trace.
-        $resp = transformer_model_lcm_cow_return_trace_checkpoint(
-            'transformer_model_lexical_context_build_sentences_from_documents',
-            'empty_sentenceScores_return',
-            $input_text_raw,
-            $resp
-        );
-        return $resp;
+        return '';
     }
 
     $sentenceScores = transformer_model_lexical_context_apply_answer_shape_bias(
@@ -7922,10 +7157,6 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
     );
 
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_scoring', $sentenceScores, $post_title_map );
-    transformer_model_lcm_case_diag_log_rows( $input_text_raw, 'after_scoring', $sentenceScores, $post_title_map, 10 );
-    transformer_model_lcm_cow_track_log_stage( 'after_scoring', $sentenceScores );
-    transformer_model_lcm_chatbot_sales_diag_log_stage( $input_text_raw, 'after_scoring', $sentenceScores, $post_title_map );
-    transformer_model_lcm_chatbot_sales_target_trace_scan_rows( 'after_scoring', $sentenceScores, $post_title_map );
 
     $sentenceScores = transformer_model_lexical_context_sort_sentence_scores_with_document_priority( $sentenceScores );
     $sentenceScores = transformer_model_lexical_context_cap_ranked_sentence_rows( $sentenceScores, 250, 'after_sort' );
@@ -7940,14 +7171,6 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
 
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_document_gate', $after_doc_gate, $post_title_map );
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_row_gate', $after_row_gate, $post_title_map );
-    transformer_model_lcm_case_diag_log_rows( $input_text_raw, 'after_document_gate', $after_doc_gate, $post_title_map, 10 );
-    transformer_model_lcm_case_diag_log_rows( $input_text_raw, 'after_row_gate', $after_row_gate, $post_title_map, 10 );
-    transformer_model_lcm_cow_track_log_stage( 'after_document_gate', $after_doc_gate );
-    transformer_model_lcm_cow_track_log_stage( 'after_row_gate', $after_row_gate );
-    transformer_model_lcm_chatbot_sales_diag_log_stage( $input_text_raw, 'after_document_gate', $after_doc_gate, $post_title_map );
-    transformer_model_lcm_chatbot_sales_diag_log_stage( $input_text_raw, 'after_row_gate', $after_row_gate, $post_title_map );
-    transformer_model_lcm_chatbot_sales_target_trace_scan_rows( 'after_document_gate', $after_doc_gate, $post_title_map );
-    transformer_model_lcm_chatbot_sales_target_trace_scan_rows( 'after_row_gate', $after_row_gate, $post_title_map );
 
     $after_row_gate = transformer_model_lexical_context_filter_low_value_sentence_rows( $after_row_gate, 'after_row_gate_quality' );
 
@@ -7974,10 +7197,6 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
     $sentenceScores = transformer_model_lexical_context_limit_rows_per_document( $sentenceScores );
 
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_deduplication', $sentenceScores, $post_title_map );
-    transformer_model_lcm_case_diag_log_rows( $input_text_raw, 'after_deduplication', $sentenceScores, $post_title_map, 10 );
-    transformer_model_lcm_cow_track_log_stage( 'after_deduplication', $sentenceScores );
-    transformer_model_lcm_chatbot_sales_diag_log_stage( $input_text_raw, 'after_deduplication', $sentenceScores, $post_title_map );
-    transformer_model_lcm_chatbot_sales_target_trace_scan_rows( 'after_deduplication', $sentenceScores, $post_title_map );
 
     // Definition preservation (informational only): compute subject-definition score early so downstream
     // coverage/answerability can preserve strong definitional rows (ordering key only; retrieval score unchanged).
@@ -8232,15 +7451,7 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         }
     }
     if ( empty( $coverage_gate['allow'] ) ) {
-        $resp = transformer_model_lexical_context_return_gate_blocked_user_message();
-        // TEMPORARY cow_return_trace.
-        $resp = transformer_model_lcm_cow_return_trace_checkpoint(
-            'transformer_model_lexical_context_build_sentences_from_documents',
-            'coverage_gate_blocked_return',
-            $input_text_raw,
-            $resp
-        );
-        return $resp;
+        return transformer_model_lexical_context_return_gate_blocked_user_message();
     }
 
     // Constraint gate (informational queries only): explicit domain/negation/contrast mismatch protection.
@@ -8400,9 +7611,6 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
             }
         }
 
-        transformer_model_lcm_case_diag_log_rows( $input_text_raw, 'after_answerability_gate', $sentenceScores, $post_title_map, 10 );
-        transformer_model_lcm_chatbot_sales_diag_log_stage( $input_text_raw, 'after_answerability_gate', $sentenceScores, $post_title_map );
-        transformer_model_lcm_chatbot_sales_target_trace_scan_rows( 'after_answerability_gate', $sentenceScores, $post_title_map );
 
         // Tiered answer strength + answer-directness reordering (informational queries only): re-rank within the
         // already-ranked list without changing retrieval scores.
@@ -8499,10 +7707,6 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
             }
         );
 
-        transformer_model_lcm_case_diag_log_rows( $input_text_raw, 'after_final_ordering', $sentenceScores, $post_title_map, 10 );
-        transformer_model_lcm_cow_track_log_stage( 'after_final_order', $sentenceScores );
-        transformer_model_lcm_chatbot_sales_diag_log_stage( $input_text_raw, 'after_final_order', $sentenceScores, $post_title_map );
-        transformer_model_lcm_chatbot_sales_target_trace_scan_rows( 'after_final_order', $sentenceScores, $post_title_map );
 
         // Fragment-completion guard: short "X is/means/refers to" inputs should only proceed if at least one row
         // starts with the query subject phrase (allowing the AI alias). Clears rows only.
@@ -8604,53 +7808,6 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                     count( $sentenceScores )
                 )
             );
-            $log_n = 0;
-            foreach ( $sentenceScores as $r ) {
-                if ( $log_n >= 10 ) {
-                    break;
-                }
-                if ( ! is_array( $r ) ) {
-                    continue;
-                }
-                $dir   = isset( $r['_answer_directness'] ) ? (int) $r['_answer_directness'] : 0;
-                $tier  = isset( $r['_answer_strength'] ) ? (int) $r['_answer_strength'] : 0;
-                $hits  = isset( $r['_query_token_hits'] ) ? (int) $r['_query_token_hits'] : 0;
-                $sds   = isset( $r['_subject_definition_score'] ) ? (int) $r['_subject_definition_score'] : 0;
-                $score = isset( $r['score'] ) ? (float) $r['score'] : 0.0;
-                $text  = isset( $r['sentence'] ) ? (string) $r['sentence'] : '';
-                $prev  = transformer_model_lexical_context_diag_preview_text( $text, 120 );
-                $prev  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-                back_trace(
-                    'NOTICE',
-                    sprintf(
-                        '[LCM][answer_directness] directness=%d strength=%d score=%.4f text="%s"',
-                        $dir,
-                        $tier,
-                        $score,
-                        $prev
-                    )
-                );
-                back_trace(
-                    'NOTICE',
-                    sprintf(
-                        '[LCM][ranking_adjustment] tokens=%d subject_definition=%d text="%s"',
-                        $hits,
-                        $sds,
-                        $prev
-                    )
-                );
-                back_trace(
-                    'NOTICE',
-                    sprintf(
-                        '[LCM][multi_token_hits] tokens=%d text="%s"',
-                        $hits,
-                        $prev
-                    )
-                );
-                ++$log_n;
-            }
-
-            // (removed verbose subject-definition debug lines)
         }
     }
 
@@ -8661,19 +7818,9 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         $local_idf_map,
         $apply_local_idf
     );
-    transformer_model_lcm_cow_track_log_stage( 'before_return_gate', $sentenceScores );
     if ( empty( $return_gate['allow'] ) ) {
-        $resp = transformer_model_lexical_context_return_gate_blocked_user_message();
-        // TEMPORARY cow_return_trace.
-        $resp = transformer_model_lcm_cow_return_trace_checkpoint(
-            'transformer_model_lexical_context_build_sentences_from_documents',
-            'return_gate_blocked_return',
-            $input_text_raw,
-            $resp
-        );
-        return $resp;
+        return transformer_model_lexical_context_return_gate_blocked_user_message();
     }
-    transformer_model_lcm_cow_track_log_stage( 'after_return_gate', $sentenceScores );
 
     transformer_model_lexical_context_lcm_timing_segment( 'pre_assembly' );
 
@@ -8795,50 +7942,17 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         }
     }
 
-    transformer_model_lcm_case_diag_log_rows(
-        $input_text_raw,
-        'final_candidates',
-        $assembly_sentenceScores,
-        $post_title_map,
-        is_array( $assembly_sentenceScores ) ? count( $assembly_sentenceScores ) : 0
-    );
-    transformer_model_lcm_cow_track_log_stage( 'before_assembly', $assembly_sentenceScores );
-    transformer_model_lcm_chatbot_sales_diag_log_stage( $input_text_raw, 'before_assembly', $assembly_sentenceScores, $post_title_map );
-    transformer_model_lcm_chatbot_sales_target_trace_scan_rows( 'before_assembly', $assembly_sentenceScores, $post_title_map );
-
-    transformer_model_lcm_rank_debug_log_rows( $input_text_raw, 'rank_debug', $assembly_sentenceScores, $post_title_map );
-    if ( transformer_model_lcm_rank_debug_is_enabled_for_query( $input_text_raw ) ) {
-        $GLOBALS['kognetiks_lcm_rank_debug_query'] = (string) $input_text_raw;
-        $GLOBALS['kognetiks_lcm_rank_debug_titles'] = $post_title_map;
-    }
-    $GLOBALS['kognetiks_lcm_raw_query_for_assembly'] = (string) $input_text_raw;
-
     $assembled = transformer_model_lexical_context_assemble_response_from_scored_sentences(
         $assembly_sentenceScores,
         $maxWords,
         $sentenceResponseCount,
         $similarityThreshold,
         $leadingSentencesRatio,
-        $leadingTokenRatio
+        $leadingTokenRatio,
+        $input_text_raw
     );
-
-    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-        if ( stripos( (string) $assembled, 'cow' ) !== false ) {
-            $prev = transformer_model_lexical_context_diag_preview_text( (string) $assembled, 200 );
-            $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-            back_trace( 'NOTICE', sprintf( '[LCM][cow_track] stage="final_output" text="%s"', $prev ) );
-        }
-    }
 
     transformer_model_lexical_context_lcm_timing_segment( 'assembly' );
-
-    // TEMPORARY cow_return_trace: checkpoint at final return of build_sentences_from_documents.
-    $assembled = transformer_model_lcm_cow_return_trace_checkpoint(
-        'transformer_model_lexical_context_build_sentences_from_documents',
-        'final_return',
-        $input_text_raw,
-        $assembled
-    );
 
     return $assembled;
 }
@@ -9055,52 +8169,13 @@ function transformer_model_lexical_context_deduplicate_near_duplicate_sentence_r
  * @param array<int, array<string, mixed>> $sentenceScores
  * @return string
  */
-function transformer_model_lexical_context_assemble_response_from_scored_sentences( $sentenceScores, $maxWords, $sentenceResponseCount, $similarityThreshold, $leadingSentencesRatio, $leadingTokenRatio ) {
-
-    // Diagnostics only: confirm assembly receives raw query.
-    $assembly_raw_query = isset( $GLOBALS['kognetiks_lcm_raw_query_for_assembly'] ) ? (string) $GLOBALS['kognetiks_lcm_raw_query_for_assembly'] : '';
-    if ( transformer_model_lcm_rank_debug_is_enabled_for_query( $assembly_raw_query ) && transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-        $rq_esc = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), trim( (string) $assembly_raw_query ) );
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][assembly_entry] count=%d raw_query_available=%d raw_query="%s"',
-                is_array( $sentenceScores ) ? count( $sentenceScores ) : 0,
-                $assembly_raw_query !== '' ? 1 : 0,
-                $rq_esc
-            )
-        );
-    }
-
-    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) && is_array( $sentenceScores ) ) {
-        foreach ( $sentenceScores as $r ) {
-            if ( ! is_array( $r ) ) {
-                continue;
-            }
-            $tx = isset( $r['sentence'] ) ? (string) $r['sentence'] : '';
-            if ( stripos( $tx, 'cow' ) !== false ) {
-                $prev = transformer_model_lexical_context_diag_preview_text( $tx, 160 );
-                $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-                back_trace( 'NOTICE', sprintf( '[LCM][cow_track] stage="assembly_input" text="%s"', $prev ) );
-            }
-        }
-    }
+function transformer_model_lexical_context_assemble_response_from_scored_sentences( $sentenceScores, $maxWords, $sentenceResponseCount, $similarityThreshold, $leadingSentencesRatio, $leadingTokenRatio, $raw_query_text = '' ) {
 
     if ( transformer_model_lexical_context_lcm_budget_hard_exceeded() ) {
         transformer_model_lexical_context_lcm_timing_segment( 'assembly_budget_cutoff' );
 
         return transformer_model_lexical_context_lcm_assembly_budget_fallback( $sentenceScores );
     }
-
-    // Diagnostics only: confirm the exact ranked order received by assembly.
-    $rank_debug_query = isset( $GLOBALS['kognetiks_lcm_rank_debug_query'] ) ? (string) $GLOBALS['kognetiks_lcm_rank_debug_query'] : '';
-    if ( transformer_model_lcm_rank_debug_is_enabled_for_query( $rank_debug_query ) ) {
-        $title_map = isset( $GLOBALS['kognetiks_lcm_rank_debug_titles'] ) && is_array( $GLOBALS['kognetiks_lcm_rank_debug_titles'] )
-            ? $GLOBALS['kognetiks_lcm_rank_debug_titles']
-            : array();
-        transformer_model_lcm_rank_debug_log_rows( $rank_debug_query, 'assembly_rank_debug', $sentenceScores, $title_map );
-    }
-    unset( $GLOBALS['kognetiks_lcm_rank_debug_query'], $GLOBALS['kognetiks_lcm_rank_debug_titles'] );
 
     // Filter out lower quality matches using similarity threshold from settings
     // Calculate quality threshold based on top score and similarity threshold setting
@@ -9123,37 +8198,19 @@ function transformer_model_lexical_context_assemble_response_from_scored_sentenc
     // Re-index array after filtering
     $qualitySentences = array_values($qualitySentences);
 
-    // For definitional queries, ensure the first sentence is a true definition when available.
-    $raw_query_for_assembly = $assembly_raw_query !== '' ? $assembly_raw_query : ( isset( $GLOBALS['kognetiks_lcm_raw_query_for_assembly'] ) ? (string) $GLOBALS['kognetiks_lcm_raw_query_for_assembly'] : '' );
-    unset( $GLOBALS['kognetiks_lcm_raw_query_for_assembly'] );
-    if ( $raw_query_for_assembly !== '' ) {
-        $rq = strtolower( wp_strip_all_tags( $raw_query_for_assembly ) );
+    // For definitional queries, prefer a strict subject-leading definition sentence as the first sentence when available.
+    if ( $raw_query_text !== '' ) {
+        $rq = strtolower( wp_strip_all_tags( $raw_query_text ) );
         $rq = preg_replace( '/\s+/u', ' ', trim( (string) $rq ) );
         $is_def_query = ( strpos( $rq, 'what is ' ) === 0 || strpos( $rq, 'what are ' ) === 0 || strpos( $rq, 'define ' ) === 0 || strpos( $rq, 'explain ' ) === 0 );
 
         if ( $is_def_query && ! empty( $qualitySentences ) ) {
-            $subject = transformer_model_lcm_informational_subject_phrase_for_definition_score( $raw_query_for_assembly, array() );
+            $subject = transformer_model_lcm_informational_subject_phrase_for_definition_score( $raw_query_text, array() );
             $subject = strtolower( preg_replace( '/\s+/u', ' ', trim( (string) $subject ) ) );
             $alias   = '';
             if ( $subject !== '' && strpos( $subject, 'artificial intelligence' ) !== false ) {
                 $alias = trim( preg_replace( '/\bartificial intelligence\b/u', 'ai', $subject ) );
                 $alias = strtolower( preg_replace( '/\s+/u', ' ', (string) $alias ) );
-            }
-
-            if ( transformer_model_lcm_rank_debug_is_enabled_for_query( $raw_query_for_assembly ) && transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                $rq_esc   = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), trim( (string) $raw_query_for_assembly ) );
-                $subj_esc = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $subject );
-                $als_esc  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $alias );
-                back_trace(
-                    'NOTICE',
-                    sprintf(
-                        '[LCM][assembly_override_diag] raw_query="%s" detected_definition_query=%d subject="%s" alias="%s"',
-                        $rq_esc,
-                        $is_def_query ? 1 : 0,
-                        $subj_esc,
-                        $als_esc
-                    )
-                );
             }
 
             // Strict subject-leading definition cues for assembly-first override.
@@ -9221,21 +8278,6 @@ function transformer_model_lexical_context_assemble_response_from_scored_sentenc
 
                 $reason = $matched ? 'subject_leading_definition' : 'not_subject_leading_definition';
 
-                if ( transformer_model_lcm_rank_debug_is_enabled_for_query( $raw_query_for_assembly ) && transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                    $prev = transformer_model_lexical_context_diag_preview_text( $tx, 140 );
-                    $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][assembly_override_candidate] rank=%d matched=%d reason="%s" text="%s"',
-                            (int) $i + 1,
-                            $matched ? 1 : 0,
-                            $reason,
-                            $prev
-                        )
-                    );
-                }
-
                 if ( ! $matched ) {
                     continue;
                 }
@@ -9251,23 +8293,8 @@ function transformer_model_lexical_context_assemble_response_from_scored_sentenc
                 $chosen = $qualitySentences[ $best_index ];
                 array_splice( $qualitySentences, $best_index, 1 );
                 array_unshift( $qualitySentences, $chosen );
-                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                    $prev = isset( $chosen['sentence'] ) ? (string) $chosen['sentence'] : '';
-                    $prev = transformer_model_lexical_context_diag_preview_text( $prev, 140 );
-                    $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-                    back_trace( 'NOTICE', sprintf( '[LCM][assembly_first_sentence_forced] applied=1 text="%s"', $prev ) );
-                }
             } elseif ( $best_index === 0 ) {
-                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                    $prev = isset( $qualitySentences[0]['sentence'] ) ? (string) $qualitySentences[0]['sentence'] : '';
-                    $prev = transformer_model_lexical_context_diag_preview_text( $prev, 140 );
-                    $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-                    back_trace( 'NOTICE', sprintf( '[LCM][assembly_first_sentence_forced] applied=0 text="%s"', $prev ) );
-                }
             } else {
-                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                    back_trace( 'NOTICE', '[LCM][assembly_first_sentence_forced] applied=0 text=""' );
-                }
             }
         }
     }
