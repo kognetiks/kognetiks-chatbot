@@ -5216,13 +5216,14 @@ function transformer_model_lcm_is_answerable_row( $text, $has_anchor ) {
  * @param bool   $has_anchor
  * @return int
  */
-function transformer_model_lcm_get_answer_strength( $text, $has_anchor ) {
+function transformer_model_lcm_get_answer_strength( $text, $has_anchor, $meaningful_query_tokens = null ) {
 
     if ( ! $has_anchor ) {
         return 0;
     }
 
     $slower = strtolower( wp_strip_all_tags( (string) $text ) );
+    $slower = preg_replace( '/\s+/u', ' ', trim( (string) $slower ) );
 
     // Tier 3: Mechanism (strongest).
     $mechanism_terms = array(
@@ -5259,7 +5260,62 @@ function transformer_model_lcm_get_answer_strength( $text, $has_anchor ) {
     }
 
     // Tier 1: Anchor-only (weak but allowed).
-    return 1;
+    $strength = 1;
+
+    // Low-signal penalty: narrative/opinion fragments without definition cues or meaningful token matches.
+    $has_meaningful = false;
+    if ( is_array( $meaningful_query_tokens ) ) {
+        foreach ( $meaningful_query_tokens as $mtok ) {
+            $mtok = strtolower( trim( (string) $mtok ) );
+            if ( $mtok === '' ) {
+                continue;
+            }
+            if ( preg_match( '/\b' . preg_quote( $mtok, '/' ) . '\b/u', $slower ) ) {
+                $has_meaningful = true;
+                break;
+            }
+        }
+    }
+
+    $has_def_cue = false;
+    $def_cues = array(
+        ' is a ',
+        ' is an ',
+        ' is the ',
+        ' refers to ',
+        ' means ',
+        ' is defined as ',
+        ' is used to ',
+    );
+    foreach ( $def_cues as $cue ) {
+        if ( strpos( $slower, $cue ) !== false ) {
+            $has_def_cue = true;
+            break;
+        }
+    }
+
+    if ( ! $has_def_cue && ! $has_meaningful ) {
+        $low_signal_re = '/\b(i\b|i\'ve|i’m|i\'m|im|i think|proudly|told|maybe)\b/u';
+        if ( preg_match( $low_signal_re, $slower ) ) {
+            $before = $strength;
+            $strength = max( 0, $strength - 2 );
+            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                $pv = transformer_model_lexical_context_diag_preview_text( (string) $text, 120 );
+                $pv = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $pv );
+                back_trace(
+                    'NOTICE',
+                    sprintf(
+                        '[LCM][answer_quality_penalty] reason="low_signal_fragment" score_before=%d score_after=%d text="%s"',
+                        (int) $before,
+                        (int) $strength,
+                        $pv
+                    )
+                );
+            }
+        }
+    }
+
+    return (int) $strength;
 }
 
 /**
@@ -8182,7 +8238,7 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                 $has_anchor = (bool) preg_match( '/' . $word_re . '/iu', $slower );
             }
 
-            $sentenceScores[ $i ]['_answer_strength'] = transformer_model_lcm_get_answer_strength( $text, $has_anchor );
+            $sentenceScores[ $i ]['_answer_strength'] = transformer_model_lcm_get_answer_strength( $text, $has_anchor, $meaningful_query_tokens );
             $sentenceScores[ $i ]['_orig_rank']       = (int) $i;
         }
 
@@ -8257,6 +8313,98 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                         count( $sentenceScores )
                     )
                 );
+            }
+        }
+
+        // Fragment-completion guard: short "X is/means/refers to" inputs should only proceed if at least one row
+        // starts with the query subject phrase (allowing the AI alias). Clears rows only.
+        if ( $constraint_query_text !== '' ) {
+            $raw_fc = strtolower( wp_strip_all_tags( (string) $constraint_query_text ) );
+            $raw_fc = preg_replace( '/\s+/u', ' ', trim( (string) $raw_fc ) );
+            $raw_fc = preg_replace( '/[?.!,;:]+$/u', '', $raw_fc );
+            $words  = $raw_fc !== '' ? preg_split( '/\s+/u', $raw_fc, -1, PREG_SPLIT_NO_EMPTY ) : array();
+            $wcount = is_array( $words ) ? count( $words ) : 0;
+            $ends_def = (bool) preg_match( '/\b(?:is|is a|is an|means|refers to)$/u', $raw_fc );
+
+            if ( $wcount > 0 && $wcount <= 5 && $ends_def ) {
+                $subject = transformer_model_lcm_informational_subject_phrase_for_definition_score( $constraint_query_text, $meaningful_query_tokens );
+                $subject = strtolower( preg_replace( '/\s+/u', ' ', trim( (string) $subject ) ) );
+                $alias   = '';
+                if ( $subject !== '' && strpos( $subject, 'artificial intelligence' ) !== false ) {
+                    $alias = trim( preg_replace( '/\bartificial intelligence\b/u', 'ai', $subject ) );
+                    $alias = strtolower( preg_replace( '/\s+/u', ' ', (string) $alias ) );
+                }
+
+                $subject_re = '';
+                if ( $subject !== '' ) {
+                    $toks = preg_split( '/\s+/u', $subject, -1, PREG_SPLIT_NO_EMPTY );
+                    if ( is_array( $toks ) && $toks !== array() ) {
+                        $parts = array();
+                        foreach ( $toks as $tw ) {
+                            $parts[] = preg_quote( (string) $tw, '/' );
+                        }
+                        $subject_re = implode( '\s+', $parts );
+                    }
+                }
+                $alias_re = '';
+                if ( $alias !== '' && $alias !== $subject ) {
+                    $toks = preg_split( '/\s+/u', $alias, -1, PREG_SPLIT_NO_EMPTY );
+                    if ( is_array( $toks ) && $toks !== array() ) {
+                        $parts = array();
+                        foreach ( $toks as $tw ) {
+                            $parts[] = preg_quote( (string) $tw, '/' );
+                        }
+                        $alias_re = implode( '\s+', $parts );
+                    }
+                }
+
+                $lead_ok = false;
+                if ( $subject_re !== '' || $alias_re !== '' ) {
+                    foreach ( $sentenceScores as $r ) {
+                        if ( ! is_array( $r ) ) {
+                            continue;
+                        }
+                        $tx = isset( $r['sentence'] ) ? (string) $r['sentence'] : '';
+                        $sl = strtolower( wp_strip_all_tags( $tx ) );
+                        $sl = preg_replace( '/\s+/u', ' ', trim( (string) $sl ) );
+                        if ( $sl === '' ) {
+                            continue;
+                        }
+
+                        $m = null;
+                        if ( $subject_re !== '' && preg_match( '/^\s{0,6}(' . $subject_re . ')\b/iu', $sl, $mm ) ) {
+                            $m = $mm[1] ?? '';
+                        } elseif ( $alias_re !== '' && preg_match( '/^\s{0,6}(' . $alias_re . ')\b/iu', $sl, $mm ) ) {
+                            $m = $mm[1] ?? '';
+                        }
+                        if ( $m === null ) {
+                            continue;
+                        }
+
+                        $pos  = mb_strpos( $sl, strtolower( (string) $m ) );
+                        $pos  = $pos === false ? 0 : $pos;
+                        $plen = mb_strlen( (string) $m );
+                        $fwd  = mb_substr( $sl, $pos + $plen, 60 );
+                        if ( preg_match( '/^\s*(?:is(?:\s+a|\s+an)?|means|refers\s+to)\b/u', $fwd ) ) {
+                            $lead_ok = true;
+                            break;
+                        }
+                    }
+                }
+
+                if ( ! $lead_ok ) {
+                    $sentenceScores = array();
+                }
+
+                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                    back_trace(
+                        'NOTICE',
+                        sprintf(
+                            '[LCM][fragment_completion_gate] allow=%d reason="subject_leading_definition_required"',
+                            $lead_ok ? 1 : 0
+                        )
+                    );
+                }
             }
         }
 
