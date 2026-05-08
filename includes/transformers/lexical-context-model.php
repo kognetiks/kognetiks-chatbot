@@ -9156,6 +9156,49 @@ function transformer_model_lexical_context_build_sentences_from_corpus( $corpus,
 }
 
 /**
+ * Phase 3: detect user intent for answer shaping.
+ * For now, only `definition` and `summary` are implemented.
+ *
+ * @param string $query_raw
+ * @return string One of: definition|summary|unknown
+ */
+function transformer_model_lexical_context_detect_query_intent( $query_raw ) {
+
+    $q = is_string( $query_raw ) ? $query_raw : (string) $query_raw;
+    $q = strtolower( wp_strip_all_tags( $q ) );
+    $q = preg_replace( '/\s+/u', ' ', trim( (string) $q ) );
+
+    if ( $q === '' ) {
+        return 'unknown';
+    }
+
+    // Definition intent.
+    if (
+        strpos( $q, 'what is ' ) === 0
+        || strpos( $q, 'what are ' ) === 0
+        || strpos( $q, 'define ' ) === 0
+        || strpos( $q, 'explain ' ) === 0
+        || preg_match( '/^(meaning\s+of)\s+/u', $q )
+        || preg_match( '/\bmeaning\s+of\b/u', $q )
+    ) {
+        return 'definition';
+    }
+
+    // Summary intent.
+    if (
+        strpos( $q, 'summarize ' ) === 0
+        || strpos( $q, 'summary of ' ) === 0
+        || preg_match( '/\btl;dr\b/u', $q )
+        || preg_match( '/\b(can you|could you|please)\s+summarize\b/u', $q )
+        || preg_match( '/\bgive\s+me\s+(a\s+)?summary\b/u', $q )
+    ) {
+        return 'summary';
+    }
+
+    return 'unknown';
+}
+
+/**
  * Consolidate ranked candidate rows into a structured intermediate object.
  * This creates a clean handoff between retrieval/ranking and final text assembly.
  *
@@ -9171,14 +9214,7 @@ function transformer_model_lexical_context_build_consolidation_object( $query_ra
     $query_raw = is_string( $query_raw ) ? $query_raw : (string) $query_raw;
     $shape     = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
 
-    $intent = 'unknown';
-    $rq = strtolower( wp_strip_all_tags( $query_raw ) );
-    $rq = preg_replace( '/\s+/u', ' ', trim( (string) $rq ) );
-    if ( $rq !== '' && ( strpos( $rq, 'what is ' ) === 0 || strpos( $rq, 'what are ' ) === 0 || strpos( $rq, 'define ' ) === 0 || strpos( $rq, 'explain ' ) === 0 ) ) {
-        $intent = 'definition';
-    } elseif ( $shape === 'informational_query' ) {
-        $intent = 'informational';
-    }
+    $intent = transformer_model_lexical_context_detect_query_intent( $query_raw );
 
     $primary_topic = transformer_model_lcm_informational_subject_phrase_for_definition_score( $query_raw, $meaningful_query_tokens );
     $primary_topic = trim( (string) $primary_topic );
