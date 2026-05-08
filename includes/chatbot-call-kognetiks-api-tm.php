@@ -168,6 +168,14 @@ function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $
     if (!empty($response)) {
         // Prepare the response body
         $response_body['choices'][0]['message']['content'] = trim($response);
+
+        // Final emitted-response normalization (Unicode whitespace + quote/punctuation spacing).
+        // Applies regardless of the underlying transformer model path.
+        if ( function_exists( 'transformer_model_lexical_context_normalize_emitted_response_spacing' ) ) {
+            $response_body['choices'][0]['message']['content'] = transformer_model_lexical_context_normalize_emitted_response_spacing(
+                (string) $response_body['choices'][0]['message']['content']
+            );
+        }
     
         // Remove any trailing comma, colon, semicolon, or spaces and replace them with a period
         $response_body['choices'][0]['message']['content'] = preg_replace('/[,;:\s]+$/', '.', $response_body['choices'][0]['message']['content']);

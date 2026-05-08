@@ -1809,6 +1809,84 @@ function transformer_model_lexical_context_filter_sentence_scores_cross_document
 }
 
 /**
+ * Post-scoring: modestly boost candidates that appear across multiple documents after normalization.
+ * This helps "useful, repeated facts" survive aggressive filtering, while one-off headline/share rows fall out.
+ *
+ * @param array<int, array<string, mixed>> $sentenceScores
+ * @return array<int, array<string, mixed>>
+ */
+function transformer_model_lexical_context_apply_cross_document_consensus_boost( $sentenceScores ) {
+
+    if ( empty( $sentenceScores ) || ! is_array( $sentenceScores ) ) {
+        return is_array( $sentenceScores ) ? $sentenceScores : array();
+    }
+
+    $key_docs = array();
+    foreach ( $sentenceScores as $row ) {
+        if ( ! is_array( $row ) ) {
+            continue;
+        }
+        $pid = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
+        $s   = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
+        $s   = transformer_model_lexical_context_clean_sentence_for_output( $s );
+        if ( $s === '' ) {
+            continue;
+        }
+
+        $tok = transformer_model_lexical_context_normalize_sentence_to_dedup_tokens( $s );
+        if ( empty( $tok ) ) {
+            continue;
+        }
+        $key = implode( ' ', $tok );
+        if ( $key === '' ) {
+            continue;
+        }
+        if ( ! isset( $key_docs[ $key ] ) ) {
+            $key_docs[ $key ] = array();
+        }
+        $key_docs[ $key ][ $pid ] = true;
+    }
+
+    if ( empty( $key_docs ) ) {
+        return $sentenceScores;
+    }
+
+    $boosted = 0;
+    foreach ( $sentenceScores as $i => $row ) {
+        if ( ! is_array( $row ) ) {
+            continue;
+        }
+        $s = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
+        $s = transformer_model_lexical_context_clean_sentence_for_output( $s );
+        if ( $s === '' ) {
+            continue;
+        }
+        $tok = transformer_model_lexical_context_normalize_sentence_to_dedup_tokens( $s );
+        if ( empty( $tok ) ) {
+            continue;
+        }
+        $key = implode( ' ', $tok );
+        if ( $key === '' || empty( $key_docs[ $key ] ) ) {
+            continue;
+        }
+        $doc_count = is_array( $key_docs[ $key ] ) ? count( $key_docs[ $key ] ) : 0;
+        if ( $doc_count >= 2 ) {
+            $base = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
+            // Small additive boost; capped so a single repeated fragment can't dominate.
+            $bonus = min( 12.0, 4.0 * ( $doc_count - 1 ) );
+            $sentenceScores[ $i ]['score'] = $base + $bonus;
+            ++$boosted;
+        }
+    }
+
+    if ( $boosted > 0 && transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        back_trace( 'NOTICE', sprintf( '[LCM][cross_document_consensus] boosted=%d', $boosted ) );
+    }
+
+    return $sentenceScores;
+}
+
+/**
  * Apply document gate with optional informational-query expansion.
  *
  * For informational queries, ensure up to N documents (default 3) are retained by expanding the allowed set
@@ -1933,8 +2011,8 @@ function transformer_model_lexical_context_filter_sentence_scores_row_gate( $sen
  */
 function transformer_model_lexical_context_sentence_dedupe_key( $sentence ) {
 
-    $sentence = wp_strip_all_tags( (string) $sentence );
-    $sentence = preg_replace( '/\s+/', ' ', trim( $sentence ) );
+    $sentence = transformer_model_lexical_context_clean_sentence_for_output( (string) $sentence );
+    $sentence = preg_replace( '/\s+/u', ' ', trim( (string) $sentence ) );
 
     return hash( 'sha256', strtolower( $sentence ) );
 }
@@ -4128,6 +4206,163 @@ function transformer_model_lexical_context_sentence_row_metadata_marker_tally( $
 }
 
 /**
+ * Aggressively remove obvious metadata/share artifacts from a candidate sentence.
+ * Used only in post-scoring filtering/assembly stages (not in PMI training).
+ *
+ * Examples removed:
+ * - Apple News / source share URLs
+ * - Leading link glyphs (🔗) and "Summary", "Related", "Tags", etc.
+ * - Standalone or embedded publish-date stubs (YYYY-MM-DD)
+ *
+ * @param string $text
+ * @return string Cleaned single-line sentence.
+ */
+function transformer_model_lexical_context_clean_sentence_for_output( $text ) {
+
+    if ( ! is_string( $text ) ) {
+        $text = (string) $text;
+    }
+
+    $t = wp_strip_all_tags( $text );
+    $t = html_entity_decode( $t, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+    // Normalize common Unicode “spaces” that PHP/PCRE can treat inconsistently across builds.
+    // (NBSP, narrow NBSP, thin space, hair space) → plain space.
+    $t = str_replace(
+        array( "\xC2\xA0", "\xE2\x80\xAF", "\xE2\x80\x89", "\xE2\x80\x8A" ),
+        ' ',
+        (string) $t
+    );
+
+    // Normalize whitespace early so pattern checks behave consistently.
+    $t = preg_replace( '/\s+/u', ' ', trim( $t ) );
+    if ( $t === '' ) {
+        return '';
+    }
+
+    // Normalize common "https: //apple. News/..." spacing variants before URL removal.
+    $t = preg_replace( '~\bhttps?\s*:\s*/\s*/~i', 'http://', $t );
+    $t = preg_replace( '~\bhttp\s*:\s*/\s*/~i', 'http://', $t );
+    $t = preg_replace( '~\bhttps\s*:\s*/\s*/~i', 'https://', $t );
+
+    // Some feeds split domains with spaces/dots (e.g. "apple. News"). Collapse obvious cases.
+    $t = preg_replace( '~\bapple\s*\.\s*news\b~i', 'apple.news', $t );
+
+    // Drop leading "link" bullets/icons.
+    $t = preg_replace( '/^\s*[🔗▶►•·]+\s*/u', '', $t );
+
+    // Remove URLs (keep surrounding prose).
+    $t = preg_replace( '~\bhttps?://[^\s)]+~i', ' ', $t );
+    $t = preg_replace( '~\bapple\.news/[^\s)]+~i', ' ', $t );
+
+    // Remove common share/query artifacts.
+    $t = preg_replace( '/\bhighlight\s*=\s*\S+/iu', ' ', $t );
+
+    // Strip common "— Source" headline tails (feed artifacts). Keep conservative list to avoid removing real prose dashes.
+    $t = preg_replace(
+        '/\s*[—\-]\s*(Gizmodo|The Verge|Ars Technica|Reuters|AP|Associated Press|BBC|CNN|Wired|TechCrunch|Engadget|Bloomberg|The Guardian|NYT|New York Times)\b/iu',
+        '',
+        $t
+    );
+
+    // Remove "Summary" / navigation labels. If "Summary" appears very early, drop any leading headline blob too.
+    // Example: "Talkie Is ... — Gizmodo Summary Talkie, a …" => "Talkie, a …"
+    $pos_summary = stripos( $t, 'summary' );
+    if ( $pos_summary !== false && $pos_summary >= 0 && $pos_summary < 140 ) {
+        $t = substr( $t, (int) $pos_summary + strlen( 'summary' ) );
+    }
+    $t = preg_replace( '/^\s*(summary|related|tags|references?)\b\s*[:\-–—]?\s*/iu', '', $t );
+
+    // If a long title-like prefix is duplicated later in the same row (headline repeated), drop the first occurrence.
+    // This happens when feeds concatenate headline + body + headline again.
+    $t_norm = preg_replace( '/\s+/u', ' ', trim( (string) $t ) );
+    if ( $t_norm !== '' && function_exists( 'mb_substr' ) ) {
+        $prefix = mb_substr( $t_norm, 0, 90, 'UTF-8' );
+    } else {
+        $prefix = substr( $t_norm, 0, 90 );
+    }
+    $prefix = trim( (string) $prefix );
+    if ( strlen( $prefix ) >= 60 ) {
+        // Avoid stripos offset arg to prevent environment-specific fatals (some hosts run patched/extreme builds).
+        $tail   = substr( $t_norm, 90 );
+        $second = stripos( $tail, $prefix );
+        if ( $second !== false ) {
+            $t = substr( $t_norm, 90 + (int) $second );
+        }
+    }
+
+    // Remove ISO-like publish dates (common in feed merges).
+    $t = preg_replace( '/\b(19|20)\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\b/u', ' ', $t );
+
+    // Final whitespace normalization.
+    $t = preg_replace( '/\s+/u', ' ', trim( (string) $t ) );
+
+    // Tighten spacing around punctuation and closing quotes/brackets.
+    // Examples: “vintage LLM, ” => “vintage LLM,” ; "word ." => "word."
+    $t = preg_replace( '/\s+([,.;:!?])/', '$1', (string) $t );
+    // Remove any whitespace between punctuation and a following quote/bracket.
+    // This specifically fixes feed artifacts like: `LLM, ”` → `LLM,”` (including NBSP variants).
+    $t = preg_replace( '/([,.;:!?])\s+([”’"“‘\)\]\}])/u', '$1$2', (string) $t );
+    $t = preg_replace( '/\s+([”’"\)\]\}])/', '$1', (string) $t );
+    $t = preg_replace( '/([“‘"\(\[\{])\s+/', '$1', (string) $t );
+
+    // Ensure a space before an opening quote when it follows a word character.
+    // Example: "a“vintage" => "a “vintage"
+    $t = preg_replace( '/([\p{L}\p{N}])([“‘"])/u', '$1 $2', (string) $t );
+
+    // Remove empty punctuation remnants.
+    $t = trim( (string) preg_replace( '/^[\p{P}\p{S}\s]+|[\p{P}\p{S}\s]+$/u', '', $t ) );
+
+    return $t;
+}
+
+/**
+ * Final-pass normalization for the emitted chatbot response.
+ * This is intentionally narrower than clean_sentence_for_output(): it does NOT strip URLs/metadata,
+ * it only normalizes whitespace and quote/punctuation spacing (including odd Unicode spaces).
+ *
+ * @param string $text
+ * @return string
+ */
+function transformer_model_lexical_context_normalize_emitted_response_spacing( $text ) {
+
+    if ( ! is_string( $text ) ) {
+        $text = (string) $text;
+    }
+
+    $t = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
+    // Collapse all Unicode separators plus common invisible joiners to plain spaces.
+    // Includes: Zs/Zl/Zp, NBSP, narrow NBSP, thin/hair spaces, zero-width space, word joiner, BOM.
+    $t = preg_replace( '/[\p{Z}\x{00A0}\x{202F}\x{2000}-\x{200A}\x{200B}\x{2060}\x{FEFF}]+/u', ' ', (string) $t );
+
+    // Normalize general whitespace.
+    $t = preg_replace( '/\s+/u', ' ', trim( (string) $t ) );
+    if ( $t === '' ) {
+        return '';
+    }
+
+    // Remove space before punctuation.
+    $t = preg_replace( '/\s+([,.;:!?])/', '$1', (string) $t );
+
+    // Remove whitespace between punctuation and following quote/bracket.
+    $t = preg_replace( '/([,.;:!?])\s+([”’"“‘\)\]\}])/u', '$1$2', (string) $t );
+
+    // Remove whitespace before closing quotes/brackets.
+    $t = preg_replace( '/\s+([”’"\)\]\}])/', '$1', (string) $t );
+
+    // Remove whitespace after opening quotes/brackets.
+    $t = preg_replace( '/([“‘"\(\[\{])\s+/', '$1', (string) $t );
+
+    // Ensure a space before opening quotes when they follow a letter/number.
+    $t = preg_replace( '/([\p{L}\p{N}])([“‘"])/u', '$1 $2', (string) $t );
+
+    // Final collapse.
+    $t = preg_replace( '/\s+/u', ' ', trim( (string) $t ) );
+
+    return $t;
+}
+
+/**
  * Strip WordPress caption shortcodes and generic shortcode wrappers, keeping any remaining prose.
  * Diagnostic/quality-filter helper only; does not affect scoring.
  *
@@ -4188,6 +4423,18 @@ function transformer_model_lexical_context_low_value_sentence_row_reason_codes( 
         return array( 'empty_sentence' );
     }
 
+    // Early-clean obvious share artifacts and re-evaluate (keeps the salvage path consistent with downstream assembly).
+    $cleaned = transformer_model_lexical_context_clean_sentence_for_output( $raw );
+    if ( $cleaned !== '' && $cleaned !== preg_replace( '/\s+/u', ' ', trim( wp_strip_all_tags( $raw ) ) ) ) {
+        $row_clean = $row;
+        $row_clean['sentence'] = $cleaned;
+        $re = transformer_model_lexical_context_low_value_sentence_row_reason_codes( $row_clean );
+        if ( $re === array() ) {
+            return array();
+        }
+        $raw = $cleaned;
+    }
+
     // Reuse chunk heuristics (line-anchored tags/related/reference, hashtag soup, etc.).
     if ( transformer_model_lexical_context_is_low_value_chunk( $raw ) ) {
         return array( 'low_value_metadata' );
@@ -4200,6 +4447,16 @@ function transformer_model_lexical_context_low_value_sentence_row_reason_codes( 
 
     $line = preg_replace( '/\s+/u', ' ', $text );
     $len  = strlen( $line );
+
+    // URL-only or URL-dominant rows (Apple News share artifacts, etc.).
+    if ( preg_match( '~\bhttps?://~i', $line ) || preg_match( '~\bapple\.news\b~i', $line ) ) {
+        return array( 'url_or_share_artifact' );
+    }
+
+    // Date-only or date-dominant rows.
+    if ( preg_match( '/^\s*(?:\(|\[)?\s*(19|20)\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\s*(?:\)|\])?\s*$/u', $line ) ) {
+        return array( 'date_only' );
+    }
 
     // Merged boilerplate at sentence start (not limited to short whole lines).
     if ( preg_match( '/^\s*NEWSLETTERS?\b/i', $line ) ) {
@@ -4215,6 +4472,9 @@ function transformer_model_lexical_context_low_value_sentence_row_reason_codes( 
         return array( 'low_value_metadata' );
     }
     if ( preg_match( '/^\s*Subscribe\b/i', $line ) ) {
+        return array( 'low_value_metadata' );
+    }
+    if ( preg_match( '/^\s*Summary\b/i', $line ) ) {
         return array( 'low_value_metadata' );
     }
     if ( preg_match( '/^\s*Related(\s*[:\-–—]|\s+posts\b|\s+articles\b|\s+stories\b|\s+content\b)/i', $line ) ) {
@@ -4323,11 +4583,17 @@ function transformer_model_lexical_context_filter_low_value_sentence_rows( $rows
     $out = array();
     $removed_logged = 0;
     foreach ( $rows as $row ) {
-        // Caption/shortcode salvage: normalize row text before the existing low-value decision.
-        // Diagnostic-only intent: avoid false positives where wrappers cause good content to be dropped.
-        // Behavior invariant: we do not short-circuit — we only replace the sentence text, then run the same checks.
+        // Normalize row text before the low-value decision:
+        // - strip obvious URL/share/date/label artifacts
+        // - salvage caption/shortcode wrappers
+        // This makes filtering and downstream dedup operate on the same cleaned surface form.
         if ( is_array( $row ) && isset( $row['sentence'] ) && is_string( $row['sentence'] ) ) {
             $raw_sentence = $row['sentence'];
+            $clean_meta   = transformer_model_lexical_context_clean_sentence_for_output( $raw_sentence );
+            if ( $clean_meta !== '' ) {
+                $row['sentence'] = $clean_meta;
+                $raw_sentence    = $clean_meta;
+            }
             if ( preg_match( '/\[\/?[a-z][a-z0-9_-]*\b/i', $raw_sentence ) || preg_match( '/\bcaption\s*=/i', $raw_sentence ) ) {
                 $cleaned = transformer_model_lexical_context_strip_shortcodes_and_captions( $raw_sentence );
                 if ( $cleaned !== '' && strlen( $cleaned ) > 20 ) {
@@ -8034,6 +8300,9 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         $meaningful_query_tokens
     );
 
+    // Cross-document candidate scoring: prefer facts that recur across documents after normalization.
+    $sentenceScores = transformer_model_lexical_context_apply_cross_document_consensus_boost( $sentenceScores );
+
     transformer_model_lexical_context_diag_log_pipeline_stage( 'after_scoring', $sentenceScores, $post_title_map );
 
     $sentenceScores = transformer_model_lexical_context_sort_sentence_scores_with_document_priority( $sentenceScores );
@@ -9076,6 +9345,19 @@ function transformer_model_lexical_context_assemble_response_from_scored_sentenc
     // Re-index array after filtering
     $qualitySentences = array_values($qualitySentences);
 
+    // For definitional queries, keep at least a couple of top candidates even if the score distribution is steep.
+    // This avoids returning a single overly-short “summary” line when the runner-up is still on-topic but scored lower.
+    if ( $raw_query_text !== '' ) {
+        $rq = strtolower( wp_strip_all_tags( $raw_query_text ) );
+        $rq = preg_replace( '/\s+/u', ' ', trim( (string) $rq ) );
+        $is_def_query = ( strpos( $rq, 'what is ' ) === 0 || strpos( $rq, 'what are ' ) === 0 || strpos( $rq, 'define ' ) === 0 || strpos( $rq, 'explain ' ) === 0 );
+
+        if ( $is_def_query && count( $qualitySentences ) < 2 && is_array( $sentenceScores ) && count( $sentenceScores ) >= 2 ) {
+            $take = max( 2, min( (int) $sentenceResponseCount, 4 ) );
+            $qualitySentences = array_slice( array_values( $sentenceScores ), 0, $take );
+        }
+    }
+
     // For definitional queries, prefer a strict subject-leading definition sentence as the first sentence when available.
     if ( $raw_query_text !== '' ) {
         $rq = strtolower( wp_strip_all_tags( $raw_query_text ) );
@@ -9207,7 +9489,10 @@ function transformer_model_lexical_context_assemble_response_from_scored_sentenc
         // Only use the best sentence if it has significant matches or input words
         // This prevents returning generic "what is" questions
         if ($hasSignificantContent || $hasInputWords) {
-            $sentence = trim($bestSentence['sentence']);
+            $sentence = isset( $bestSentence['sentence'] ) ? (string) $bestSentence['sentence'] : '';
+            // Final output normalization: apply the same cleanup used in filtering/deduplication.
+            $sentence = transformer_model_lexical_context_clean_sentence_for_output( $sentence );
+            $sentence = trim( (string) $sentence );
             if (!empty($sentence)) {
                 // Ensure sentence ends with punctuation
                 if (!preg_match('/[.!?]$/', $sentence)) {
@@ -9228,7 +9513,10 @@ function transformer_model_lexical_context_assemble_response_from_scored_sentenc
     // Use the ratios to determine how many tokens/sentences to allocate
     // Prefer adding fewer, higher quality sentences for tighter responses
     for ($i = 1; $i < count($qualitySentences) && $sentencesAdded < $maxSentences && $wordCount < $maxWords; $i++) {
-        $sentence = trim($qualitySentences[$i]['sentence']);
+        $sentence = isset( $qualitySentences[$i]['sentence'] ) ? (string) $qualitySentences[$i]['sentence'] : '';
+        // Final output normalization: apply the same cleanup used in filtering/deduplication.
+        $sentence = transformer_model_lexical_context_clean_sentence_for_output( $sentence );
+        $sentence = trim( (string) $sentence );
         if (empty($sentence)) {
             continue;
         }
@@ -9277,7 +9565,7 @@ function transformer_model_lexical_context_assemble_response_from_scored_sentenc
         }
     }
     
-    return trim($response);
+    return transformer_model_lexical_context_normalize_emitted_response_spacing( trim( (string) $response ) );
 }
 
 // Function to build structured response from words when corpus sentences aren't available
