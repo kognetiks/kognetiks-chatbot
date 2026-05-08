@@ -9089,8 +9089,32 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         }
     }
 
-    $assembled = transformer_model_lexical_context_assemble_response_from_scored_sentences(
+    // Phase 2: build structured intermediate object as the handoff between ranking and synthesis.
+    $consolidated = transformer_model_lexical_context_build_consolidation_object(
+        $input_text_raw,
+        $query_shape,
+        $meaningful_query_tokens,
         $assembly_sentenceScores,
+        $sentenceScores
+    );
+
+    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][consolidated] intent=%s topic="%s" best_doc=%d facts=%d discarded=%d confidence=%.2f',
+                isset( $consolidated['intent'] ) ? (string) $consolidated['intent'] : '',
+                str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) ( $consolidated['primary_topic'] ?? '' ) ),
+                (int) ( $consolidated['best_document_id'] ?? 0 ),
+                is_array( $consolidated['facts'] ?? null ) ? count( (array) $consolidated['facts'] ) : 0,
+                is_array( $consolidated['discarded'] ?? null ) ? count( (array) $consolidated['discarded'] ) : 0,
+                isset( $consolidated['confidence'] ) ? (float) $consolidated['confidence'] : 0.0
+            )
+        );
+    }
+
+    $assembled = transformer_model_lexical_context_assemble_response_from_consolidated(
+        $consolidated,
         $maxWords,
         $sentenceResponseCount,
         $similarityThreshold,
@@ -9128,6 +9152,201 @@ function transformer_model_lexical_context_build_sentences_from_corpus( $corpus,
         $leadingSentencesRatio,
         $leadingTokenRatio,
         ''
+    );
+}
+
+/**
+ * Consolidate ranked candidate rows into a structured intermediate object.
+ * This creates a clean handoff between retrieval/ranking and final text assembly.
+ *
+ * @param string                           $query_raw
+ * @param array{ shape?: string }          $query_shape
+ * @param array<int, string>               $meaningful_query_tokens
+ * @param array<int, array<string, mixed>> $survivors Ranked rows that survived gates + dedup.
+ * @param array<int, array<string, mixed>> $all_ranked Optional. Larger ranked pool (pre-gate) used to populate discarded[].
+ * @return array<string, mixed>
+ */
+function transformer_model_lexical_context_build_consolidation_object( $query_raw, $query_shape, $meaningful_query_tokens, $survivors, $all_ranked = array() ) {
+
+    $query_raw = is_string( $query_raw ) ? $query_raw : (string) $query_raw;
+    $shape     = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
+
+    $intent = 'unknown';
+    $rq = strtolower( wp_strip_all_tags( $query_raw ) );
+    $rq = preg_replace( '/\s+/u', ' ', trim( (string) $rq ) );
+    if ( $rq !== '' && ( strpos( $rq, 'what is ' ) === 0 || strpos( $rq, 'what are ' ) === 0 || strpos( $rq, 'define ' ) === 0 || strpos( $rq, 'explain ' ) === 0 ) ) {
+        $intent = 'definition';
+    } elseif ( $shape === 'informational_query' ) {
+        $intent = 'informational';
+    }
+
+    $primary_topic = transformer_model_lcm_informational_subject_phrase_for_definition_score( $query_raw, $meaningful_query_tokens );
+    $primary_topic = trim( (string) $primary_topic );
+    if ( $primary_topic === '' && is_array( $meaningful_query_tokens ) && $meaningful_query_tokens !== array() ) {
+        $primary_topic = implode( ' ', array_slice( $meaningful_query_tokens, 0, 3 ) );
+    }
+
+    $best_document_id = 0;
+    if ( is_array( $survivors ) && ! empty( $survivors[0]['post_id'] ) ) {
+        $best_document_id = (int) $survivors[0]['post_id'];
+    }
+
+    $supporting = array();
+    $facts      = array();
+
+    foreach ( is_array( $survivors ) ? $survivors : array() as $row ) {
+        if ( ! is_array( $row ) ) {
+            continue;
+        }
+        $pid  = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
+        $text = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
+        $text = transformer_model_lexical_context_clean_sentence_for_output( $text );
+        $text = trim( (string) $text );
+        if ( $text === '' ) {
+            continue;
+        }
+
+        $supporting[ $pid ] = true;
+
+        $slower = strtolower( wp_strip_all_tags( $text ) );
+        $contains_anchor = false;
+        if ( is_array( $meaningful_query_tokens ) ) {
+            foreach ( $meaningful_query_tokens as $mtok ) {
+                $mtok = strtolower( trim( (string) $mtok ) );
+                if ( $mtok !== '' && preg_match( '/\b' . preg_quote( $mtok, '/' ) . '\b/u', $slower ) ) {
+                    $contains_anchor = true;
+                    break;
+                }
+            }
+        }
+
+        $is_def_like = false;
+        $head_120    = function_exists( 'mb_substr' ) ? mb_substr( $slower, 0, 120 ) : substr( $slower, 0, 120 );
+        foreach ( array( ' is a ', ' is an ', ' is the ', ' refers to ', ' means ', ' is defined as ', ' is used to ' ) as $cue ) {
+            if ( strpos( $head_120, $cue ) !== false ) {
+                $is_def_like = true;
+                break;
+            }
+        }
+
+        $facts[] = array(
+            'text'               => $text,
+            'source_id'          => $pid,
+            'score'              => isset( $row['score'] ) ? (float) $row['score'] : 0.0,
+            'contains_anchor'    => $contains_anchor,
+            'is_definition_like' => $is_def_like,
+            'is_metadata'        => false,
+        );
+    }
+
+    $supporting_document_ids = array_map( 'intval', array_keys( $supporting ) );
+    $supporting_document_ids = array_values( array_filter( $supporting_document_ids, static function ( $v ) { return $v !== 0; } ) );
+
+    // Discarded: best-effort capture from a larger ranked pool, using the existing reason code helper.
+    $discarded = array();
+    if ( is_array( $all_ranked ) && $all_ranked !== array() ) {
+        $seen_fact = array();
+        foreach ( $facts as $f ) {
+            $seen_fact[ hash( 'sha256', (string) $f['text'] ) ] = true;
+        }
+        $max_discarded = 25;
+        foreach ( $all_ranked as $row ) {
+            if ( count( $discarded ) >= $max_discarded ) {
+                break;
+            }
+            if ( ! is_array( $row ) ) {
+                continue;
+            }
+            $raw = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
+            $txt = transformer_model_lexical_context_clean_sentence_for_output( $raw );
+            $txt = trim( (string) $txt );
+            if ( $txt === '' ) {
+                continue;
+            }
+            $k = hash( 'sha256', $txt );
+            if ( isset( $seen_fact[ $k ] ) ) {
+                continue;
+            }
+
+            $reasons = transformer_model_lexical_context_low_value_sentence_row_reason_codes(
+                array_merge(
+                    is_array( $row ) ? $row : array(),
+                    array( 'sentence' => $txt )
+                )
+            );
+
+            // Only record actually-discard-worthy rows (metadata, url/share artifacts, etc.)
+            if ( $reasons === array() ) {
+                continue;
+            }
+
+            $discarded[] = array(
+                'text'      => $txt,
+                'source_id' => isset( $row['post_id'] ) ? (int) $row['post_id'] : 0,
+                'score'     => isset( $row['score'] ) ? (float) $row['score'] : 0.0,
+                'reasons'   => $reasons,
+            );
+        }
+    }
+
+    $top_score   = ( ! empty( $facts ) && isset( $facts[0]['score'] ) ) ? (float) $facts[0]['score'] : 0.0;
+    $confidence  = max( 0.0, min( 1.0, $top_score / 100.0 ) );
+
+    return array(
+        'query'                   => $query_raw,
+        'intent'                  => $intent,
+        'primary_topic'           => $primary_topic,
+        'best_document_id'        => $best_document_id,
+        'supporting_document_ids' => $supporting_document_ids,
+        'facts'                   => $facts,
+        'discarded'               => $discarded,
+        'confidence'              => $confidence,
+    );
+}
+
+/**
+ * Assemble the chatbot response from a consolidation object (facts-first).
+ *
+ * @param array<string, mixed> $consolidated
+ * @param int                  $maxWords
+ * @param int                  $sentenceResponseCount
+ * @param float                $similarityThreshold
+ * @param float                $leadingSentencesRatio
+ * @param float                $leadingTokenRatio
+ * @param string               $raw_query_text
+ * @return string
+ */
+function transformer_model_lexical_context_assemble_response_from_consolidated( $consolidated, $maxWords, $sentenceResponseCount, $similarityThreshold, $leadingSentencesRatio, $leadingTokenRatio, $raw_query_text = '' ) {
+
+    $facts = ( is_array( $consolidated ) && isset( $consolidated['facts'] ) && is_array( $consolidated['facts'] ) )
+        ? $consolidated['facts']
+        : array();
+
+    // Convert facts back into sentenceScore-like rows for existing assembler logic.
+    $rows = array();
+    foreach ( $facts as $f ) {
+        if ( ! is_array( $f ) ) {
+            continue;
+        }
+        $rows[] = array(
+            'sentence'             => isset( $f['text'] ) ? (string) $f['text'] : '',
+            'post_id'              => isset( $f['source_id'] ) ? (int) $f['source_id'] : 0,
+            'score'                => isset( $f['score'] ) ? (float) $f['score'] : 0.0,
+            // conservative defaults; assembly only needs these for simple heuristics
+            'hasSignificantMatch'  => true,
+            'inputMatched'         => 1,
+            'wordCount'            => str_word_count( (string) ( $f['text'] ?? '' ) ),
+        );
+    }
+
+    return transformer_model_lexical_context_assemble_response_from_scored_sentences(
+        $rows,
+        $maxWords,
+        $sentenceResponseCount,
+        $similarityThreshold,
+        $leadingSentencesRatio,
+        $leadingTokenRatio,
+        $raw_query_text
     );
 }
 
