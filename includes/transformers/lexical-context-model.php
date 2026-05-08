@@ -9795,7 +9795,7 @@ function transformer_model_lexical_context_assemble_response_from_consolidated( 
     if ( is_array( $consolidated ) && (string) ( $consolidated['intent'] ?? '' ) === 'definition' ) {
         $templated = transformer_model_lexical_context_assemble_definition_template_from_consolidated( $consolidated );
         if ( is_string( $templated ) && trim( $templated ) !== '' ) {
-            return $templated;
+            return transformer_model_lexical_context_polish_before_emit( $templated, $consolidated );
         }
     }
 
@@ -9820,7 +9820,7 @@ function transformer_model_lexical_context_assemble_response_from_consolidated( 
         );
     }
 
-    return transformer_model_lexical_context_assemble_response_from_scored_sentences(
+    $assembled = transformer_model_lexical_context_assemble_response_from_scored_sentences(
         $rows,
         $maxWords,
         $sentenceResponseCount,
@@ -9829,6 +9829,7 @@ function transformer_model_lexical_context_assemble_response_from_consolidated( 
         $leadingTokenRatio,
         $raw_query_text
     );
+    return transformer_model_lexical_context_polish_before_emit( $assembled, is_array( $consolidated ) ? $consolidated : array() );
 }
 
 /**
@@ -9900,13 +9901,16 @@ function transformer_model_lexical_context_assemble_definition_template_from_con
             }
         }
 
-        // Purpose slot: goal/intent language.
+        // Purpose slot: goal/intent language (and for methods/systems, allow "how to use" guidance).
         if ( $purpose === '' ) {
             if (
                 ! $aside_like
                 && (
                 preg_match( '/\b(?:purpose|goal|idea|aim|intended)\b/iu', $sl )
                 || preg_match( '/\bto\s+(?:emulate|simulate|approximate|reflect)\b/iu', $sl )
+                || preg_match( '/\b(?:core\s+rule|rule\s+of\s+thumb|guideline|best\s+practice)\b/iu', $sl )
+                || preg_match( '/\b(?:should|avoid|instead\s+of)\b/iu', $sl )
+                || preg_match( '/\bcopying\s+and\s+pasting\b/iu', $sl )
                 )
             ) {
                 $purpose = $t;
@@ -9975,6 +9979,10 @@ function transformer_model_lexical_context_assemble_definition_template_from_con
         return '';
     }
 
+    // If the definition already begins with an article ("A/An/The ..."), we should not prepend "X is/are".
+    $def_trim = ltrim( (string) $def );
+    $def_is_full_sentence = (bool) preg_match( '/^(?:a|an|the)\s+/iu', $def_trim );
+
     // If our "definition" is actually an aside/qualifier, discard it and rely on synthesis fallback below.
     $def_lower = strtolower( wp_strip_all_tags( (string) $def ) );
     if ( preg_match( '/\b(?:though|personally|i[’\']?ll|i\s+will|for\s+ease\s+of\s+reference|most\s+people)\b/iu', $def_lower ) ) {
@@ -10003,15 +10011,28 @@ function transformer_model_lexical_context_assemble_definition_template_from_con
         return '';
     }
 
-    // Normalize topic plurality a bit for the template.
+    // Normalize topic plurality a bit for the template (avoid mangling non-LLM topics).
     $topic_out = $topic;
-    if ( ! preg_match( '/\bllms\b/i', $topic_out ) && preg_match( '/\bllm\b/i', $topic_out ) ) {
-        // If the query topic is singular "vintage llm", present plural "Vintage LLMs".
-        $topic_out = preg_replace( '/\bllm\b/iu', 'LLMs', $topic_out );
+    if ( preg_match( '/\bllm\b/iu', $topic_out ) ) {
+        if ( ! preg_match( '/\bllms\b/iu', $topic_out ) ) {
+            // If the query topic is singular "vintage llm", present plural "Vintage LLMs".
+            $topic_out = preg_replace( '/\bllm\b/iu', 'LLMs', $topic_out );
+        }
+    } else {
+        // Default: keep singular topic to avoid "Zettelkasten are ...".
+        $topic_out = preg_replace( '/\s+/u', ' ', trim( (string) $topic_out ) );
     }
 
     // Compose.
-    $out = $topic_out . ' are ' . rtrim( $def, ". \t\n\r\0\x0B" ) . '.';
+    $verb = ' is ';
+    if ( preg_match( '/\bllms\b/iu', $topic_out ) || preg_match( '/\b(?:models|systems|tools)\b/iu', $topic_out ) ) {
+        $verb = ' are ';
+    }
+    if ( $def_is_full_sentence ) {
+        $out = rtrim( $def, ". \t\n\r\0\x0B" ) . '.';
+    } else {
+        $out = $topic_out . $verb . rtrim( $def, ". \t\n\r\0\x0B" ) . '.';
+    }
     if ( $example !== '' && ! transformer_model_lexical_context_are_sentences_near_duplicates( $example, $def ) ) {
         $out .= ' ' . rtrim( $example, ". \t\n\r\0\x0B" ) . '.';
     }
@@ -10022,6 +10043,103 @@ function transformer_model_lexical_context_assemble_definition_template_from_con
     // Final spacing normalization (same helper the UI applies at emit time).
     if ( function_exists( 'transformer_model_lexical_context_normalize_emitted_response_spacing' ) ) {
         $out = transformer_model_lexical_context_normalize_emitted_response_spacing( (string) $out );
+    }
+
+    return trim( (string) $out );
+}
+
+/**
+ * Phase 7: Final polish rules before emit (string-only, no retrieval changes).
+ *
+ * - collapse repeated spaces (handled by normalize_emitted_response_spacing)
+ * - remove URLs/broken URLs
+ * - remove duplicated / near-duplicated sentences
+ * - limit to 2–4 sentences
+ * - remove dangling punctuation
+ * - optionally add a low-confidence preface
+ *
+ * @param string              $text
+ * @param array<string,mixed> $consolidated Optional; used for confidence/intent.
+ * @return string
+ */
+function transformer_model_lexical_context_polish_before_emit( $text, $consolidated = array() ) {
+
+    $t = is_string( $text ) ? $text : (string) $text;
+    $t = trim( (string) $t );
+    if ( $t === '' ) {
+        return '';
+    }
+
+    // Remove raw/broken URLs (including spaced schemes like "http: //example.com").
+    $t = preg_replace( '~\bhttps?\s*:\s*//\s*\S+~iu', '', (string) $t );
+    $t = preg_replace( '~\bwww\.\S+~iu', '', (string) $t );
+    $t = preg_replace( '~\b\S+\.(?:com|net|org|io|edu|gov)\S*~iu', '', (string) $t );
+
+    // Normalize spaces/quotes/punctuation spacing.
+    if ( function_exists( 'transformer_model_lexical_context_normalize_emitted_response_spacing' ) ) {
+        $t = transformer_model_lexical_context_normalize_emitted_response_spacing( (string) $t );
+    } else {
+        $t = preg_replace( '/\s+/u', ' ', trim( (string) $t ) );
+    }
+
+    // Split into sentences, dedupe near-duplicates, and cap length.
+    $parts = preg_split( '/(?<=[.!?])\s+/u', (string) $t, -1, PREG_SPLIT_NO_EMPTY );
+    $parts = is_array( $parts ) ? $parts : array( $t );
+
+    $deduped = array();
+    foreach ( $parts as $s ) {
+        $s = trim( (string) $s );
+        if ( $s === '' ) {
+            continue;
+        }
+        // Remove dangling punctuation.
+        $s = preg_replace( '/[,:;]+\s*$/u', '.', (string) $s );
+        $s = trim( (string) $s );
+        if ( $s !== '' && ! preg_match( '/[.!?]$/u', $s ) ) {
+            $s .= '.';
+        }
+
+        $is_dup = false;
+        foreach ( $deduped as $prev ) {
+            if ( function_exists( 'transformer_model_lexical_context_are_sentences_near_duplicates' ) ) {
+                if ( transformer_model_lexical_context_are_sentences_near_duplicates( $s, $prev ) ) {
+                    $is_dup = true;
+                    break;
+                }
+            } elseif ( strcasecmp( $s, $prev ) === 0 ) {
+                $is_dup = true;
+                break;
+            }
+        }
+        if ( $is_dup ) {
+            continue;
+        }
+        $deduped[] = $s;
+    }
+
+    $intent = ( is_array( $consolidated ) && isset( $consolidated['intent'] ) ) ? (string) $consolidated['intent'] : '';
+    $min_sent = ( $intent === 'definition' ) ? 2 : 2;
+    $max_sent = ( $intent === 'definition' ) ? 4 : 4;
+
+    $deduped = array_slice( $deduped, 0, $max_sent );
+    if ( count( $deduped ) < $min_sent && count( $parts ) > 0 ) {
+        // Ensure we emit something reasonable even if split failed.
+        $deduped = array_slice( array_values( array_filter( $parts ) ), 0, $min_sent );
+    }
+
+    $out = trim( implode( ' ', $deduped ) );
+
+    // Low-confidence preface.
+    $confidence = ( is_array( $consolidated ) && isset( $consolidated['confidence'] ) ) ? (float) $consolidated['confidence'] : null;
+    if ( $confidence !== null && $confidence > 0.0 && $confidence < 0.35 ) {
+        $out = 'I found limited relevant information in the site content. ' . $out;
+    }
+
+    // Final normalize again.
+    if ( function_exists( 'transformer_model_lexical_context_normalize_emitted_response_spacing' ) ) {
+        $out = transformer_model_lexical_context_normalize_emitted_response_spacing( (string) $out );
+    } else {
+        $out = preg_replace( '/\s+/u', ' ', trim( (string) $out ) );
     }
 
     return trim( (string) $out );
