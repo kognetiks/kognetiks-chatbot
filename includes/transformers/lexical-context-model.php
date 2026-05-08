@@ -107,7 +107,10 @@ function transformer_model_lexical_context_log_request_start_diagnostics( $docum
  */
 function transformer_model_lexical_context_lcm_max_runtime_seconds() {
 
-    return max( 0.5, (float) apply_filters( 'chatbot_lcm_max_runtime_seconds', 20.0 ) );
+    $opt = get_option( 'chatbot_lcm_max_runtime_seconds', 20.0 );
+    $opt = is_numeric( $opt ) ? (float) $opt : 20.0;
+
+    return max( 0.5, (float) apply_filters( 'chatbot_lcm_max_runtime_seconds', $opt ) );
 }
 
 /**
@@ -4347,14 +4350,40 @@ function transformer_model_lexical_context_normalize_emitted_response_spacing( $
     // Remove whitespace between punctuation and following quote/bracket.
     $t = preg_replace( '/([,.;:!?])\s+([”’"“‘\)\]\}])/u', '$1$2', (string) $t );
 
+    // Quotes-as-punctuation fixes (straight + curly quotes).
+    // Example: `"confidential "accessible` => `"confidential" accessible`
+    // - remove spaces BEFORE a quote when it appears between word characters (treat as closing-quote artifact)
+    // - ensure a space AFTER a quote when followed by a letter/number (so `"word"next` => `"word" next`)
+    //
+    // Note: some feeds incorrectly use an opening curly quote `“` where a closing quote should be,
+    // so we treat `“` as eligible here too.
+    //
+    // After our whitespace normalization above, inter-token spacing should be plain ASCII spaces.
+    // Use `[ ]+` instead of `\s+` here to reliably catch cases like: `confidential "accessible`.
+    // If a quote appears between word characters, treat it like a closing-quote artifact:
+    // remove spaces before it, and ensure a single space after it.
+    $t = preg_replace( '/([\p{L}\p{N}])[ ]+([“”"])(?=[\p{L}\p{N}])/u', '$1$2', (string) $t );
+    $t = preg_replace( '/([\p{L}\p{N}])([“”"])(?=[\p{L}\p{N}])/u', '$1$2 ', (string) $t );
+
+    // Broken quote-pair artifact: an opening straight quote, then later another straight quote used as if it were
+    // an opening quote again (missing the closing quote in between).
+    // Example: `"confidential "accessible` => `"confidential" accessible`
+    $t = preg_replace( '/(")([^"]{1,120}?)[ ]+"(?=[[:alnum:]])/u', '$1$2" ', (string) $t );
+
     // Remove whitespace before closing quotes/brackets.
     $t = preg_replace( '/\s+([”’"\)\]\}])/', '$1', (string) $t );
 
     // Remove whitespace after opening quotes/brackets.
     $t = preg_replace( '/([“‘"\(\[\{])\s+/', '$1', (string) $t );
 
-    // Ensure a space before opening quotes when they follow a letter/number.
-    $t = preg_replace( '/([\p{L}\p{N}])([“‘"])/u', '$1 $2', (string) $t );
+    // Ensure a space before *opening* quotes when they follow a letter/number.
+    // Only treat as opening if the quote is immediately followed by a letter/number.
+    // This avoids undoing the closing-quote fix for patterns like: `confidential" accessible`.
+    $t = preg_replace( '/([\p{L}\p{N}])([“‘"])(?=[\p{L}\p{N}])/u', '$1 $2', (string) $t );
+
+    // Run the broken-quote-pair fix again late, after other quote-spacing normalizations.
+    // Example: `"confidential "accessible` => `"confidential" accessible`
+    $t = preg_replace( '/(")([^"]{1,120}?)[ ]+"(?=[[:alnum:]])/u', '$1$2" ', (string) $t );
 
     // Final collapse.
     $t = preg_replace( '/\s+/u', ' ', trim( (string) $t ) );
@@ -5221,9 +5250,14 @@ function transformer_model_lexical_context_answer_shape_definition_cue_specs() {
         // Strong: direct definitional phrasing.
         array( 'label' => 'is defined as', 'pattern' => '\bis\s+defined\s+as\b', 'strength' => 'strong' ),
         array( 'label' => 'refers to', 'pattern' => '\brefers\s+to\b', 'strength' => 'strong' ),
+        array( 'label' => 'describes', 'pattern' => '\bdescribes\b', 'strength' => 'strong' ),
         array( 'label' => 'is an', 'pattern' => '\bis\s+an\b', 'strength' => 'strong' ),
         array( 'label' => 'is a', 'pattern' => '\bis\s+a\b', 'strength' => 'strong' ),
         array( 'label' => 'means', 'pattern' => '\bmeans\b', 'strength' => 'strong' ),
+        array( 'label' => 'the purpose is', 'pattern' => '\bthe\s+purpose\s+is\b', 'strength' => 'strong' ),
+        array( 'label' => 'is designed to', 'pattern' => '\bis\s+designed\s+to\b', 'strength' => 'strong' ),
+        array( 'label' => 'is used to', 'pattern' => '\bis\s+used\s+to\b', 'strength' => 'strong' ),
+        array( 'label' => 'is trained on', 'pattern' => '\bis\s+trained\s+on\b', 'strength' => 'strong' ),
         // Medium: examples / capability — smaller bonus.
         array( 'label' => 'examples of', 'pattern' => '\bexamples\s+of\b', 'strength' => 'medium' ),
         array( 'label' => 'includes', 'pattern' => '\bincludes\b', 'strength' => 'medium' ),
@@ -5466,7 +5500,8 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
         $medium_ratio = 1.0;
     }
     $bonus_medium = $bonus_strong * $medium_ratio;
-    $penalty      = (float) apply_filters( 'chatbot_lcm_answer_shape_meta_penalty', 35.0 );
+    $penalty       = (float) apply_filters( 'chatbot_lcm_answer_shape_meta_penalty', 35.0 );
+    $intro_penalty = (float) apply_filters( 'chatbot_lcm_answer_shape_intro_penalty', 18.0 );
 
     $boosted      = 0;
     $penalized    = 0;
@@ -5647,6 +5682,25 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
         if ( $meta_hit ) {
             $delta -= $penalty;
             ++$penalized;
+        }
+
+        // Penalty: definition-intro / aside / boilerplate that often precedes the actual definition.
+        // This helps prefer "X is/means/refers to/is trained on..." over "If you've ever heard..." lead-ins.
+        if ( ! $meta_hit && $slower !== '' ) {
+            $head_220 = function_exists( 'mb_substr' ) ? mb_substr( $slower, 0, 220 ) : substr( $slower, 0, 220 );
+            $intro_patterns = array(
+                '/\bif\s+you[’\']?ve\s+ever\s+heard\b/i',
+                '/\banyway\b/i',
+                '/\bas\s+a\s+total\s+aside\b/i',
+                '/\bcuriosity\s+with\s+a\s+purpose\b/i',
+                '/\bthe\s+bottom\s+line\b/i',
+            );
+            foreach ( $intro_patterns as $ip ) {
+                if ( preg_match( $ip, $head_220 ) ) {
+                    $delta -= $intro_penalty;
+                    break;
+                }
+            }
         }
 
         $base = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
@@ -8153,6 +8207,9 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
     $meaningful_query_tokens          = transformer_model_lexical_context_meaningful_query_tokens_for_relevance_guard( $inputWordsLower );
     $corpus_had_meaningful_overlap    = false;
 
+    // Ensure constraint query text is always defined for downstream helpers (definition scoring, answerability, etc.).
+    $constraint_query_text = $input_text_raw !== '' ? (string) $input_text_raw : implode( ' ', (array) $inputWordsLower );
+
     $normalized_for_diag = transformer_model_lexical_context_normalize_lexical_query_string( $input_text_raw );
     $normalized_for_diag = preg_replace( '/[^\w\s]/u', ' ', $normalized_for_diag );
     $normalized_for_diag = preg_replace( '/\s+/u', ' ', trim( $normalized_for_diag ) );
@@ -8357,7 +8414,7 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                 $tx,
                 $query_shape,
                 $meaningful_query_tokens,
-                $constraint_query_text
+                isset( $constraint_query_text ) ? (string) $constraint_query_text : ''
             );
         }
     }

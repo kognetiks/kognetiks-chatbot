@@ -546,6 +546,50 @@ function chatbot_transformer_model_advanced_settings_section_callback($args) {
 
 }
 
+/**
+ * LCM max runtime (seconds) field callback.
+ *
+ * @param mixed $args
+ * @return void
+ */
+function chatbot_lcm_max_runtime_seconds_callback( $args ) {
+
+    $val = get_option( 'chatbot_lcm_max_runtime_seconds', 20 );
+    $val = is_numeric( $val ) ? (float) $val : 20.0;
+    // Clamp in UI to avoid extreme values.
+    $val = max( 0.5, min( 120.0, $val ) );
+    ?>
+    <input
+        type="number"
+        step="0.5"
+        min="0.5"
+        max="120"
+        id="chatbot_lcm_max_runtime_seconds"
+        name="chatbot_lcm_max_runtime_seconds"
+        value="<?php echo esc_attr( (string) $val ); ?>"
+        style="width: 120px;"
+    />
+    <p class="description"><?php echo esc_html__( 'Soft time budget (seconds) for one Lexical Context Model request. Increase if long answers are cut short (budget fallback). Default 20. Filter chatbot_lcm_max_runtime_seconds can still override.', 'chatbot-chatgpt' ); ?></p>
+    <?php
+}
+
+/**
+ * Sanitize LCM max runtime seconds (float, clamped).
+ *
+ * @param mixed $value
+ * @return float
+ */
+function chatbot_lcm_max_runtime_seconds_sanitize( $value ) {
+
+    if ( is_string( $value ) ) {
+        $value = trim( $value );
+    }
+    $f = is_numeric( $value ) ? (float) $value : 20.0;
+    // Clamp to a safe range.
+    $f = max( 0.5, min( 120.0, $f ) );
+    return $f;
+}
+
 // Transformer Model Build Schedule Callback - Ver 2.1.6
 function chatbot_transformer_model_build_schedule_callback($args) {
 
@@ -803,6 +847,16 @@ function chatbot_transformer_model_api_settings_init() {
         )
     );
 
+    register_setting(
+        'chatbot_transformer_model_api_model',
+        'chatbot_lcm_max_runtime_seconds',
+        array(
+            'type'              => 'number',
+            'sanitize_callback' => 'chatbot_lcm_max_runtime_seconds_sanitize',
+            'default'           => 20.0,
+        )
+    );
+
     add_settings_section(
         'chatbot_transformer_model_api_model_general_section',
         'Transformer Model Settings',
@@ -922,6 +976,14 @@ function chatbot_transformer_model_api_settings_init() {
         'chatbot_lcm_query_intent_expansion',
         'LCM Query Intent Expansion',
         'chatbot_lcm_query_intent_expansion_callback',
+        'chatbot_transformer_model_advanced_settings',
+        'chatbot_transformer_model_advanced_settings_section'
+    );
+
+    add_settings_field(
+        'chatbot_lcm_max_runtime_seconds',
+        'LCM Max Runtime (seconds)',
+        'chatbot_lcm_max_runtime_seconds_callback',
         'chatbot_transformer_model_advanced_settings',
         'chatbot_transformer_model_advanced_settings_section'
     );
