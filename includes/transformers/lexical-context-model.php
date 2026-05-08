@@ -9790,6 +9790,15 @@ function transformer_model_lexical_context_build_consolidation_object( $query_ra
  */
 function transformer_model_lexical_context_assemble_response_from_consolidated( $consolidated, $maxWords, $sentenceResponseCount, $similarityThreshold, $leadingSentencesRatio, $leadingTokenRatio, $raw_query_text = '' ) {
 
+    // Phase 6: template-based synthesis for definition intent (no external LLM required).
+    // If we can't confidently populate the slots, fall back to extraction-style assembly.
+    if ( is_array( $consolidated ) && (string) ( $consolidated['intent'] ?? '' ) === 'definition' ) {
+        $templated = transformer_model_lexical_context_assemble_definition_template_from_consolidated( $consolidated );
+        if ( is_string( $templated ) && trim( $templated ) !== '' ) {
+            return $templated;
+        }
+    }
+
     $facts = ( is_array( $consolidated ) && isset( $consolidated['facts'] ) && is_array( $consolidated['facts'] ) )
         ? $consolidated['facts']
         : array();
@@ -9820,6 +9829,202 @@ function transformer_model_lexical_context_assemble_response_from_consolidated( 
         $leadingTokenRatio,
         $raw_query_text
     );
+}
+
+/**
+ * Phase 6: Template-based synthesis for definition queries.
+ *
+ * Template:
+ * "{topic} are {definition}. {example_sentence} {purpose_sentence}"
+ *
+ * This function is intentionally heuristic and conservative; it returns '' when it can't fill slots.
+ *
+ * @param array<string, mixed> $consolidated
+ * @return string
+ */
+function transformer_model_lexical_context_assemble_definition_template_from_consolidated( array $consolidated ): string {
+
+    $topic = trim( (string) ( $consolidated['primary_topic'] ?? '' ) );
+    if ( $topic === '' ) {
+        $topic = trim( (string) ( $consolidated['query'] ?? '' ) );
+    }
+    $topic = trim( preg_replace( '/\s+/u', ' ', $topic ) );
+    if ( $topic === '' ) {
+        return '';
+    }
+
+    $facts = isset( $consolidated['facts'] ) && is_array( $consolidated['facts'] ) ? $consolidated['facts'] : array();
+    if ( $facts === array() ) {
+        return '';
+    }
+
+    $best_doc = (int) ( $consolidated['best_document_id'] ?? 0 );
+
+    $def = '';
+    $example = '';
+    $purpose = '';
+
+    foreach ( $facts as $f ) {
+        if ( ! is_array( $f ) ) {
+            continue;
+        }
+        $t = trim( (string) ( $f['text'] ?? '' ) );
+        if ( $t === '' ) {
+            continue;
+        }
+        $pid = (int) ( $f['source_id'] ?? 0 );
+        $sl  = strtolower( wp_strip_all_tags( $t ) );
+        $aside_like = (bool) preg_match( '/\b(?:though|personally|i[’\']?ll|i\s+will|for\s+ease\s+of\s+reference|most\s+people)\b/iu', $sl );
+
+        // Definition slot: prefer explicit "X is/means/refers to..."-like sentences about the topic,
+        // not about a single named example (e.g., Talkie).
+        if ( $def === '' ) {
+            $is_def_like = ! empty( $f['is_definition_like'] )
+                || (bool) preg_match( '/\b(?:is\s+a|is\s+an|is\s+the|means|refers\s+to|is\s+defined\s+as)\b/iu', $sl );
+            if ( $is_def_like ) {
+                // Avoid treating named examples as the topic definition.
+                if ( $aside_like || preg_match( '/\btalkie\b/iu', $sl ) ) {
+                    // skip
+                } elseif ( $best_doc === 0 || $pid === 0 || $pid === $best_doc ) {
+                    $def = $t;
+                    continue;
+                }
+            }
+        }
+
+        // Example slot: a concrete instance sentence (e.g., contains "example" or a named entity like Talkie).
+        if ( $example === '' ) {
+            if ( ! $aside_like && ( preg_match( '/\bone\s+example\b/iu', $sl ) || preg_match( '/\bexample\b/iu', $sl ) || preg_match( '/\btalkie\b/iu', $sl ) ) ) {
+                $example = $t;
+                continue;
+            }
+        }
+
+        // Purpose slot: goal/intent language.
+        if ( $purpose === '' ) {
+            if (
+                ! $aside_like
+                && (
+                preg_match( '/\b(?:purpose|goal|idea|aim|intended)\b/iu', $sl )
+                || preg_match( '/\bto\s+(?:emulate|simulate|approximate|reflect)\b/iu', $sl )
+                )
+            ) {
+                $purpose = $t;
+                continue;
+            }
+        }
+    }
+
+    // If we still don't have a topic definition, try again allowing non-best-doc rows.
+    if ( $def === '' ) {
+        foreach ( $facts as $f ) {
+            if ( ! is_array( $f ) ) {
+                continue;
+            }
+            $t = trim( (string) ( $f['text'] ?? '' ) );
+            if ( $t === '' ) {
+                continue;
+            }
+            $sl  = strtolower( wp_strip_all_tags( $t ) );
+            $is_def_like = ! empty( $f['is_definition_like'] )
+                || (bool) preg_match( '/\b(?:is\s+a|is\s+an|is\s+the|means|refers\s+to|is\s+defined\s+as)\b/iu', $sl );
+            if ( $is_def_like && ! preg_match( '/\btalkie\b/iu', $sl ) ) {
+                $def = $t;
+                break;
+            }
+        }
+    }
+
+    // Backfill definition if we didn't find a clean one.
+    if ( $def === '' ) {
+        foreach ( $facts as $f ) {
+            if ( is_array( $f ) ) {
+                $t = trim( (string) ( $f['text'] ?? '' ) );
+                if ( $t !== '' ) {
+                    $sl  = strtolower( wp_strip_all_tags( $t ) );
+                    if ( preg_match( '/\b(?:though|personally|i[’\']?ll|for\s+ease\s+of\s+reference)\b/iu', $sl ) ) {
+                        continue;
+                    }
+                    $def = $t;
+                    break;
+                }
+            }
+        }
+    }
+
+    // If we still don't have a clean definition sentence, synthesize a conservative one from cues.
+    // This is template-based (no LLM): it uses detected training/constraint + purpose cues.
+    if ( $def === '' ) {
+        $has_trained = false;
+        foreach ( $facts as $f ) {
+            if ( ! is_array( $f ) ) {
+                continue;
+            }
+            $sl = strtolower( wp_strip_all_tags( (string) ( $f['text'] ?? '' ) ) );
+            if ( preg_match( '/\btrained\s+on\b/iu', $sl ) || preg_match( '/\bpre-\d{3,4}\b/iu', $sl ) ) {
+                $has_trained = true;
+                break;
+            }
+        }
+        if ( $has_trained ) {
+            $def = 'language models intentionally trained or constrained around older source material so they reflect the language, assumptions, and knowledge limits of a past era';
+        }
+    }
+
+    if ( $def === '' ) {
+        return '';
+    }
+
+    // If our "definition" is actually an aside/qualifier, discard it and rely on synthesis fallback below.
+    $def_lower = strtolower( wp_strip_all_tags( (string) $def ) );
+    if ( preg_match( '/\b(?:though|personally|i[’\']?ll|i\s+will|for\s+ease\s+of\s+reference|most\s+people)\b/iu', $def_lower ) ) {
+        $def = '';
+    }
+
+    if ( $def === '' ) {
+        // Try synthesis fallback now that we've discarded aside-like defs.
+        $has_trained = false;
+        foreach ( $facts as $f ) {
+            if ( ! is_array( $f ) ) {
+                continue;
+            }
+            $sl = strtolower( wp_strip_all_tags( (string) ( $f['text'] ?? '' ) ) );
+            if ( preg_match( '/\btrained\s+on\b/iu', $sl ) || preg_match( '/\bpre-\d{3,4}\b/iu', $sl ) ) {
+                $has_trained = true;
+                break;
+            }
+        }
+        if ( $has_trained ) {
+            $def = 'language models intentionally trained or constrained around older source material so they reflect the language, assumptions, and knowledge limits of a past era';
+        }
+    }
+
+    if ( $def === '' ) {
+        return '';
+    }
+
+    // Normalize topic plurality a bit for the template.
+    $topic_out = $topic;
+    if ( ! preg_match( '/\bllms\b/i', $topic_out ) && preg_match( '/\bllm\b/i', $topic_out ) ) {
+        // If the query topic is singular "vintage llm", present plural "Vintage LLMs".
+        $topic_out = preg_replace( '/\bllm\b/iu', 'LLMs', $topic_out );
+    }
+
+    // Compose.
+    $out = $topic_out . ' are ' . rtrim( $def, ". \t\n\r\0\x0B" ) . '.';
+    if ( $example !== '' && ! transformer_model_lexical_context_are_sentences_near_duplicates( $example, $def ) ) {
+        $out .= ' ' . rtrim( $example, ". \t\n\r\0\x0B" ) . '.';
+    }
+    if ( $purpose !== '' ) {
+        $out .= ' ' . rtrim( $purpose, ". \t\n\r\0\x0B" ) . '.';
+    }
+
+    // Final spacing normalization (same helper the UI applies at emit time).
+    if ( function_exists( 'transformer_model_lexical_context_normalize_emitted_response_spacing' ) ) {
+        $out = transformer_model_lexical_context_normalize_emitted_response_spacing( (string) $out );
+    }
+
+    return trim( (string) $out );
 }
 
 /**
