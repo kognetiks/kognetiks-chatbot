@@ -4526,7 +4526,22 @@ function transformer_model_lexical_context_low_value_sentence_row_reason_codes( 
         $cleaned = transformer_model_lexical_context_strip_shortcodes_and_captions( $raw );
         // If useful prose remains, re-evaluate the cleaned text instead of discarding the whole row.
         if ( $cleaned !== '' && strlen( $cleaned ) > 20 ) {
-            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            // Guard: only salvage+recurse when the cleaner actually changed the text.
+            // Some inputs contain an opening `[` with no closing `]` (e.g., truncated applenotes blobs),
+            // in which case strip_shortcodes_and_captions() returns the original string and recursion would loop.
+            $raw_norm    = preg_replace( '/\s+/u', ' ', trim( wp_strip_all_tags( (string) $raw ) ) );
+            $clean_norm  = preg_replace( '/\s+/u', ' ', trim( wp_strip_all_tags( (string) $cleaned ) ) );
+            if ( $raw_norm === $clean_norm ) {
+                return array( 'caption_or_shortcode' );
+            }
+
+            // Diagnostics can touch thousands of rows; cap salvage logs per request.
+            static $lcm_salvaged_caption_logged_reason_codes = 0;
+            if (
+                transformer_model_lexical_context_is_lcm_diagnostics_enabled()
+                && function_exists( 'back_trace' )
+                && $lcm_salvaged_caption_logged_reason_codes < 12
+            ) {
                 $orig_prev   = transformer_model_lexical_context_diag_preview_text( $raw, 165 );
                 $clean_prev  = transformer_model_lexical_context_diag_preview_text( $cleaned, 165 );
                 $orig_prev   = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $orig_prev );
@@ -4539,6 +4554,7 @@ function transformer_model_lexical_context_low_value_sentence_row_reason_codes( 
                         $clean_prev
                     )
                 );
+                ++$lcm_salvaged_caption_logged_reason_codes;
             }
 
             // Re-run the same checks against the cleaned sentence.
@@ -4626,7 +4642,25 @@ function transformer_model_lexical_context_filter_low_value_sentence_rows( $rows
             if ( preg_match( '/\[\/?[a-z][a-z0-9_-]*\b/i', $raw_sentence ) || preg_match( '/\bcaption\s*=/i', $raw_sentence ) ) {
                 $cleaned = transformer_model_lexical_context_strip_shortcodes_and_captions( $raw_sentence );
                 if ( $cleaned !== '' && strlen( $cleaned ) > 20 ) {
-                    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                    // Guard: only salvage when the cleaner actually changed the text; otherwise we keep reprocessing
+                    // the same huge bracket blob and can blow memory in formatting/normalization.
+                    $raw_norm   = preg_replace( '/\s+/u', ' ', trim( wp_strip_all_tags( (string) $raw_sentence ) ) );
+                    $clean_norm = preg_replace( '/\s+/u', ' ', trim( wp_strip_all_tags( (string) $cleaned ) ) );
+                    if ( $raw_norm === $clean_norm ) {
+                        // No change => treat as unsalvageable shortcode/caption fragment.
+                        $cleaned = '';
+                    }
+
+                }
+
+                if ( $cleaned !== '' && strlen( $cleaned ) > 20 ) {
+                    // Diagnostics can touch thousands of rows; cap salvage logs per request.
+                    static $lcm_salvaged_caption_logged_filter = 0;
+                    if (
+                        transformer_model_lexical_context_is_lcm_diagnostics_enabled()
+                        && function_exists( 'back_trace' )
+                        && $lcm_salvaged_caption_logged_filter < 12
+                    ) {
                         $orig_prev  = transformer_model_lexical_context_diag_preview_text( $raw_sentence, 165 );
                         $clean_prev = transformer_model_lexical_context_diag_preview_text( $cleaned, 165 );
                         $orig_prev  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $orig_prev );
@@ -4639,6 +4673,7 @@ function transformer_model_lexical_context_filter_low_value_sentence_rows( $rows
                                 $clean_prev
                             )
                         );
+                        ++$lcm_salvaged_caption_logged_filter;
                     }
 
                     // Core fix: cleaned text flows downstream and is re-evaluated by existing checks.
@@ -5615,10 +5650,10 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
             $action_boost = 10.0;
             $action_cues  = array( 'uses', 'use', 'allows', 'allow', 'helps', 'help', 'enables', 'enable', 'provides', 'provide', 'analyzes', 'analyze' );
             $hit_cue      = '';
-            foreach ( $action_cues as $c ) {
-                $needle = ' ' . $c . ' ';
+            foreach ( $action_cues as $cue ) {
+                $needle = ' ' . $cue . ' ';
                 if ( strpos( $slower, $needle ) !== false ) {
-                    $hit_cue = $c;
+                    $hit_cue = $cue;
                     break;
                 }
             }
@@ -5650,8 +5685,8 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
         if ( ! $meta_hit && $has_anchor ) {
             $info_cues = array( 'uses', 'use', 'allows', 'allow', 'helps', 'help', 'enables', 'enable', 'provides', 'provide', 'analyzes', 'analyze' );
             $has_info  = false;
-            foreach ( $info_cues as $c ) {
-                $needle = ' ' . $c . ' ';
+            foreach ( $info_cues as $cue ) {
+                $needle = ' ' . $cue . ' ';
                 if ( strpos( $slower, $needle ) !== false ) {
                     $has_info = true;
                     break;
@@ -5821,6 +5856,7 @@ function transformer_model_lexical_context_meaningful_query_tokens_for_relevance
 
     $stop = array_flip( transformer_model_lexical_context_relevance_guard_stop_words() );
     $out  = array();
+    $action_flip = transformer_model_lexical_context_answer_shape_query_action_words_flip();
 
     foreach ( $inputWordsLower as $w ) {
         $w = strtolower( trim( (string) $w ) );
@@ -5828,6 +5864,10 @@ function transformer_model_lexical_context_meaningful_query_tokens_for_relevance
             continue;
         }
         if ( isset( $stop[ $w ] ) ) {
+            continue;
+        }
+        // Do not require instruction verbs for corpus overlap (e.g., "explain", "define").
+        if ( isset( $action_flip[ $w ] ) ) {
             continue;
         }
         $out[] = $w;
@@ -8365,6 +8405,11 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
     $sentenceScores = transformer_model_lexical_context_sort_sentence_scores_with_document_priority( $sentenceScores );
     $sentenceScores = transformer_model_lexical_context_cap_ranked_sentence_rows( $sentenceScores, 250, 'after_sort' );
 
+    // Keep a broader ranked pool for Phase 5 fact condensation and discarded[] diagnostics.
+    // This is intentionally earlier than the later row/document gates so the condenser has enough material
+    // to find 3–5 fact-like sentences for definition queries.
+    $lcm_all_ranked_pool = $sentenceScores;
+
     // Conservative cross-document gate: only include weaker posts if their document-level max score is within 85% of the best post’s max.
     $after_doc_gate = transformer_model_lexical_context_apply_document_gate( $sentenceScores, $query_shape, 0.85 );
     $after_doc_gate = transformer_model_lexical_context_cap_ranked_sentence_rows( $after_doc_gate, 100, 'after_document_gate' );
@@ -9152,7 +9197,7 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         $query_shape,
         $meaningful_query_tokens,
         $assembly_sentenceScores,
-        $sentenceScores
+        isset( $lcm_all_ranked_pool ) && is_array( $lcm_all_ranked_pool ) ? $lcm_all_ranked_pool : $sentenceScores
     );
 
     if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
@@ -9256,6 +9301,379 @@ function transformer_model_lexical_context_detect_query_intent( $query_raw ) {
 }
 
 /**
+ * Phase 5: Fact condenser.
+ *
+ * Convert ranked candidate sentence rows into a small set of "synthesis backbone" facts.
+ *
+ * Goals:
+ * - remove metadata / URLs
+ * - remove duplicate titles / headline-y rows
+ * - keep only top 3–5 fact-like sentences
+ * - prefer phrase-anchor hits and the best document
+ * - allow supporting docs only when they add new information (novel tokens)
+ *
+ * @param array<int, array<string, mixed>> $ranked_sentences Ranked rows (best first).
+ * @param string                          $intent           e.g. definition|summary|unknown
+ * @param string                          $query            raw query text
+ * @return array{ facts: array<int, array<string, mixed>>, supporting_document_ids: array<int, int>, best_document_id: int }
+ */
+function lcm_consolidate_facts( array $ranked_sentences, string $intent, string $query ): array {
+
+    $query = (string) $query;
+    $intent = (string) $intent;
+
+    $meaningful_query_tokens = transformer_model_lexical_context_meaningful_query_tokens_for_relevance_guard(
+        array_map(
+            'strtolower',
+            preg_split( '/\s+/u', preg_replace( '/[^\p{L}\p{N}\s]/u', ' ', $query ), -1, PREG_SPLIT_NO_EMPTY )
+                ?: array()
+        )
+    );
+    $meaningful_query_tokens = is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array();
+    $meaningful_query_tokens = array_values(
+        array_filter(
+            array_map(
+                static function ( $t ) {
+                    $t = strtolower( trim( (string) $t ) );
+                    return strlen( $t ) >= 2 ? $t : '';
+                },
+                $meaningful_query_tokens
+            ),
+            static function ( $t ) {
+                return $t !== '';
+            }
+        )
+    );
+
+    // Phrase anchor: 2–3 token phrase if available (stronger than single token).
+    $phrase_tokens = array();
+    if ( count( $meaningful_query_tokens ) >= 2 ) {
+        $phrase_tokens = count( $meaningful_query_tokens ) <= 3
+            ? $meaningful_query_tokens
+            : array_slice( $meaningful_query_tokens, 0, 3 );
+    }
+    $phrase_anchor_re = null;
+    if ( count( $phrase_tokens ) >= 2 ) {
+        $phrase_anchor_re = transformer_model_lexical_context_answer_shape_anchor_regex_phrase( $phrase_tokens );
+    }
+
+    $best_document_id = 0;
+    foreach ( $ranked_sentences as $row0 ) {
+        if ( is_array( $row0 ) && ! empty( $row0['post_id'] ) ) {
+            $best_document_id = (int) $row0['post_id'];
+            break;
+        }
+    }
+
+    $max_facts = 5;
+    $min_facts = ( $intent === 'definition' ) ? 3 : 3;
+
+    // Pass 1: clean + drop obvious low-value rows, and compute light features.
+    $candidates = array();
+    foreach ( $ranked_sentences as $row ) {
+        if ( ! is_array( $row ) ) {
+            continue;
+        }
+
+        $pid  = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
+        $raw  = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
+        $text = transformer_model_lexical_context_clean_sentence_for_output( $raw );
+        $text = trim( (string) $text );
+        if ( $text === '' ) {
+            continue;
+        }
+
+        // Remove URL-ish rows and other metadata via the existing reason code helper.
+        $reasons = transformer_model_lexical_context_low_value_sentence_row_reason_codes(
+            array_merge(
+                $row,
+                array( 'sentence' => $text )
+            )
+        );
+        if ( $reasons !== array() ) {
+            continue;
+        }
+
+        $slower = strtolower( wp_strip_all_tags( $text ) );
+
+        // For definition intent, aggressively drop definition-intro/aside lead-ins.
+        // These rows are almost never "facts" and often contain merged title+intro artifacts.
+        if ( $intent === 'definition' && $slower !== '' ) {
+            $head_260 = function_exists( 'mb_substr' ) ? mb_substr( $slower, 0, 260 ) : substr( $slower, 0, 260 );
+            $intro_patterns = array(
+                '/\bif\s+you[’\']?ve\s+ever\s+heard\b/iu',
+                '/\banyway\b/iu',
+                '/\bas\s+a\s+total\s+aside\b/iu',
+                '/\bcuriosity\s+with\s+a\s+purpose\b/iu',
+                '/\bthe\s+bottom\s+line\b/iu',
+            );
+            foreach ( $intro_patterns as $ip ) {
+                if ( preg_match( $ip, $head_260 ) ) {
+                    continue 2;
+                }
+            }
+        }
+
+        // Title/headline suppression (best-effort): drop exact/near-exact title repeats.
+        if ( $pid !== 0 && function_exists( 'get_the_title' ) ) {
+            $title = (string) get_the_title( $pid );
+            $title = trim( wp_strip_all_tags( $title ) );
+            if ( $title !== '' ) {
+                $t_norm = strtolower( (string) $title );
+                $s_norm = strtolower( (string) $slower );
+
+                // Normalize aggressively (punctuation/quotes/dashes differ across feeds).
+                $t_norm = preg_replace( '/[^\p{L}\p{N}\s]/u', ' ', (string) $t_norm );
+                $s_norm = preg_replace( '/[^\p{L}\p{N}\s]/u', ' ', (string) $s_norm );
+                $t_norm = preg_replace( '/\s+/u', ' ', trim( (string) $t_norm ) );
+                $s_norm = preg_replace( '/\s+/u', ' ', trim( (string) $s_norm ) );
+
+                // If the sentence begins with the title, or is extremely close, treat as duplicate title row.
+                if ( $t_norm !== '' && ( $s_norm === $t_norm || strpos( $s_norm, $t_norm ) === 0 || levenshtein( $t_norm, $s_norm ) <= 6 ) ) {
+                    continue;
+                }
+            }
+        }
+
+        // Headline-style separators often indicate title fragments, not facts.
+        if ( preg_match( '/\s[—–\-]\s/u', $text ) || strpos( $text, ' | ' ) !== false ) {
+            // If it looks like a title, skip it.
+            if ( str_word_count( wp_strip_all_tags( $text ) ) <= 18 ) {
+                continue;
+            }
+        }
+
+        // Content headline suppression: many sources embed the title as a standalone sentence.
+        // Heuristic: no terminal punctuation + high proportion of TitleCase words.
+        $plain = trim( (string) wp_strip_all_tags( $text ) );
+        if ( $plain !== '' && ! preg_match( '/[.!?]$/u', $plain ) ) {
+            $words = preg_split( '/\s+/u', $plain, -1, PREG_SPLIT_NO_EMPTY ) ?: array();
+            if ( count( $words ) >= 8 && count( $words ) <= 22 ) {
+                $caps = 0;
+                foreach ( $words as $w ) {
+                    $w = (string) $w;
+                    $w = preg_replace( '/[^\p{L}\p{N}]/u', '', $w );
+                    if ( $w === '' ) {
+                        continue;
+                    }
+                    $first = function_exists( 'mb_substr' ) ? mb_substr( $w, 0, 1 ) : substr( $w, 0, 1 );
+                    if ( $first !== '' && preg_match( '/\p{Lu}/u', $first ) ) {
+                        ++$caps;
+                    }
+                }
+                if ( $caps >= 5 ) {
+                    continue;
+                }
+            }
+        }
+
+        $contains_any_anchor   = false;
+        $contains_phrase_anchor = false;
+        if ( $phrase_anchor_re !== null && $phrase_anchor_re !== '' ) {
+            $contains_phrase_anchor = (bool) preg_match( '/' . $phrase_anchor_re . '/iu', $slower );
+            $contains_any_anchor    = $contains_phrase_anchor;
+        }
+        if ( ! $contains_any_anchor && $meaningful_query_tokens !== array() ) {
+            foreach ( $meaningful_query_tokens as $mtok ) {
+                if ( $mtok !== '' && preg_match( '/\b' . preg_quote( $mtok, '/' ) . '\b/u', $slower ) ) {
+                    $contains_any_anchor = true;
+                    break;
+                }
+            }
+        }
+
+        // Fact-likeness heuristic: slightly prefer definitional cues for definition intent.
+        $is_def_like = false;
+        if ( $intent === 'definition' ) {
+            $head_160 = function_exists( 'mb_substr' ) ? mb_substr( $slower, 0, 160 ) : substr( $slower, 0, 160 );
+            foreach ( transformer_model_lexical_context_answer_shape_definition_cue_specs() as $spec ) {
+                if ( ! is_array( $spec ) ) {
+                    continue;
+                }
+                $pat = isset( $spec['pattern'] ) ? (string) $spec['pattern'] : '';
+                if ( $pat !== '' && preg_match( '/' . $pat . '/iu', $head_160 ) ) {
+                    $is_def_like = true;
+                    break;
+                }
+            }
+        }
+
+        $candidates[] = array(
+            'text'                 => $text,
+            'source_id'            => $pid,
+            'score'                => isset( $row['score'] ) ? (float) $row['score'] : 0.0,
+            'contains_anchor'      => $contains_any_anchor,
+            'contains_phrase_anchor' => $contains_phrase_anchor,
+            'is_definition_like'   => $is_def_like,
+            'is_metadata'          => false,
+        );
+    }
+
+    if ( $candidates === array() ) {
+        return array(
+            'facts'                   => array(),
+            'supporting_document_ids' => array(),
+            'best_document_id'        => $best_document_id,
+        );
+    }
+
+    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        $p = array();
+        for ( $i = 0; $i < min( 4, count( $candidates ) ); $i++ ) {
+            $t = isset( $candidates[ $i ]['text'] ) ? (string) $candidates[ $i ]['text'] : '';
+            $p[] = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), transformer_model_lexical_context_diag_preview_text( $t, 140 ) );
+        }
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][fact_condenser] intent=%s candidates=%d preview="%s"',
+                str_replace( '"', "'", $intent ),
+                count( $candidates ),
+                implode( ' | ', $p )
+            )
+        );
+    }
+
+    // Dedupe exact/near-exact (by existing dedupe token signature) before selection.
+    $seen_sig = array();
+    $deduped  = array();
+    foreach ( $candidates as $c ) {
+        $sig = transformer_model_lexical_context_sentence_dedupe_key( (string) $c['text'] );
+        if ( $sig === '' ) {
+            $sig = hash( 'sha256', (string) $c['text'] );
+        }
+        if ( isset( $seen_sig[ $sig ] ) ) {
+            continue;
+        }
+        $seen_sig[ $sig ] = true;
+        $deduped[]        = $c;
+    }
+
+    // Re-rank for condensation: keep the original retrieval score, but bias toward anchor + best-doc + fact-like.
+    foreach ( $deduped as $i => $c ) {
+        $pid = isset( $c['source_id'] ) ? (int) $c['source_id'] : 0;
+        $condense_score = isset( $c['score'] ) ? (float) $c['score'] : 0.0;
+        if ( ! empty( $c['contains_phrase_anchor'] ) ) {
+            $condense_score += 8.0;
+        } elseif ( ! empty( $c['contains_anchor'] ) ) {
+            $condense_score += 3.0;
+        }
+        if ( $pid !== 0 && $best_document_id !== 0 && $pid === $best_document_id ) {
+            $condense_score += 5.0;
+        }
+        if ( $intent === 'definition' ) {
+            if ( ! empty( $c['is_definition_like'] ) ) {
+                $condense_score += 8.0;
+            } else {
+                $condense_score -= 4.0;
+            }
+        }
+        $deduped[ $i ]['_condense_score'] = $condense_score;
+    }
+    usort(
+        $deduped,
+        static function ( $a, $b ) {
+            $sa = isset( $a['_condense_score'] ) ? (float) $a['_condense_score'] : (float) ( $a['score'] ?? 0.0 );
+            $sb = isset( $b['_condense_score'] ) ? (float) $b['_condense_score'] : (float) ( $b['score'] ?? 0.0 );
+            return $sb <=> $sa;
+        }
+    );
+
+    // Selection: greedy with "novel token" gate for cross-document support.
+    $facts          = array();
+    $supporting_set = array();
+    $covered_tokens = array();
+
+    // Token ignore set: query tokens + common stopwords.
+    $ignore = array_flip( transformer_model_lexical_context_dedup_normalization_stop_words() );
+    foreach ( $meaningful_query_tokens as $qt ) {
+        $ignore[ (string) $qt ] = true;
+    }
+
+    foreach ( $deduped as $c ) {
+        if ( count( $facts ) >= $max_facts ) {
+            break;
+        }
+        $pid = isset( $c['source_id'] ) ? (int) $c['source_id'] : 0;
+
+        // Require an anchor signal unless we're still below the minimum fact floor.
+        if ( count( $facts ) >= $min_facts && empty( $c['contains_anchor'] ) && empty( $c['contains_phrase_anchor'] ) ) {
+            continue;
+        }
+
+        // Prefer best doc early; allow other docs if they add new info.
+        $tokens = transformer_model_lexical_context_normalize_sentence_to_dedup_tokens( (string) $c['text'] );
+        $novel  = 0;
+        foreach ( $tokens as $t ) {
+            if ( $t === '' || isset( $ignore[ $t ] ) ) {
+                continue;
+            }
+            if ( ! isset( $covered_tokens[ $t ] ) ) {
+                ++$novel;
+            }
+        }
+
+        if ( $pid !== 0 && $best_document_id !== 0 && $pid !== $best_document_id ) {
+            // Supporting docs must contribute novelty.
+            if ( $novel < 2 ) {
+                continue;
+            }
+        }
+
+        // Accept.
+        $facts[] = $c;
+        if ( $pid !== 0 ) {
+            $supporting_set[ $pid ] = true;
+        }
+        foreach ( $tokens as $t ) {
+            if ( $t === '' || isset( $ignore[ $t ] ) ) {
+                continue;
+            }
+            $covered_tokens[ $t ] = true;
+        }
+    }
+
+    // If we somehow didn't meet the minimum (too strict), fall back to top-ranked deduped rows.
+    if ( count( $facts ) < $min_facts ) {
+        foreach ( $deduped as $c ) {
+            if ( count( $facts ) >= $min_facts ) {
+                break;
+            }
+            $already = false;
+            foreach ( $facts as $f ) {
+                if ( isset( $f['text'] ) && isset( $c['text'] ) && (string) $f['text'] === (string) $c['text'] ) {
+                    $already = true;
+                    break;
+                }
+            }
+            if ( $already ) {
+                continue;
+            }
+            $facts[] = $c;
+            $pid = isset( $c['source_id'] ) ? (int) $c['source_id'] : 0;
+            if ( $pid !== 0 ) {
+                $supporting_set[ $pid ] = true;
+            }
+        }
+    }
+
+    $supporting_document_ids = array_values(
+        array_filter(
+            array_map( 'intval', array_keys( $supporting_set ) ),
+            static function ( $v ) {
+                return $v !== 0;
+            }
+        )
+    );
+
+    return array(
+        'facts'                   => array_values( $facts ),
+        'supporting_document_ids' => $supporting_document_ids,
+        'best_document_id'        => $best_document_id,
+    );
+}
+
+/**
  * Consolidate ranked candidate rows into a structured intermediate object.
  * This creates a clean handoff between retrieval/ranking and final text assembly.
  *
@@ -9279,61 +9697,22 @@ function transformer_model_lexical_context_build_consolidation_object( $query_ra
         $primary_topic = implode( ' ', array_slice( $meaningful_query_tokens, 0, 3 ) );
     }
 
-    $best_document_id = 0;
-    if ( is_array( $survivors ) && ! empty( $survivors[0]['post_id'] ) ) {
-        $best_document_id = (int) $survivors[0]['post_id'];
+    // Phase 5: build facts from a broader pool when possible (especially for definition intent),
+    // so we don't get stuck with a title + lead-in just because they survived an earlier assembly filter.
+    $pool = is_array( $survivors ) ? $survivors : array();
+    if ( $intent === 'definition' && is_array( $all_ranked ) && $all_ranked !== array() ) {
+        $pool = $all_ranked;
+    } elseif ( $pool === array() && is_array( $all_ranked ) ) {
+        $pool = $all_ranked;
     }
 
-    $supporting = array();
-    $facts      = array();
+    $condensed = lcm_consolidate_facts( $pool, $intent, $query_raw );
 
-    foreach ( is_array( $survivors ) ? $survivors : array() as $row ) {
-        if ( ! is_array( $row ) ) {
-            continue;
-        }
-        $pid  = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
-        $text = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
-        $text = transformer_model_lexical_context_clean_sentence_for_output( $text );
-        $text = trim( (string) $text );
-        if ( $text === '' ) {
-            continue;
-        }
-
-        $supporting[ $pid ] = true;
-
-        $slower = strtolower( wp_strip_all_tags( $text ) );
-        $contains_anchor = false;
-        if ( is_array( $meaningful_query_tokens ) ) {
-            foreach ( $meaningful_query_tokens as $mtok ) {
-                $mtok = strtolower( trim( (string) $mtok ) );
-                if ( $mtok !== '' && preg_match( '/\b' . preg_quote( $mtok, '/' ) . '\b/u', $slower ) ) {
-                    $contains_anchor = true;
-                    break;
-                }
-            }
-        }
-
-        $is_def_like = false;
-        $head_120    = function_exists( 'mb_substr' ) ? mb_substr( $slower, 0, 120 ) : substr( $slower, 0, 120 );
-        foreach ( array( ' is a ', ' is an ', ' is the ', ' refers to ', ' means ', ' is defined as ', ' is used to ' ) as $cue ) {
-            if ( strpos( $head_120, $cue ) !== false ) {
-                $is_def_like = true;
-                break;
-            }
-        }
-
-        $facts[] = array(
-            'text'               => $text,
-            'source_id'          => $pid,
-            'score'              => isset( $row['score'] ) ? (float) $row['score'] : 0.0,
-            'contains_anchor'    => $contains_anchor,
-            'is_definition_like' => $is_def_like,
-            'is_metadata'        => false,
-        );
-    }
-
-    $supporting_document_ids = array_map( 'intval', array_keys( $supporting ) );
-    $supporting_document_ids = array_values( array_filter( $supporting_document_ids, static function ( $v ) { return $v !== 0; } ) );
+    $facts = ( isset( $condensed['facts'] ) && is_array( $condensed['facts'] ) ) ? $condensed['facts'] : array();
+    $best_document_id = isset( $condensed['best_document_id'] ) ? (int) $condensed['best_document_id'] : 0;
+    $supporting_document_ids = ( isset( $condensed['supporting_document_ids'] ) && is_array( $condensed['supporting_document_ids'] ) )
+        ? array_values( array_map( 'intval', $condensed['supporting_document_ids'] ) )
+        : array();
 
     // Discarded: best-effort capture from a larger ranked pool, using the existing reason code helper.
     $discarded = array();
