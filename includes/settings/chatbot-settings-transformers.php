@@ -87,16 +87,8 @@ function chatbot_lcm_lexical_cache_apply_rebuild_schedule( $value ) {
             if ( ! chatbot_lcm_lexical_cache_pending_one_shot_scheduled() ) {
                 wp_schedule_single_event( time() + 10, $hook, array( 'once' ) );
                 set_transient( 'chatbot_lexical_rebuild_job_pending', 1, 2 * HOUR_IN_SECONDS );
-            }
-            if ( function_exists( 'spawn_cron' ) ) {
-                spawn_cron();
-            }
-            global $chatbot_chatgpt_plugin_dir_path;
-            if ( ! empty( $chatbot_chatgpt_plugin_dir_path ) ) {
-                $path = $chatbot_chatgpt_plugin_dir_path . 'includes/transformers/lexical-context-model.php';
-                if ( file_exists( $path ) ) {
-                    require_once $path;
-                }
+                update_option( 'chatbot_lcm_lexical_cache_rebuild_last_status', 'running', false );
+                update_option( 'chatbot_lcm_lexical_cache_rebuild_last_time', time(), false );
             }
             if ( function_exists( 'transformer_model_lexical_context_lexical_rebuild_log' ) ) {
                 transformer_model_lexical_context_lexical_rebuild_log( 'schedule_ui=Now queued one-off wp-cron' );
@@ -115,9 +107,8 @@ function chatbot_lcm_lexical_cache_apply_rebuild_schedule( $value ) {
             $interval    = $interval_map[ $value ];
             $first_run_at = time() + 60;
             wp_schedule_event( $first_run_at, $interval, $hook, array( 'recurring' ) );
-            if ( function_exists( 'spawn_cron' ) ) {
-                spawn_cron();
-            }
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_status', 'scheduled', false );
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_time', time(), false );
             return;
 
         default:
@@ -149,6 +140,95 @@ function chatbot_lcm_lexical_cache_rebuild_schedule_sanitize( $value ) {
 }
 
 /**
+ * Shows lexical rebuild worker heartbeat + stalled warnings while a background job is pending.
+ *
+ * @return void
+ */
+function chatbot_lcm_lexical_echo_rebuild_worker_panel() {
+
+    if ( ! function_exists( 'chatbot_lcm_lexical_cache_rebuild_cron_hook' ) ) {
+        return;
+    }
+
+    $hook = chatbot_lcm_lexical_cache_rebuild_cron_hook();
+
+    $next_once      = wp_next_scheduled( $hook, array( 'once' ) );
+    $next_legacy    = wp_next_scheduled( $hook, array() );
+    $pending        = (bool) get_transient( 'chatbot_lexical_rebuild_job_pending' ) || (bool) $next_once || (bool) $next_legacy;
+
+    if ( ! $pending ) {
+        return;
+    }
+
+    $activity   = get_option( 'chatbot_lcm_lexical_rebuild_activity', array() );
+    if ( ! is_array( $activity ) ) {
+        $activity = array();
+    }
+    $ts         = isset( $activity['ts'] ) ? (int) $activity['ts'] : 0;
+    $enqueue_ts = (int) get_option( 'chatbot_lcm_lexical_cache_rebuild_last_time', 0 );
+    $running_lbl = get_option( 'chatbot_lcm_lexical_cache_rebuild_last_status', '' );
+    $running_lbl = is_string( $running_lbl ) ? $running_lbl : '';
+
+    $stale_secs = max( 60, (int) apply_filters( 'chatbot_lexical_rebuild_stale_after_seconds', 330 ) );
+    $no_hb_secs = max( 60, (int) apply_filters( 'chatbot_lexical_rebuild_no_heartbeat_seconds', 210 ) );
+
+    $tz       = wp_timezone();
+    $date_fmt = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
+    $fmt      = static function ( $unix ) use ( $tz, $date_fmt ) {
+        if ( $unix <= 0 ) {
+            return '';
+        }
+
+        return wp_date( $date_fmt, $unix, $tz );
+    };
+
+    ?>
+    <div style="border: 1px solid #c3c4c7; padding: 10px 12px; margin: 10px 0; max-width: 720px; background: #f6f7f7;">
+        <p style="margin: 0 0 8px 0;"><strong><?php esc_html_e( 'Background lexical rebuild worker', 'chatbot-chatgpt' ); ?></strong></p>
+        <?php if ( $ts > 0 ) : ?>
+            <p style="margin: 4px 0;">
+                <?php
+                printf(
+                    esc_html__( 'Last heartbeat: %1$s (%2$s)', 'chatbot-chatgpt' ),
+                    esc_html( $fmt( $ts ) ),
+                    esc_html( isset( $activity['step'] ) ? (string) $activity['step'] : '?' )
+                );
+                ?>
+                <?php if ( isset( $activity['context'] ) && is_string( $activity['context'] ) && $activity['context'] !== '' ) : ?>
+                    <span style="color:#646970;"><?php echo esc_html( '[' . $activity['context'] . ']' ); ?></span>
+                <?php endif; ?>
+            </p>
+            <p style="margin: 4px 0; font-size: 12px;">
+                <?php
+                echo esc_html(
+                    sprintf(
+                        __( 'Pipeline: stage=%s offset=%s N_docs=%s / rows=%s', 'chatbot-chatgpt' ),
+                        isset( $activity['stage'] ) ? (string) $activity['stage'] : '?',
+                        isset( $activity['offset'] ) ? (string) (int) $activity['offset'] : '?',
+                        isset( $activity['N_docs'] ) ? (string) (int) $activity['N_docs'] : '?',
+                        isset( $activity['total_rows'] ) ? (string) (int) $activity['total_rows'] : '?'
+                    )
+                );
+                ?>
+            </p>
+        <?php elseif ( $enqueue_ts > 0 && 'running' === $running_lbl ) : ?>
+            <p style="margin: 4px 0;"><?php esc_html_e( 'No worker heartbeat captured yet — the queue may still be waiting for WP-Cron or the first PHP slice.', 'chatbot-chatgpt' ); ?></p>
+        <?php else : ?>
+            <p style="margin: 4px 0;"><?php esc_html_e( 'A rebuild appears pending, but activity details are unavailable. Check the plugin error log for [LCM][rebuild] lines.', 'chatbot-chatgpt' ); ?></p>
+        <?php endif; ?>
+
+        <?php if ( $ts > 0 && ( time() - $ts ) > $stale_secs ) : ?>
+            <div class="notice notice-warning inline" style="margin:10px 0 0;"><p><?php esc_html_e( 'No heartbeat for several minutes — the worker may have been killed by Apache/FastCGI (idle timeout ~30s on MAMP), or PHP ran out of memory. Use “Run One Rebuild Step Now” after waiting for the lock, clear the stalled job if needed, then check Apache / PHP / chatbot error logs.', 'chatbot-chatgpt' ); ?></div>
+        <?php elseif ( $ts <= 0 && $enqueue_ts > 0 && ( time() - $enqueue_ts ) > $no_hb_secs && 'running' === $running_lbl ) : ?>
+            <div class="notice notice-warning inline" style="margin:10px 0 0;"><p><?php esc_html_e( 'Still no first heartbeat — WP-Cron may not be firing locally. Load the front-end once or click “Run One Rebuild Step Now”.', 'chatbot-chatgpt' ); ?></div>
+        <?php elseif ( $ts > 0 ) : ?>
+            <p style="margin:8px 0 0; font-size:12px;"><em><?php esc_html_e( 'As long as the heartbeat time advances when you refresh this screen, work is progressing.', 'chatbot-chatgpt' ); ?></em></p>
+        <?php endif; ?>
+    </div>
+    <?php
+}
+
+/**
  * Section intro + status for LCM lexical cache WP-Cron scheduling.
  *
  * @param mixed $args Section args.
@@ -169,11 +249,17 @@ function chatbot_lcm_lexical_cache_schedule_section_callback( $args ) {
 
     $next_recurring = wp_next_scheduled( $hook, array( 'recurring' ) );
     $next_once      = wp_next_scheduled( $hook, array( 'once' ) );
+    $next_legacy    = wp_next_scheduled( $hook, array() );
     $last_ts        = (int) get_option( 'chatbot_lcm_lexical_cache_rebuild_last_time', 0 );
     $last_status    = get_option( 'chatbot_lcm_lexical_cache_rebuild_last_status', '' );
     if ( ! is_string( $last_status ) ) {
         $last_status = '';
     }
+    $last_error = get_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', '' );
+    if ( ! is_string( $last_error ) ) {
+        $last_error = '';
+    }
+    $is_pending = (bool) get_transient( 'chatbot_lexical_rebuild_job_pending' ) || (bool) $next_once || (bool) $next_legacy;
 
     $tz = wp_timezone();
     $fmt_next_recurring = $next_recurring ? wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $next_recurring, $tz ) : '';
@@ -181,7 +267,9 @@ function chatbot_lcm_lexical_cache_schedule_section_callback( $args ) {
     $fmt_last           = $last_ts ? wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $last_ts, $tz ) : '';
 
     $status_label = '';
-    if ( 'success' === $last_status ) {
+    if ( $is_pending ) {
+        $status_label = __( 'In progress', 'chatbot-chatgpt' );
+    } elseif ( 'success' === $last_status ) {
         $status_label = __( 'Success', 'chatbot-chatgpt' );
     } elseif ( 'failed' === $last_status ) {
         $status_label = __( 'Failed', 'chatbot-chatgpt' );
@@ -194,19 +282,25 @@ function chatbot_lcm_lexical_cache_schedule_section_callback( $args ) {
             <?php echo $next_recurring ? esc_html( $fmt_next_recurring ) : esc_html__( 'Not scheduled', 'chatbot-chatgpt' ); ?></p>
         <p><strong><?php echo esc_html__( 'Next one-off rebuild (if queued)', 'chatbot-chatgpt' ); ?>:</strong>
             <?php echo $next_once ? esc_html( $fmt_next_once ) : esc_html__( 'None', 'chatbot-chatgpt' ); ?></p>
-        <p><strong><?php echo esc_html__( 'Last scheduled rebuild', 'chatbot-chatgpt' ); ?>:</strong>
+        <p><strong><?php echo esc_html__( 'Last completed rebuild job', 'chatbot-chatgpt' ); ?>:</strong>
             <?php
-            if ( $fmt_last && $status_label ) {
-                echo esc_html( $fmt_last . ' — ' . $status_label );
-            } elseif ( $fmt_last ) {
-                echo esc_html( $fmt_last );
+            if ( $fmt_last ) {
+                $suffix = ( $status_label !== '' ) ? ( ' — ' . $status_label ) : '';
+                echo esc_html( $fmt_last . $suffix );
             } else {
-                echo esc_html__( 'No completed run recorded yet.', 'chatbot-chatgpt' );
+                echo esc_html__( 'No completed rebuild job recorded yet.', 'chatbot-chatgpt' );
             }
             ?>
         </p>
+        <?php if ( $status_label === __( 'Failed', 'chatbot-chatgpt' ) && $last_error !== '' ) : ?>
+            <p style="margin:0;"><em><?php echo esc_html__( 'Last failure reason', 'chatbot-chatgpt' ); ?>: <?php echo esc_html( $last_error ); ?></em></p>
+        <?php endif; ?>
+        <?php if ( $is_pending ) : ?>
+            <p style="margin:0;"><em><?php echo esc_html__( 'A rebuild is currently queued/running. The “Success/Failed” status shown above reflects the last completed job, not the current run.', 'chatbot-chatgpt' ); ?></em></p>
+        <?php endif; ?>
     </div>
     <?php
+    chatbot_lcm_lexical_echo_rebuild_worker_panel();
 }
 
 /**
@@ -302,6 +396,12 @@ function chatbot_transformer_model_cache_info_callback($args) {
             case 'already_scheduled':
                 $status_message = '<div class="notice notice-warning is-dismissible"><p>A lexical cache rebuild is already scheduled or running. Please wait before starting another.</p></div>';
                 break;
+            case 'cleared':
+                $status_message = '<div class="notice notice-success is-dismissible"><p>Cleared the pending lexical rebuild flag and any queued one-off cron events. You can schedule a new rebuild now.</p></div>';
+                break;
+            case 'ran_step':
+                $status_message = '<div class="notice notice-info is-dismissible"><p>Ran one rebuild step. Check logs for <code>[LCM][rebuild]</code> heartbeat lines (offset should advance each run).</p></div>';
+                break;
             case 'sync_failed':
                 $status_message = '<div class="notice notice-error is-dismissible"><p>The lexical cache rebuild did not finish. Existing cache files were left unchanged. See logs for <code>[LCM][rebuild]</code>.</p></div>';
                 break;
@@ -363,6 +463,7 @@ function chatbot_transformer_model_cache_info_callback($args) {
 
     ?>
     <?php echo wp_kses_post($status_message); ?>
+    <?php chatbot_lcm_lexical_echo_rebuild_worker_panel(); ?>
     <table class="widefat fixed striped">
         <tbody>
             <tr>
@@ -408,6 +509,25 @@ function chatbot_transformer_model_cache_info_callback($args) {
         <a href="<?php echo esc_url($rebuild_url); ?>" class="button button-secondary" onclick="return confirm('Delete and rebuild the lexical cache now?');">
             Delete &amp; Rebuild Lexical Cache
         </a>
+        <?php
+            $pending = (bool) get_transient('chatbot_lexical_rebuild_job_pending') || ( function_exists( 'chatbot_lcm_lexical_cache_pending_one_shot_scheduled' ) && chatbot_lcm_lexical_cache_pending_one_shot_scheduled() );
+            if ( $pending ) :
+                $clear_url = wp_nonce_url(
+                    admin_url('admin-post.php?action=chatbot_transformer_model_clear_lexical_rebuild'),
+                    'chatbot_transformer_model_clear_lexical_rebuild'
+                );
+                $step_url = wp_nonce_url(
+                    admin_url('admin-post.php?action=chatbot_transformer_model_run_lexical_rebuild_step'),
+                    'chatbot_transformer_model_run_lexical_rebuild_step'
+                );
+        ?>
+            <a href="<?php echo esc_url($step_url); ?>" class="button button-secondary" style="margin-left: 8px;">
+                Run One Rebuild Step Now
+            </a>
+            <a href="<?php echo esc_url($clear_url); ?>" class="button button-link-delete" onclick="return confirm('Clear the pending rebuild flag and queued one-off cron events? Only do this if a rebuild is stuck.');" style="margin-left: 8px;">
+                Clear Pending Rebuild (if stuck)
+            </a>
+        <?php endif; ?>
     </p>
     <p class="description">
         <?php echo esc_html__( 'Rebuilds the PMI embeddings cache and the optional LCM local IDF file (same corpus version). On large sites the request may schedule a background WP-Cron job instead of finishing in the browser (see notices after clicking). For predictable automation, use Lexical Cache Rebuild Schedule below.', 'chatbot-chatgpt' ); ?>
@@ -838,6 +958,92 @@ if (!function_exists('chatbot_transformer_model_format_bytes')) {
 }
 
 /**
+ * Clear "pending rebuild" state and queued one-off cron events (recovery for killed wp-cron.php jobs).
+ *
+ * @return void
+ */
+function chatbot_transformer_model_handle_clear_lexical_rebuild() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You do not have permission to perform this action.', 'chatbot-chatgpt' ) );
+    }
+
+    check_admin_referer( 'chatbot_transformer_model_clear_lexical_rebuild' );
+
+    $redirect_url = admin_url( 'admin.php?page=chatbot-chatgpt&tab=api_transformer' );
+
+    // Clear transient gate.
+    delete_transient( 'chatbot_lexical_rebuild_job_pending' );
+
+    // Clear queued one-off cron events (both the current arg format and the legacy empty-args format).
+    if ( function_exists( 'chatbot_lcm_lexical_cache_rebuild_cron_hook' ) ) {
+        $hook = chatbot_lcm_lexical_cache_rebuild_cron_hook();
+        wp_clear_scheduled_hook( $hook, array( 'once' ) );
+        wp_clear_scheduled_hook( $hook, array() );
+    }
+
+    // Clear chunked rebuild state + temp files if present.
+    $state = get_option( 'chatbot_lcm_lexical_rebuild_state', array() );
+    if ( is_array( $state ) && ! empty( $state['token'] ) ) {
+        $token = preg_replace( '/[^a-zA-Z0-9_-]/', '', (string) $state['token'] );
+        global $chatbot_chatgpt_plugin_dir_path;
+        if ( ! empty( $chatbot_chatgpt_plugin_dir_path ) ) {
+            $dir   = trailingslashit( $chatbot_chatgpt_plugin_dir_path ) . 'includes/transformers/lexical_embeddings_cache/';
+            $base  = $dir . 'lexical_rebuild_counts.' . $token;
+            $paths = array(
+                $base . '.co.bin',
+                $base . '.wc.bin',
+                $base . '.extra.bin',
+                $base . '.bin',
+                $dir . 'lexical_rebuild_pmi.' . $token . '.bin',
+                $dir . 'lexical_rebuild_corpus.' . $token . '.txt',
+            );
+            foreach ( $paths as $p ) {
+                if ( $p && file_exists( $p ) ) {
+                    @unlink( $p );
+                }
+            }
+        }
+    }
+    delete_option( 'chatbot_lcm_lexical_rebuild_state' );
+
+    if ( function_exists( 'transformer_model_lexical_context_rebuild_clear_activity' ) ) {
+        transformer_model_lexical_context_rebuild_clear_activity();
+    }
+
+    wp_safe_redirect( add_query_arg( 'lexical_cache_status', 'cleared', $redirect_url ) );
+    exit;
+}
+add_action( 'admin_post_chatbot_transformer_model_clear_lexical_rebuild', 'chatbot_transformer_model_handle_clear_lexical_rebuild' );
+
+/**
+ * Run exactly one chunked rebuild slice immediately (useful when WP-Cron does not fire on localhost).
+ *
+ * @return void
+ */
+function chatbot_transformer_model_handle_run_lexical_rebuild_step() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You do not have permission to perform this action.', 'chatbot-chatgpt' ) );
+    }
+
+    check_admin_referer( 'chatbot_transformer_model_run_lexical_rebuild_step' );
+
+    global $chatbot_chatgpt_plugin_dir_path;
+    if ( ! empty( $chatbot_chatgpt_plugin_dir_path ) ) {
+        require_once $chatbot_chatgpt_plugin_dir_path . 'includes/transformers/lexical-context-model.php';
+    }
+
+    if ( function_exists( 'transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunked' ) ) {
+        // Run a single safe slice (time budget filter already defaults to 12s).
+        transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunked( 'manual_step', 'once' );
+    }
+
+    $redirect_url = admin_url( 'admin.php?page=chatbot-chatgpt&tab=api_transformer' );
+    wp_safe_redirect( add_query_arg( 'lexical_cache_status', 'ran_step', $redirect_url ) );
+    exit;
+}
+add_action( 'admin_post_chatbot_transformer_model_run_lexical_rebuild_step', 'chatbot_transformer_model_handle_run_lexical_rebuild_step' );
+
+/**
  * Handle Lexical Cache rebuild requests from the settings UI.
  *
  * Large corpora defer to WP-Cron to avoid FastCGI idle timeouts. Rebuild uses atomic file swap — existing cache is kept if the job fails.
@@ -879,10 +1085,8 @@ function chatbot_transformer_model_handle_cache_rebuild() {
 
         wp_schedule_single_event(time() + 10, chatbot_lcm_lexical_cache_rebuild_cron_hook(), array( 'once' ));
         set_transient('chatbot_lexical_rebuild_job_pending', 1, 2 * HOUR_IN_SECONDS);
-
-        if (function_exists('spawn_cron')) {
-            spawn_cron();
-        }
+        update_option( 'chatbot_lcm_lexical_cache_rebuild_last_status', 'running', false );
+        update_option( 'chatbot_lcm_lexical_cache_rebuild_last_time', time(), false );
 
         if (function_exists('transformer_model_lexical_context_lexical_rebuild_log')) {
             transformer_model_lexical_context_lexical_rebuild_log('admin_rebuild deferred to wp-cron (SQL aggregate / large corpus)');
@@ -923,10 +1127,8 @@ function chatbot_transformer_model_handle_cache_rebuild() {
 
         wp_schedule_single_event(time() + 10, chatbot_lcm_lexical_cache_rebuild_cron_hook(), array( 'once' ));
         set_transient('chatbot_lexical_rebuild_job_pending', 1, 2 * HOUR_IN_SECONDS);
-
-        if (function_exists('spawn_cron')) {
-            spawn_cron();
-        }
+        update_option( 'chatbot_lcm_lexical_cache_rebuild_last_status', 'running', false );
+        update_option( 'chatbot_lcm_lexical_cache_rebuild_last_time', time(), false );
 
         if (function_exists('transformer_model_lexical_context_lexical_rebuild_log')) {
             transformer_model_lexical_context_lexical_rebuild_log('admin_rebuild deferred to wp-cron (large corpus)');
@@ -976,10 +1178,28 @@ function chatbot_transformer_model_lexical_cache_rebuild_cron_runner( $run_kind 
         if ($run_kind === 'once' || $run_kind === null || $run_kind === '') {
             delete_transient('chatbot_lexical_rebuild_job_pending');
         }
+        if ( function_exists( 'transformer_model_lexical_context_rebuild_clear_activity' ) ) {
+            transformer_model_lexical_context_rebuild_clear_activity();
+        }
         return;
     }
 
-    $result = transformer_model_lexical_context_run_full_lexical_cache_rebuild('wp_cron');
+    // Chunked rebuild to avoid FastCGI idle timeouts on wp-cron.php (common on MAMP/mod_fastcgi).
+    if ( function_exists( 'transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunked' ) ) {
+        $chunk = transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunked( 'wp_cron', $run_kind );
+        if ( empty( $chunk['done'] ) ) {
+            // Reschedule soon to continue; keep args consistent (once vs recurring marker).
+            $hook = chatbot_lcm_lexical_cache_rebuild_cron_hook();
+            $arg  = $run_kind ?: 'once';
+            if ( ! wp_next_scheduled( $hook, array( $arg ) ) ) {
+                wp_schedule_single_event( time() + 15, $hook, array( $arg ) );
+            }
+            return;
+        }
+        $result = array( 'ok' => ! empty( $chunk['ok'] ) );
+    } else {
+        $result = transformer_model_lexical_context_run_full_lexical_cache_rebuild('wp_cron');
+    }
 
     update_option('chatbot_lcm_lexical_cache_rebuild_last_time', time(), false);
     update_option(
@@ -987,6 +1207,10 @@ function chatbot_transformer_model_lexical_cache_rebuild_cron_runner( $run_kind 
         !empty($result['ok']) ? 'success' : 'failed',
         false
     );
+
+    if ( function_exists( 'transformer_model_lexical_context_rebuild_clear_activity' ) ) {
+        transformer_model_lexical_context_rebuild_clear_activity();
+    }
 
     // Transient is only used for one-off admin-defer jobs; recurring runs must not clear it.
     if ($run_kind === 'once' || $run_kind === null || $run_kind === '') {

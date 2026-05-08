@@ -939,6 +939,378 @@ function transformer_model_lexical_context_save_cache($cacheFile, $embeddings) {
     
 }
 
+/**
+ * Internal: Load/save large rebuild state blobs to disk efficiently.
+ * Uses serialize + gzencode (similar to cache), but without PHP wrapper.
+ *
+ * @param string $path
+ * @param mixed  $data
+ * @return bool
+ */
+function transformer_model_lexical_context_rebuild_blob_save( $path, $data ) {
+    // Many hosts (including MAMP) run rebuilds with a 256M cap; serialization duplicates large arrays.
+    if ( is_array( $data ) ) {
+        $usage = function_exists( 'memory_get_usage' ) ? (int) memory_get_usage( true ) : 0;
+        if ( $usage > 180 * 1024 * 1024 ) {
+            @ini_set( 'memory_limit', '1024M' );
+        }
+    }
+
+    $serialized = serialize( $data );
+
+    // Avoid a second large buffer when memory is tight: gzencode requires allocating the compressed blob in memory.
+    // On big corpora, serialize() + gzencode() can briefly exceed PHP's memory_limit and fatal.
+    $mem_limit = ini_get( 'memory_limit' );
+    $limit_bytes = 0;
+    if ( is_string( $mem_limit ) && $mem_limit !== '' && $mem_limit !== '-1' ) {
+        $last = strtolower( substr( trim( $mem_limit ), -1 ) );
+        $n    = (int) $mem_limit;
+        if ( $last === 'g' ) {
+            $limit_bytes = $n * 1024 * 1024 * 1024;
+        } elseif ( $last === 'm' ) {
+            $limit_bytes = $n * 1024 * 1024;
+        } elseif ( $last === 'k' ) {
+            $limit_bytes = $n * 1024;
+        } else {
+            $limit_bytes = (int) $mem_limit;
+        }
+    }
+    $usage = function_exists( 'memory_get_usage' ) ? (int) memory_get_usage( true ) : 0;
+
+    // If we're close to the limit, skip compression and write the serialized string directly.
+    if ( $limit_bytes > 0 ) {
+        $projected = $usage + (int) ( strlen( $serialized ) * 1.2 ); // rough buffer overhead estimate
+        if ( $projected > (int) ( $limit_bytes * 0.90 ) ) {
+            return ( false !== file_put_contents( $path, $serialized, LOCK_EX ) );
+        }
+    }
+
+    // Compression level 1 reduces peak CPU and some memory overhead vs max compression.
+    $compressed = gzencode( $serialized, 1 );
+    if ( $compressed === false ) {
+        return ( false !== file_put_contents( $path, $serialized, LOCK_EX ) );
+    }
+
+    return ( false !== file_put_contents( $path, $compressed, LOCK_EX ) );
+}
+
+/**
+ * Record last lexical rebuild worker activity (cron/manual chunk) so the admin UI can detect stalls.
+ *
+ * @param string               $worker_ctx e.g. wp_cron, manual_step.
+ * @param array<string, mixed> $fields     stage, offset, total_rows, N_docs, step, etc.
+ * @return void
+ */
+function transformer_model_lexical_context_rebuild_record_activity( $worker_ctx, array $fields ) {
+
+    $payload = array_merge(
+        array(
+            'ts'      => time(),
+            'context' => (string) $worker_ctx,
+        ),
+        $fields
+    );
+    update_option( 'chatbot_lcm_lexical_rebuild_activity', $payload, false );
+}
+
+/**
+ * Clear activity snapshot (completed job or user cleared stuck state).
+ *
+ * @return void
+ */
+function transformer_model_lexical_context_rebuild_clear_activity() {
+    delete_option( 'chatbot_lcm_lexical_rebuild_activity' );
+}
+
+/**
+ * @param string $path
+ * @return mixed|null
+ */
+function transformer_model_lexical_context_rebuild_blob_load( $path ) {
+    if ( ! $path || ! file_exists( $path ) ) {
+        return null;
+    }
+    $compressed = file_get_contents( $path );
+    if ( $compressed === false ) {
+        return null;
+    }
+    $serialized = gzdecode( $compressed );
+    if ( $serialized === false ) {
+        // Fallback: treat as uncompressed serialized blob.
+        $serialized = $compressed;
+    }
+    $data = @unserialize( $serialized );
+    return ( $data === false && $serialized !== 'b:0;' ) ? null : $data;
+}
+
+/**
+ * Shared base path for chunked rebuild count files (no extension).
+ *
+ * @param string $cache_dir
+ * @param string $token
+ * @return string
+ */
+function transformer_model_lexical_context_rebuild_counts_base_path( $cache_dir, $token ) {
+    return trailingslashit( $cache_dir ) . 'lexical_rebuild_counts.' . preg_replace( '/[^a-zA-Z0-9_-]/', '', (string) $token );
+}
+
+/**
+ * Prune co-occurrence / word-count state before persist so serialize() fits in memory (large corpora).
+ * Aligns with PMI finalize (top pairs per root). Updates total pair sum after dropping roots/pairs.
+ *
+ * @param array<string, mixed> $counts
+ * @return int New total co-occurrence pair count represented in $counts['co'].
+ */
+function transformer_model_lexical_context_rebuild_prune_counts_for_persist( &$counts ) {
+    $max_pairs = (int) apply_filters( 'chatbot_lcm_pmi_max_cooccurrence_pairs_per_root', 150 );
+    $max_pairs = max( 1, min( 500, $max_pairs ) );
+
+    $max_roots = (int) apply_filters( 'chatbot_lexical_rebuild_max_persist_co_roots', 60000 );
+    $max_roots = max( 5000, min( 500000, $max_roots ) );
+
+    if ( ! isset( $counts['co'] ) || ! is_array( $counts['co'] ) ) {
+        return 0;
+    }
+
+    $co = &$counts['co'];
+    $wc = isset( $counts['wc'] ) && is_array( $counts['wc'] ) ? $counts['wc'] : array();
+
+    foreach ( $co as $root => &$ctx ) {
+        if ( ! is_array( $ctx ) ) {
+            continue;
+        }
+        if ( count( $ctx ) > $max_pairs ) {
+            arsort( $ctx, SORT_NUMERIC );
+            $ctx = array_slice( $ctx, 0, $max_pairs, true );
+        }
+    }
+    unset( $ctx );
+
+    if ( count( $co ) > $max_roots ) {
+        $scores = array();
+        foreach ( $co as $root => $ctx ) {
+            if ( ! is_array( $ctx ) ) {
+                continue;
+            }
+            $s = 0;
+            foreach ( $ctx as $v ) {
+                $s += (int) $v;
+            }
+            $scores[ (string) $root ] = $s;
+        }
+        arsort( $scores, SORT_NUMERIC );
+        $keep = array_slice( array_keys( $scores ), 0, $max_roots, true );
+        $flip = array_flip( $keep );
+        foreach ( array_keys( $co ) as $root ) {
+            if ( ! isset( $flip[ $root ] ) ) {
+                unset( $co[ $root ] );
+            }
+        }
+    }
+
+    $tp = 0;
+    foreach ( $co as $ctx ) {
+        if ( ! is_array( $ctx ) ) {
+            continue;
+        }
+        foreach ( $ctx as $v ) {
+            $tp += (int) $v;
+        }
+    }
+
+    $needed = array();
+    foreach ( $co as $root => $ctx ) {
+        $needed[ (string) $root ] = true;
+        if ( is_array( $ctx ) ) {
+            foreach ( array_keys( $ctx ) as $c ) {
+                $needed[ (string) $c ] = true;
+            }
+        }
+    }
+
+    $new_wc = array();
+    foreach ( array_keys( $needed ) as $w ) {
+        if ( isset( $wc[ $w ] ) ) {
+            $new_wc[ $w ] = (int) $wc[ $w ];
+        }
+    }
+    $counts['wc'] = $new_wc;
+
+    return $tp;
+}
+
+/**
+ * Save counts in split files (smaller serialize() peaks than one giant blob).
+ *
+ * @param string               $base lexical_rebuild_counts.{token} without extension.
+ * @param array<string, mixed> $counts
+ * @param array<string, mixed> $state Reference to cron state; updates total_pairs after prune.
+ * @return bool
+ */
+function transformer_model_lexical_context_rebuild_counts_save( $base, array &$counts, array &$state ) {
+
+    $tp = transformer_model_lexical_context_rebuild_prune_counts_for_persist( $counts );
+    $state['total_pairs'] = $tp;
+
+    $ok_co = transformer_model_lexical_context_rebuild_blob_save( $base . '.co.bin', $counts['co'] );
+    $ok_wc = transformer_model_lexical_context_rebuild_blob_save( $base . '.wc.bin', $counts['wc'] );
+    $extra = array(
+        'df' => isset( $counts['df'] ) && is_array( $counts['df'] ) ? $counts['df'] : array(),
+        'N'  => isset( $counts['N'] ) ? (int) $counts['N'] : 0,
+    );
+    $ok_ex = transformer_model_lexical_context_rebuild_blob_save( $base . '.extra.bin', $extra );
+
+    if ( $ok_co && $ok_wc && $ok_ex ) {
+        @unlink( $base . '.bin' );
+    }
+
+    return $ok_co && $ok_wc && $ok_ex;
+}
+
+/**
+ * Load counts from split files or legacy single .bin.
+ *
+ * @param string $base Without extension, same as transformer_model_lexical_context_rebuild_counts_base_path().
+ * @return array<string, mixed>|null
+ */
+function transformer_model_lexical_context_rebuild_counts_load( $base ) {
+
+    $co = transformer_model_lexical_context_rebuild_blob_load( $base . '.co.bin' );
+    if ( is_array( $co ) ) {
+        $wc = transformer_model_lexical_context_rebuild_blob_load( $base . '.wc.bin' );
+        $ex = transformer_model_lexical_context_rebuild_blob_load( $base . '.extra.bin' );
+        if ( ! is_array( $wc ) ) {
+            $wc = array();
+        }
+        if ( ! is_array( $ex ) ) {
+            $ex = array();
+        }
+
+        return array(
+            'co' => $co,
+            'wc' => $wc,
+            'df' => isset( $ex['df'] ) && is_array( $ex['df'] ) ? $ex['df'] : array(),
+            'N'  => isset( $ex['N'] ) ? (int) $ex['N'] : 0,
+        );
+    }
+
+    // Install stage may run after finalize deletes co/wc shards; keep DF/N available for IDF write.
+    $ex_only = transformer_model_lexical_context_rebuild_blob_load( $base . '.extra.bin' );
+    if ( is_array( $ex_only ) ) {
+        return array(
+            'co' => array(),
+            'wc' => array(),
+            'df' => isset( $ex_only['df'] ) && is_array( $ex_only['df'] ) ? $ex_only['df'] : array(),
+            'N'  => isset( $ex_only['N'] ) ? (int) $ex_only['N'] : 0,
+        );
+    }
+
+    $legacy = transformer_model_lexical_context_rebuild_blob_load( $base . '.bin' );
+
+    return is_array( $legacy ) ? $legacy : null;
+}
+
+/**
+ * Remove all count shard files for a token base path.
+ *
+ * @param string $base From transformer_model_lexical_context_rebuild_counts_base_path().
+ * @return void
+ */
+function transformer_model_lexical_context_rebuild_counts_unlink_all( $base ) {
+
+    foreach ( array( '.co.bin', '.wc.bin', '.extra.bin', '.bin' ) as $suf ) {
+        if ( $base !== '' && file_exists( $base . $suf ) ) {
+            @unlink( $base . $suf );
+        }
+    }
+}
+
+/**
+ * Remove only the heavy co/wc shards. Keep DF/N (extra.bin) for install stage.
+ *
+ * @param string $base From transformer_model_lexical_context_rebuild_counts_base_path().
+ * @return void
+ */
+function transformer_model_lexical_context_rebuild_counts_unlink_heavy_only( $base ) {
+    foreach ( array( '.co.bin', '.wc.bin', '.bin' ) as $suf ) {
+        if ( $base !== '' && file_exists( $base . $suf ) ) {
+            @unlink( $base . $suf );
+        }
+    }
+}
+
+/**
+ * Fetch a page of WP documents for lexical rebuild (paged to avoid loading all rows at once).
+ *
+ * @param int $offset
+ * @param int $limit
+ * @return array<int, array<string, mixed>>
+ */
+function transformer_model_lexical_context_fetch_wordpress_documents_page( $offset, $limit ) {
+    global $wpdb;
+
+    $offset = max( 0, (int) $offset );
+    $limit  = max( 1, min( 200, (int) $limit ) );
+
+    $results = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT ID, post_title, post_type, post_status, post_content FROM {$wpdb->posts}
+             WHERE post_status IN (%s, %s) AND (post_type = %s OR post_type = %s OR post_type = %s) AND post_content != ''
+             ORDER BY ID ASC
+             LIMIT %d, %d",
+            'publish',
+            'private',
+            'post',
+            'page',
+            'apple_note',
+            $offset,
+            $limit
+        ),
+        ARRAY_A
+    );
+
+    if ( empty( $results ) || ! is_array( $results ) ) {
+        return array();
+    }
+
+    $documents = array();
+    foreach ( $results as $row ) {
+        $post_type = isset( $row['post_type'] ) ? (string) $row['post_type'] : 'post';
+        if ( $post_type === 'revision' ) {
+            continue;
+        }
+        $post_status = isset( $row['post_status'] ) ? (string) $row['post_status'] : '';
+        if ( $post_status !== 'publish' && ! ( $post_status === 'private' && $post_type === 'apple_note' ) ) {
+            continue;
+        }
+
+        if ( empty( $row['post_content'] ) ) {
+            continue;
+        }
+
+        $post_id   = isset( $row['ID'] ) ? (int) $row['ID'] : 0;
+        $title     = isset( $row['post_title'] ) ? (string) $row['post_title'] : '';
+
+        $normalized = wp_strip_all_tags( (string) $row['post_content'] );
+        $normalized = preg_replace( '/\s+/', ' ', $normalized );
+        $normalized = trim( (string) $normalized );
+        if ( $normalized === '' ) {
+            continue;
+        }
+
+        $documents[] = array(
+            'post_id'         => $post_id,
+            'post_title'      => $title,
+            'post_type'       => $post_type,
+            'permalink'       => '',
+            'normalized_text' => $normalized,
+            'chunks'          => array(),
+        );
+    }
+
+    return $documents;
+}
+
 // Function to load cache with automatic format detection
 function transformer_model_lexical_context_load_cache($cacheFile) {
     
@@ -1947,6 +2319,11 @@ function transformer_model_lexical_context_maybe_raise_memory_for_rebuild( $cont
     $bytes  = (int) ( $metrics['corpus_bytes'] ?? 0 );
 
     $default = null;
+    // Chunked rebuilds tend to hit peak memory during state serialization and PMI finalization,
+    // even when chunk_count is unknown (SQL aggregate path). Prefer a higher baseline.
+    if ( $context === 'chunked_rebuild' || $context === 'wp_cron' || $context === 'manual_step' ) {
+        $default = '1024M';
+    }
     if ( $chunks > 50000 || $bytes > 8000000 ) {
         $default = '768M';
     } elseif ( $chunks > 20000 || $bytes > 4000000 ) {
@@ -1960,8 +2337,10 @@ function transformer_model_lexical_context_maybe_raise_memory_for_rebuild( $cont
     }
 
     if ( is_string( $limit ) ) {
+        $before = is_string( ini_get( 'memory_limit' ) ) ? (string) ini_get( 'memory_limit' ) : '';
         @ini_set( 'memory_limit', $limit );
-        transformer_model_lexical_context_lexical_rebuild_log( 'step=memory_limit value=' . $limit );
+        $after = is_string( ini_get( 'memory_limit' ) ) ? (string) ini_get( 'memory_limit' ) : '';
+        transformer_model_lexical_context_lexical_rebuild_log( 'step=memory_limit before=' . $before . ' requested=' . $limit . ' after=' . $after );
     }
 }
 
@@ -2180,6 +2559,505 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $cont
 
     } finally {
         $GLOBALS['chatbot_lcm_full_rebuild_watch'] = false;
+    }
+}
+
+/**
+ * Chunked lexical rebuild for WP-Cron environments with strict FastCGI idle timeouts (e.g. MAMP).
+ *
+ * This runs the same PMI+IDF rebuild as transformer_model_lexical_context_run_full_lexical_cache_rebuild(),
+ * but slices work across multiple cron invocations, persisting intermediate PMI counts to disk.
+ *
+ * @param string      $context  Source label for logs: wp_cron recommended.
+ * @param string|null $run_kind Cron arg: once|recurring|''|null.
+ * @return array{ done: bool, ok?: bool, error?: string }
+ */
+function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunked( $context = 'wp_cron', $run_kind = null ) {
+
+    $hook = 'chatbot_transformer_model_lexical_cache_rebuild_cron';
+
+    // Prevent concurrent chunk runners from stomping state (common when multiple wp-cron.php hits overlap).
+    $lock_key = 'chatbot_lcm_lexical_rebuild_lock';
+    $lock_ttl = (int) apply_filters( 'chatbot_lexical_rebuild_cron_lock_ttl_seconds', 70, $context, $run_kind );
+    $lock_ttl = max( 15, min( 300, $lock_ttl ) );
+    $existing_lock = get_transient( $lock_key );
+    if ( $existing_lock ) {
+        transformer_model_lexical_context_lexical_rebuild_log(
+            sprintf( 'context=%s step=lock_busy lock_ttl=%ds', $context, $lock_ttl )
+        );
+        return array( 'done' => false );
+    }
+    set_transient( $lock_key, 1, $lock_ttl );
+
+    $time_budget = (float) apply_filters( 'chatbot_lexical_rebuild_cron_time_budget_seconds', 8.0, $context, $run_kind );
+    $batch_size  = (int) apply_filters( 'chatbot_lexical_rebuild_cron_document_batch_size', 6, $context, $run_kind );
+    $batch_size  = max( 1, min( 50, $batch_size ) );
+
+    $t0 = microtime( true );
+    $deadline = $t0 + max( 3.0, $time_budget );
+
+    $cache_dir = __DIR__ . '/lexical_embeddings_cache';
+    if ( ! file_exists( $cache_dir ) ) {
+        @wp_mkdir_p( $cache_dir );
+    }
+    $cache_dir = trailingslashit( $cache_dir );
+
+    $state_key = 'chatbot_lcm_lexical_rebuild_state';
+    $state     = get_option( $state_key, array() );
+    if ( ! is_array( $state ) ) {
+        $state = array();
+    }
+
+    try {
+
+    // Initialize state if needed.
+    if ( empty( $state['token'] ) || empty( $state['stage'] ) ) {
+        $token = wp_generate_password( 12, false, false );
+        $sql_agg = transformer_model_lexical_context_lexical_corpus_sql_aggregate();
+        if ( function_exists( 'transformer_model_lexical_context_maybe_raise_memory_for_rebuild' ) ) {
+            transformer_model_lexical_context_maybe_raise_memory_for_rebuild(
+                'chunked_rebuild',
+                array(
+                    'document_count' => (int) ( $sql_agg['row_count'] ?? 0 ),
+                    'chunk_count'    => 0,
+                    'corpus_bytes'   => (int) ( $sql_agg['content_bytes'] ?? 0 ),
+                )
+            );
+        }
+
+        $state = array(
+            'token'            => $token,
+            'stage'            => 'pmi_accumulate',
+            'offset'           => 0,
+            'total_rows'       => (int) ( $sql_agg['row_count'] ?? 0 ),
+            'total_words'      => 0,
+            'total_pairs'      => 0,
+            'window_size'      => max( 1, min( 50, (int) get_option( 'chatbot_transformer_model_word_content_window_size', 3 ) ) ),
+            'started_at'       => time(),
+            'run_kind'         => is_string( $run_kind ) ? $run_kind : '',
+        );
+
+        transformer_model_lexical_context_lexical_rebuild_log(
+            sprintf(
+                'context=%s step=chunked_init total_rows=%d batch=%d budget=%.1fs',
+                $context,
+                (int) $state['total_rows'],
+                $batch_size,
+                $time_budget
+            )
+        );
+        update_option( $state_key, $state, false );
+        transformer_model_lexical_context_rebuild_record_activity(
+            $context,
+            array(
+                'step'        => 'chunked_init',
+                'stage'       => 'pmi_accumulate',
+                'offset'      => 0,
+                'total_rows'  => (int) $state['total_rows'],
+                'N_docs'      => 0,
+            )
+        );
+    }
+
+    $token = (string) ( $state['token'] ?? '' );
+    if ( $token === '' ) {
+        $err = array( 'done' => true, 'ok' => false, 'error' => 'state_token' );
+        transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
+        transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'unknown', 'error' => $err['error'] ) );
+        update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', (string) $err['error'], false );
+        return $err;
+    }
+
+    $counts_base = transformer_model_lexical_context_rebuild_counts_base_path( $cache_dir, $token );
+    $pmi_path    = $cache_dir . 'lexical_rebuild_pmi.' . $token . '.bin';
+    $corpus_path = $cache_dir . 'lexical_rebuild_corpus.' . $token . '.txt';
+
+    // Load counts if present.
+    $counts = transformer_model_lexical_context_rebuild_counts_load( $counts_base );
+    if ( ! is_array( $counts ) ) {
+        $counts = array(
+            'co'   => array(),
+            'wc'   => array(),
+            'df'   => array(),
+            'N'    => 0,
+        );
+    }
+
+    $stage = (string) ( $state['stage'] ?? 'pmi_accumulate' );
+
+    // Stage 1: accumulate PMI counts over paged documents.
+    if ( $stage === 'pmi_accumulate' ) {
+        while ( microtime( true ) < $deadline ) {
+            $offset = (int) ( $state['offset'] ?? 0 );
+            $docs = transformer_model_lexical_context_fetch_wordpress_documents_page( $offset, $batch_size );
+            if ( empty( $docs ) ) {
+                // Done reading corpus — flush counts and stage for finalize.
+                transformer_model_lexical_context_rebuild_counts_save( $counts_base, $counts, $state );
+                $state['stage'] = 'pmi_finalize';
+                transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=pmi_accumulate_done offset=' . $offset );
+                update_option( $state_key, $state, false );
+                transformer_model_lexical_context_rebuild_record_activity(
+                    $context,
+                    array(
+                        'step'       => 'pmi_accumulate_done',
+                        'stage'      => 'pmi_finalize',
+                        'offset'     => $offset,
+                        'total_rows' => (int) ( $state['total_rows'] ?? 0 ),
+                        'N_docs'     => (int) ( $counts['N'] ?? 0 ),
+                    )
+                );
+                break;
+            }
+
+            foreach ( $docs as $doc ) {
+                $corpus = isset( $doc['normalized_text'] ) ? (string) $doc['normalized_text'] : '';
+                if ( $corpus === '' ) {
+                    continue;
+                }
+                // Persist flattened corpus stream to disk for a stable corpus_hash (avoids holding the full string in memory).
+                // Matches flatten_documents() semantics: documents joined with a single space in stable ORDER BY ID.
+                file_put_contents( $corpus_path, ' ' . $corpus, FILE_APPEND | LOCK_EX );
+
+                // Incremental DF/N for IDF (unique tokens per document).
+                $counts['N'] = (int) ( $counts['N'] ?? 0 ) + 1;
+                $idf_tokens  = transformer_model_lexical_context_tokenize_for_local_idf( $corpus );
+                $idf_uniq    = array_unique( $idf_tokens );
+                foreach ( $idf_uniq as $t ) {
+                    if ( $t === '' ) {
+                        continue;
+                    }
+                    if ( ! isset( $counts['df'][ $t ] ) ) {
+                        $counts['df'][ $t ] = 0;
+                    }
+                    $counts['df'][ $t ]++;
+                }
+
+                $corpus = preg_replace( '/[^\w\s]/u', ' ', $corpus );
+                $words  = preg_split( '/\s+/', strtolower( trim( $corpus ) ) );
+                $words  = is_array( $words ) ? $words : array();
+                $words  = array_filter(
+                    $words,
+                    function ( $word ) {
+                        return ! empty( $word ) && strlen( (string) $word ) > 1;
+                    }
+                );
+                $words = array_values( $words );
+                if ( empty( $words ) ) {
+                    continue;
+                }
+
+                foreach ( $words as $w ) {
+                    if ( ! isset( $counts['wc'][ $w ] ) ) {
+                        $counts['wc'][ $w ] = 0;
+                    }
+                    $counts['wc'][ $w ]++;
+                    $state['total_words'] = (int) ( $state['total_words'] ?? 0 ) + 1;
+                }
+
+                $tp = (int) ( $state['total_pairs'] ?? 0 );
+                transformer_model_lexical_context_accumulate_cooccurrences_within_sequence(
+                    $words,
+                    (int) ( $state['window_size'] ?? 3 ),
+                    $counts['co'],
+                    $tp
+                );
+                $state['total_pairs'] = $tp;
+            }
+
+            $state['offset'] = $offset + $batch_size;
+
+            // Persist less frequently; pruning + split files happen inside counts_save().
+            $persist_every = (int) apply_filters( 'chatbot_lexical_rebuild_cron_persist_every_batches', 4, $context, $run_kind );
+            $persist_every = max( 1, min( 25, $persist_every ) );
+            $batches_done  = (int) ( $state['batches_done'] ?? 0 ) + 1;
+            $state['batches_done'] = $batches_done;
+            if ( $batches_done % $persist_every === 0 || microtime( true ) + 0.5 >= $deadline ) {
+                transformer_model_lexical_context_rebuild_counts_save( $counts_base, $counts, $state );
+            }
+            update_option( $state_key, $state, false );
+        }
+
+        $elapsed = microtime( true ) - $t0;
+        $peak = function_exists( 'memory_get_peak_usage' ) ? memory_get_peak_usage( true ) : 0;
+        transformer_model_lexical_context_lexical_rebuild_log(
+            sprintf(
+                'context=%s step=chunk_heartbeat stage=pmi_accumulate offset=%d elapsed=%.2f peak_mem_bytes=%d N_docs=%d',
+                $context,
+                (int) ( $state['offset'] ?? 0 ),
+                $elapsed,
+                (int) $peak,
+                (int) ( $counts['N'] ?? 0 )
+            )
+        );
+        transformer_model_lexical_context_rebuild_record_activity(
+            $context,
+            array(
+                'step'       => 'chunk_heartbeat',
+                'stage'      => 'pmi_accumulate',
+                'offset'     => (int) ( $state['offset'] ?? 0 ),
+                'total_rows' => (int) ( $state['total_rows'] ?? 0 ),
+                'N_docs'     => (int) ( $counts['N'] ?? 0 ),
+            )
+        );
+
+        return array( 'done' => false );
+    }
+
+    // Stage 2: finalize PMI from counts (single shot; still time-budgeted).
+    if ( $stage === 'pmi_finalize' ) {
+        $tw = (int) ( $state['total_words'] ?? 0 );
+        $tp = (int) ( $state['total_pairs'] ?? 0 );
+        if ( $tw <= 0 || $tp <= 0 ) {
+            delete_option( $state_key );
+            transformer_model_lexical_context_rebuild_counts_unlink_all( $counts_base );
+            $err = array( 'done' => true, 'ok' => false, 'error' => 'empty_counts' );
+            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
+            transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'pmi_finalize', 'error' => $err['error'] ) );
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', (string) $err['error'], false );
+            return $err;
+        }
+
+        // Finalization can be expensive; keep it in its own cron slice.
+        transformer_model_lexical_context_lexical_rebuild_log(
+            sprintf( 'context=%s step=pmi_finalize_started roots=%d', $context, is_array( $counts['co'] ) ? count( $counts['co'] ) : 0 )
+        );
+        transformer_model_lexical_context_rebuild_record_activity(
+            $context,
+            array(
+                'step'       => 'pmi_finalize_started',
+                'stage'      => 'pmi_finalize',
+                'offset'     => (int) ( $state['offset'] ?? 0 ),
+                'total_rows' => (int) ( $state['total_rows'] ?? 0 ),
+                'N_docs'     => (int) ( $counts['N'] ?? 0 ),
+                'roots'      => is_array( $counts['co'] ) ? count( $counts['co'] ) : 0,
+            )
+        );
+
+        $embeddings = transformer_model_lexical_context_finalize_pmi_from_counts( $counts['co'], $counts['wc'], $tw, $tp );
+        if ( empty( $embeddings ) ) {
+            delete_option( $state_key );
+            transformer_model_lexical_context_rebuild_counts_unlink_all( $counts_base );
+            $err = array( 'done' => true, 'ok' => false, 'error' => 'pmi_empty' );
+            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
+            transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'pmi_finalize', 'error' => $err['error'] ) );
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', (string) $err['error'], false );
+            return $err;
+        }
+
+        if ( ! transformer_model_lexical_context_rebuild_blob_save( $pmi_path, $embeddings ) ) {
+            delete_option( $state_key );
+            transformer_model_lexical_context_rebuild_counts_unlink_all( $counts_base );
+            $err = array( 'done' => true, 'ok' => false, 'error' => 'pmi_persist' );
+            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
+            transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'pmi_finalize', 'error' => $err['error'] ) );
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', (string) $err['error'], false );
+            return $err;
+        }
+
+        // Free heavy co/wc shards once PMI exists; keep DF/N for install stage IDF write.
+        transformer_model_lexical_context_rebuild_counts_unlink_heavy_only( $counts_base );
+        $state['stage'] = 'install';
+        update_option( $state_key, $state, false );
+
+        transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=pmi_finalize_done' );
+        transformer_model_lexical_context_rebuild_record_activity(
+            $context,
+            array(
+                'step'  => 'pmi_finalize_done',
+                'stage' => 'install',
+            )
+        );
+        return array( 'done' => false );
+    }
+
+    // Stage 3: install PMI + IDF atomically using existing full-rebuild installer logic (but using our PMI).
+    if ( $stage === 'install' ) {
+        transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=install_enter' );
+        transformer_model_lexical_context_rebuild_record_activity(
+            $context,
+            array(
+                'step'  => 'install_enter',
+                'stage' => 'install',
+            )
+        );
+        $embeddings = transformer_model_lexical_context_rebuild_blob_load( $pmi_path );
+        if ( ! is_array( $embeddings ) || empty( $embeddings ) ) {
+            delete_option( $state_key );
+            @unlink( $pmi_path );
+            $err = array( 'done' => true, 'ok' => false, 'error' => 'pmi_missing' );
+            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
+            transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'] ) );
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', (string) $err['error'], false );
+            return $err;
+        }
+
+        // Stable corpus hash from streamed corpus file created during accumulation.
+        if ( ! file_exists( $corpus_path ) ) {
+            delete_option( $state_key );
+            @unlink( $pmi_path );
+            $err = array( 'done' => true, 'ok' => false, 'error' => 'corpus_stream_missing' );
+            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
+            transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'] ) );
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', (string) $err['error'], false );
+            return $err;
+        }
+        $corpus_hash = hash_file( 'sha256', $corpus_path );
+        if ( ! is_string( $corpus_hash ) || $corpus_hash === '' ) {
+            delete_option( $state_key );
+            @unlink( $pmi_path );
+            $err = array( 'done' => true, 'ok' => false, 'error' => 'corpus_hash' );
+            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
+            transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'] ) );
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', (string) $err['error'], false );
+            return $err;
+        }
+
+        $cache_dir = __DIR__ . '/lexical_embeddings_cache';
+        if ( ! file_exists( $cache_dir ) ) {
+            if ( ! wp_mkdir_p( $cache_dir ) ) {
+                delete_option( $state_key );
+                @unlink( $pmi_path );
+                $err = array( 'done' => true, 'ok' => false, 'error' => 'cache_dir' );
+                transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
+                transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'] ) );
+                update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', (string) $err['error'], false );
+                return $err;
+            }
+        }
+
+        $cache_dir = trailingslashit( $cache_dir );
+        $token     = (string) $state['token'];
+
+        $final_php    = $cache_dir . 'lexical_embeddings_cache.php';
+        $final_ver    = $cache_dir . 'lexical_embeddings_cache_version.txt';
+        $final_idf    = $cache_dir . 'lexical_local_idf_cache.json';
+
+        $staging_php  = $cache_dir . 'lexical_embeddings_cache.staging.' . $token . '.php';
+        $idf_staging  = $cache_dir . 'lexical_local_idf_cache.staging.' . $token . '.json';
+        $ver_staging  = $cache_dir . 'lexical_embeddings_cache_version.staging.' . $token . '.txt';
+
+        transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=install_started' );
+
+        if ( ! transformer_model_lexical_context_save_cache( $staging_php, $embeddings ) ) {
+            transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cache_dir, $token );
+            $err = array( 'done' => true, 'ok' => false, 'error' => 'write_error' );
+            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] . ' detail=pmi_save' );
+            transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'], 'detail' => 'pmi_save' ) );
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', 'write_error:pmi_save', false );
+            return $err;
+        }
+
+        // Build IDF payload from accumulated DF/N (no need to load all docs again).
+        $N  = (int) ( $counts['N'] ?? 0 );
+        $df = isset( $counts['df'] ) && is_array( $counts['df'] ) ? $counts['df'] : array();
+        if ( $N <= 0 || empty( $df ) ) {
+            transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cache_dir, $token );
+            $err = array( 'done' => true, 'ok' => false, 'error' => 'idf_empty' );
+            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
+            transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'] ) );
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', (string) $err['error'], false );
+            return $err;
+        }
+
+        $idf_map = array();
+        foreach ( $df as $term => $dcf ) {
+            $idf_map[ $term ] = log( ( 1 + $N ) / ( 1 + (int) $dcf ) ) + 1.0;
+        }
+
+        $idf_payload = array(
+            'version'     => 1,
+            'corpus_hash' => $corpus_hash,
+            'N_docs'      => $N,
+            'created_at'  => gmdate( 'c' ),
+            'idf_map'     => $idf_map,
+        );
+        $idf_json = wp_json_encode( $idf_payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+        if ( ! is_string( $idf_json ) || $idf_json === '' ) {
+            transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cache_dir, $token );
+            $err = array( 'done' => true, 'ok' => false, 'error' => 'idf_encode' );
+            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
+            transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'] ) );
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', (string) $err['error'], false );
+            return $err;
+        }
+        if ( false === file_put_contents( $idf_staging, $idf_json, LOCK_EX ) ) {
+            transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cache_dir, $token );
+            $err = array( 'done' => true, 'ok' => false, 'error' => 'write_error' );
+            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] . ' detail=idf_write' );
+            transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'], 'detail' => 'idf_write' ) );
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', 'write_error:idf_write', false );
+            return $err;
+        }
+
+        if ( false === file_put_contents( $ver_staging, $corpus_hash, LOCK_EX ) ) {
+            transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cache_dir, $token );
+            $err = array( 'done' => true, 'ok' => false, 'error' => 'write_error' );
+            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] . ' detail=version_write' );
+            transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'], 'detail' => 'version_write' ) );
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', 'write_error:version_write', false );
+            return $err;
+        }
+
+        // Atomic-ish swap.
+        $install_one = function ( $from, $to ) {
+            if ( ! file_exists( $from ) ) {
+                return false;
+            }
+            if ( file_exists( $to ) ) {
+                @unlink( $to . '.bak' );
+                @rename( $to, $to . '.bak' );
+            }
+            return @rename( $from, $to );
+        };
+
+        $ok_move = $install_one( $staging_php, $final_php );
+        $ok_move = $ok_move && $install_one( $idf_staging, $final_idf );
+        $ok_move = $ok_move && $install_one( $ver_staging, $final_ver );
+
+        if ( ! $ok_move ) {
+            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=install_failed' );
+            transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cache_dir, $token );
+            $err = array( 'done' => true, 'ok' => false, 'error' => 'write_error' );
+            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] . ' detail=atomic_swap' );
+            transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'], 'detail' => 'atomic_swap' ) );
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', 'write_error:atomic_swap', false );
+            return $err;
+        }
+
+        transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=install_ok' );
+
+        transformer_model_lexical_context_rebuild_record_activity(
+            $context,
+            array(
+                'step'  => 'install_ok',
+                'stage' => 'complete',
+            )
+        );
+
+        // Cleanup.
+        @unlink( $pmi_path );
+        @unlink( $corpus_path );
+        delete_option( $state_key );
+        // DF/N no longer needed once caches are installed.
+        transformer_model_lexical_context_rebuild_counts_unlink_all( $counts_base );
+        delete_option( 'chatbot_lcm_lexical_cache_rebuild_last_error' );
+
+        return array( 'done' => true, 'ok' => true );
+    }
+
+    // Unknown stage; reset.
+    delete_option( $state_key );
+    transformer_model_lexical_context_rebuild_counts_unlink_all( $counts_base );
+    @unlink( $pmi_path );
+    @unlink( $corpus_path );
+    $err = array( 'done' => true, 'ok' => false, 'error' => 'bad_stage' );
+    transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
+    transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'unknown', 'error' => $err['error'] ) );
+    update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', (string) $err['error'], false );
+    return $err;
+
+    } finally {
+        delete_transient( $lock_key );
     }
 }
 
