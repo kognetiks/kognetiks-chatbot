@@ -9795,7 +9795,11 @@ function transformer_model_lexical_context_assemble_response_from_consolidated( 
     if ( is_array( $consolidated ) && (string) ( $consolidated['intent'] ?? '' ) === 'definition' ) {
         $templated = transformer_model_lexical_context_assemble_definition_template_from_consolidated( $consolidated );
         if ( is_string( $templated ) && trim( $templated ) !== '' ) {
-            return transformer_model_lexical_context_polish_before_emit( $templated, $consolidated );
+            $handled = transformer_model_lexical_context_apply_confidence_handling_before_emit( $templated, $consolidated, $raw_query_text );
+            if ( is_array( $handled ) && ! empty( $handled['return_raw'] ) ) {
+                return (string) ( $handled['text'] ?? '' );
+            }
+            return transformer_model_lexical_context_polish_before_emit( (string) ( $handled['text'] ?? $templated ), $consolidated );
         }
     }
 
@@ -9829,7 +9833,90 @@ function transformer_model_lexical_context_assemble_response_from_consolidated( 
         $leadingTokenRatio,
         $raw_query_text
     );
-    return transformer_model_lexical_context_polish_before_emit( $assembled, is_array( $consolidated ) ? $consolidated : array() );
+    $consolidated_arr = is_array( $consolidated ) ? $consolidated : array();
+    $handled = transformer_model_lexical_context_apply_confidence_handling_before_emit( $assembled, $consolidated_arr, $raw_query_text );
+    if ( is_array( $handled ) && ! empty( $handled['return_raw'] ) ) {
+        return (string) ( $handled['text'] ?? '' );
+    }
+    return transformer_model_lexical_context_polish_before_emit( (string) ( $handled['text'] ?? $assembled ), $consolidated_arr );
+}
+
+/**
+ * Phase 8: Confidence handling (no bluffing).
+ *
+ * High confidence: return direct answer.
+ * Medium confidence: return direct answer with soft framing.
+ * Low confidence: return uncertainty / no-match message.
+ *
+ * @param string              $text
+ * @param array<string,mixed> $consolidated
+ * @param string              $raw_query_text
+ * @return array{text:string,return_raw:bool}
+ */
+function transformer_model_lexical_context_apply_confidence_handling_before_emit( $text, $consolidated = array(), $raw_query_text = '' ) {
+
+    $t = is_string( $text ) ? $text : (string) $text;
+    $t = trim( (string) $t );
+
+    $confidence = ( is_array( $consolidated ) && isset( $consolidated['confidence'] ) ) ? (float) $consolidated['confidence'] : null;
+    if ( $confidence === null ) {
+        return array(
+            'text'       => $t,
+            'return_raw' => false,
+        );
+    }
+
+    $high_min   = (float) apply_filters( 'chatbot_lcm_confidence_high_min', 0.70 );
+    $medium_min = (float) apply_filters( 'chatbot_lcm_confidence_medium_min', 0.35 );
+
+    if ( $confidence >= $high_min ) {
+        return array(
+            'text'       => $t,
+            'return_raw' => false,
+        );
+    }
+
+    $intent = ( is_array( $consolidated ) && isset( $consolidated['intent'] ) ) ? (string) $consolidated['intent'] : '';
+    $topic  = ( is_array( $consolidated ) && isset( $consolidated['primary_topic'] ) ) ? trim( (string) $consolidated['primary_topic'] ) : '';
+    if ( $topic === '' && is_array( $consolidated ) && isset( $consolidated['query'] ) ) {
+        $topic = trim( (string) $consolidated['query'] );
+    }
+    if ( $topic === '' ) {
+        $topic = trim( (string) $raw_query_text );
+    }
+    if ( $topic === '' ) {
+        $topic = 'that term';
+    }
+
+    // Low confidence: do not bluff; return uncertainty/no-match.
+    if ( $confidence < $medium_min ) {
+        if ( $intent === 'definition' ) {
+            return array(
+                'text'       => 'I found references to ' . $topic . ', but not enough context to define the term confidently.',
+                'return_raw' => true,
+            );
+        }
+        return array(
+            'text'       => transformer_model_lexical_context_lcm_insufficient_confidence_message(),
+            'return_raw' => true,
+        );
+    }
+
+    // Medium confidence: soft framing, but still answer directly.
+    $medium_prefix = (string) apply_filters(
+        'chatbot_lcm_medium_confidence_framing_prefix',
+        'Based on the information I can access, '
+    );
+    if ( $t !== '' ) {
+        $t = $medium_prefix . $t;
+    } else {
+        $t = $medium_prefix . 'I don\'t have enough information in the site content to answer that confidently.';
+    }
+
+    return array(
+        'text'       => $t,
+        'return_raw' => false,
+    );
 }
 
 /**
@@ -10118,7 +10205,11 @@ function transformer_model_lexical_context_polish_before_emit( $text, $consolida
     }
 
     $intent = ( is_array( $consolidated ) && isset( $consolidated['intent'] ) ) ? (string) $consolidated['intent'] : '';
-    $min_sent = ( $intent === 'definition' ) ? 2 : 2;
+    $confidence = ( is_array( $consolidated ) && isset( $consolidated['confidence'] ) ) ? (float) $consolidated['confidence'] : null;
+    $low_conf_min = (float) apply_filters( 'chatbot_lcm_confidence_medium_min', 0.35 );
+
+    // For low-confidence/no-match answers, allow a single sentence (Phase 8 message is intentionally short).
+    $min_sent = ( $confidence !== null && $confidence < $low_conf_min ) ? 1 : 2;
     $max_sent = ( $intent === 'definition' ) ? 4 : 4;
 
     $deduped = array_slice( $deduped, 0, $max_sent );
@@ -10128,12 +10219,6 @@ function transformer_model_lexical_context_polish_before_emit( $text, $consolida
     }
 
     $out = trim( implode( ' ', $deduped ) );
-
-    // Low-confidence preface.
-    $confidence = ( is_array( $consolidated ) && isset( $consolidated['confidence'] ) ) ? (float) $consolidated['confidence'] : null;
-    if ( $confidence !== null && $confidence > 0.0 && $confidence < 0.35 ) {
-        $out = 'I found limited relevant information in the site content. ' . $out;
-    }
 
     // Final normalize again.
     if ( function_exists( 'transformer_model_lexical_context_normalize_emitted_response_spacing' ) ) {
