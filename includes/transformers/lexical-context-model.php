@@ -4477,6 +4477,18 @@ function transformer_model_lexical_context_low_value_sentence_row_reason_codes( 
     $line = preg_replace( '/\s+/u', ' ', $text );
     $len  = strlen( $line );
 
+    // Hard reject: LLM transcript/meta fragments that should never participate in answering.
+    // These are often artifact-y “assistant transcript” sentences that can win lexical overlap.
+    if (
+        preg_match( '/\b(?:end|start|beginning)\s+of\s+chatgpt\s+response\b/i', $raw )
+        || preg_match( '/\bchatgpt\s+response\b/i', $raw )
+        || preg_match( '/\bsupremely\s+overconfident\b/i', $raw )
+        || preg_match( '/\bgetting\s+caught\s+by\s+ai\b/i', $raw )
+        || preg_match( '/\bundo\s+the\s+ai[’\']?\s+guidance\b/i', $raw )
+    ) {
+        return array( 'lcm_transcript_meta_artifact' );
+    }
+
     // URL-only or URL-dominant rows (Apple News share artifacts, etc.).
     if ( preg_match( '~\bhttps?://~i', $line ) || preg_match( '~\bapple\.news\b~i', $line ) ) {
         return array( 'url_or_share_artifact' );
@@ -5926,6 +5938,140 @@ function transformer_model_lexical_context_no_query_overlap_message() {
 function transformer_model_lexical_context_is_lcm_diagnostics_enabled() {
 
     return defined( 'KOGNETIKS_LCM_DEBUG' ) && KOGNETIKS_LCM_DEBUG;
+}
+
+/**
+ * Phase 9: emit structured “source trace” for debugging (not shown to end users).
+ *
+ * Enable when `KOGNETIKS_LCM_PHASE9_EMIT_TRACE` is true, or when `KOGNETIKS_LCM_DEBUG` is true
+ * (override with filter `chatbot_lcm_phase9_emit_trace_enabled`).
+ *
+ * @return bool
+ */
+function transformer_model_lexical_context_is_phase9_emit_trace_enabled() {
+
+    if ( defined( 'KOGNETIKS_LCM_PHASE9_EMIT_TRACE' ) && constant( 'KOGNETIKS_LCM_PHASE9_EMIT_TRACE' ) ) {
+        return true;
+    }
+
+    return (bool) apply_filters(
+        'chatbot_lcm_phase9_emit_trace_enabled',
+        transformer_model_lexical_context_is_lcm_diagnostics_enabled()
+    );
+}
+
+/**
+ * Phase 9: log consolidation + emit summary as one JSON object (chatbot-logs when available).
+ *
+ * Keys: final_answer_source_documents, sentences_used, sentences_discarded, synthesis_intent, confidence_score.
+ *
+ * @param array<string, mixed> $consolidated Consolidation object from Phase 5.
+ * @param string               $final_answer_text Text returned to the caller after assembly + polish.
+ * @return void
+ */
+function transformer_model_lexical_context_log_phase9_emit_trace( $consolidated, $final_answer_text ) {
+
+    if ( ! transformer_model_lexical_context_is_phase9_emit_trace_enabled() ) {
+        return;
+    }
+
+    $c = is_array( $consolidated ) ? $consolidated : array();
+
+    $facts     = isset( $c['facts'] ) && is_array( $c['facts'] ) ? $c['facts'] : array();
+    $discarded = isset( $c['discarded'] ) && is_array( $c['discarded'] ) ? $c['discarded'] : array();
+
+    $best = (int) ( $c['best_document_id'] ?? 0 );
+    $sup  = isset( $c['supporting_document_ids'] ) && is_array( $c['supporting_document_ids'] )
+        ? array_values( array_map( 'intval', $c['supporting_document_ids'] ) )
+        : array();
+
+    $doc_union = array();
+    foreach ( $facts as $f ) {
+        if ( is_array( $f ) && isset( $f['source_id'] ) ) {
+            $pid = (int) $f['source_id'];
+            if ( $pid > 0 ) {
+                $doc_union[ $pid ] = true;
+            }
+        }
+    }
+    if ( $best > 0 ) {
+        $doc_union[ $best ] = true;
+    }
+    foreach ( $sup as $pid ) {
+        if ( $pid > 0 ) {
+            $doc_union[ $pid ] = true;
+        }
+    }
+    $doc_ids = array_keys( $doc_union );
+    sort( $doc_ids, SORT_NUMERIC );
+
+    $sentences_used = array();
+    foreach ( $facts as $f ) {
+        if ( ! is_array( $f ) ) {
+            continue;
+        }
+        $sentences_used[] = array(
+            'text'    => transformer_model_lexical_context_diag_preview_text( (string) ( $f['text'] ?? '' ), 220 ),
+            'post_id' => isset( $f['source_id'] ) ? (int) $f['source_id'] : 0,
+            'score'   => isset( $f['score'] ) ? (float) $f['score'] : 0.0,
+        );
+    }
+
+    $sentences_discarded = array();
+    foreach ( $discarded as $d ) {
+        if ( ! is_array( $d ) ) {
+            continue;
+        }
+        $reasons = isset( $d['reasons'] ) && is_array( $d['reasons'] ) ? array_values( $d['reasons'] ) : array();
+        $sentences_discarded[] = array(
+            'text'    => transformer_model_lexical_context_diag_preview_text( (string) ( $d['text'] ?? '' ), 220 ),
+            'post_id' => isset( $d['source_id'] ) ? (int) $d['source_id'] : 0,
+            'score'   => isset( $d['score'] ) ? (float) $d['score'] : 0.0,
+            'reasons' => $reasons,
+        );
+    }
+
+    $qshape = '';
+    if ( isset( $c['query_shape'] ) && is_array( $c['query_shape'] ) && isset( $c['query_shape']['shape'] ) ) {
+        $qshape = (string) $c['query_shape']['shape'];
+    }
+
+    $payload = array(
+        'final_answer_source_documents' => array(
+            'best_document_id'        => $best,
+            'supporting_document_ids' => $sup,
+            'document_ids'            => $doc_ids,
+        ),
+        'sentences_used'                => $sentences_used,
+        'sentences_discarded'           => $sentences_discarded,
+        'synthesis_intent'              => isset( $c['intent'] ) ? (string) $c['intent'] : '',
+        'confidence_score'              => isset( $c['confidence'] ) ? (float) $c['confidence'] : 0.0,
+        'query_shape'                   => $qshape,
+        'phase11_query_facet'           => transformer_model_lexical_context_phase11_query_facet_class(
+            isset( $c['query'] ) ? (string) $c['query'] : '',
+            isset( $c['intent'] ) ? (string) $c['intent'] : ''
+        ),
+        'final_answer_preview'          => transformer_model_lexical_context_diag_preview_text( (string) $final_answer_text, 260 ),
+    );
+
+    $payload = apply_filters( 'chatbot_lcm_phase9_emit_trace_payload', $payload, $c, (string) $final_answer_text );
+
+    $flags = JSON_UNESCAPED_UNICODE;
+    if ( defined( 'JSON_INVALID_UTF8_SUBSTITUTE' ) ) {
+        $flags |= constant( 'JSON_INVALID_UTF8_SUBSTITUTE' );
+    }
+    $json = wp_json_encode( $payload, $flags );
+    if ( ! is_string( $json ) || $json === '' ) {
+        return;
+    }
+
+    $line = '[LCM][phase9_emit] ' . $json;
+    if ( function_exists( 'chatbot_error_log' ) ) {
+        $dt = gmdate( 'd-M-Y H:i:s' );
+        chatbot_error_log( '[' . $dt . ' UTC] ' . $line );
+    } elseif ( function_exists( 'error_log' ) ) {
+        error_log( $line );
+    }
 }
 
 /**
@@ -9080,7 +9226,13 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         $raw_l = preg_replace( '/\s+/u', ' ', trim( (string) $raw_l ) );
         $is_def_query = false;
         if ( strpos( $raw_l, 'what is ' ) === 0 || strpos( $raw_l, 'what are ' ) === 0 || strpos( $raw_l, 'define ' ) === 0 || strpos( $raw_l, 'explain ' ) === 0 ) {
-            $is_def_query = true;
+            $is_purpose_lead = (bool) preg_match(
+                '/\b(role\s+of|what\s+is\s+the\s+role|what\s+are\s+the\s+roles|what\'s\s+the\s+role|whats\s+the\s+role)\b/u',
+                $raw_l
+            );
+            if ( ! $is_purpose_lead ) {
+                $is_def_query = true;
+            }
         }
 
         if ( $is_def_query ) {
@@ -9225,6 +9377,8 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         $input_text_raw
     );
 
+    transformer_model_lexical_context_log_phase9_emit_trace( $consolidated, $assembled );
+
     transformer_model_lexical_context_lcm_timing_segment( 'assembly' );
 
     return $assembled;
@@ -9259,10 +9413,10 @@ function transformer_model_lexical_context_build_sentences_from_corpus( $corpus,
 
 /**
  * Phase 3: detect user intent for answer shaping.
- * For now, only `definition` and `summary` are implemented.
+ * `purpose` = role / function / “what does … do” (not the same as glossary definition).
  *
  * @param string $query_raw
- * @return string One of: definition|summary|unknown
+ * @return string One of: purpose|definition|summary|unknown
  */
 function transformer_model_lexical_context_detect_query_intent( $query_raw ) {
 
@@ -9272,6 +9426,16 @@ function transformer_model_lexical_context_detect_query_intent( $query_raw ) {
 
     if ( $q === '' ) {
         return 'unknown';
+    }
+
+    // Purpose / role intent — must run before bare “what is …” definition routing.
+    if (
+        preg_match( '/\b(role\s+of|what\s+is\s+the\s+role|what\s+are\s+the\s+roles|what\'s\s+the\s+role|whats\s+the\s+role)\b/u', $q )
+        || preg_match( '/\b(main\s+job|primary\s+role|what\s+function)\b/u', $q )
+        || preg_match( '/\bwhat\s+does\b/u', $q )
+        || preg_match( '/\bwhat\s+do\b/u', $q )
+    ) {
+        return 'purpose';
     }
 
     // Definition intent.
@@ -9298,6 +9462,405 @@ function transformer_model_lexical_context_detect_query_intent( $query_raw ) {
     }
 
     return 'unknown';
+}
+
+/**
+ * Purpose-intent: detect title/lead/methodology “wrapper” sentences that should not become emitted facts.
+ *
+ * @param string      $text   Cleaned sentence text.
+ * @param string|null $slower Lowercased plain text; computed when null.
+ * @return bool True when this row should be dropped for purpose condensation/synthesis.
+ */
+function transformer_model_lexical_context_purpose_fact_is_wrapper_or_noise( $text, $slower = null ) {
+
+    $plain = trim( (string) wp_strip_all_tags( (string) $text ) );
+    if ( $plain === '' ) {
+        return true;
+    }
+
+    if ( $slower === null || $slower === '' ) {
+        $slower = strtolower( $plain );
+    }
+    $slower = preg_replace( '/\s+/u', ' ', (string) $slower );
+
+    $patterns = (array) apply_filters(
+        'chatbot_lcm_purpose_fact_wrapper_patterns',
+        array(
+            '/\bharnessing\s+the\s+power\b/iu',
+            '/\bunlocking\s+the\s+power\b/iu',
+            '/\bin today[’\']?s fast-?paced\b/iu',
+            '/\bthis\s+article\s+(?:explores|examines|looks\s+at|discusses)\b/iu',
+            '/\bin\s+this\s+(?:piece|post|article)\b/iu',
+            '/\bi\s+analyzed\s+\d+/iu',
+            '/\bi\s+(?:reviewed|studied|surveyed|examined)\s+\d+/iu',
+            '/\baccording\s+to\s+(?:my|our)\s+(?:analysis|research|survey)\b/iu',
+            '/\btransforming\s+.+\s+business\s+operations\b/iu',
+            '/\bleading\s+(?:the\s+)?(?:digital\s+)?transformation\b/iu',
+            '/\bleverage\s+(?:the\s+)?power\s+of\b/iu',
+            '/\b(?:welcome to|in this guide|in this overview)\b/iu',
+            '/\bwe\s+(?:conducted|ran|performed)\s+(?:a\s+)?(?:analysis|study|survey)\b/iu',
+        )
+    );
+    foreach ( $patterns as $re ) {
+        if ( is_string( $re ) && $re !== '' && preg_match( $re, $slower ) ) {
+            return true;
+        }
+    }
+
+    if ( preg_match( '/\bjob postings\b/iu', $slower )
+        && preg_match( '/\b(?:i\s+)?(?:analyzed|reviewed|studied|surveyed|examined|looked\s+at)\b/iu', $slower ) ) {
+        return true;
+    }
+
+    // Merged headline + magazine lead-in: "Long Title: Rest … in today's …"
+    if ( preg_match( '/^[^.!?\n]{10,120}:\s+.+\b(?:in today|fast-?paced|digital world)\b/iu', $plain ) ) {
+        return true;
+    }
+
+    // Opening scene-setter: very first clause is a time/marketing frame.
+    if ( preg_match( '/^.{0,50}\bin today[’\']?s\b.+\b(?:businesses|companies|organizations)\s+(?:are|face|must|need)\b/iu', $slower ) ) {
+        return true;
+    }
+
+    return (bool) apply_filters( 'chatbot_lcm_purpose_fact_is_wrapper', false, $plain, $slower );
+}
+
+/**
+ * Purpose-intent: boost rows that describe concrete support/AI actions (not article wrappers).
+ *
+ * @param string $slower Lowercased sentence text.
+ * @return float Bonus to add to condense score (capped).
+ */
+function transformer_model_lexical_context_purpose_fact_action_verb_bonus( $slower ) {
+
+    $slower = preg_replace( '/\s+/u', ' ', trim( (string) $slower ) );
+    if ( $slower === '' ) {
+        return 0.0;
+    }
+
+    $re = (string) apply_filters(
+        'chatbot_lcm_purpose_action_verb_bonus_pattern',
+        '/\b(automating|automate|automation|summarizing|summarization|summarize|resolving|resolve|routing|route|retriev(?:e|ing|al)|assisting|assist|handling|handle|shifting|shift|improving|improve|reducing|reduce|workflows?|escalat\w*|deflect\w*)\b/iu'
+    );
+
+    $n = 0;
+    if ( $re !== '' && preg_match_all( $re, $slower, $m ) && ! empty( $m[0] ) ) {
+        $n = count( array_unique( array_map( 'strtolower', $m[0] ) ) );
+    }
+
+    $per = (float) apply_filters( 'chatbot_lcm_purpose_action_verb_bonus_per_hit', 5.0 );
+    $cap = (float) apply_filters( 'chatbot_lcm_purpose_action_verb_bonus_cap', 28.0 );
+
+    return min( $cap, (float) $n * $per );
+}
+
+/**
+ * Purpose synthesis: classify a fact for rhetorical ordering (primary → workflow → shift → caveat).
+ *
+ * @param string      $text   Cleaned sentence text.
+ * @param string|null $slower Lowercased plain text; computed when null.
+ * @return string One of: limitation, human_role_shift, workflow_impact, primary_role.
+ */
+function transformer_model_lexical_context_purpose_fact_rhetorical_bucket( $text, $slower = null ) {
+
+    $plain = trim( (string) wp_strip_all_tags( (string) $text ) );
+    if ( $plain === '' ) {
+        return 'primary_role';
+    }
+
+    if ( $slower === null || $slower === '' ) {
+        $slower = strtolower( $plain );
+    }
+    $slower = preg_replace( '/\s+/u', ' ', (string) $slower );
+
+    // Limitation / risk / criticism (must win over "handling" in workflow heuristics).
+    $lim_re = (string) apply_filters(
+        'chatbot_lcm_purpose_limitation_bucket_pattern',
+        '/\b(frustrat\w*|ineffective(?:ness)?|fail(?:s|ing|ed)?\s+to|unable\s+to|does\s+not\s+handle|can\'?t\s+handle|cannot\s+handle|struggl\w*|shortcom\w*|drawback|downside|disappoint\w*|'
+        . 'limitation|caveat|concern(?:s)?|risk\s+of|problem\s+with|issues?\s+with|weakness|'
+        . 'not\s+(?:always\s+)?reliable|poor(?:ly)?\s+(?:at|for))\b/iu'
+    );
+    if ( $lim_re !== '' && preg_match( $lim_re, $slower ) ) {
+        return (string) apply_filters( 'chatbot_lcm_purpose_rhetorical_bucket', 'limitation', $plain, $slower );
+    }
+
+    // Human / org role change (jobs, careers, routines vs design).
+    if ( preg_match(
+        '/\b(?:shift(?:ing|ed)?|evolv(?:e|ing|ed)|chang(?:e|ing))\s+(?:the\s+)?(?:role|roles|nature|work)\b/iu',
+        $slower
+    )
+        || preg_match( '/\broles?\s+(?:are|is)\s+(?:evolv|chang|shift)/iu', $slower )
+        || preg_match( '/\bshift(?:ing|ed)?\s+from\b/iu', $slower )
+        || preg_match( '/\b(?:toward|towards)\s+(?:system\s+)?(?:design|oversight|operation)/iu', $slower )
+        || preg_match( '/\b(?:move|moving)\s+beyond\s+routine\b/iu', $slower )
+        || preg_match( '/\b(?:from|away\s+from)\s+routine\s+(?:ticket\s+)?handling\b/iu', $slower ) ) {
+        return (string) apply_filters( 'chatbot_lcm_purpose_rhetorical_bucket', 'human_role_shift', $plain, $slower );
+    }
+
+    // Concrete operational impact (automation, workflows, resolution paths).
+    if ( preg_match(
+        '/\b(automating|automation|workflows?|summariz\w*|resolution\b|routing|deflect\w*|escalat\w*|'
+        . 'ticketing|agent\s+workflows?|native\s+players)\b/iu',
+        $slower
+    ) ) {
+        return (string) apply_filters( 'chatbot_lcm_purpose_rhetorical_bucket', 'workflow_impact', $plain, $slower );
+    }
+
+    // Primary role: what AI is for / capabilities (fallback bucket).
+    if ( preg_match(
+        '/\b(role\s+of|ai[’\']?s\s+role|purpose\s+(?:of|is)|designed\s+to|used\s+to|helps?\s+(?:teams|agents|support)|'
+        . 'enables?\s+\w+\s+to|capable\s+of|chatbots?\s+(?:can|could|are\s+able))\b/iu',
+        $slower
+    )
+        || preg_match( '/\b(understanding\s+context|providing\s+relevant|personalized\s+support)\b/iu', $slower ) ) {
+        return (string) apply_filters( 'chatbot_lcm_purpose_rhetorical_bucket', 'primary_role', $plain, $slower );
+    }
+
+    return (string) apply_filters( 'chatbot_lcm_purpose_rhetorical_bucket', 'primary_role', $plain, $slower );
+}
+
+/**
+ * Sort key: retrieval score plus purpose action-verb bonus (higher is better).
+ *
+ * @param array<string, mixed> $row Fact row.
+ * @return float
+ */
+function transformer_model_lexical_context_purpose_fact_row_strength( array $row ) {
+
+    $sc = isset( $row['score'] ) ? (float) $row['score'] : 0.0;
+    $t  = isset( $row['text'] ) ? (string) $row['text'] : '';
+    $sl = strtolower( wp_strip_all_tags( $t ) );
+    return $sc + transformer_model_lexical_context_purpose_fact_action_verb_bonus( $sl );
+}
+
+/**
+ * Order purpose facts: primary_role → workflow_impact → human_role_shift; optional framed limitation last.
+ *
+ * @param array<int, array<string, mixed>> $filtered Clean fact rows.
+ * @param int                              $max_take Max sentences (2–4).
+ * @return array{0: array<int, array<string, mixed>>, 1: ?array<string, mixed>} [ordered rows, caveat row or null]
+ */
+function transformer_model_lexical_context_purpose_order_facts_for_synthesis( array $filtered, $max_take ) {
+
+    $max_take = (int) $max_take;
+    $max_take = max( 2, min( 4, $max_take ) );
+
+    $groups = array(
+        'primary_role'     => array(),
+        'workflow_impact'  => array(),
+        'human_role_shift' => array(),
+        'limitation'       => array(),
+    );
+
+    foreach ( $filtered as $f ) {
+        if ( ! is_array( $f ) ) {
+            continue;
+        }
+        $t0 = isset( $f['text'] ) ? trim( (string) $f['text'] ) : '';
+        $t0 = transformer_model_lexical_context_clean_sentence_for_output( $t0 );
+        $t0 = trim( (string) $t0 );
+        if ( $t0 === '' ) {
+            continue;
+        }
+        $sl     = strtolower( wp_strip_all_tags( $t0 ) );
+        $bucket = transformer_model_lexical_context_purpose_fact_rhetorical_bucket( $t0, $sl );
+        if ( ! isset( $groups[ $bucket ] ) ) {
+            $bucket = 'primary_role';
+        }
+        $groups[ $bucket ][] = $f;
+    }
+
+    foreach ( $groups as $bk => $rows ) {
+        if ( ! is_array( $rows ) || $rows === array() ) {
+            continue;
+        }
+        usort(
+            $rows,
+            static function ( $a, $b ) {
+                $sa = is_array( $a ) ? transformer_model_lexical_context_purpose_fact_row_strength( $a ) : 0.0;
+                $sb = is_array( $b ) ? transformer_model_lexical_context_purpose_fact_row_strength( $b ) : 0.0;
+                return $sb <=> $sa;
+            }
+        );
+        $groups[ $bk ] = $rows;
+    }
+
+    $caveat_row = ( ! empty( $groups['limitation'] ) && is_array( $groups['limitation'][0] ) )
+        ? $groups['limitation'][0]
+        : null;
+
+    $include_caveat = (bool) apply_filters( 'chatbot_lcm_purpose_synthesis_include_caveat', true, $caveat_row, $filtered );
+    if ( ! $include_caveat || $caveat_row === null ) {
+        $caveat_row = null;
+    }
+
+    $core_cap = $caveat_row !== null ? max( 1, $max_take - 1 ) : $max_take;
+
+    $chain = array( 'primary_role', 'workflow_impact', 'human_role_shift' );
+    $out   = array();
+
+    foreach ( $chain as $bucket ) {
+        if ( count( $out ) >= $core_cap ) {
+            break;
+        }
+        if ( empty( $groups[ $bucket ] ) || ! is_array( $groups[ $bucket ] ) ) {
+            continue;
+        }
+        foreach ( $groups[ $bucket ] as $cand ) {
+            if ( count( $out ) >= $core_cap ) {
+                break;
+            }
+            if ( ! is_array( $cand ) ) {
+                continue;
+            }
+            $t = isset( $cand['text'] ) ? trim( (string) $cand['text'] ) : '';
+            $t = transformer_model_lexical_context_clean_sentence_for_output( $t );
+            $t = trim( (string) $t );
+            if ( $t === '' ) {
+                continue;
+            }
+            $is_dup = false;
+            foreach ( $out as $prev ) {
+                if ( ! is_array( $prev ) ) {
+                    continue;
+                }
+                $pt = isset( $prev['text'] ) ? trim( (string) $prev['text'] ) : '';
+                if ( function_exists( 'transformer_model_lexical_context_are_sentences_near_duplicates' )
+                    && transformer_model_lexical_context_are_sentences_near_duplicates( $t, $pt ) ) {
+                    $is_dup = true;
+                    break;
+                }
+            }
+            if ( $is_dup ) {
+                continue;
+            }
+            $out[] = $cand;
+            break;
+        }
+    }
+
+    // If chain left gaps, backfill from strongest remaining non-limitation rows.
+    if ( count( $out ) < $core_cap ) {
+        $pool = array();
+        foreach ( $chain as $bucket ) {
+            if ( empty( $groups[ $bucket ] ) ) {
+                continue;
+            }
+            foreach ( $groups[ $bucket ] as $cand ) {
+                $pool[] = $cand;
+            }
+        }
+        usort(
+            $pool,
+            static function ( $a, $b ) {
+                $sa = is_array( $a ) ? transformer_model_lexical_context_purpose_fact_row_strength( $a ) : 0.0;
+                $sb = is_array( $b ) ? transformer_model_lexical_context_purpose_fact_row_strength( $b ) : 0.0;
+                return $sb <=> $sa;
+            }
+        );
+        foreach ( $pool as $cand ) {
+            if ( count( $out ) >= $core_cap ) {
+                break;
+            }
+            if ( ! is_array( $cand ) ) {
+                continue;
+            }
+            $t = isset( $cand['text'] ) ? trim( (string) $cand['text'] ) : '';
+            $t = transformer_model_lexical_context_clean_sentence_for_output( $t );
+            $t = trim( (string) $t );
+            if ( $t === '' ) {
+                continue;
+            }
+            $is_dup = false;
+            foreach ( $out as $prev ) {
+                if ( ! is_array( $prev ) ) {
+                    continue;
+                }
+                $pt = isset( $prev['text'] ) ? trim( (string) $prev['text'] ) : '';
+                if ( function_exists( 'transformer_model_lexical_context_are_sentences_near_duplicates' )
+                    && transformer_model_lexical_context_are_sentences_near_duplicates( $t, $pt ) ) {
+                    $is_dup = true;
+                    break;
+                }
+            }
+            if ( $is_dup ) {
+                continue;
+            }
+            $already = false;
+            foreach ( $out as $have ) {
+                if ( $have === $cand ) {
+                    $already = true;
+                    break;
+                }
+            }
+            if ( $already ) {
+                continue;
+            }
+            $out[] = $cand;
+        }
+    }
+
+    if ( $caveat_row !== null ) {
+        $ct = isset( $caveat_row['text'] ) ? trim( (string) $caveat_row['text'] ) : '';
+        $ct = transformer_model_lexical_context_clean_sentence_for_output( $ct );
+        $ct = trim( (string) $ct );
+        if ( $ct === '' ) {
+            $caveat_row = null;
+        } else {
+            foreach ( $out as $prev ) {
+                if ( ! is_array( $prev ) ) {
+                    continue;
+                }
+                $pt = isset( $prev['text'] ) ? trim( (string) $prev['text'] ) : '';
+                if ( function_exists( 'transformer_model_lexical_context_are_sentences_near_duplicates' )
+                    && transformer_model_lexical_context_are_sentences_near_duplicates( $ct, $pt ) ) {
+                    $caveat_row = null;
+                    break;
+                }
+            }
+        }
+    }
+
+    $default_min_core = $max_take <= 2 ? 1 : 2;
+    $min_core_for_caveat = (int) apply_filters( 'chatbot_lcm_purpose_synthesis_min_core_before_caveat', $default_min_core, $max_take );
+    if ( $caveat_row !== null && count( $out ) < $min_core_for_caveat ) {
+        $caveat_row = null;
+    }
+
+    $total_cap = (int) min( 4, $max_take + ( $caveat_row !== null ? 1 : 0 ) );
+    if ( $caveat_row !== null && count( $out ) + 1 > $total_cap ) {
+        $caveat_row = null;
+    }
+
+    return array( $out, $caveat_row );
+}
+
+/**
+ * Prefix a limitation fact so it reads as a caveat, not an abrupt non sequitur.
+ *
+ * @param string $text Cleaned sentence.
+ * @return string
+ */
+function transformer_model_lexical_context_purpose_frame_caveat_sentence( $text ) {
+
+    $t = trim( (string) transformer_model_lexical_context_clean_sentence_for_output( $text ) );
+    if ( $t === '' ) {
+        return '';
+    }
+    $low = strtolower( wp_strip_all_tags( $t ) );
+    if ( preg_match(
+        '/^(a limitation is|one caveat is|the notes also (?:flag|note|caution))\b/iu',
+        $low
+    ) ) {
+        return $t;
+    }
+
+    $prefix = (string) apply_filters( 'chatbot_lcm_purpose_caveat_frame_prefix', 'The notes also flag a limitation: ', $t );
+    if ( ! preg_match( '/\s$/u', $prefix ) && ! preg_match( '/:$/u', $prefix ) ) {
+        $prefix .= ' ';
+    }
+
+    return $prefix . $t;
 }
 
 /**
@@ -9395,6 +9958,11 @@ function lcm_consolidate_facts( array $ranked_sentences, string $intent, string 
         }
 
         $slower = strtolower( wp_strip_all_tags( $text ) );
+
+        // Purpose intent: drop title/lead/methodology wrappers before fact ranking.
+        if ( $intent === 'purpose' && $slower !== '' && transformer_model_lexical_context_purpose_fact_is_wrapper_or_noise( $text, $slower ) ) {
+            continue;
+        }
 
         // For definition intent, aggressively drop definition-intro/aside lead-ins.
         // These rows are almost never "facts" and often contain merged title+intro artifacts.
@@ -9568,6 +10136,10 @@ function lcm_consolidate_facts( array $ranked_sentences, string $intent, string 
                 $condense_score -= 4.0;
             }
         }
+        if ( $intent === 'purpose' ) {
+            $slow_c = strtolower( wp_strip_all_tags( (string) $c['text'] ) );
+            $condense_score += transformer_model_lexical_context_purpose_fact_action_verb_bonus( $slow_c );
+        }
         $deduped[ $i ]['_condense_score'] = $condense_score;
     }
     usort(
@@ -9700,7 +10272,7 @@ function transformer_model_lexical_context_build_consolidation_object( $query_ra
     // Phase 5: build facts from a broader pool when possible (especially for definition intent),
     // so we don't get stuck with a title + lead-in just because they survived an earlier assembly filter.
     $pool = is_array( $survivors ) ? $survivors : array();
-    if ( $intent === 'definition' && is_array( $all_ranked ) && $all_ranked !== array() ) {
+    if ( in_array( $intent, array( 'definition', 'purpose' ), true ) && is_array( $all_ranked ) && $all_ranked !== array() ) {
         $pool = $all_ranked;
     } elseif ( $pool === array() && is_array( $all_ranked ) ) {
         $pool = $all_ranked;
@@ -9768,12 +10340,142 @@ function transformer_model_lexical_context_build_consolidation_object( $query_ra
         'query'                   => $query_raw,
         'intent'                  => $intent,
         'primary_topic'           => $primary_topic,
+        'query_shape'             => is_array( $query_shape ) ? $query_shape : array(
+            'shape'      => $shape,
+            'confidence' => 0.0,
+            'signals'    => array(),
+        ),
+        'meaningful_query_tokens' => array_values( is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array() ),
         'best_document_id'        => $best_document_id,
         'supporting_document_ids' => $supporting_document_ids,
         'facts'                   => $facts,
         'discarded'               => $discarded,
         'confidence'              => $confidence,
     );
+}
+
+/**
+ * When consolidation has several strong facts, stitch 2–3 diverse sentences before legacy assembly
+ * (avoids emitting only the top row when the fact set is rich).
+ *
+ * @param array<string, mixed> $consolidated
+ * @param string               $raw_query_text
+ * @return string Empty string when this path should not apply.
+ */
+function transformer_model_lexical_context_synthesize_multi_fact_answer_from_consolidated( array $consolidated, $raw_query_text = '' ) {
+
+    unset( $raw_query_text );
+
+    $facts = isset( $consolidated['facts'] ) && is_array( $consolidated['facts'] ) ? $consolidated['facts'] : array();
+    $conf  = isset( $consolidated['confidence'] ) ? (float) $consolidated['confidence'] : 0.0;
+
+    $min_facts = (int) apply_filters( 'chatbot_lcm_multi_fact_synthesis_min_facts', 3 );
+    $min_conf  = (float) apply_filters( 'chatbot_lcm_multi_fact_synthesis_min_confidence', 0.70 );
+
+    if ( count( $facts ) < $min_facts || $conf + 1e-9 < $min_conf ) {
+        return '';
+    }
+
+    $max_take = (int) apply_filters( 'chatbot_lcm_multi_fact_synthesis_max_sentences', 3 );
+    $max_take = max( 2, min( 4, $max_take ) );
+
+    $intent_syn          = isset( $consolidated['intent'] ) ? (string) $consolidated['intent'] : '';
+    $facts_for_stitch    = $facts;
+    $purpose_caveat_text = '';
+    if ( $intent_syn === 'purpose' ) {
+        $filtered = array();
+        foreach ( $facts as $f ) {
+            if ( ! is_array( $f ) ) {
+                continue;
+            }
+            $t0 = isset( $f['text'] ) ? trim( (string) $f['text'] ) : '';
+            $t0 = transformer_model_lexical_context_clean_sentence_for_output( $t0 );
+            $t0 = trim( (string) $t0 );
+            if ( $t0 === '' ) {
+                continue;
+            }
+            $sl = strtolower( wp_strip_all_tags( $t0 ) );
+            if ( transformer_model_lexical_context_purpose_fact_is_wrapper_or_noise( $t0, $sl ) ) {
+                continue;
+            }
+            $filtered[] = $f;
+        }
+        if ( count( $filtered ) < $min_facts ) {
+            return '';
+        }
+        list( $ordered, $caveat_row ) = transformer_model_lexical_context_purpose_order_facts_for_synthesis( $filtered, $max_take );
+        if ( count( $ordered ) < 2 ) {
+            return '';
+        }
+        $facts_for_stitch = $ordered;
+        if ( is_array( $caveat_row ) ) {
+            $craw = isset( $caveat_row['text'] ) ? trim( (string) $caveat_row['text'] ) : '';
+            if ( $craw !== '' ) {
+                $purpose_caveat_text = transformer_model_lexical_context_purpose_frame_caveat_sentence( $craw );
+            }
+        }
+    }
+
+    $parts = array();
+    foreach ( $facts_for_stitch as $f ) {
+        if ( count( $parts ) >= $max_take ) {
+            break;
+        }
+        if ( ! is_array( $f ) ) {
+            continue;
+        }
+        $t = isset( $f['text'] ) ? trim( (string) $f['text'] ) : '';
+        $t = transformer_model_lexical_context_clean_sentence_for_output( $t );
+        $t = trim( (string) $t );
+        if ( $t === '' ) {
+            continue;
+        }
+
+        $is_dup = false;
+        foreach ( $parts as $prev ) {
+            if ( function_exists( 'transformer_model_lexical_context_are_sentences_near_duplicates' )
+                && transformer_model_lexical_context_are_sentences_near_duplicates( $t, $prev ) ) {
+                $is_dup = true;
+                break;
+            }
+        }
+        if ( $is_dup ) {
+            continue;
+        }
+
+        if ( ! preg_match( '/[.!?]$/u', $t ) ) {
+            $t .= '.';
+        }
+        $parts[] = $t;
+    }
+
+    if ( $purpose_caveat_text !== '' ) {
+        $pc = trim( (string) $purpose_caveat_text );
+        if ( $pc !== '' ) {
+            $dup_c = false;
+            foreach ( $parts as $prev ) {
+                if ( function_exists( 'transformer_model_lexical_context_are_sentences_near_duplicates' )
+                    && transformer_model_lexical_context_are_sentences_near_duplicates( $pc, $prev ) ) {
+                    $dup_c = true;
+                    break;
+                }
+            }
+            if ( ! $dup_c ) {
+                if ( ! preg_match( '/[.!?]$/u', $pc ) ) {
+                    $pc .= '.';
+                }
+                $parts[] = $pc;
+            }
+        }
+    }
+
+    if ( count( $parts ) < 2 ) {
+        return '';
+    }
+
+    $out = trim( implode( ' ', $parts ) );
+
+    return (string) apply_filters( 'chatbot_lcm_multi_fact_synthesis_text', $out, $consolidated );
 }
 
 /**
@@ -9800,6 +10502,17 @@ function transformer_model_lexical_context_assemble_response_from_consolidated( 
                 return (string) ( $handled['text'] ?? '' );
             }
             return transformer_model_lexical_context_polish_before_emit( (string) ( $handled['text'] ?? $templated ), $consolidated );
+        }
+    }
+
+    if ( is_array( $consolidated ) ) {
+        $multi = transformer_model_lexical_context_synthesize_multi_fact_answer_from_consolidated( $consolidated, $raw_query_text );
+        if ( is_string( $multi ) && trim( $multi ) !== '' ) {
+            $handled = transformer_model_lexical_context_apply_confidence_handling_before_emit( $multi, $consolidated, $raw_query_text );
+            if ( is_array( $handled ) && ! empty( $handled['return_raw'] ) ) {
+                return (string) ( $handled['text'] ?? '' );
+            }
+            return transformer_model_lexical_context_polish_before_emit( (string) ( $handled['text'] ?? $multi ), $consolidated );
         }
     }
 
@@ -9842,11 +10555,347 @@ function transformer_model_lexical_context_assemble_response_from_consolidated( 
 }
 
 /**
+ * Lowercased query words for emit-time checks (matches diagnostics tokenization).
+ *
+ * @param string $raw_query_text
+ * @return array<int, string>
+ */
+function transformer_model_lexical_context_input_words_lower_from_raw_query( $raw_query_text ) {
+
+    $n = transformer_model_lexical_context_normalize_lexical_query_string( (string) $raw_query_text );
+    $n = preg_replace( '/[^\w\s]/u', ' ', $n );
+    $n = preg_replace( '/\s+/u', ' ', trim( (string) $n ) );
+    if ( $n === '' ) {
+        return array();
+    }
+    $bits = preg_split( '/\s+/u', $n, -1, PREG_SPLIT_NO_EMPTY );
+
+    return array_values( array_map( 'strtolower', array_map( 'strval', $bits ) ) );
+}
+
+/**
+ * Whether assembled answer text overlaps enough of the meaningful query tokens for medium-confidence framing.
+ *
+ * @param string $answer_text
+ * @param string $raw_query_text
+ * @return bool
+ */
+function transformer_model_lexical_context_medium_band_answer_covers_query( $answer_text, $raw_query_text ) {
+
+    $input_low  = transformer_model_lexical_context_input_words_lower_from_raw_query( $raw_query_text );
+    $meaningful = transformer_model_lexical_context_meaningful_query_tokens_for_relevance_guard( $input_low );
+    $n_mean     = count( $meaningful );
+    if ( $n_mean === 0 ) {
+        return true;
+    }
+
+    $haystack = strtolower( wp_strip_all_tags( (string) $answer_text ) );
+    $matched  = 0;
+    foreach ( $meaningful as $tok ) {
+        if ( transformer_model_lexical_context_chunk_has_meaningful_query_overlap( $haystack, array( $tok ) ) ) {
+            ++$matched;
+        }
+    }
+
+    $min_ratio = (float) apply_filters( 'chatbot_lcm_medium_min_query_token_coverage', 0.5 );
+    $ratio     = $matched / $n_mean;
+
+    $min_matched = (int) apply_filters( 'chatbot_lcm_medium_min_matched_query_tokens', -1 );
+    if ( $min_matched < 0 ) {
+        $min_matched = (int) max( 1, ceil( $n_mean * $min_ratio ) );
+    }
+    if ( $n_mean >= 3 ) {
+        $min_matched = max( $min_matched, 2 );
+    }
+
+    return ( $matched >= $min_matched ) && ( $ratio + 1e-9 >= $min_ratio );
+}
+
+/**
+ * Phase 11: classify query facet for medium-band gating (identity vs purpose vs general).
+ *
+ * @param string $raw_query_text
+ * @param string $consolidated_intent Consolidation intent (definition|summary|…).
+ * @return string identity|purpose|general
+ */
+function transformer_model_lexical_context_phase11_query_facet_class( $raw_query_text, $consolidated_intent = '' ) {
+
+    $raw_l = strtolower( wp_strip_all_tags( (string) $raw_query_text ) );
+    $raw_l = preg_replace( '/\s+/u', ' ', trim( $raw_l ) );
+
+    // Purpose / mechanism first so "what is the role of …" does not get lumped into pure identity.
+    if ( preg_match( '/\b(role\s+of|what\s+is\s+the\s+role|what\s+are\s+the\s+roles|what\s+does|what\s+do|purpose\s+of|main\s+job|how\s+does\b)/u', $raw_l ) ) {
+        return 'purpose';
+    }
+
+    if ( preg_match( '/\b(what\s+is|what\s+are|what\'s|whats|define|definition\s+of|tell\s+me\s+about|who\s+is|who\s+are)\b/u', $raw_l ) ) {
+        return 'identity';
+    }
+
+    if ( (string) $consolidated_intent === 'definition' ) {
+        return 'identity';
+    }
+
+    if ( (string) $consolidated_intent === 'purpose' ) {
+        return 'purpose';
+    }
+
+    return 'general';
+}
+
+/**
+ * Whether any consecutive pair of meaningful query tokens appears as a phrase in haystack.
+ *
+ * @param string               $haystack_lower
+ * @param array<int, string>   $meaningful_lower
+ * @return bool
+ */
+function transformer_model_lexical_context_phase11_haystack_has_meaningful_bigram( $haystack_lower, $meaningful_lower ) {
+
+    $meaningful_lower = is_array( $meaningful_lower ) ? $meaningful_lower : array();
+    $n                = count( $meaningful_lower );
+    if ( $n < 2 ) {
+        return true;
+    }
+
+    for ( $i = 0; $i < $n - 1; $i++ ) {
+        $a = strtolower( trim( (string) $meaningful_lower[ $i ] ) );
+        $b = strtolower( trim( (string) $meaningful_lower[ $i + 1 ] ) );
+        if ( strlen( $a ) < 2 || strlen( $b ) < 2 ) {
+            continue;
+        }
+        $pair = '(?<![\p{L}\p{N}_])' . preg_quote( $a, '/' ) . '\s+' . preg_quote( $b, '/' ) . '(?![\p{L}\p{N}_])';
+        if ( preg_match( '/' . $pair . '/u', (string) $haystack_lower ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Count “schedule / settings UI” signals (wrong facet for identity-style “what is X?” answers).
+ *
+ * @param string $haystack_lower
+ * @return int
+ */
+function transformer_model_lexical_context_phase11_config_schedule_signal_count( $haystack_lower ) {
+
+    $patterns = (array) apply_filters(
+        'chatbot_lcm_phase11_config_facet_patterns',
+        array(
+            '/\b(?:hourly|twice\s+daily|daily|weekly)\b/u',
+            '/\brun\s+schedule\b/u',
+            '/\bselect\s+run\b/u',
+            '/\bsettings?\s+that\s+control\b/u',
+            '/\b(?:frequence|frequency)\b/u',
+            '/\bknowledge\s+navigator\s+process\b/u',
+            '/\bindex(?:ing)?\s+schedule\b/u',
+            '/\b(?:the\s+)?values\s+include\b/u',
+        )
+    );
+
+    $hits = 0;
+    foreach ( $patterns as $re ) {
+        if ( is_string( $re ) && $re !== '' && preg_match( $re, (string) $haystack_lower ) ) {
+            ++$hits;
+        }
+    }
+
+    return (int) $hits;
+}
+
+/**
+ * Phase 11: facet coverage for medium-confidence framing (topic + intent-shaped cues, penalize wrong facet).
+ *
+ * @param string              $answer_text
+ * @param string              $raw_query_text
+ * @param array<string,mixed> $consolidated
+ * @return bool
+ */
+function transformer_model_lexical_context_medium_band_facet_coverage_ok( $answer_text, $raw_query_text, $consolidated = array() ) {
+
+    if ( ! (bool) apply_filters( 'chatbot_lcm_phase11_facet_gate_enabled', true ) ) {
+        return true;
+    }
+
+    $c = is_array( $consolidated ) ? $consolidated : array();
+
+    $hay = strtolower( wp_strip_all_tags( (string) $answer_text ) );
+    $hay = preg_replace( '/\s+/u', ' ', trim( $hay ) );
+    if ( $hay === '' ) {
+        return false;
+    }
+
+    // Hard fail: transcript/meta artifacts still present in the answer surface.
+    if (
+        preg_match( '/\b(?:end|start|beginning)\s+of\s+chatgpt\s+response\b/i', $answer_text )
+        || preg_match( '/\bchatgpt\s+response\b/i', $answer_text )
+        || preg_match( '/\bsupremely\s+overconfident\b/i', $answer_text )
+    ) {
+        return false;
+    }
+
+    $meaningful = isset( $c['meaningful_query_tokens'] ) && is_array( $c['meaningful_query_tokens'] ) ? $c['meaningful_query_tokens'] : array();
+    if ( $meaningful === array() ) {
+        $meaningful = transformer_model_lexical_context_meaningful_query_tokens_for_relevance_guard(
+            transformer_model_lexical_context_input_words_lower_from_raw_query( $raw_query_text )
+        );
+    }
+
+    $intent = isset( $c['intent'] ) ? (string) $c['intent'] : '';
+    $facet  = transformer_model_lexical_context_phase11_query_facet_class( $raw_query_text, $intent );
+
+    $has_bigram = transformer_model_lexical_context_phase11_haystack_has_meaningful_bigram( $hay, $meaningful );
+
+    $topic_lc = isset( $c['primary_topic'] ) ? strtolower( trim( preg_replace( '/\s+/u', ' ', (string) $c['primary_topic'] ) ) ) : '';
+    if ( $topic_lc !== '' && substr_count( $topic_lc, ' ' ) >= 1 ) {
+        $topic_re = '(?<![\p{L}\p{N}_])' . preg_replace( '/\s+/u', '\\s+', preg_quote( $topic_lc, '/' ) ) . '(?![\p{L}\p{N}_])';
+        if ( preg_match( '/' . $topic_re . '/u', $hay ) ) {
+            $has_bigram = true;
+        }
+    }
+
+    $def_cue = (bool) preg_match(
+        '/\b(?:is|are|means|refers\s+to|defined\s+as|known\s+as|called|type\s+of|kind\s+of|plugin|feature|tool|system|algorithm|software|uses|using|includes)\b/u',
+        $hay
+    );
+
+    $purpose_cue = (bool) preg_match(
+        '/\b(?:helps?|enables?|allows?|lets?|designed\s+to|used\s+to|aims?\s+to|purpose\s+is|in\s+order\s+to|responsible\s+for|supports|improves|reduces|increases)\b/u',
+        $hay
+    );
+
+    $config_hits = transformer_model_lexical_context_phase11_config_schedule_signal_count( $hay );
+
+    $min_config_reject = (int) apply_filters( 'chatbot_lcm_phase11_config_signal_reject_at', 1 );
+
+    if ( $facet === 'identity' ) {
+        if ( preg_match( '/\bvalues\s+include\b/u', $hay ) && ! $has_bigram ) {
+            return false;
+        }
+        $cue_ok = $def_cue || $purpose_cue;
+        if ( count( $meaningful ) >= 2 && ! $has_bigram && ! $cue_ok ) {
+            return false;
+        }
+        if ( $config_hits >= $min_config_reject && ! $has_bigram && ! $def_cue ) {
+            return false;
+        }
+        if ( ! $cue_ok && ! $has_bigram ) {
+            return false;
+        }
+    } elseif ( $facet === 'purpose' ) {
+        if ( count( $meaningful ) >= 2 && ! $has_bigram ) {
+            return false;
+        }
+        if ( ! $purpose_cue && ! $def_cue ) {
+            return false;
+        }
+    } else {
+        // general / shallow intent: still require a phrase anchor when the query has 2+ meaningful tokens.
+        if ( count( $meaningful ) >= 2 && ! $has_bigram ) {
+            return false;
+        }
+    }
+
+    $shape = '';
+    if ( isset( $c['query_shape'] ) && is_array( $c['query_shape'] ) && isset( $c['query_shape']['shape'] ) ) {
+        $shape = (string) $c['query_shape']['shape'];
+    }
+    if ( $shape === 'keyword_bag_query' && count( $meaningful ) >= 2 && ! $has_bigram ) {
+        return false;
+    }
+
+    return (bool) apply_filters( 'chatbot_lcm_phase11_facet_gate_pass', true, $facet, $c, $answer_text, $raw_query_text );
+}
+
+/**
+ * Remove LLM transcript/meta artifacts and drop sentences that are only markers (Phase 8 hygiene).
+ *
+ * @param string $text
+ * @return string
+ */
+function transformer_model_lexical_context_strip_lcm_meta_artifacts_from_text( $text ) {
+
+    $t = wp_strip_all_tags( (string) $text );
+    $t = trim( (string) $t );
+    if ( $t === '' ) {
+        return '';
+    }
+
+    $phrase_res = (array) apply_filters(
+        'chatbot_lcm_meta_artifact_phrase_patterns',
+        array(
+            '/\s*\bend of chatgpt response\b[\s,.:;""\'\)\]\}]*\s*/iu',
+            '/\s*\bstart of chatgpt response\b[\s,.:;""\'\)\]\}]*\s*/iu',
+            '/\s*\bbeginning of chatgpt response\b[\s,.:;""\'\)\]\}]*\s*/iu',
+            '/\s*\bchatgpt response follows\b[\s,.:;""\'\)\]\}]*\s*/iu',
+        )
+    );
+    foreach ( $phrase_res as $re ) {
+        if ( is_string( $re ) && $re !== '' ) {
+            $t = preg_replace( $re, ' ', $t );
+        }
+    }
+
+    if ( function_exists( 'transformer_model_lexical_context_normalize_emitted_response_spacing' ) ) {
+        $t = transformer_model_lexical_context_normalize_emitted_response_spacing( (string) $t );
+    } else {
+        $t = preg_replace( '/\s+/u', ' ', trim( (string) $t ) );
+    }
+
+    $sentence_res = (array) apply_filters(
+        'chatbot_lcm_meta_artifact_sentence_patterns',
+        array(
+            '/^\s*\bend of chatgpt response\b[\s,.:;""\'\)\]\}]*\s*$/iu',
+            '/^\s*\bstart of chatgpt response\b[\s,.:;""\'\)\]\}]*\s*$/iu',
+            '/^\s*chatgpt response:\s*$/iu',
+        )
+    );
+
+    $parts = transformer_model_lexical_context_split_sentences_for_polish( (string) $t );
+    if ( $parts === array() ) {
+        $parts = array( $t );
+    }
+    $kept = array();
+    foreach ( $parts as $s ) {
+        $s = trim( (string) $s );
+        if ( $s === '' ) {
+            continue;
+        }
+        $sl = strtolower( wp_strip_all_tags( $s ) );
+        $sl = preg_replace( '/\s+/u', ' ', $sl );
+        $drop = false;
+        foreach ( $sentence_res as $re ) {
+            if ( is_string( $re ) && $re !== '' && preg_match( $re, $sl ) ) {
+                $drop = true;
+                break;
+            }
+        }
+        if ( $drop ) {
+            continue;
+        }
+        $kept[] = $s;
+    }
+
+    $out = trim( implode( ' ', $kept ) );
+    if ( function_exists( 'transformer_model_lexical_context_normalize_emitted_response_spacing' ) ) {
+        $out = transformer_model_lexical_context_normalize_emitted_response_spacing( (string) $out );
+    } else {
+        $out = preg_replace( '/\s+/u', ' ', trim( (string) $out ) );
+    }
+
+    return trim( (string) $out );
+}
+
+/**
  * Phase 8: Confidence handling (no bluffing).
  *
  * High confidence: return direct answer.
- * Medium confidence: return direct answer with soft framing.
+ * Medium confidence: return direct answer with soft framing (only if answer text covers the query).
  * Low confidence: return uncertainty / no-match message.
+ *
+ * Strips transcript/meta artifacts before applying tiers.
  *
  * @param string              $text
  * @param array<string,mixed> $consolidated
@@ -9857,6 +10906,32 @@ function transformer_model_lexical_context_apply_confidence_handling_before_emit
 
     $t = is_string( $text ) ? $text : (string) $text;
     $t = trim( (string) $t );
+    $t = transformer_model_lexical_context_strip_lcm_meta_artifacts_from_text( $t );
+
+    $intent = ( is_array( $consolidated ) && isset( $consolidated['intent'] ) ) ? (string) $consolidated['intent'] : '';
+    $topic  = ( is_array( $consolidated ) && isset( $consolidated['primary_topic'] ) ) ? trim( (string) $consolidated['primary_topic'] ) : '';
+    if ( $topic === '' && is_array( $consolidated ) && isset( $consolidated['query'] ) ) {
+        $topic = trim( (string) $consolidated['query'] );
+    }
+    if ( $topic === '' ) {
+        $topic = trim( (string) $raw_query_text );
+    }
+    if ( $topic === '' ) {
+        $topic = 'that term';
+    }
+
+    if ( $t === '' ) {
+        if ( $intent === 'definition' ) {
+            return array(
+                'text'       => 'I found references to ' . $topic . ', but not enough context to define the term confidently.',
+                'return_raw' => true,
+            );
+        }
+        return array(
+            'text'       => transformer_model_lexical_context_lcm_insufficient_confidence_message(),
+            'return_raw' => true,
+        );
+    }
 
     $confidence = ( is_array( $consolidated ) && isset( $consolidated['confidence'] ) ) ? (float) $consolidated['confidence'] : null;
     if ( $confidence === null ) {
@@ -9876,20 +10951,36 @@ function transformer_model_lexical_context_apply_confidence_handling_before_emit
         );
     }
 
-    $intent = ( is_array( $consolidated ) && isset( $consolidated['intent'] ) ) ? (string) $consolidated['intent'] : '';
-    $topic  = ( is_array( $consolidated ) && isset( $consolidated['primary_topic'] ) ) ? trim( (string) $consolidated['primary_topic'] ) : '';
-    if ( $topic === '' && is_array( $consolidated ) && isset( $consolidated['query'] ) ) {
-        $topic = trim( (string) $consolidated['query'] );
-    }
-    if ( $topic === '' ) {
-        $topic = trim( (string) $raw_query_text );
-    }
-    if ( $topic === '' ) {
-        $topic = 'that term';
-    }
-
     // Low confidence: do not bluff; return uncertainty/no-match.
     if ( $confidence < $medium_min ) {
+        if ( $intent === 'definition' ) {
+            return array(
+                'text'       => 'I found references to ' . $topic . ', but not enough context to define the term confidently.',
+                'return_raw' => true,
+            );
+        }
+        return array(
+            'text'       => transformer_model_lexical_context_lcm_insufficient_confidence_message(),
+            'return_raw' => true,
+        );
+    }
+
+    // Medium band: numeric score is only moderate — require actual answer/query overlap before soft framing.
+    if ( ! transformer_model_lexical_context_medium_band_answer_covers_query( $t, $raw_query_text ) ) {
+        if ( $intent === 'definition' ) {
+            return array(
+                'text'       => 'I found references to ' . $topic . ', but not enough context to define the term confidently.',
+                'return_raw' => true,
+            );
+        }
+        return array(
+            'text'       => transformer_model_lexical_context_lcm_insufficient_confidence_message(),
+            'return_raw' => true,
+        );
+    }
+
+    // Phase 11: facet coverage (identity vs purpose vs config noise) — avoid “cautious but wrong facet.”
+    if ( ! transformer_model_lexical_context_medium_band_facet_coverage_ok( $t, $raw_query_text, is_array( $consolidated ) ? $consolidated : array() ) ) {
         if ( $intent === 'definition' ) {
             return array(
                 'text'       => 'I found references to ' . $topic . ', but not enough context to define the term confidently.',
@@ -9907,11 +10998,7 @@ function transformer_model_lexical_context_apply_confidence_handling_before_emit
         'chatbot_lcm_medium_confidence_framing_prefix',
         'Based on the information I can access, '
     );
-    if ( $t !== '' ) {
-        $t = $medium_prefix . $t;
-    } else {
-        $t = $medium_prefix . 'I don\'t have enough information in the site content to answer that confidently.';
-    }
+    $t = $medium_prefix . $t;
 
     return array(
         'text'       => $t,
@@ -10136,6 +11223,88 @@ function transformer_model_lexical_context_assemble_definition_template_from_con
 }
 
 /**
+ * Split prose into sentences for polish/dedupe (handles closing quotes after . ? !).
+ *
+ * @param string $text
+ * @return array<int, string>
+ */
+function transformer_model_lexical_context_split_sentences_for_polish( $text ) {
+
+    $t = trim( (string) $text );
+    if ( $t === '' ) {
+        return array();
+    }
+
+    $parts = preg_split(
+        '/(?<=[.!?])(?:[""\'\x{2018}\x{2019}\x{201C}\x{201D}])*\s+/u',
+        $t,
+        -1,
+        PREG_SPLIT_NO_EMPTY
+    );
+
+    return is_array( $parts ) ? $parts : array( $t );
+}
+
+/**
+ * Strip keyword-stuffed “topic tokens is …” openers from broken lexical templates (e.g. “Role ai … is This …”).
+ *
+ * @param string $text
+ * @return string
+ */
+function transformer_model_lexical_context_strip_mangled_lexical_is_opener( $text ) {
+
+    if ( ! (bool) apply_filters( 'chatbot_lcm_strip_mangled_is_opener', true ) ) {
+        return (string) $text;
+    }
+
+    $t = trim( (string) $text );
+    if ( $t === '' ) {
+        return '';
+    }
+
+    $repl = preg_replace(
+        '/^([\p{L}\p{N}]+\s+){2,14}is\s+(?=This\b|Those\b|These\b|The\s+\p{L}|A\s+\p{L}|An\s+\p{L})/u',
+        '',
+        $t,
+        1
+    );
+
+    if ( is_string( $repl ) && $repl !== $t && trim( $repl ) !== '' ) {
+        return trim( $repl );
+    }
+
+    return $t;
+}
+
+/**
+ * If the entire reply is the same UTF-8 string repeated twice, keep one copy.
+ *
+ * @param string $text
+ * @return string
+ */
+function transformer_model_lexical_context_collapse_exactly_doubled_reply( $text ) {
+
+    $t = trim( (string) $text );
+    if ( $t === '' ) {
+        return '';
+    }
+
+    $len = mb_strlen( $t, 'UTF-8' );
+    if ( $len < 40 || ( $len % 2 ) !== 0 ) {
+        return $t;
+    }
+
+    $half = (int) ( $len / 2 );
+    $a    = mb_substr( $t, 0, $half, 'UTF-8' );
+    $b    = mb_substr( $t, $half, null, 'UTF-8' );
+    if ( $a === $b ) {
+        return trim( $a );
+    }
+
+    return $t;
+}
+
+/**
  * Phase 7: Final polish rules before emit (string-only, no retrieval changes).
  *
  * - collapse repeated spaces (handled by normalize_emitted_response_spacing)
@@ -10143,7 +11312,7 @@ function transformer_model_lexical_context_assemble_definition_template_from_con
  * - remove duplicated / near-duplicated sentences
  * - limit to 2–4 sentences
  * - remove dangling punctuation
- * - optionally add a low-confidence preface
+ * - strip LLM transcript/meta artifacts (e.g. “End of ChatGPT response”) before dedupe
  *
  * @param string              $text
  * @param array<string,mixed> $consolidated Optional; used for confidence/intent.
@@ -10153,6 +11322,11 @@ function transformer_model_lexical_context_polish_before_emit( $text, $consolida
 
     $t = is_string( $text ) ? $text : (string) $text;
     $t = trim( (string) $t );
+    if ( $t === '' ) {
+        return '';
+    }
+
+    $t = transformer_model_lexical_context_strip_lcm_meta_artifacts_from_text( $t );
     if ( $t === '' ) {
         return '';
     }
@@ -10169,9 +11343,13 @@ function transformer_model_lexical_context_polish_before_emit( $text, $consolida
         $t = preg_replace( '/\s+/u', ' ', trim( (string) $t ) );
     }
 
+    $t = transformer_model_lexical_context_strip_mangled_lexical_is_opener( (string) $t );
+
     // Split into sentences, dedupe near-duplicates, and cap length.
-    $parts = preg_split( '/(?<=[.!?])\s+/u', (string) $t, -1, PREG_SPLIT_NO_EMPTY );
-    $parts = is_array( $parts ) ? $parts : array( $t );
+    $parts = transformer_model_lexical_context_split_sentences_for_polish( (string) $t );
+    if ( $parts === array() ) {
+        $parts = array( $t );
+    }
 
     $deduped = array();
     foreach ( $parts as $s ) {
@@ -10219,6 +11397,7 @@ function transformer_model_lexical_context_polish_before_emit( $text, $consolida
     }
 
     $out = trim( implode( ' ', $deduped ) );
+    $out = transformer_model_lexical_context_collapse_exactly_doubled_reply( (string) $out );
 
     // Final normalize again.
     if ( function_exists( 'transformer_model_lexical_context_normalize_emitted_response_spacing' ) ) {
@@ -10449,7 +11628,13 @@ function transformer_model_lexical_context_assemble_response_from_scored_sentenc
     if ( $raw_query_text !== '' ) {
         $rq = strtolower( wp_strip_all_tags( $raw_query_text ) );
         $rq = preg_replace( '/\s+/u', ' ', trim( (string) $rq ) );
-        $is_def_query = ( strpos( $rq, 'what is ' ) === 0 || strpos( $rq, 'what are ' ) === 0 || strpos( $rq, 'define ' ) === 0 || strpos( $rq, 'explain ' ) === 0 );
+        $is_def_query = false;
+        if ( strpos( $rq, 'what is ' ) === 0 || strpos( $rq, 'what are ' ) === 0 || strpos( $rq, 'define ' ) === 0 || strpos( $rq, 'explain ' ) === 0 ) {
+            $is_def_query = ! (bool) preg_match(
+                '/\b(role\s+of|what\s+is\s+the\s+role|what\s+are\s+the\s+roles|what\'s\s+the\s+role|whats\s+the\s+role)\b/u',
+                $rq
+            );
+        }
 
         if ( $is_def_query && count( $qualitySentences ) < 2 && is_array( $sentenceScores ) && count( $sentenceScores ) >= 2 ) {
             $take = max( 2, min( (int) $sentenceResponseCount, 4 ) );
@@ -10461,7 +11646,13 @@ function transformer_model_lexical_context_assemble_response_from_scored_sentenc
     if ( $raw_query_text !== '' ) {
         $rq = strtolower( wp_strip_all_tags( $raw_query_text ) );
         $rq = preg_replace( '/\s+/u', ' ', trim( (string) $rq ) );
-        $is_def_query = ( strpos( $rq, 'what is ' ) === 0 || strpos( $rq, 'what are ' ) === 0 || strpos( $rq, 'define ' ) === 0 || strpos( $rq, 'explain ' ) === 0 );
+        $is_def_query = false;
+        if ( strpos( $rq, 'what is ' ) === 0 || strpos( $rq, 'what are ' ) === 0 || strpos( $rq, 'define ' ) === 0 || strpos( $rq, 'explain ' ) === 0 ) {
+            $is_def_query = ! (bool) preg_match(
+                '/\b(role\s+of|what\s+is\s+the\s+role|what\s+are\s+the\s+roles|what\'s\s+the\s+role|whats\s+the\s+role)\b/u',
+                $rq
+            );
+        }
 
         if ( $is_def_query && ! empty( $qualitySentences ) ) {
             $subject = transformer_model_lcm_informational_subject_phrase_for_definition_score( $raw_query_text, array() );
