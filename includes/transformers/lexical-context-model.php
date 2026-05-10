@@ -390,7 +390,117 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null 
 }
 
 /**
- * Fetch published posts and pages as structured documents with normalized text and sentence chunks.
+ * Sanitized list of custom post type slugs that may be included when status is `private` (filter-driven).
+ *
+ * @return array<int, string>
+ */
+function transformer_model_lexical_context_lcm_allowed_private_post_types() {
+
+    $raw = apply_filters( 'chatbot_lcm_allowed_private_post_types', array() );
+    if ( ! is_array( $raw ) ) {
+        return array();
+    }
+
+    $out = array();
+    foreach ( $raw as $pt ) {
+        $pt = is_string( $pt ) ? sanitize_key( $pt ) : '';
+        if ( $pt !== '' ) {
+            $out[] = $pt;
+        }
+    }
+
+    return array_values( array_unique( $out ) );
+}
+
+/**
+ * Post types included in LCM document SQL: `post`, `page`, plus filter-configured CPTs (for publish and eligible private).
+ *
+ * @return array<int, string>
+ */
+function transformer_model_lexical_context_lcm_fetch_query_post_types() {
+
+    $base = array( 'post', 'page' );
+    $ext  = transformer_model_lexical_context_lcm_allowed_private_post_types();
+    $all  = array_merge( $base, $ext );
+    $seen = array();
+    $out  = array();
+    foreach ( $all as $t ) {
+        $t = is_string( $t ) ? sanitize_key( $t ) : '';
+        if ( $t === '' || isset( $seen[ $t ] ) ) {
+            continue;
+        }
+        $seen[ $t ] = true;
+        $out[]      = $t;
+    }
+
+    return $out;
+}
+
+/**
+ * Prepare a `post_type IN (...)` SQL fragment with placeholders (for $wpdb->prepare variadic args).
+ *
+ * @param array<int, string> $types
+ * @return array{sql_fragment:string,types:array<int,string>}
+ */
+function transformer_model_lexical_context_lcm_fetch_post_type_in_prepare_parts( array $types ) {
+
+    $types = array_values(
+        array_filter(
+            array_map(
+                static function ( $t ) {
+                    return is_string( $t ) ? sanitize_key( $t ) : '';
+                },
+                $types
+            )
+        )
+    );
+    if ( $types === array() ) {
+        $types = array( 'post', 'page' );
+    }
+
+    $sql_fragment = implode( ', ', array_fill( 0, count( $types ), '%s' ) );
+
+    return array(
+        'sql_fragment' => $sql_fragment,
+        'types'        => $types,
+    );
+}
+
+/**
+ * Log LCM document fetch filter context ([LCM][fetch_filter]).
+ *
+ * @param array<string, mixed> $payload
+ * @return void
+ */
+function transformer_model_lexical_context_log_lcm_fetch_filter( array $payload ) {
+
+    if ( ! (bool) apply_filters( 'chatbot_lcm_fetch_filter_log_enabled', true ) ) {
+        return;
+    }
+
+    $flags = JSON_UNESCAPED_UNICODE;
+    if ( defined( 'JSON_INVALID_UTF8_SUBSTITUTE' ) ) {
+        $flags |= constant( 'JSON_INVALID_UTF8_SUBSTITUTE' );
+    }
+    $json = wp_json_encode( $payload, $flags );
+    if ( ! is_string( $json ) || $json === '' ) {
+        return;
+    }
+
+    $line = '[LCM][fetch_filter] ' . $json;
+    if ( function_exists( 'chatbot_error_log' ) ) {
+        $dt = gmdate( 'd-M-Y H:i:s' );
+        chatbot_error_log( '[' . $dt . ' UTC] ' . $line );
+    } elseif ( function_exists( 'error_log' ) ) {
+        error_log( $line );
+    }
+}
+
+/**
+ * Fetch posts and pages as structured documents with normalized text and sentence chunks.
+ *
+ * SQL scope: `post` and `page`, plus CPT slugs from `chatbot_lcm_allowed_private_post_types` (published and private
+ * for those types; private for other types is never returned). See `transformer_model_lexical_context_log_lcm_fetch_filter`.
  *
  * @return array<int, array<string, mixed>> List of documents.
  */
@@ -400,36 +510,50 @@ function transformer_model_lexical_context_fetch_wordpress_documents() {
 
     transformer_model_lexical_context_lexical_rebuild_log( 'before fetch_wordpress_documents' );
 
-    $results = $wpdb->get_results(
-        $wpdb->prepare(
-            "SELECT ID, post_title, post_type, post_status, post_content FROM {$wpdb->posts}
-             WHERE post_status IN (%s, %s) AND (post_type = %s OR post_type = %s OR post_type = %s) AND post_content != ''
-             ORDER BY ID ASC",
-            'publish',
-            'private',
-            'post',
-            'page',
-            'apple_note'
-        ),
-        ARRAY_A
+    $parts       = transformer_model_lexical_context_lcm_fetch_post_type_in_prepare_parts(
+        transformer_model_lexical_context_lcm_fetch_query_post_types()
     );
+    $type_sql    = $parts['sql_fragment'];
+    $query_types = $parts['types'];
 
-    if (empty($results) || !is_array($results)) {
-        return [];
+    $sql = "SELECT ID, post_title, post_type, post_status, post_content FROM {$wpdb->posts}
+             WHERE post_status IN (%s, %s) AND post_type IN ({$type_sql}) AND post_content != ''
+             ORDER BY ID ASC";
+
+    $prepare_args = array_merge(
+        array( $sql, 'publish', 'private' ),
+        $query_types
+    );
+    $prepared     = call_user_func_array( array( $wpdb, 'prepare' ), $prepare_args );
+
+    $results = $wpdb->get_results( $prepared, ARRAY_A );
+
+    if ( empty( $results ) || ! is_array( $results ) ) {
+        transformer_model_lexical_context_log_lcm_fetch_filter(
+            array(
+                'allowed_private_post_types' => transformer_model_lexical_context_lcm_allowed_private_post_types(),
+                'query_post_types'             => $query_types,
+                'excluded_revisions'           => 0,
+                'documents_emitted'            => 0,
+            )
+        );
+
+        return array();
     }
 
     transformer_model_lexical_context_lexical_rebuild_log( 'after fetch_wordpress_documents' );
 
     transformer_model_lexical_context_lexical_rebuild_log( 'before documents' );
 
-    $documents = [];
+    $documents = array();
 
     transformer_model_lexical_context_lexical_rebuild_log( 'before foreach' );
 
-    $loop_counter         = 0;
-    $excluded_revisions   = 0;
+    $loop_counter                       = 0;
+    $excluded_revisions                 = 0;
+    $allowed_private_flip               = array_fill_keys( transformer_model_lexical_context_lcm_allowed_private_post_types(), true );
 
-    foreach ($results as $row) {
+    foreach ( $results as $row ) {
 
         $loop_counter++;
         if ( $loop_counter % 100 === 0 ) {
@@ -440,11 +564,10 @@ function transformer_model_lexical_context_fetch_wordpress_documents() {
             ++$excluded_revisions;
             continue;
         }
-        // Minimal post-status filter:
-        // - Always allow published content
-        // - Allow private only for apple_note
-        $post_status = isset( $row['post_status'] ) ? (string) $row['post_status'] : '';
-        if ( $post_status !== 'publish' && ! ( $post_status === 'private' && $post_type === 'apple_note' ) ) {
+        // Post-status filter: published rows for all queried types; private only for `chatbot_lcm_allowed_private_post_types`.
+        $post_status     = isset( $row['post_status'] ) ? (string) $row['post_status'] : '';
+        $private_type_ok = ( $post_status === 'private' && ! empty( $allowed_private_flip[ $post_type ] ) );
+        if ( $post_status !== 'publish' && ! $private_type_ok ) {
             continue;
         }
 
@@ -480,12 +603,14 @@ function transformer_model_lexical_context_fetch_wordpress_documents() {
         );
     }
 
-    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-        back_trace(
-            'NOTICE',
-            sprintf( '[LCM][fetch_filter] excluded_revisions=%d', $excluded_revisions )
-        );
-    }
+    transformer_model_lexical_context_log_lcm_fetch_filter(
+        array(
+            'allowed_private_post_types' => transformer_model_lexical_context_lcm_allowed_private_post_types(),
+            'query_post_types'           => $query_types,
+            'excluded_revisions'         => $excluded_revisions,
+            'documents_emitted'          => count( $documents ),
+        )
+    );
 
     transformer_model_lexical_context_lexical_rebuild_log( 'after foreach' );
 
@@ -1259,35 +1384,40 @@ function transformer_model_lexical_context_fetch_wordpress_documents_page( $offs
     $offset = max( 0, (int) $offset );
     $limit  = max( 1, min( 200, (int) $limit ) );
 
-    $results = $wpdb->get_results(
-        $wpdb->prepare(
-            "SELECT ID, post_title, post_type, post_status, post_content FROM {$wpdb->posts}
-             WHERE post_status IN (%s, %s) AND (post_type = %s OR post_type = %s OR post_type = %s) AND post_content != ''
-             ORDER BY ID ASC
-             LIMIT %d, %d",
-            'publish',
-            'private',
-            'post',
-            'page',
-            'apple_note',
-            $offset,
-            $limit
-        ),
-        ARRAY_A
+    $parts       = transformer_model_lexical_context_lcm_fetch_post_type_in_prepare_parts(
+        transformer_model_lexical_context_lcm_fetch_query_post_types()
     );
+    $type_sql    = $parts['sql_fragment'];
+    $query_types = $parts['types'];
+
+    $sql = "SELECT ID, post_title, post_type, post_status, post_content FROM {$wpdb->posts}
+             WHERE post_status IN (%s, %s) AND post_type IN ({$type_sql}) AND post_content != ''
+             ORDER BY ID ASC
+             LIMIT %d, %d";
+
+    $prepare_args = array_merge(
+        array( $sql, 'publish', 'private' ),
+        $query_types,
+        array( $offset, $limit )
+    );
+    $prepared     = call_user_func_array( array( $wpdb, 'prepare' ), $prepare_args );
+
+    $results = $wpdb->get_results( $prepared, ARRAY_A );
 
     if ( empty( $results ) || ! is_array( $results ) ) {
         return array();
     }
 
-    $documents = array();
+    $documents            = array();
+    $allowed_private_flip = array_fill_keys( transformer_model_lexical_context_lcm_allowed_private_post_types(), true );
     foreach ( $results as $row ) {
         $post_type = isset( $row['post_type'] ) ? (string) $row['post_type'] : 'post';
         if ( $post_type === 'revision' ) {
             continue;
         }
-        $post_status = isset( $row['post_status'] ) ? (string) $row['post_status'] : '';
-        if ( $post_status !== 'publish' && ! ( $post_status === 'private' && $post_type === 'apple_note' ) ) {
+        $post_status     = isset( $row['post_status'] ) ? (string) $row['post_status'] : '';
+        $private_type_ok = ( $post_status === 'private' && ! empty( $allowed_private_flip[ $post_type ] ) );
+        if ( $post_status !== 'publish' && ! $private_type_ok ) {
             continue;
         }
 
@@ -2294,21 +2424,25 @@ function transformer_model_lexical_context_lexical_corpus_sql_aggregate() {
 
     global $wpdb;
 
-    $row = $wpdb->get_row(
-        $wpdb->prepare(
-            "SELECT COUNT(*) AS row_count, COALESCE(SUM(CHAR_LENGTH(post_content)), 0) AS content_bytes
+    $parts       = transformer_model_lexical_context_lcm_fetch_post_type_in_prepare_parts(
+        transformer_model_lexical_context_lcm_fetch_query_post_types()
+    );
+    $type_sql    = $parts['sql_fragment'];
+    $query_types = $parts['types'];
+
+    $sql = "SELECT COUNT(*) AS row_count, COALESCE(SUM(CHAR_LENGTH(post_content)), 0) AS content_bytes
              FROM {$wpdb->posts}
              WHERE post_status IN (%s, %s)
-             AND (post_type = %s OR post_type = %s OR post_type = %s)
-             AND post_content != ''",
-            'publish',
-            'private',
-            'post',
-            'page',
-            'apple_note'
-        ),
-        ARRAY_A
+             AND post_type IN ({$type_sql})
+             AND post_content != ''";
+
+    $prepare_args = array_merge(
+        array( $sql, 'publish', 'private' ),
+        $query_types
     );
+    $prepared     = call_user_func_array( array( $wpdb, 'prepare' ), $prepare_args );
+
+    $row = $wpdb->get_row( $prepared, ARRAY_A );
 
     if ( ! is_array( $row ) ) {
         return array(
@@ -4213,13 +4347,378 @@ function transformer_model_lexical_context_sentence_row_metadata_marker_tally( $
 }
 
 /**
+ * Generic multi-label TLD suffix alternation for URL/host cleanup (filterable; no site-specific domains).
+ *
+ * @return string Non-capturing alternation body, e.g. "(?:com|org|...)".
+ */
+function transformer_model_lexical_context_get_generic_tld_suffix_alternation() {
+
+    $raw = (string) apply_filters(
+        'chatbot_lcm_generic_tld_suffix_pattern',
+        'com|org|net|int|edu|gov|mil|io|ai|co|me|tv|us|uk|de|fr|jp|cn|au|ca|nz|in|br|mx|nl|se|no|fi|dk|pl|eu|info|biz|name|pro|mobi|app|dev|cloud|tech|news|blog|site|online|store|shop|xyz'
+    );
+    $raw = trim( $raw );
+    if ( $raw === '' ) {
+        $raw = 'com|org|net';
+    }
+
+    return '(?:' . $raw . ')';
+}
+
+/**
+ * Normalize split scheme (https : / / …) and collapse spaced domain labels (example . com) generically.
+ *
+ * @param string $t
+ * @return string
+ */
+function transformer_model_lexical_context_normalize_feed_url_spacing_in_text( $t ) {
+
+    if ( ! is_string( $t ) || $t === '' ) {
+        return (string) $t;
+    }
+
+    // https:// and http:// with arbitrary whitespace around ":" and slashes (feed/share URL artifacts).
+    $t = preg_replace( '~\bhttps\s*:\s*/\s*/\s*~iu', 'https://', $t );
+    $t = preg_replace( '~\bhttp\s*:\s*/\s*/\s*~iu', 'http://', $t );
+
+    $tld = transformer_model_lexical_context_get_generic_tld_suffix_alternation();
+
+    $iter = 0;
+    while ( $iter < 14 ) {
+        $before = $t;
+        $t      = preg_replace_callback(
+            '/\b(\p{L}[\p{L}\p{N}-]*)\s+\.\s+(\p{L}[\p{L}\p{N}-]*)\b/iu',
+            static function ( array $m ) use ( $tld ) {
+                $a = (string) ( $m[1] ?? '' );
+                $b = (string) ( $m[2] ?? '' );
+                if ( strlen( $a ) < 1 || strlen( $b ) < 1 ) {
+                    return (string) ( $m[0] ?? '' );
+                }
+                // Avoid collapsing Latin abbreviations like "e . g" (single-letter fragments).
+                if ( strlen( $a ) < 2 && strlen( $b ) < 2 && ! preg_match( '/^(?:' . $tld . ')$/iu', $b ) ) {
+                    return (string) ( $m[0] ?? '' );
+                }
+                if ( preg_match( '/^(?:' . $tld . ')$/iu', $b ) ) {
+                    return $a . '.' . strtolower( $b );
+                }
+
+                return $a . '.' . $b;
+            },
+            (string) $t,
+            1
+        );
+        if ( ! is_string( $t ) ) {
+            return '';
+        }
+        if ( $before === $t ) {
+            break;
+        }
+        ++$iter;
+    }
+
+    return (string) $t;
+}
+
+/**
+ * Remove share/tracking query key fragments (standalone or in query strings).
+ *
+ * @param string $t
+ * @return string
+ */
+function transformer_model_lexical_context_remove_share_query_artifacts_from_text( $t ) {
+
+    if ( ! is_string( $t ) || $t === '' ) {
+        return (string) $t;
+    }
+
+    $keys = apply_filters(
+        'chatbot_lcm_share_query_artifact_keys',
+        array(
+            'highlight',
+            'ref',
+            'referrer',
+            'source',
+            'src',
+            'fbclid',
+            'gclid',
+            'mc_cid',
+            'mc_eid',
+            'igshid',
+        )
+    );
+    if ( ! is_array( $keys ) ) {
+        $keys = array();
+    }
+
+    foreach ( $keys as $k ) {
+        $k = strtolower( trim( (string) $k ) );
+        if ( $k === '' || ! preg_match( '/^[a-z][a-z0-9_]*$/', $k ) ) {
+            continue;
+        }
+        $qk = preg_quote( $k, '~' );
+        $t  = preg_replace( '~(?<=[?&/]|^|[\s"\'(\[])' . $qk . '\s*=\s*[^\s)&"\']+~iu', ' ', (string) $t );
+        $t  = preg_replace( '~\b' . $qk . '\s*=\s*[^\s)&"\']+~iu', ' ', (string) $t );
+    }
+
+    $t = preg_replace( '~(?<=[?&/]|^|[\s"\'(\[])utm_[a-z0-9_]+\s*=\s*[^\s)&"\']+~iu', ' ', (string) $t );
+    $t = preg_replace( '~\butm_[a-z0-9_]+\s*=\s*[^\s)&"\']+~iu', ' ', (string) $t );
+
+    return (string) $t;
+}
+
+/**
+ * Whether trailing clause after the last em/en/hyphen dash looks like a feed-style outlet label (not prose).
+ *
+ * @param string $tail Text after the dash (no leading dash).
+ * @return bool
+ */
+function transformer_model_lexical_context_tail_looks_like_feed_source_label( $tail ) {
+
+    $tail = trim( (string) $tail );
+    if ( $tail === '' ) {
+        return false;
+    }
+
+    $words = preg_split( '/\s+/u', $tail, -1, PREG_SPLIT_NO_EMPTY );
+    if ( ! is_array( $words ) || count( $words ) < 1 || count( $words ) > 4 ) {
+        return false;
+    }
+
+    $stop = array_flip(
+        array(
+            'a',
+            'an',
+            'and',
+            'or',
+            'but',
+            'the',
+            'in',
+            'on',
+            'of',
+            'for',
+            'to',
+            'as',
+            'at',
+            'vs',
+            'via',
+        )
+    );
+
+    foreach ( $words as $w ) {
+        $w = preg_replace( '/[^\p{L}\p{N}]/u', '', (string) $w );
+        if ( $w === '' ) {
+            continue;
+        }
+        $wl = strtolower( $w );
+        if ( isset( $stop[ $wl ] ) ) {
+            continue;
+        }
+        if ( preg_match( '/^[A-Z]{2,}$/', $w ) ) {
+            continue;
+        }
+        if ( preg_match( '/^[A-Z][a-z]*$/u', $w ) ) {
+            continue;
+        }
+
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Whether the substring before a candidate source tail looks headline/title-like (avoid stripping prose dashes).
+ *
+ * @param string $before Text before the dash (trimmed).
+ * @return bool
+ */
+function transformer_model_lexical_context_prefix_looks_headline_like_for_source_tail( $before ) {
+
+    $before = trim( (string) $before );
+    if ( $before === '' ) {
+        return false;
+    }
+
+    if ( function_exists( 'mb_strlen' ) && mb_strlen( $before, 'UTF-8' ) > 140 ) {
+        return false;
+    }
+    if ( strlen( $before ) > 160 ) {
+        return false;
+    }
+
+    $trimmed = trim( preg_replace( '/[.!?]+\s*$/u', '', $before ) );
+    if ( preg_match( '/[.!?]\s+\p{L}/u', $trimmed ) ) {
+        return false;
+    }
+
+    if ( (bool) preg_match( '/:\s*\S/u', $before ) ) {
+        return true;
+    }
+
+    $words = preg_split( '/\s+/u', $trimmed, -1, PREG_SPLIT_NO_EMPTY );
+    if ( ! is_array( $words ) || count( $words ) < 1 ) {
+        return false;
+    }
+
+    if ( preg_match( '/\b(?:because|although|which|where|when|while|that|those|these|they|we|you|i|what|this)\b/iu', $before ) ) {
+        return false;
+    }
+
+    if ( 1 === count( $words ) ) {
+        $w0 = preg_replace( '/[^\p{L}\p{N}]/u', '', (string) ( $words[0] ?? '' ) );
+
+        return $w0 !== ''
+            && ( (bool) preg_match( '/^\p{Lu}\p{Ll}+$/u', $w0 ) || (bool) preg_match( '/^[\p{Lu}]{2,12}$/u', $w0 ) );
+    }
+
+    $n_cap = 0;
+    foreach ( $words as $w ) {
+        $w0 = preg_replace( '/[^\p{L}\p{N}]/u', '', (string) $w );
+        if ( $w0 === '' ) {
+            continue;
+        }
+        if ( preg_match( '/^\p{Lu}/u', $w0 ) ) {
+            ++$n_cap;
+        }
+    }
+
+    $n = count( $words );
+
+    return $n > 0 && ( $n_cap / $n ) >= 0.55;
+}
+
+/**
+ * Strip feed-style "— Source" tails when structurally safe (filterable regex overrides default).
+ *
+ * @param string $t
+ * @return string
+ */
+function transformer_model_lexical_context_strip_feed_style_source_tail_from_text( $t ) {
+
+    if ( ! is_string( $t ) || $t === '' ) {
+        return (string) $t;
+    }
+
+    $custom = apply_filters( 'chatbot_lcm_feed_source_tail_pattern', null );
+    if ( is_string( $custom ) && trim( $custom ) !== '' ) {
+        $repl = preg_replace( $custom, '', (string) $t );
+
+        return is_string( $repl ) ? trim( preg_replace( '/\s+/u', ' ', $repl ) ) : $t;
+    }
+
+    $delims = array( '—', '–', '-' );
+    $best_p = false;
+    $best_d = '';
+    foreach ( $delims as $d ) {
+        if ( ! is_string( $d ) || $d === '' ) {
+            continue;
+        }
+        $p = function_exists( 'mb_strrpos' ) ? mb_strrpos( $t, $d, 0, 'UTF-8' ) : strrpos( $t, $d );
+        if ( false !== $p && ( false === $best_p || (int) $p > (int) $best_p ) ) {
+            $best_p = (int) $p;
+            $best_d = $d;
+        }
+    }
+
+    if ( false === $best_p || $best_d === '' ) {
+        return $t;
+    }
+
+    $dlen = function_exists( 'mb_strlen' ) ? mb_strlen( $best_d, 'UTF-8' ) : strlen( $best_d );
+    if ( function_exists( 'mb_substr' ) ) {
+        $before = mb_substr( $t, 0, $best_p, 'UTF-8' );
+        $tail   = mb_substr( $t, $best_p + $dlen, null, 'UTF-8' );
+    } else {
+        $before = substr( $t, 0, $best_p );
+        $tail   = substr( $t, $best_p + $dlen );
+    }
+
+    $before = trim( (string) $before );
+    $tail   = trim( (string) $tail );
+    if ( $before === '' || $tail === '' ) {
+        return $t;
+    }
+
+    if ( '-' === $best_d ) {
+        $ch_b = $best_p > 0
+            ? ( function_exists( 'mb_substr' ) ? mb_substr( $t, $best_p - 1, 1, 'UTF-8' ) : substr( $t, max( 0, $best_p - 1 ), 1 ) )
+            : ' ';
+        $ch_a = function_exists( 'mb_substr' ) ? mb_substr( $t, $best_p + $dlen, 1, 'UTF-8' ) : substr( $t, $best_p + $dlen, 1 );
+        if ( $ch_b !== ' ' || $ch_a !== ' ' ) {
+            return $t;
+        }
+    } elseif ( ! preg_match( '/^\s/u', ( function_exists( 'mb_substr' ) ? mb_substr( $t, $best_p + $dlen, 1, 'UTF-8' ) : substr( $t, $best_p + $dlen, 1 ) ) ) ) {
+        // Em/en dash source tails are usually spaced; hyphen already gated above.
+        return $t;
+    }
+
+    if ( ! transformer_model_lexical_context_prefix_looks_headline_like_for_source_tail( $before )
+        || ! transformer_model_lexical_context_tail_looks_like_feed_source_label( $tail ) ) {
+        return $t;
+    }
+
+    return trim( preg_replace( '/\s+/u', ' ', $before ) );
+}
+
+/**
+ * Remove http(s) URLs, www hosts, and bare domain/path hosts (after spacing normalization).
+ *
+ * @param string $t
+ * @return string
+ */
+function transformer_model_lexical_context_remove_urls_and_bare_domains_from_text( $t ) {
+
+    if ( ! is_string( $t ) || $t === '' ) {
+        return (string) $t;
+    }
+
+    $tld = transformer_model_lexical_context_get_generic_tld_suffix_alternation();
+
+    $t = preg_replace( '~\bhttps?://[^\s)\]\"\'<>\x{00A0}]+~iu', ' ', (string) $t );
+    $t = preg_replace( '~\bwww\.[^\s)\]\"\'<>\x{00A0}]+~iu', ' ', (string) $t );
+
+    $host = '(?:\p{L}[\p{L}\p{N}-]*\.)+' . $tld;
+    $t    = preg_replace( '~\b' . $host . '(?:/[^\s)\]\"\'<>\x{00A0}]*)?~iu', ' ', (string) $t );
+
+    return (string) $t;
+}
+
+/**
+ * True when a line still looks URL- or share-dominant after light cleaning (generic; no per-feed domains).
+ *
+ * @param string $line
+ * @return bool
+ */
+function transformer_model_lexical_context_line_has_residual_url_or_domain_artifact( $line ) {
+
+    if ( ! is_string( $line ) || trim( $line ) === '' ) {
+        return false;
+    }
+
+    $probe = transformer_model_lexical_context_normalize_feed_url_spacing_in_text( (string) $line );
+    $probe = transformer_model_lexical_context_remove_share_query_artifacts_from_text( $probe );
+
+    if ( preg_match( '~\bhttps?://~i', $probe ) ) {
+        return true;
+    }
+
+    $tld  = transformer_model_lexical_context_get_generic_tld_suffix_alternation();
+    $host = '(?:\p{L}[\p{L}\p{N}-]*\.)+' . $tld;
+
+    return (bool) preg_match( '~\b' . $host . '\b~iu', $probe );
+}
+
+/**
  * Aggressively remove obvious metadata/share artifacts from a candidate sentence.
  * Used only in post-scoring filtering/assembly stages (not in PMI training).
  *
  * Examples removed:
- * - Apple News / source share URLs
+ * - Feed/share URL artifacts (split schemes, spaced domains, tracking params)
  * - Leading link glyphs (🔗) and "Summary", "Related", "Tags", etc.
  * - Standalone or embedded publish-date stubs (YYYY-MM-DD)
+ *
+ * Filters: `chatbot_lcm_generic_tld_suffix_pattern`, `chatbot_lcm_share_query_artifact_keys`,
+ * `chatbot_lcm_feed_source_tail_pattern` (regex override for source-tail stripping).
  *
  * @param string $text
  * @return string Cleaned single-line sentence.
@@ -4246,30 +4745,15 @@ function transformer_model_lexical_context_clean_sentence_for_output( $text ) {
         return '';
     }
 
-    // Normalize common "https: //apple. News/..." spacing variants before URL removal.
-    $t = preg_replace( '~\bhttps?\s*:\s*/\s*/~i', 'http://', $t );
-    $t = preg_replace( '~\bhttp\s*:\s*/\s*/~i', 'http://', $t );
-    $t = preg_replace( '~\bhttps\s*:\s*/\s*/~i', 'https://', $t );
-
-    // Some feeds split domains with spaces/dots (e.g. "apple. News"). Collapse obvious cases.
-    $t = preg_replace( '~\bapple\s*\.\s*news\b~i', 'apple.news', $t );
+    $t = transformer_model_lexical_context_normalize_feed_url_spacing_in_text( (string) $t );
+    $t = transformer_model_lexical_context_remove_share_query_artifacts_from_text( (string) $t );
 
     // Drop leading "link" bullets/icons.
     $t = preg_replace( '/^\s*[🔗▶►•·]+\s*/u', '', $t );
 
-    // Remove URLs (keep surrounding prose).
-    $t = preg_replace( '~\bhttps?://[^\s)]+~i', ' ', $t );
-    $t = preg_replace( '~\bapple\.news/[^\s)]+~i', ' ', $t );
+    $t = transformer_model_lexical_context_remove_urls_and_bare_domains_from_text( (string) $t );
 
-    // Remove common share/query artifacts.
-    $t = preg_replace( '/\bhighlight\s*=\s*\S+/iu', ' ', $t );
-
-    // Strip common "— Source" headline tails (feed artifacts). Keep conservative list to avoid removing real prose dashes.
-    $t = preg_replace(
-        '/\s*[—\-]\s*(Gizmodo|The Verge|Ars Technica|Reuters|AP|Associated Press|BBC|CNN|Wired|TechCrunch|Engadget|Bloomberg|The Guardian|NYT|New York Times)\b/iu',
-        '',
-        $t
-    );
+    $t = transformer_model_lexical_context_strip_feed_style_source_tail_from_text( (string) $t );
 
     // Remove "Summary" / navigation labels. If "Summary" appears very early, drop any leading headline blob too.
     $pos_summary = stripos( $t, 'summary' );
@@ -4418,6 +4902,177 @@ function transformer_model_lexical_context_collapse_duplicate_definition_subject
 }
 
 /**
+ * Whether a comma position sits inside an unbalanced ASCII double-quote span (opening quote not yet closed).
+ *
+ * @param string $before Text strictly before the comma (byte-safe slice from UTF-8 subject).
+ * @return bool
+ */
+function transformer_model_lexical_context_comma_inside_ascii_double_quote_span( $before ) {
+
+    if ( ! is_string( $before ) || $before === '' ) {
+        return false;
+    }
+
+    $n = preg_match_all( '/"/u', $before );
+
+    return is_int( $n ) && ( $n % 2 ) === 1;
+}
+
+/**
+ * Whether a comma sits inside curly-quote span (more opening “ than closing ” before comma).
+ *
+ * @param string $before Text strictly before the comma.
+ * @return bool
+ */
+function transformer_model_lexical_context_comma_inside_curly_quote_span( $before ) {
+
+    if ( ! is_string( $before ) || $before === '' ) {
+        return false;
+    }
+
+    $open  = preg_match_all( '/\x{201C}/u', $before );
+    $close = preg_match_all( '/\x{201D}/u', $before );
+    if ( ! is_int( $open ) || ! is_int( $close ) ) {
+        return false;
+    }
+
+    return $open > $close;
+}
+
+/**
+ * Subtitle / title-list zone: last colon before comma starts a Title Case phrase with no sentence break.
+ *
+ * @param string $before Text strictly before the comma.
+ * @return bool
+ */
+function transformer_model_lexical_context_comma_in_colon_subtitle_zone( $before ) {
+
+    if ( ! is_string( $before ) || $before === '' ) {
+        return false;
+    }
+
+    $colon_at = function_exists( 'mb_strrpos' ) ? mb_strrpos( $before, ':', 0, 'UTF-8' ) : strrpos( $before, ':' );
+    if ( false === $colon_at ) {
+        return false;
+    }
+
+    $after_colon = function_exists( 'mb_substr' )
+        ? mb_substr( $before, $colon_at + 1, null, 'UTF-8' )
+        : substr( $before, (int) $colon_at + 1 );
+    $after_colon = trim( (string) $after_colon );
+    if ( $after_colon === '' ) {
+        return false;
+    }
+
+    // Sentence break between colon and comma → not a compact subtitle/title list.
+    if ( preg_match( '/[.!?]\s+/u', $after_colon ) ) {
+        return false;
+    }
+
+    // Expect subtitle-style start: space + capitalized word (e.g. "Title: Subtitle, Part Two").
+    if ( ! preg_match( '/^\s*\p{Lu}\p{Ll}+/u', $after_colon ) ) {
+        return false;
+    }
+
+    $tc = 0;
+    if ( preg_match_all( '/\b\p{Lu}\p{Ll}{2,}\b/u', $after_colon, $xm ) ) {
+        $tc = count( $xm[0] );
+    }
+
+    // Require two+ title tokens so single-clause notes ("Note: Use care, …") are not treated as headlines.
+    return $tc >= 2;
+}
+
+/**
+ * Count Title Case words in the tail of $before (title-density heuristic).
+ *
+ * @param string $before Text strictly before the comma.
+ * @param int    $tail_chars
+ * @return int
+ */
+function transformer_model_lexical_context_title_case_word_count_in_tail( $before, $tail_chars = 120 ) {
+
+    if ( ! is_string( $before ) || $before === '' ) {
+        return 0;
+    }
+
+    $tail_chars = max( 20, min( 200, (int) $tail_chars ) );
+    $tail       = function_exists( 'mb_substr' )
+        ? mb_substr( $before, max( 0, mb_strlen( $before, 'UTF-8' ) - $tail_chars ), null, 'UTF-8' )
+        : substr( $before, max( 0, strlen( $before ) - $tail_chars ) );
+
+    if ( ! preg_match_all( '/\b\p{Lu}\p{Ll}{2,}\b/u', (string) $tail, $m ) ) {
+        return 0;
+    }
+
+    return count( $m[0] );
+}
+
+/**
+ * True when the word after a comma should keep its capitalization (title-like span; corpus-agnostic).
+ *
+ * @param string $full_text Full string (original).
+ * @param int    $comma_pos Byte offset of the comma starting ", Word".
+ * @param int    $match_len Byte length of the full ", Word" match.
+ * @return bool
+ */
+function transformer_model_lexical_context_preserve_title_case_after_comma( $full_text, $comma_pos, $match_len ) {
+
+    if ( ! is_string( $full_text ) || $comma_pos < 0 || $match_len < 1 ) {
+        return false;
+    }
+
+    $before = substr( $full_text, 0, $comma_pos );
+    if ( ! is_string( $before ) ) {
+        return false;
+    }
+
+    if ( transformer_model_lexical_context_comma_inside_ascii_double_quote_span( $before )
+        || transformer_model_lexical_context_comma_inside_curly_quote_span( $before ) ) {
+        return true;
+    }
+
+    if ( transformer_model_lexical_context_comma_in_colon_subtitle_zone( $before ) ) {
+        return true;
+    }
+
+    // Book/article style: long dash separating title fragments in the same clause.
+    if ( preg_match( '/\s[\x{2013}\x{2014}\-]\s+\p{Lu}\p{Ll}+/u', $before ) ) {
+        return true;
+    }
+
+    $dense_titles = transformer_model_lexical_context_title_case_word_count_in_tail( $before, 120 );
+    if ( $dense_titles >= 3 ) {
+        return true;
+    }
+
+    $before_word = '';
+    if ( preg_match( '/\b(\p{Lu}\p{Ll}+)\s*$/u', rtrim( $before ), $bw ) ) {
+        $before_word = (string) ( $bw[1] ?? '' );
+    }
+
+    $suffix = substr( $full_text, $comma_pos + $match_len, 180 );
+    if ( ! is_string( $suffix ) ) {
+        $suffix = '';
+    }
+
+    // Coordinated title phrase: "… Word, Other …" or "… Word, and the Other …"
+    if ( $before_word !== '' && preg_match( '/^,\s+\p{Lu}/u', $suffix ) ) {
+        return true;
+    }
+    if ( $before_word !== '' && preg_match( '/^\s+and\s+the\s+\p{Lu}/iu', $suffix ) ) {
+        return true;
+    }
+
+    // Previous and current are both title-shaped words in a dense cap run.
+    if ( $before_word !== '' && $dense_titles >= 2 ) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
  * Lowercase a single Title-case word after a comma unless it looks like a proper noun / acronym.
  *
  * @param string $text
@@ -4437,7 +5092,7 @@ function transformer_model_lexical_context_normalize_lowercase_after_commas( $te
         'chatbot_lcm_proper_nouns_preserve_after_comma',
         array()
     );
-    
+
     $flip = array();
     foreach ( $proper as $w ) {
         $w = strtolower( trim( (string) $w ) );
@@ -4446,19 +5101,36 @@ function transformer_model_lexical_context_normalize_lowercase_after_commas( $te
         }
     }
 
-    return (string) preg_replace_callback(
-        '/,\s+([A-Z])([a-z]+)\b/u',
-        static function ( array $m ) use ( $flip ) {
-            $word = $m[1] . $m[2];
-            $lw   = strtolower( $word );
-            if ( isset( $flip[ $lw ] ) ) {
-                return ', ' . $word;
-            }
+    if ( ! preg_match_all( '/,\s+(\p{Lu})(\p{Ll}+)\b/u', $text, $matches, PREG_OFFSET_CAPTURE ) ) {
+        return $text;
+    }
 
-            return ', ' . strtolower( $m[1] ) . $m[2];
-        },
-        $text
-    );
+    $out = $text;
+    $n   = count( $matches[0] );
+    for ( $i = $n - 1; $i >= 0; $i-- ) {
+        $whole     = (string) ( $matches[0][ $i ][0] ?? '' );
+        $comma_pos = (int) ( $matches[0][ $i ][1] ?? -1 );
+        $uc        = (string) ( $matches[1][ $i ][0] ?? '' );
+        $rest      = (string) ( $matches[2][ $i ][0] ?? '' );
+        if ( $whole === '' || $comma_pos < 0 ) {
+            continue;
+        }
+
+        $word = $uc . $rest;
+        $lw   = strtolower( $word );
+        if ( isset( $flip[ $lw ] ) ) {
+            continue;
+        }
+
+        if ( transformer_model_lexical_context_preserve_title_case_after_comma( $text, $comma_pos, strlen( $whole ) ) ) {
+            continue;
+        }
+
+        $replacement = ', ' . mb_strtolower( $uc, 'UTF-8' ) . $rest;
+        $out         = substr_replace( $out, $replacement, $comma_pos, strlen( $whole ) );
+    }
+
+    return (string) $out;
 }
 
 /**
@@ -4638,8 +5310,8 @@ function transformer_model_lexical_context_low_value_sentence_row_reason_codes( 
         return array( 'lcm_transcript_meta_artifact' );
     }
 
-    // URL-only or URL-dominant rows (Apple News share artifacts, etc.).
-    if ( preg_match( '~\bhttps?://~i', $line ) || preg_match( '~\bapple\.news\b~i', $line ) ) {
+    // URL-only or URL-dominant rows (feed/share link artifacts, split domains, etc.).
+    if ( transformer_model_lexical_context_line_has_residual_url_or_domain_artifact( $line ) ) {
         return array( 'url_or_share_artifact' );
     }
 
@@ -4688,7 +5360,7 @@ function transformer_model_lexical_context_low_value_sentence_row_reason_codes( 
         // If useful prose remains, re-evaluate the cleaned text instead of discarding the whole row.
         if ( $cleaned !== '' && strlen( $cleaned ) > 20 ) {
             // Guard: only salvage+recurse when the cleaner actually changed the text.
-            // Some inputs contain an opening `[` with no closing `]` (e.g., truncated applenotes blobs),
+            // Some inputs contain an opening `[` with no closing `]` (e.g., truncated note/import blobs),
             // in which case strip_shortcodes_and_captions() returns the original string and recursion would loop.
             $raw_norm    = preg_replace( '/\s+/u', ' ', trim( wp_strip_all_tags( (string) $raw ) ) );
             $clean_norm  = preg_replace( '/\s+/u', ' ', trim( wp_strip_all_tags( (string) $cleaned ) ) );
@@ -7613,7 +8285,8 @@ function transformer_model_lexical_context_constraint_gate_last_meta( $set = nul
  * Constraint gate (informational queries only): explicit domain / negation / contrast mismatch protection.
  *
  * Design:
- * - No-op unless the query includes an explicit constraint (e.g. "in finance", "not marketing related", "X vs Y difference").
+ * - No-op unless the query includes an explicit constraint (e.g. "in finance", a negated-domain phrase, or "X vs Y difference").
+ * - Domain vocabulary is filter-driven (`chatbot_lcm_constraint_gate_domains`); core defaults are domain-neutral beyond general academic/technical buckets.
  * - Never changes scores or ordering; only removes rows.
  * - If a domain/negation constraint removes everything, return empty so the existing return gate produces the standard no-answer response.
  *
@@ -7647,36 +8320,63 @@ function transformer_model_lexical_context_apply_constraint_gate( $rows, $query_
         return $rows;
     }
 
+    $default_gate = array(
+        'domain_patterns' => array(
+            'biology'     => '/\bin\s+biology\b/i',
+            'finance'     => '/\bin\s+finance\b/i',
+            'medicine'    => '/\bin\s+medicine\b/i',
+            'law'         => '/\bin\s+(law|legal)\b/i',
+            'physics'     => '/\bin\s+physics\b/i',
+            'chemistry'   => '/\bin\s+chemistry\b/i',
+            'accounting'  => '/\bin\s+accounting\b/i',
+            'real_estate' => '/\bin\s+real\s+estate\b/i',
+        ),
+        // Negated-domain phrases (empty by default; add via `chatbot_lcm_constraint_gate_domains`).
+        'neg_patterns'      => array(),
+        'markers'           => array(
+            // Keep markers small and generic. Use whole-word/phrase matching to avoid substring collisions (e.g. "gene" vs "generate").
+            'biology'     => array( 'biology', 'biological', 'organism', 'organisms', 'cell', 'cells', 'gene', 'genes', 'protein', 'proteins', 'species', 'ecosystem', 'evolution', 'dna' ),
+            'finance'     => array( 'finance', 'financial', 'banking', 'investment', 'accounting', 'revenue' ),
+            'medicine'    => array( 'medicine', 'medical', 'health', 'clinical', 'patient' ),
+            'law'         => array( 'law', 'legal', 'attorney', 'court', 'contract' ),
+            'physics'     => array( 'physics', 'quantum', 'energy', 'force', 'matter' ),
+            'chemistry'   => array( 'chemistry', 'chemical', 'molecule', 'compound' ),
+            'accounting'  => array( 'accounting', 'tax', 'balance', 'ledger', 'financial' ),
+            'real_estate' => array( 'real estate', 'property', 'housing', 'condo', 'mortgage' ),
+            // Generic contrast companion for common “electrical” ambiguity cases (not corpus-specific).
+            'electrical'  => array( 'electrical', 'electronics', 'voltage', 'current', 'circuit', 'wire' ),
+        ),
+    );
+
+    $gate = apply_filters( 'chatbot_lcm_constraint_gate_domains', $default_gate );
+    if ( ! is_array( $gate ) ) {
+        $gate = $default_gate;
+    }
+
+    $domain_patterns = isset( $gate['domain_patterns'] ) && is_array( $gate['domain_patterns'] ) ? $gate['domain_patterns'] : $default_gate['domain_patterns'];
+    $neg_patterns    = isset( $gate['neg_patterns'] ) && is_array( $gate['neg_patterns'] ) ? $gate['neg_patterns'] : $default_gate['neg_patterns'];
+    $markers         = isset( $gate['markers'] ) && is_array( $gate['markers'] ) ? $gate['markers'] : $default_gate['markers'];
+
     // Domain qualifiers ("in X").
     $domain = '';
-    $domain_patterns = array(
-        'biology'     => '/\bin\s+biology\b/i',
-        'finance'     => '/\bin\s+finance\b/i',
-        'medicine'    => '/\bin\s+medicine\b/i',
-        'law'         => '/\bin\s+(law|legal)\b/i',
-        'physics'     => '/\bin\s+physics\b/i',
-        'chemistry'   => '/\bin\s+chemistry\b/i',
-        'accounting'  => '/\bin\s+accounting\b/i',
-        'real_estate' => '/\bin\s+real\s+estate\b/i',
-        'marketing'   => '/\bin\s+marketing\b/i',
-        'sales'       => '/\bin\s+sales\b/i',
-    );
     foreach ( $domain_patterns as $k => $re ) {
+        if ( ! is_string( $k ) || $k === '' || ! is_string( $re ) || $re === '' ) {
+            continue;
+        }
         if ( preg_match( $re, $q ) ) {
-            $domain = $k;
+            $domain = (string) $k;
             break;
         }
     }
 
-    // Negated domain constraints ("not marketing related", "not sales related").
+    // Negated domain constraints (filter-defined phrases → marker keys).
     $negated = '';
-    $neg_patterns = array(
-        'marketing' => '/\bnot\s+marketing\s+related\b/i',
-        'sales'     => '/\bnot\s+sales\s+related\b/i',
-    );
     foreach ( $neg_patterns as $k => $re ) {
+        if ( ! is_string( $k ) || $k === '' || ! is_string( $re ) || $re === '' ) {
+            continue;
+        }
         if ( preg_match( $re, $q ) ) {
-            $negated = $k;
+            $negated = (string) $k;
             break;
         }
     }
@@ -7687,23 +8387,6 @@ function transformer_model_lexical_context_apply_constraint_gate( $rows, $query_
     if ( $domain === '' && $negated === '' && ! $has_contrast ) {
         return $rows; // No explicit constraint signal; preserve existing behavior.
     }
-
-    // Small, generic domain marker map.
-    $markers = array(
-        // Keep markers small and generic. Use whole-word/phrase matching to avoid substring collisions (e.g. "gene" vs "generate").
-        'biology' => array( 'biology', 'biological', 'organism', 'organisms', 'cell', 'cells', 'gene', 'genes', 'protein', 'proteins', 'species', 'ecosystem', 'evolution', 'dna' ),
-        'finance' => array( 'finance', 'financial', 'banking', 'investment', 'accounting', 'revenue' ),
-        'medicine' => array( 'medicine', 'medical', 'health', 'clinical', 'patient' ),
-        'law' => array( 'law', 'legal', 'attorney', 'court', 'contract' ),
-        'physics' => array( 'physics', 'quantum', 'energy', 'force', 'matter' ),
-        'chemistry' => array( 'chemistry', 'chemical', 'molecule', 'compound' ),
-        'accounting' => array( 'accounting', 'tax', 'balance', 'ledger', 'financial' ),
-        'real_estate' => array( 'real estate', 'property', 'housing', 'condo', 'mortgage' ),
-        'marketing' => array( 'marketing', 'campaign', 'audience', 'conversion' ),
-        'sales'       => array( 'sales', 'prospect', 'pipeline', 'deal' ),
-        // Generic contrast companion for common “electrical” ambiguity cases (not corpus-specific).
-        'electrical' => array( 'electrical', 'electronics', 'voltage', 'current', 'circuit', 'wire' ),
-    );
 
     $match_marker = static function ( $text_lower, $marker ) {
         $marker = strtolower( trim( (string) $marker ) );
@@ -7726,19 +8409,6 @@ function transformer_model_lexical_context_apply_constraint_gate( $rows, $query_
         return (bool) preg_match( '/' . $re . '/iu', $text_lower );
     };
 
-    $match_row = static function ( $text_lower, $domain_key ) use ( $markers ) {
-        if ( $domain_key === '' || ! isset( $markers[ $domain_key ] ) ) {
-            return false;
-        }
-        foreach ( $markers[ $domain_key ] as $m ) {
-            if ( $m !== '' && strpos( $text_lower, (string) $m ) !== false ) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    // Override: use boundary-aware marker matching (prevents substring false positives).
     $match_row = static function ( $text_lower, $domain_key ) use ( $markers, $match_marker ) {
         if ( $domain_key === '' || ! isset( $markers[ $domain_key ] ) ) {
             return false;
@@ -9786,42 +10456,43 @@ function transformer_model_lexical_context_purpose_fact_is_wrapper_or_noise( $te
     }
     $slower = preg_replace( '/\s+/u', ' ', (string) $slower );
 
-    $patterns = (array) apply_filters(
-        'chatbot_lcm_purpose_fact_wrapper_patterns',
-        array(
-            '/\bharnessing\s+the\s+power\b/iu',
-            '/\bunlocking\s+the\s+power\b/iu',
-            '/\bin today[’\']?s fast-?paced\b/iu',
-            '/\bthis\s+article\s+(?:explores|examines|looks\s+at|discusses)\b/iu',
-            '/\bin\s+this\s+(?:piece|post|article)\b/iu',
-            '/\bi\s+analyzed\s+\d+/iu',
-            '/\bi\s+(?:reviewed|studied|surveyed|examined)\s+\d+/iu',
-            '/\baccording\s+to\s+(?:my|our)\s+(?:analysis|research|survey)\b/iu',
-            '/\btransforming\s+.+\s+business\s+operations\b/iu',
-            '/\bleading\s+(?:the\s+)?(?:digital\s+)?transformation\b/iu',
-            '/\bleverage\s+(?:the\s+)?power\s+of\b/iu',
-            '/\b(?:welcome to|in this guide|in this overview)\b/iu',
-            '/\bwe\s+(?:conducted|ran|performed)\s+(?:a\s+)?(?:analysis|study|survey)\b/iu',
-        )
+    $structural_wrappers = array(
+        '/\bthis\s+article\s+(?:explores|examines|looks\s+at|discusses|covers)\b/iu',
+        '/\bthis\s+guide\s+(?:explores|covers|explains|walks\s+through)\b/iu',
+        '/\bin\s+this\s+(?:article|guide|post|piece|overview)\b/iu',
+        '/\b(?:welcome to|in this guide|in this overview)\b/iu',
+        '/\btoday\s+we\s+(?:explore|discuss|cover|examine|look\s+at)\b/iu',
+        '/\bin today[’\']?s\s+(?:article|guide|post|piece)\b/iu',
+        '/\bi\s+analyzed\s+\d+/iu',
+        '/\bi\s+(?:reviewed|studied|surveyed|examined)\s+\d+/iu',
+        '/\baccording\s+to\s+(?:my|our)\s+(?:analysis|research|survey)\b/iu',
+        '/\bwe\s+(?:conducted|ran|performed)\s+(?:a\s+)?(?:analysis|study|survey)\b/iu',
     );
+
+    $patterns = array_merge(
+        (array) apply_filters( 'chatbot_lcm_purpose_fact_wrapper_patterns', $structural_wrappers ),
+        (array) apply_filters( 'chatbot_lcm_purpose_fact_wrapper_promo_patterns', array() )
+    );
+
     foreach ( $patterns as $re ) {
         if ( is_string( $re ) && $re !== '' && preg_match( $re, $slower ) ) {
             return true;
         }
     }
 
-    if ( preg_match( '/\bjob postings\b/iu', $slower )
+    if ( (bool) apply_filters( 'chatbot_lcm_purpose_fact_wrapper_job_posting_merged_heuristic', false )
+        && preg_match( '/\bjob postings\b/iu', $slower )
         && preg_match( '/\b(?:i\s+)?(?:analyzed|reviewed|studied|surveyed|examined|looked\s+at)\b/iu', $slower ) ) {
         return true;
     }
 
-    // Merged headline + magazine lead-in: "Long Title: Rest … in today's …"
-    if ( preg_match( '/^[^.!?\n]{10,120}:\s+.+\b(?:in today|fast-?paced|digital world)\b/iu', $plain ) ) {
+    // Merged headline + lead-in: long title colon, then clause with a generic “in this … / today’s …” frame.
+    if ( preg_match( '/^[^.!?\n]{10,120}:\s+.+\b(?:in this (?:article|guide|post)|in today[’\']?s\s+(?:article|guide|post))\b/iu', $plain ) ) {
         return true;
     }
 
-    // Opening scene-setter: very first clause is a time/marketing frame.
-    if ( preg_match( '/^.{0,50}\bin today[’\']?s\b.+\b(?:businesses|companies|organizations)\s+(?:are|face|must|need)\b/iu', $slower ) ) {
+    // Opening clause: “in today’s …” scene-setter tied to a named format (article/guide/post), not a sector list.
+    if ( preg_match( '/^.{0,50}\bin today[’\']?s\s+(?:article|guide|post|piece)\b/iu', $slower ) ) {
         return true;
     }
 
@@ -12094,15 +12765,18 @@ function transformer_model_lexical_context_definition_slot_hard_reject_reasons( 
         $reasons[] = 'title_like_pipe';
     }
 
-    $openers = (array) apply_filters(
-        'chatbot_lcm_definition_slot_article_opener_patterns',
-        array(
-            '/\bharnessing\s+the\s+power\b/iu',
-            '/\bin today[’\']?s\s+(?:fast-?paced|digital)\b/iu',
-            '/\bthis\s+article\s+(?:explores|examines|discusses)\b/iu',
-            '/\b(?:welcome to|in this guide|in this overview)\b/iu',
-            '/\bleverage\s+(?:the\s+)?power\s+of\b/iu',
-        )
+    $definition_openers_default = array(
+        '/\bthis\s+article\s+(?:explores|examines|discusses|covers)\b/iu',
+        '/\bthis\s+guide\s+(?:covers|explains|walks\s+through)\b/iu',
+        '/\bin\s+this\s+(?:article|guide|post|overview)\b/iu',
+        '/\b(?:welcome to|in this guide|in this overview)\b/iu',
+        '/\btoday\s+we\s+(?:explore|discuss|cover|examine)\b/iu',
+        '/\bin today[’\']?s\s+(?:article|guide|post|piece)\b/iu',
+    );
+
+    $openers = array_merge(
+        (array) apply_filters( 'chatbot_lcm_definition_slot_article_opener_patterns', $definition_openers_default ),
+        (array) apply_filters( 'chatbot_lcm_definition_slot_article_opener_promo_patterns', array() )
     );
     foreach ( $openers as $re ) {
         if ( is_string( $re ) && $re !== '' && preg_match( $re, $slower ) ) {
@@ -12665,6 +13339,406 @@ function transformer_model_lexical_context_log_person_topic_attribution( array $
     } elseif ( function_exists( 'error_log' ) ) {
         error_log( $line );
     }
+}
+
+/**
+ * Log attribution answer polish ([LCM][attribution_polish]).
+ *
+ * @param array<string, mixed> $payload Keys: before, after, reasons (list of strings).
+ * @return void
+ */
+function transformer_model_lexical_context_log_attribution_polish( array $payload ) {
+
+    if ( ! (bool) apply_filters( 'chatbot_lcm_attribution_polish_log_enabled', true ) ) {
+        return;
+    }
+
+    $flags = JSON_UNESCAPED_UNICODE;
+    if ( defined( 'JSON_INVALID_UTF8_SUBSTITUTE' ) ) {
+        $flags |= constant( 'JSON_INVALID_UTF8_SUBSTITUTE' );
+    }
+    $json = wp_json_encode( $payload, $flags );
+    if ( ! is_string( $json ) || $json === '' ) {
+        return;
+    }
+
+    $line = '[LCM][attribution_polish] ' . $json;
+    if ( function_exists( 'chatbot_error_log' ) ) {
+        $dt = gmdate( 'd-M-Y H:i:s' );
+        chatbot_error_log( '[' . $dt . ' UTC] ' . $line );
+    } elseif ( function_exists( 'error_log' ) ) {
+        error_log( $line );
+    }
+}
+
+/**
+ * Log attribution fragment/quote polish ([LCM][attribution_fragment_polish]).
+ *
+ * @param array<string, mixed> $payload Keys: before, after, reasons.
+ * @return void
+ */
+function transformer_model_lexical_context_log_attribution_fragment_polish( array $payload ) {
+
+    if ( ! (bool) apply_filters( 'chatbot_lcm_attribution_fragment_polish_log_enabled', true ) ) {
+        return;
+    }
+
+    $flags = JSON_UNESCAPED_UNICODE;
+    if ( defined( 'JSON_INVALID_UTF8_SUBSTITUTE' ) ) {
+        $flags |= constant( 'JSON_INVALID_UTF8_SUBSTITUTE' );
+    }
+    $json = wp_json_encode( $payload, $flags );
+    if ( ! is_string( $json ) || $json === '' ) {
+        return;
+    }
+
+    $line = '[LCM][attribution_fragment_polish] ' . $json;
+    if ( function_exists( 'chatbot_error_log' ) ) {
+        $dt = gmdate( 'd-M-Y H:i:s' );
+        chatbot_error_log( '[' . $dt . ' UTC] ' . $line );
+    } elseif ( function_exists( 'error_log' ) ) {
+        error_log( $line );
+    }
+}
+
+/**
+ * Ensure a space after colon when followed by a quote or letter (not time-style digit colon).
+ *
+ * @param string $text
+ * @return string
+ */
+function transformer_model_lexical_context_attribution_repair_colon_spacing( $text ) {
+
+    if ( ! is_string( $text ) || $text === '' ) {
+        return (string) $text;
+    }
+
+    $t = (string) $text;
+    $t = preg_replace( '/(?<!\d)\s*:\s*(?=["\x{201C}\x{2018}])/u', ': ', $t );
+    $t = preg_replace( '/(?<!\d)\s*:\s*(?=\p{L})/u', ': ', $t );
+
+    return is_string( $t ) ? $t : (string) $text;
+}
+
+/**
+ * If a sentence opens with a short quoted span and the same span repeats in the remainder, drop the leading quote.
+ *
+ * @param string $sentence
+ * @return string
+ */
+function transformer_model_lexical_context_attribution_strip_leading_duplicate_quote_sentence( $sentence ) {
+
+    $s = trim( (string) $sentence );
+    if ( $s === '' ) {
+        return $s;
+    }
+
+    if ( ! preg_match( '/^(\x{201C}([^\x{201D}]{2,400})\x{201D}|"([^"]{2,400})")\s+/u', $s, $m ) ) {
+        return $sentence;
+    }
+
+    $inner = trim( (string) ( $m[2] ?? '' ) );
+    if ( $inner === '' ) {
+        $inner = trim( (string) ( $m[3] ?? '' ) );
+    }
+    if ( $inner === '' || mb_strlen( $inner, 'UTF-8' ) < 2 ) {
+        return $sentence;
+    }
+
+    $full_match = (string) ( $m[0] ?? '' );
+    $rest       = '';
+    if ( function_exists( 'mb_strlen' ) && function_exists( 'mb_substr' ) ) {
+        $mlen = mb_strlen( $full_match, 'UTF-8' );
+        $rest = trim( (string) mb_substr( $s, $mlen, null, 'UTF-8' ) );
+    } else {
+        $rest = trim( (string) substr( $s, strlen( $full_match ) ) );
+    }
+    if ( $rest === '' ) {
+        return $sentence;
+    }
+
+    $il = mb_strtolower( $inner, 'UTF-8' );
+    $rl = mb_strtolower( $rest, 'UTF-8' );
+    if ( $il !== '' && strpos( $rl, $il ) !== false ) {
+        return $rest;
+    }
+
+    return $sentence;
+}
+
+/**
+ * Apply duplicate-quote stripping per sentence.
+ *
+ * @param string $text
+ * @return string
+ */
+function transformer_model_lexical_context_attribution_strip_leading_duplicate_quotes( $text ) {
+
+    if ( ! is_string( $text ) || $text === '' ) {
+        return (string) $text;
+    }
+
+    $parts = transformer_model_lexical_context_split_sentences_for_polish( (string) $text );
+    if ( $parts === array() ) {
+        $parts = array( (string) $text );
+    }
+
+    $out = array();
+    foreach ( $parts as $p ) {
+        $out[] = transformer_model_lexical_context_attribution_strip_leading_duplicate_quote_sentence( (string) $p );
+    }
+
+    return trim( preg_replace( '/\s+/u', ' ', implode( ' ', $out ) ) );
+}
+
+/**
+ * Repair "Name have an/a" → "Name had an/a" when Name matches the parsed person display (import/OCR style).
+ *
+ * @param string $text
+ * @param string $person_disp
+ * @return string
+ */
+function transformer_model_lexical_context_attribution_repair_person_have_agreement( $text, $person_disp ) {
+
+    if ( ! is_string( $text ) || $text === '' ) {
+        return (string) $text;
+    }
+
+    $person_disp = trim( preg_replace( '/\s+/u', ' ', (string) $person_disp ) );
+    if ( $person_disp === '' ) {
+        return (string) $text;
+    }
+
+    $toks = preg_split( '/\s+/u', $person_disp, -1, PREG_SPLIT_NO_EMPTY );
+    if ( ! is_array( $toks ) || $toks === array() ) {
+        return (string) $text;
+    }
+
+    $quoted = array();
+    foreach ( $toks as $w ) {
+        $quoted[] = preg_quote( (string) $w, '/' );
+    }
+    $inner = implode( '\s+', $quoted );
+
+    $t = (string) $text;
+    $t = preg_replace( '/(\b' . $inner . '\b)\s+have\s+an\b/iu', '$1 had an', $t, 1 );
+    $t = preg_replace( '/(\b' . $inner . '\b)\s+have\s+a\b/iu', '$1 had a', $t, 1 );
+
+    return is_string( $t ) ? $t : (string) $text;
+}
+
+/**
+ * Heuristic: attribution detail looks like a stitched fragment (prefer cautious frame).
+ *
+ * @param string $detail
+ * @return bool
+ */
+function transformer_model_lexical_context_attribution_detail_looks_fragmentary( $detail ) {
+
+    $d = trim( (string) $detail );
+    if ( $d === '' ) {
+        return false;
+    }
+
+    if ( preg_match( '/^[\p{Ll}\p{Lo}]/u', $d ) ) {
+        return true;
+    }
+
+    if ( preg_match( '/\b\p{Lu}\p{Ll}+\s+have\s+an\b/u', $d ) || preg_match( '/\b\p{Lu}\p{Ll}+\s+have\s+a\b/u', $d ) ) {
+        return true;
+    }
+
+    // Short leading quote immediately followed by another capitalized token (stitched excerpt + clause).
+    if ( preg_match( '/^["\x{201C}]([^"\x{201D}]{1,120})["\x{201D}]\s+\p{Lu}\p{Ll}+/u', $d ) ) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Quote/colon/agreement cleanup for person-topic attribution (corpus-agnostic).
+ *
+ * @param string $text
+ * @param string $person_disp Parsed person anchor for "have→had" repair; may be empty.
+ * @return array{text:string,reasons:array<int,string>}
+ */
+function transformer_model_lexical_context_polish_person_topic_attribution_fragments( $text, $person_disp = '' ) {
+
+    $reasons = array();
+    $t       = trim( (string) $text );
+    if ( $t === '' ) {
+        return array(
+            'text'    => '',
+            'reasons' => array( 'empty_input' ),
+        );
+    }
+
+    $before_colon = $t;
+    $t            = transformer_model_lexical_context_attribution_repair_colon_spacing( $t );
+    if ( $t !== $before_colon ) {
+        $reasons[] = 'colon_spacing_after_detail';
+    }
+
+    $before_dup = $t;
+    $t          = transformer_model_lexical_context_attribution_strip_leading_duplicate_quotes( $t );
+    if ( $t !== $before_dup ) {
+        $reasons[] = 'removed_leading_duplicate_quote';
+    }
+
+    $before_have = $t;
+    $t           = transformer_model_lexical_context_attribution_repair_person_have_agreement( $t, $person_disp );
+    if ( $t !== $before_have ) {
+        $reasons[] = 'repaired_person_have_agreement';
+    }
+
+    $t = trim( preg_replace( '/\s+/u', ' ', (string) $t ) );
+
+    if ( $reasons === array() ) {
+        $reasons[] = 'unchanged';
+    }
+
+    return array(
+        'text'    => $t,
+        'reasons' => $reasons,
+    );
+}
+
+/**
+ * Whether a trailing sentence is headline-like and largely redundant with earlier attribution text.
+ *
+ * @param string $tail_sentence
+ * @param string $earlier_joined Earlier sentences joined (single string).
+ * @return bool
+ */
+function transformer_model_lexical_context_attribution_trailing_is_redundant_headline( $tail_sentence, $earlier_joined ) {
+
+    $tail   = trim( wp_strip_all_tags( (string) $tail_sentence ) );
+    $prefix = trim( wp_strip_all_tags( (string) $earlier_joined ) );
+    if ( $tail === '' || $prefix === '' ) {
+        return false;
+    }
+
+    if ( function_exists( 'transformer_model_lexical_context_are_sentences_near_duplicates' )
+        && transformer_model_lexical_context_are_sentences_near_duplicates( $tail, $prefix ) ) {
+        return true;
+    }
+
+    $wc = str_word_count( $tail );
+    if ( ! is_int( $wc ) || $wc < 1 ) {
+        $wc = 1;
+    }
+
+    $caps = 0;
+    if ( preg_match_all( '/\b\p{Lu}\p{Ll}{2,}\b/u', $tail, $cm ) ) {
+        $caps = count( $cm[0] );
+    }
+
+    $headline_like = (bool) preg_match( '/^[^.!?]{1,100}:\s*\S/u', $tail )
+        || ( $wc <= 16 && $caps >= 2 && ( function_exists( 'mb_strlen' ) ? mb_strlen( $tail, 'UTF-8' ) : strlen( $tail ) ) < 140 )
+        || ( (bool) preg_match( '/\s[\x{2013}\x{2014}\-]\s/u', $tail ) && $wc <= 18 );
+
+    if ( ! $headline_like ) {
+        return false;
+    }
+
+    $tl = mb_strtolower( $tail, 'UTF-8' );
+    $pl = mb_strtolower( $prefix, 'UTF-8' );
+    if ( $tl !== '' && strpos( $pl, $tl ) !== false ) {
+        return true;
+    }
+
+    $tok_tail = preg_split( '/\s+/u', preg_replace( '/[^\p{L}\p{N}\s]/u', ' ', $tl ), -1, PREG_SPLIT_NO_EMPTY );
+    $significant = array();
+    foreach ( $tok_tail as $t ) {
+        $t = trim( (string) $t );
+        if ( $t === '' || mb_strlen( $t, 'UTF-8' ) < 3 ) {
+            continue;
+        }
+        $significant[] = $t;
+    }
+    if ( $significant === array() ) {
+        return false;
+    }
+
+    $hit = 0;
+    foreach ( $significant as $t ) {
+        if ( strpos( $pl, $t ) !== false ) {
+            ++$hit;
+        }
+    }
+
+    return ( $hit / count( $significant ) ) >= 0.72;
+}
+
+/**
+ * Light polish for person-topic attribution answers: dedupe headline tail, cap length, terminal punctuation.
+ *
+ * Does not rewrite claims or add content.
+ *
+ * @param string $text
+ * @return array{text:string,reasons:array<int,string>}
+ */
+function transformer_model_lexical_context_polish_person_topic_attribution_answer( $text ) {
+
+    $reasons = array();
+    $before  = trim( (string) $text );
+    if ( $before === '' ) {
+        return array(
+            'text'    => '',
+            'reasons' => array( 'empty_input' ),
+        );
+    }
+
+    $parts = transformer_model_lexical_context_split_sentences_for_polish( $before );
+    if ( $parts === array() ) {
+        $parts = array( $before );
+    }
+
+    $clean = array();
+    foreach ( $parts as $s ) {
+        $s = trim( (string) $s );
+        if ( $s === '' ) {
+            continue;
+        }
+        $clean[] = $s;
+    }
+
+    if ( $clean === array() ) {
+        return array(
+            'text'    => '',
+            'reasons' => array( 'empty_after_split' ),
+        );
+    }
+
+    if ( count( $clean ) >= 2 ) {
+        $last        = $clean[ count( $clean ) - 1 ];
+        $merged_rest = trim( implode( ' ', array_slice( $clean, 0, -1 ) ) );
+        if ( transformer_model_lexical_context_attribution_trailing_is_redundant_headline( $last, $merged_rest ) ) {
+            array_pop( $clean );
+            $reasons[] = 'dropped_redundant_headline_sentence';
+        }
+    }
+
+    if ( count( $clean ) > 2 ) {
+        $clean     = array_slice( $clean, 0, 2 );
+        $reasons[] = 'capped_to_two_sentences';
+    }
+
+    $out = trim( implode( ' ', $clean ) );
+    if ( $out !== '' && ! preg_match( '/[.!?]$/u', $out ) ) {
+        $out       .= '.';
+        $reasons[] = 'added_terminal_punctuation';
+    }
+
+    if ( $reasons === array() ) {
+        $reasons[] = 'unchanged';
+    }
+
+    return array(
+        'text'    => $out,
+        'reasons' => $reasons,
+    );
 }
 
 /**
@@ -13335,14 +14409,6 @@ function transformer_model_lexical_context_person_topic_attribution_build_pack( 
     }
 
     $quote = transformer_model_lexical_context_person_topic_extract_verbatim_quote( $merge );
-    $frame = (string) apply_filters(
-        'chatbot_lcm_person_topic_attribution_frame',
-        'The available notes connect %1$s with %2$s through the following detail:',
-        $person_disp,
-        $topic_disp,
-        $consolidated
-    );
-    $lead = sprintf( $frame, $person_disp, $topic_disp );
 
     $detail = $merge;
     if ( $quote !== '' && strlen( $quote ) <= 420 ) {
@@ -13355,6 +14421,25 @@ function transformer_model_lexical_context_person_topic_attribution_build_pack( 
             $detail = substr( $detail, 0, 377 ) . '…';
         }
     }
+
+    if ( transformer_model_lexical_context_attribution_detail_looks_fragmentary( $detail ) ) {
+        $frame = (string) apply_filters(
+            'chatbot_lcm_person_topic_attribution_frame_cautious',
+            'The available notes mention that %1$s and %2$s appear together in the material as follows:',
+            $person_disp,
+            $topic_disp,
+            $consolidated
+        );
+    } else {
+        $frame = (string) apply_filters(
+            'chatbot_lcm_person_topic_attribution_frame',
+            'The available notes connect %1$s with %2$s through the following detail:',
+            $person_disp,
+            $topic_disp,
+            $consolidated
+        );
+    }
+    $lead = sprintf( $frame, $person_disp, $topic_disp );
 
     $answer = trim( $lead . ' ' . $detail );
 
@@ -13370,6 +14455,40 @@ function transformer_model_lexical_context_person_topic_attribution_build_pack( 
             $answer = trim( $answer . ' ' . $s2 );
         }
     }
+
+    $clip_polish_log = static function ( $s ) {
+        $s = (string) $s;
+        $n = 500;
+        if ( function_exists( 'mb_strlen' ) && mb_strlen( $s, 'UTF-8' ) > $n ) {
+            return mb_substr( $s, 0, $n, 'UTF-8' ) . '…';
+        }
+        if ( strlen( $s ) > $n ) {
+            return substr( $s, 0, $n ) . '…';
+        }
+        return $s;
+    };
+
+    $before_frag = $answer;
+    $frag_pack   = transformer_model_lexical_context_polish_person_topic_attribution_fragments( $answer, $person_disp );
+    $answer      = (string) ( $frag_pack['text'] ?? $answer );
+    transformer_model_lexical_context_log_attribution_fragment_polish(
+        array(
+            'before'  => $clip_polish_log( $before_frag ),
+            'after'   => $clip_polish_log( $answer ),
+            'reasons' => isset( $frag_pack['reasons'] ) && is_array( $frag_pack['reasons'] ) ? $frag_pack['reasons'] : array(),
+        )
+    );
+
+    $before_polish = $answer;
+    $polish_pack   = transformer_model_lexical_context_polish_person_topic_attribution_answer( $answer );
+    $answer        = (string) ( $polish_pack['text'] ?? $answer );
+    transformer_model_lexical_context_log_attribution_polish(
+        array(
+            'before'  => $clip_polish_log( $before_polish ),
+            'after'   => $clip_polish_log( $answer ),
+            'reasons' => isset( $polish_pack['reasons'] ) && is_array( $polish_pack['reasons'] ) ? $polish_pack['reasons'] : array(),
+        )
+    );
 
     if ( function_exists( 'transformer_model_lexical_context_normalize_emitted_response_spacing' ) ) {
         $answer = transformer_model_lexical_context_normalize_emitted_response_spacing( $answer );
@@ -16230,15 +17349,17 @@ function transformer_model_lexical_context_polish_before_emit( $text, $consolida
         return '';
     }
 
+    $is_pta_emit = is_array( $consolidated ) && ! empty( $consolidated['lcm_person_topic_attribution_emit_ok'] );
+
     $t = transformer_model_lexical_context_strip_lcm_meta_artifacts_from_text( $t );
     if ( $t === '' ) {
         return '';
     }
 
-    // Remove raw/broken URLs (including spaced schemes like "http: //example.com").
-    $t = preg_replace( '~\bhttps?\s*:\s*//\s*\S+~iu', '', (string) $t );
-    $t = preg_replace( '~\bwww\.\S+~iu', '', (string) $t );
-    $t = preg_replace( '~\b\S+\.(?:com|net|org|io|edu|gov)\S*~iu', '', (string) $t );
+    // Remove raw/broken URLs and bare domains (same generic rules as clean_sentence_for_output).
+    $t = transformer_model_lexical_context_normalize_feed_url_spacing_in_text( (string) $t );
+    $t = transformer_model_lexical_context_remove_share_query_artifacts_from_text( (string) $t );
+    $t = transformer_model_lexical_context_remove_urls_and_bare_domains_from_text( (string) $t );
 
     // Normalize spaces/quotes/punctuation spacing.
     if ( function_exists( 'transformer_model_lexical_context_normalize_emitted_response_spacing' ) ) {
@@ -16293,6 +17414,10 @@ function transformer_model_lexical_context_polish_before_emit( $text, $consolida
     // For low-confidence/no-match answers, allow a single sentence (Phase 8 message is intentionally short).
     $min_sent = ( $confidence !== null && $confidence < $low_conf_min ) ? 1 : 2;
     $max_sent = transformer_model_lexical_context_lcm_intent_is_definition_family( $intent ) ? 4 : 4;
+    if ( $is_pta_emit ) {
+        $min_sent = 1;
+        $max_sent = 2;
+    }
 
     $deduped = array_slice( $deduped, 0, $max_sent );
     if ( count( $deduped ) < $min_sent && count( $parts ) > 0 ) {
