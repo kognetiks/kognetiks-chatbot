@@ -341,9 +341,32 @@ function transformer_model_lexical_context_lcm_assembly_budget_fallback( $senten
     return transformer_model_lexical_context_lcm_assembly_fallback_message();
 }
 
+/**
+ * Avoid HTTP 500 from max_execution_time (often 30s on shared hosts): extend budget for LCM runs.
+ *
+ * `set_time_limit` resets the counter from this call. Filter `chatbot_lcm_max_execution_time_seconds`
+ * default is 120; use 0 to leave the host / php.ini limit unchanged.
+ *
+ * @return void
+ */
+function transformer_model_lexical_context_lcm_request_extend_time_limit() {
+
+    $seconds = (int) apply_filters( 'chatbot_lcm_max_execution_time_seconds', 240 );
+    if ( $seconds <= 0 ) {
+        return;
+    }
+    if ( function_exists( 'set_time_limit' ) ) {
+        @set_time_limit( $seconds );
+    }
+    if ( function_exists( 'ini_set' ) ) {
+        @ini_set( 'max_execution_time', (string) $seconds );
+    }
+}
+
 // Main function to generate a response
 function transformer_model_lexical_context_response( $input, $max_tokens = null ) {
 
+    transformer_model_lexical_context_lcm_request_extend_time_limit();
     transformer_model_lexical_context_lcm_timing_init();
 
     // Maximum tokens - Fixed: removed hardcoded override

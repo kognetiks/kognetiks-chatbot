@@ -1845,6 +1845,14 @@ function chatbot_chatgpt_send_message() {
 
     }
 
+    // Lexical Context Model runs long on large corpora; extend PHP budget before session locks and routing.
+    // Generic Apache 500 ~30s with full LCM logs usually means Apache TimeOut — PHP limits alone cannot fix that.
+    $early_ai_platform = esc_attr( get_option( 'chatbot_ai_platform_choice', 'OpenAI' ) );
+    $early_transformer   = esc_attr( get_option( 'chatbot_transformer_model_choice', 'sentential-context-model' ) );
+    if ( $early_ai_platform === 'Transformer' && $early_transformer === 'lexical-context-model' && function_exists( 'transformer_model_lexical_context_lcm_request_extend_time_limit' ) ) {
+        transformer_model_lexical_context_lcm_request_extend_time_limit();
+    }
+
     // Security: Get current user and verify authorization
     $current_user = wp_get_current_user();
     $current_user_id = $current_user->ID;
