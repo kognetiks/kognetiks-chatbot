@@ -9234,6 +9234,94 @@ function transformer_model_lexical_context_evaluate_query_coverage_gate( $rows, 
 }
 
 /**
+ * Compute an adaptive minimum top-score threshold for the final return gate.
+ *
+ * Goal: avoid applying the same hard minimum to every query shape while keeping conservative defaults.
+ * This only adapts for short, high-confidence relation/entity intent with surviving candidates and
+ * meaningful token overlap in the top candidate.
+ *
+ * @param array{ shape?: string, confidence?: float, signals?: array<int, string> }|null $query_shape
+ * @param array<int, string> $meaningful_tokens
+ * @param float              $top_score
+ * @param int                $candidate_count
+ * @param array<string,mixed>|null $top_candidate
+ * @param float              $default_min_score
+ * @return array{ min_score: float, adapted: bool, reason: string }
+ */
+function lcm_get_adaptive_return_min_score( $query_shape, $meaningful_tokens, $top_score, $candidate_count, $top_candidate, $default_min_score ) {
+    $default_min_score = is_numeric( $default_min_score ) ? (float) $default_min_score : 0.0;
+    $top_score         = is_numeric( $top_score ) ? (float) $top_score : 0.0;
+    $candidate_count   = is_numeric( $candidate_count ) ? (int) $candidate_count : 0;
+    $meaningful_tokens = is_array( $meaningful_tokens ) ? $meaningful_tokens : array();
+
+    $shape = '';
+    $conf  = 0.0;
+    if ( is_array( $query_shape ) ) {
+        $shape = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
+        $conf  = isset( $query_shape['confidence'] ) ? (float) $query_shape['confidence'] : 0.0;
+    }
+
+    $meaningful_count = count( $meaningful_tokens );
+
+    // Default: keep conservative global minimum unchanged.
+    $out = array(
+        'min_score' => $default_min_score,
+        'adapted'   => false,
+        'reason'    => 'default',
+    );
+
+    // Only consider adaptation for short, high-confidence relation intent with surviving candidates.
+    if ( $candidate_count <= 0 ) {
+        $out['reason'] = 'no_candidates';
+        return $out;
+    }
+    if ( $meaningful_count < 1 || $meaningful_count > 2 ) {
+        $out['reason'] = 'meaningful_count_out_of_range';
+        return $out;
+    }
+    if ( $shape !== 'relation_query' ) {
+        $out['reason'] = 'shape_not_relation_query';
+        return $out;
+    }
+    if ( $conf > 0.0 && $conf < 0.6 ) {
+        $out['reason'] = 'low_shape_confidence';
+        return $out;
+    }
+
+    // Require meaningful token overlap between query and the top candidate (avoid "empty success" cases).
+    $top_sentence = '';
+    if ( is_array( $top_candidate ) ) {
+        if ( isset( $top_candidate['sentence'] ) && is_string( $top_candidate['sentence'] ) ) {
+            $top_sentence = (string) $top_candidate['sentence'];
+        } elseif ( isset( $top_candidate['text'] ) && is_string( $top_candidate['text'] ) ) {
+            $top_sentence = (string) $top_candidate['text'];
+        }
+    }
+
+    if ( $top_sentence === '' ) {
+        $out['reason'] = 'missing_top_candidate_text';
+        return $out;
+    }
+    if ( ! transformer_model_lexical_context_chunk_has_meaningful_query_overlap( $top_sentence, $meaningful_tokens ) ) {
+        $out['reason'] = 'no_top_overlap';
+        return $out;
+    }
+
+    // Adaptive floor: lower but nonzero, only for the narrow case above.
+    // Keep this modest so vague/garbage/keyword-stuffed queries still fail earlier gates.
+    $adaptive = $default_min_score;
+    if ( $default_min_score > 0.0 ) {
+        $adaptive = max( 10.0, min( $default_min_score, 12.0 ) );
+    }
+
+    $out['min_score'] = $adaptive;
+    $out['adapted']   = ( $adaptive < $default_min_score );
+    $out['reason']    = $out['adapted'] ? 'short_relation_query_overlap' : 'no_adaptation_needed';
+
+    return $out;
+}
+
+/**
  * Conservative gate: whether assembled reply should run given ranked rows after deduplication.
  * Does not alter scores — decisions use existing row scores only.
  *
@@ -9242,14 +9330,16 @@ function transformer_model_lexical_context_evaluate_query_coverage_gate( $rows, 
  * @param array<int, string>|null          $meaningful_direct_tokens Meaningful direct query tokens (relevance guard list); null derives from inputWordsLower.
  * @param array<string, float>|null        $local_idf_map             Runtime local IDF map when active.
  * @param bool                             $local_idf_available       Whether local IDF was loaded for this request (option on + cache hit).
+ * @param array{ shape?: string, confidence?: float, signals?: array<int, string> }|null $query_shape Query shape pack, if available.
  * @return array{ allow: bool, reason: string, top_score: float, candidate_count: int }
  */
-function transformer_model_lexical_context_should_return_scored_rows( $rows, $inputWordsLower, $meaningful_direct_tokens = null, $local_idf_map = null, $local_idf_available = false ) {
+function transformer_model_lexical_context_should_return_scored_rows( $rows, $inputWordsLower, $meaningful_direct_tokens = null, $local_idf_map = null, $local_idf_available = false, $query_shape = null ) {
 
     $rows             = is_array( $rows ) ? $rows : array();
     $inputWordsLower  = is_array( $inputWordsLower ) ? $inputWordsLower : array();
     $local_idf_map    = ( $local_idf_map !== null && is_array( $local_idf_map ) ) ? $local_idf_map : array();
     $local_idf_available = (bool) $local_idf_available;
+    $query_shape      = ( $query_shape !== null && is_array( $query_shape ) ) ? $query_shape : null;
 
     if ( $meaningful_direct_tokens === null ) {
         $meaningful_direct_tokens = transformer_model_lexical_context_meaningful_query_tokens_for_relevance_guard( $inputWordsLower );
@@ -9278,8 +9368,20 @@ function transformer_model_lexical_context_should_return_scored_rows( $rows, $in
         $result['reason']    = 'no_candidates';
         $result['top_score'] = 0.0;
     } else {
-        $min_top    = (float) apply_filters( 'chatbot_lcm_min_return_top_score', 20.0 );
+        $min_top_default = (float) apply_filters( 'chatbot_lcm_min_return_top_score', 20.0 );
         $min_single = (float) apply_filters( 'chatbot_lcm_min_single_candidate_score', 30.0 );
+
+        $adaptive = lcm_get_adaptive_return_min_score(
+            $query_shape,
+            $meaningful_direct_tokens,
+            $top_score,
+            $candidate_count,
+            isset( $rows[0] ) && is_array( $rows[0] ) ? $rows[0] : null,
+            $min_top_default
+        );
+        $min_top = isset( $adaptive['min_score'] ) && is_numeric( $adaptive['min_score'] )
+            ? (float) $adaptive['min_score']
+            : $min_top_default;
 
         if ( $top_score < $min_top ) {
             $result['allow']  = false;
@@ -9307,6 +9409,32 @@ function transformer_model_lexical_context_should_return_scored_rows( $rows, $in
     }
 
     if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        $shape_s = '';
+        if ( $query_shape !== null && isset( $query_shape['shape'] ) ) {
+            $shape_s = (string) $query_shape['shape'];
+        }
+        $meaningful_count = is_array( $meaningful_direct_tokens ) ? count( $meaningful_direct_tokens ) : 0;
+        $min_top_default_s = isset( $min_top_default ) ? (float) $min_top_default : 0.0;
+        $min_top_used_s    = isset( $min_top ) ? (float) $min_top : $min_top_default_s;
+        $adapted_s         = ( isset( $adaptive ) && is_array( $adaptive ) && ! empty( $adaptive['adapted'] ) ) ? 1 : 0;
+        $adapt_reason_s    = ( isset( $adaptive ) && is_array( $adaptive ) && isset( $adaptive['reason'] ) ) ? (string) $adaptive['reason'] : '';
+
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][return_gate_diag] min_default=%g min_used=%g adapted=%d adapt_reason=%s shape=%s meaningful=%d top_score=%g candidates=%d local_idf=%d',
+                $min_top_default_s,
+                $min_top_used_s,
+                $adapted_s,
+                $adapt_reason_s,
+                $shape_s,
+                $meaningful_count,
+                isset( $result['top_score'] ) ? (float) $result['top_score'] : 0.0,
+                isset( $result['candidate_count'] ) ? (int) $result['candidate_count'] : 0,
+                $local_idf_available ? 1 : 0
+            )
+        );
+
         back_trace(
             'NOTICE',
             sprintf(
@@ -10159,7 +10287,8 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         $inputWordsLower,
         $meaningful_query_tokens,
         $local_idf_map,
-        $apply_local_idf
+        $apply_local_idf,
+        $query_shape
     );
     if ( empty( $return_gate['allow'] ) ) {
         return transformer_model_lexical_context_return_gate_blocked_user_message();
@@ -10287,6 +10416,29 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
     }
 
     // Phase 2: build structured intermediate object as the handoff between ranking and synthesis.
+    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        $detected_intent_dbg = transformer_model_lexical_context_detect_query_intent( $input_text_raw );
+        $resolved_dbg        = lcm_resolve_assembly_intent(
+            $detected_intent_dbg,
+            is_array( $query_shape ) ? $query_shape : array(),
+            is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array(),
+            (string) $input_text_raw
+        );
+        $shape_dbg = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
+        $sel_dbg   = isset( $resolved_dbg['intent'] ) ? (string) $resolved_dbg['intent'] : (string) $detected_intent_dbg;
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][pre_fact_condenser_intent] path=scored_sentences detected=%s shape=%s selected=%s overridden=%d reason=%s meaningful=%d',
+                str_replace( '"', "'", (string) $detected_intent_dbg ),
+                str_replace( '"', "'", (string) $shape_dbg ),
+                str_replace( '"', "'", (string) $sel_dbg ),
+                ! empty( $resolved_dbg['overridden'] ) ? 1 : 0,
+                isset( $resolved_dbg['reason'] ) ? str_replace( '"', "'", (string) $resolved_dbg['reason'] ) : '',
+                is_array( $meaningful_query_tokens ) ? count( $meaningful_query_tokens ) : 0
+            )
+        );
+    }
     $consolidated = transformer_model_lexical_context_build_consolidation_object(
         $input_text_raw,
         $query_shape,
@@ -10458,6 +10610,74 @@ function transformer_model_lexical_context_detect_query_intent( $query_raw ) {
     }
 
     return 'unknown';
+}
+
+/**
+ * Resolve downstream assembly/synthesis intent from detected intent + query shape.
+ *
+ * Relation-style questions can contain "what is" phrasing but should not be forced into definition-only
+ * synthesis when query_shape is confidently relation/association.
+ *
+ * @param string $detected_intent Output of transformer_model_lexical_context_detect_query_intent().
+ * @param array{ shape?: string, confidence?: float, signals?: array<int, string> }|array{ shape?: string } $query_shape
+ * @param array<int, string> $meaningful_tokens
+ * @param string $query_raw
+ * @return array{ intent: string, overridden: bool, reason: string }
+ */
+function lcm_resolve_assembly_intent( $detected_intent, $query_shape, $meaningful_tokens, $query_raw ) {
+    $detected_intent   = (string) $detected_intent;
+    $meaningful_tokens = is_array( $meaningful_tokens ) ? $meaningful_tokens : array();
+    $qshape            = is_array( $query_shape ) ? $query_shape : array();
+
+    $shape = isset( $qshape['shape'] ) ? (string) $qshape['shape'] : '';
+    $conf  = isset( $qshape['confidence'] ) ? (float) $qshape['confidence'] : 0.0;
+
+    $out = array(
+        'intent'     => $detected_intent,
+        'overridden' => false,
+        'reason'     => 'default',
+    );
+
+    if ( $shape !== 'relation_query' ) {
+        $out['reason'] = 'shape_not_relation_query';
+        return $out;
+    }
+    if ( count( $meaningful_tokens ) < 1 ) {
+        $out['reason'] = 'no_meaningful_tokens';
+        return $out;
+    }
+    if ( $conf > 0.0 && $conf < 0.6 ) {
+        $out['reason'] = 'shape_low_confidence';
+        return $out;
+    }
+
+    $q = strtolower( preg_replace( '/\s+/u', ' ', trim( (string) wp_strip_all_tags( (string) $query_raw ) ) ) );
+
+    // Strong explicit definition directives (keep definition safeguards).
+    $explicit_def = preg_match( '/\b(?:define|definition\s+of)\b/iu', $q )
+        || preg_match( '/\bwhat\s+is\b.+\bdefinition\b/iu', $q );
+
+    if ( $explicit_def ) {
+        $out['reason'] = 'explicit_definition_directive';
+        return $out;
+    }
+
+    if ( transformer_model_lexical_context_lcm_intent_is_definition_family( $detected_intent ) ) {
+        $out['intent']     = 'relation';
+        $out['overridden'] = true;
+        $out['reason']     = 'relation_shape_overrides_weak_definition_phrasing';
+        return $out;
+    }
+
+    if ( $detected_intent === 'unknown' ) {
+        $out['intent']     = 'relation';
+        $out['overridden'] = true;
+        $out['reason']     = 'relation_shape_sets_intent';
+        return $out;
+    }
+
+    $out['reason'] = 'no_override';
+    return $out;
 }
 
 /**
@@ -11387,7 +11607,9 @@ function transformer_model_lexical_context_definition_emit_guard_merge_log_conte
 
     $ctx = array(
         'query'                => is_string( $raw_query_text ) ? $raw_query_text : (string) $raw_query_text,
-        'detected_intent'      => isset( $consolidated['intent'] ) ? (string) $consolidated['intent'] : '',
+        'detected_intent'      => isset( $consolidated['detected_intent'] ) ? (string) $consolidated['detected_intent'] : ( ( isset( $consolidated['intent'] ) ? (string) $consolidated['intent'] : '' ) ),
+        'assembly_intent'      => isset( $consolidated['intent'] ) ? (string) $consolidated['intent'] : '',
+        'relation_override'    => ! empty( $consolidated['relation_intent_overrode_definition'] ),
         'query_shape'          => $shape,
         'assembly_path_used'   => isset( $emit_ctx['assembly_path_used'] ) ? (string) $emit_ctx['assembly_path_used'] : '',
         'return_raw'           => ! empty( $emit_ctx['return_raw'] ),
@@ -15055,6 +15277,26 @@ function transformer_model_lexical_context_filter_facts_by_answer_intent( array 
         );
     }
 
+    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        $intent_dbg = isset( $slice['intent'] ) ? (string) $slice['intent'] : '';
+        $q_dbg      = isset( $slice['query'] ) ? (string) $slice['query'] : '';
+        $shape_dbg  = '';
+        if ( isset( $slice['query_shape'] ) && is_array( $slice['query_shape'] ) && isset( $slice['query_shape']['shape'] ) ) {
+            $shape_dbg = (string) $slice['query_shape']['shape'];
+        }
+        $compat_dbg = transformer_model_lexical_context_evidence_sufficiency_compat_profile( $q_dbg, $intent_dbg, is_array( $slice ) ? $slice : array() );
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][pre_evidence_sufficiency] stage=fact_filter intent=%s compat_profile=%s shape=%s facts=%d',
+                str_replace( '"', "'", (string) $intent_dbg ),
+                str_replace( '"', "'", (string) $compat_dbg ),
+                str_replace( '"', "'", (string) $shape_dbg ),
+                is_array( $facts ) ? count( $facts ) : 0
+            )
+        );
+    }
+
     $eval = transformer_model_lexical_context_evidence_sufficiency_evaluate_facts(
         $facts,
         $slice,
@@ -15112,6 +15354,206 @@ function transformer_model_lexical_context_filter_facts_by_answer_intent( array 
 }
 
 /**
+ * Relation intent: compute a conservative confidence adjustment when evidence shows actual association context.
+ *
+ * This does not lower global confidence thresholds; it only increases confidence when we can justify it
+ * from retrieved evidence beyond a bare token mention.
+ *
+ * @param float $base_confidence Confidence after existing caps.
+ * @param array{ shape?: string, confidence?: float }|array{ shape?: string } $query_shape
+ * @param array<int, string> $meaningful_query_tokens
+ * @param string $query_raw
+ * @param array<int, array<string, mixed>> $survivors Scored sentence rows that survived gates.
+ * @param array<int, array<string, mixed>> $facts Condensed facts (best-first).
+ * @param int $best_document_id
+ * @param array<int, int> $supporting_document_ids
+ * @return array{confidence: float, base: float, bonus: float, applied: bool, reason: string, signals: int}
+ */
+function lcm_adjust_relation_confidence_from_evidence( $base_confidence, $query_shape, $meaningful_query_tokens, $query_raw, array $survivors, array $facts, $best_document_id, array $supporting_document_ids ) {
+    $base = is_numeric( $base_confidence ) ? (float) $base_confidence : 0.0;
+    $base = max( 0.0, min( 1.0, $base ) );
+
+    $shape = '';
+    $qconf = 0.0;
+    if ( is_array( $query_shape ) ) {
+        $shape = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
+        $qconf = isset( $query_shape['confidence'] ) ? (float) $query_shape['confidence'] : 0.0;
+    }
+
+    $q_norm = strtolower( preg_replace( '/\s+/u', ' ', trim( (string) wp_strip_all_tags( (string) $query_raw ) ) ) );
+    $q_norm = preg_replace( '/[^\p{L}\p{N}\s]/u', ' ', (string) $q_norm );
+    $q_norm = preg_replace( '/\s+/u', ' ', trim( (string) $q_norm ) );
+
+    $meaningful = is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array();
+    $meaningful = array_values(
+        array_filter(
+            array_map(
+                static function ( $t ) {
+                    $t = strtolower( trim( (string) $t ) );
+                    return ( strlen( $t ) >= 2 ) ? $t : '';
+                },
+                $meaningful
+            ),
+            static function ( $t ) {
+                return $t !== '';
+            }
+        )
+    );
+
+    $out = array(
+        'confidence' => $base,
+        'base'       => $base,
+        'bonus'      => 0.0,
+        'applied'    => false,
+        'reason'     => 'default',
+        'signals'    => 0,
+    );
+
+    if ( $shape !== 'relation_query' ) {
+        $out['reason'] = 'shape_not_relation_query';
+        return $out;
+    }
+    if ( $qconf > 0.0 && $qconf < 0.6 ) {
+        $out['reason'] = 'shape_low_confidence';
+        return $out;
+    }
+    if ( count( $meaningful ) < 1 ) {
+        $out['reason'] = 'no_meaningful_tokens';
+        return $out;
+    }
+    if ( $facts === array() ) {
+        $out['reason'] = 'no_facts';
+        return $out;
+    }
+
+    $fact_count      = count( $facts );
+    $candidate_count = count( $survivors );
+
+    // Evidence heuristics: require at least one fact with token overlap + a relational cue.
+    $relation_cue_re = '/\b(?:related(?:ness)?|related\s+to|associate(?:d|s)?|association|similar(?:ity)?|connected|connection|link(?:ed)?|context(?:ual)?|category|categor(?:y|ies)|type\s+of|kind\s+of|part\s+of|member\s+of|belongs?\s+to|taxonomy|tag(?:ged)?|often\s+used\s+with|works?\s+with|integrat(?:e|es|ed|ing)\s+with|paired\s+with|compared?\s+to|differs?\s+from)\b/iu';
+    $test_artifact_re = '/\b(?:final\s+rare\s+boundary\s+word|rare\s+boundary\s+word|boundary\s+word|test\s+word|placeholder|dummy\s+text|lorem\s+ipsum|sample\s+text|fixture|unit\s+test|test\s+case)\b/iu';
+
+    $signals = 0;
+    $overlap_and_cue = 0;
+    $overlap_only    = 0;
+    $best_doc_hits   = 0;
+
+    foreach ( $facts as $f ) {
+        if ( ! is_array( $f ) ) {
+            continue;
+        }
+        $txt = trim( (string) ( $f['text'] ?? '' ) );
+        if ( $txt === '' ) {
+            continue;
+        }
+        $txt_norm = strtolower( preg_replace( '/\s+/u', ' ', trim( (string) wp_strip_all_tags( (string) $txt ) ) ) );
+        $txt_norm = preg_replace( '/[^\p{L}\p{N}\s]/u', ' ', (string) $txt_norm );
+        $txt_norm = preg_replace( '/\s+/u', ' ', trim( (string) $txt_norm ) );
+
+        if ( $txt_norm !== '' && preg_match( $test_artifact_re, $txt_norm ) ) {
+            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                back_trace( 'NOTICE', sprintf( '[LCM][relation_bonus_candidate_rejected] reason=test_artifact text="%s"', str_replace( '"', "'", transformer_model_lexical_context_diag_preview_text( $txt, 180 ) ) ) );
+            }
+            continue;
+        }
+
+        // Reject echoed query text / headings that substantially match the user's query.
+        if ( $q_norm !== '' && $txt_norm !== '' ) {
+            $is_echo = ( $txt_norm === $q_norm )
+                || ( strlen( $txt_norm ) >= 14 && strpos( $txt_norm, $q_norm ) !== false )
+                || ( strlen( $q_norm ) >= 14 && strpos( $q_norm, $txt_norm ) !== false );
+            if ( $is_echo ) {
+                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                    back_trace( 'NOTICE', sprintf( '[LCM][relation_bonus_candidate_rejected] reason=query_echo text="%s"', str_replace( '"', "'", transformer_model_lexical_context_diag_preview_text( $txt, 180 ) ) ) );
+                }
+                continue;
+            }
+        }
+
+        $pid = isset( $f['source_id'] ) ? (int) $f['source_id'] : 0;
+        if ( $best_document_id !== 0 && $pid === (int) $best_document_id ) {
+            $best_doc_hits++;
+        }
+
+        $has_overlap = transformer_model_lexical_context_chunk_has_meaningful_query_overlap( $txt, $meaningful );
+        $has_cue     = preg_match( $relation_cue_re, strtolower( wp_strip_all_tags( $txt ) ) );
+
+        // Reject bare mentions: overlap but too little surrounding context to support a relation answer.
+        if ( $has_overlap ) {
+            $plain = $txt_norm;
+            foreach ( $meaningful as $tok ) {
+                $plain = preg_replace( '/\b' . preg_quote( (string) $tok, '/' ) . '\b/iu', ' ', (string) $plain );
+            }
+            $plain  = preg_replace( '/\s+/u', ' ', trim( (string) $plain ) );
+            $wc     = ( $txt_norm !== '' ) ? str_word_count( $txt_norm ) : 0;
+            $wc_rem = ( $plain !== '' ) ? str_word_count( $plain ) : 0;
+            if ( $wc <= 6 || $wc_rem <= 2 ) {
+                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                    back_trace( 'NOTICE', sprintf( '[LCM][relation_bonus_candidate_rejected] reason=bare_token_mention text="%s"', str_replace( '"', "'", transformer_model_lexical_context_diag_preview_text( $txt, 180 ) ) ) );
+                }
+                continue;
+            }
+        }
+
+        if ( $has_overlap ) {
+            $overlap_only++;
+        }
+        if ( $has_overlap && $has_cue ) {
+            $overlap_and_cue++;
+            $signals++;
+        }
+    }
+
+    $out['signals'] = $signals;
+
+    // Don't reward bare mentions: require overlap+cues, and at least 2 facts or strong best-doc concentration.
+    if ( $overlap_and_cue < 1 ) {
+        $out['reason'] = 'no_independent_relation_evidence';
+        return $out;
+    }
+
+    $best_doc_ratio = ( $fact_count > 0 ) ? ( $best_doc_hits / $fact_count ) : 0.0;
+    $multi_fact     = ( $fact_count >= 2 );
+    $single_doc     = ( $supporting_document_ids === array() );
+
+    // Bonus is intentionally capped and requires multiple independent signs of association context.
+    $bonus = 0.0;
+    if ( $multi_fact ) {
+        $bonus += 0.14;
+    } else {
+        // Single fact: only allow a small bump when it's clearly anchored and coherent.
+        if ( $single_doc && $best_doc_ratio >= 1.0 ) {
+            $bonus += 0.08;
+        }
+    }
+    if ( $candidate_count >= 2 ) {
+        $bonus += 0.04;
+    }
+    if ( $qconf >= 0.75 ) {
+        $bonus += 0.04;
+    }
+    if ( $best_doc_ratio >= 0.8 ) {
+        $bonus += 0.03;
+    }
+    if ( $signals >= 2 ) {
+        $bonus += 0.03;
+    }
+
+    $bonus = max( 0.0, min( 0.22, $bonus ) );
+    if ( $bonus <= 0.0 ) {
+        $out['reason'] = 'no_bonus_conditions_met';
+        return $out;
+    }
+
+    $out['bonus']      = $bonus;
+    $out['confidence'] = max( 0.0, min( 1.0, $base + $bonus ) );
+    $out['applied']    = true;
+    $out['reason']     = 'relation_evidence_bonus';
+
+    return $out;
+}
+
+/**
  * Consolidate ranked candidate rows into a structured intermediate object.
  * This creates a clean handoff between retrieval/ranking and final text assembly.
  *
@@ -15127,7 +15569,33 @@ function transformer_model_lexical_context_build_consolidation_object( $query_ra
     $query_raw = is_string( $query_raw ) ? $query_raw : (string) $query_raw;
     $shape     = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
 
-    $intent = transformer_model_lexical_context_detect_query_intent( $query_raw );
+    $detected_intent = transformer_model_lexical_context_detect_query_intent( $query_raw );
+    $resolved_intent = lcm_resolve_assembly_intent(
+        $detected_intent,
+        is_array( $query_shape ) ? $query_shape : array(),
+        is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array(),
+        $query_raw
+    );
+    $intent = isset( $resolved_intent['intent'] ) ? (string) $resolved_intent['intent'] : (string) $detected_intent;
+    $relation_override = ! empty( $resolved_intent['overridden'] )
+        && transformer_model_lexical_context_lcm_intent_is_definition_family( $detected_intent )
+        && $intent === 'relation';
+
+    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        $shape_s = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][assembly_intent] detected=%s shape=%s selected=%s overridden=%d reason=%s meaningful=%d',
+                str_replace( '"', "'", (string) $detected_intent ),
+                str_replace( '"', "'", (string) $shape_s ),
+                str_replace( '"', "'", (string) $intent ),
+                ! empty( $resolved_intent['overridden'] ) ? 1 : 0,
+                isset( $resolved_intent['reason'] ) ? str_replace( '"', "'", (string) $resolved_intent['reason'] ) : '',
+                is_array( $meaningful_query_tokens ) ? count( $meaningful_query_tokens ) : 0
+            )
+        );
+    }
 
     $primary_topic = transformer_model_lcm_informational_subject_phrase_for_definition_score( $query_raw, $meaningful_query_tokens );
     $primary_topic = trim( (string) $primary_topic );
@@ -15240,12 +15708,50 @@ function transformer_model_lexical_context_build_consolidation_object( $query_ra
     }
 
     $top_score   = ( ! empty( $facts ) && isset( $facts[0]['score'] ) ) ? (float) $facts[0]['score'] : 0.0;
-    $confidence  = max( 0.0, min( 1.0, $top_score / 100.0 ) );
+    $confidence_base = max( 0.0, min( 1.0, $top_score / 100.0 ) );
+    $confidence      = $confidence_base;
     if ( transformer_model_lexical_context_lcm_intent_is_definition_family( $intent ) && is_array( $definition_validation ) && isset( $definition_validation['confidence_cap'] ) ) {
         $confidence = min( $confidence, (float) $definition_validation['confidence_cap'] );
     }
     if ( $answer_intent_confidence_cap !== null ) {
         $confidence = min( $confidence, $answer_intent_confidence_cap );
+    }
+
+    // Relation intent: allow a conservative evidence-based confidence lift when facts show actual association context.
+    $relation_conf_adj = null;
+    if ( $intent === 'relation' ) {
+        $relation_conf_adj = lcm_adjust_relation_confidence_from_evidence(
+            $confidence,
+            is_array( $query_shape ) ? $query_shape : array(),
+            is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array(),
+            (string) $query_raw,
+            is_array( $survivors ) ? $survivors : array(),
+            is_array( $facts ) ? $facts : array(),
+            (int) $best_document_id,
+            is_array( $supporting_document_ids ) ? $supporting_document_ids : array()
+        );
+        if ( is_array( $relation_conf_adj ) && ! empty( $relation_conf_adj['applied'] ) && isset( $relation_conf_adj['confidence'] ) && is_numeric( $relation_conf_adj['confidence'] ) ) {
+            $confidence = (float) $relation_conf_adj['confidence'];
+            // Preserve any existing caps.
+            if ( $answer_intent_confidence_cap !== null ) {
+                $confidence = min( $confidence, $answer_intent_confidence_cap );
+            }
+        }
+        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            back_trace(
+                'NOTICE',
+                sprintf(
+                    '[LCM][relation_confidence] base=%g after_caps=%g bonus=%g final=%g applied=%d reason=%s signals=%d',
+                    (float) $confidence_base,
+                    (float) ( is_array( $relation_conf_adj ) ? (float) ( $relation_conf_adj['base'] ?? $confidence ) : $confidence ),
+                    (float) ( is_array( $relation_conf_adj ) ? (float) ( $relation_conf_adj['bonus'] ?? 0.0 ) : 0.0 ),
+                    (float) $confidence,
+                    ( is_array( $relation_conf_adj ) && ! empty( $relation_conf_adj['applied'] ) ) ? 1 : 0,
+                    is_array( $relation_conf_adj ) && isset( $relation_conf_adj['reason'] ) ? str_replace( '"', "'", (string) $relation_conf_adj['reason'] ) : '',
+                    is_array( $relation_conf_adj ) && isset( $relation_conf_adj['signals'] ) ? (int) $relation_conf_adj['signals'] : 0
+                )
+            );
+        }
     }
 
     $repair_ranked_pool = array();
@@ -15275,6 +15781,8 @@ function transformer_model_lexical_context_build_consolidation_object( $query_ra
     return array(
         'query'                   => $query_raw,
         'intent'                  => $intent,
+        'detected_intent'         => (string) $detected_intent,
+        'relation_intent_overrode_definition' => $relation_override,
         'primary_topic'           => $primary_topic,
         'query_shape'             => is_array( $query_shape ) ? $query_shape : array(
             'shape'      => $shape,
@@ -15287,6 +15795,7 @@ function transformer_model_lexical_context_build_consolidation_object( $query_ra
         'facts'                   => $facts,
         'discarded'               => $discarded,
         'confidence'              => $confidence,
+        'lcm_relation_confidence_adjustment' => $relation_conf_adj,
         'repair_ranked_pool'      => $repair_ranked_pool,
         'lcm_answer_intent_confidence_cap_applied' => ( $answer_intent_confidence_cap !== null ),
     );
@@ -17007,6 +17516,24 @@ function transformer_model_lexical_context_apply_confidence_handling_before_emit
     $high_min   = (float) apply_filters( 'chatbot_lcm_confidence_high_min', 0.70 );
     $medium_min = (float) apply_filters( 'chatbot_lcm_confidence_medium_min', 0.35 );
 
+    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        $shape_s = '';
+        if ( is_array( $consolidated ) && isset( $consolidated['query_shape'] ) && is_array( $consolidated['query_shape'] ) && isset( $consolidated['query_shape']['shape'] ) ) {
+            $shape_s = (string) $consolidated['query_shape']['shape'];
+        }
+        back_trace(
+            'NOTICE',
+            sprintf(
+                '[LCM][confidence_gate] intent=%s shape=%s confidence=%g high_min=%g medium_min=%g',
+                str_replace( '"', "'", (string) $intent ),
+                str_replace( '"', "'", (string) $shape_s ),
+                (float) $confidence,
+                (float) $high_min,
+                (float) $medium_min
+            )
+        );
+    }
+
     if ( $confidence >= $high_min ) {
         return array(
             'text'       => $t,
@@ -17016,11 +17543,41 @@ function transformer_model_lexical_context_apply_confidence_handling_before_emit
 
     // Low confidence: do not bluff; return uncertainty/no-match.
     if ( $confidence < $medium_min ) {
+        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            back_trace(
+                'NOTICE',
+                sprintf(
+                    '[LCM][confidence_gate_decision] allow=0 reason=below_medium_min intent=%s confidence=%g medium_min=%g',
+                    str_replace( '"', "'", (string) $intent ),
+                    (float) $confidence,
+                    (float) $medium_min
+                )
+            );
+        }
         if ( transformer_model_lexical_context_lcm_intent_is_definition_family( $intent ) ) {
             $seed = trim( (string) $raw_query_text ) . '|' . $topic;
             return array(
                 'text'       => transformer_model_lexical_context_definition_low_confidence_message_build( $topic, $seed ),
                 'return_raw' => true,
+            );
+        }
+        // TEMP DIAGNOSTIC: prove fallback selection for non-definition low confidence.
+        if ( function_exists( 'back_trace' ) ) {
+            $shape_s = '';
+            if ( is_array( $consolidated ) && isset( $consolidated['query_shape'] ) && is_array( $consolidated['query_shape'] ) && isset( $consolidated['query_shape']['shape'] ) ) {
+                $shape_s = (string) $consolidated['query_shape']['shape'];
+            }
+            $facts_n = ( is_array( $consolidated ) && isset( $consolidated['facts'] ) && is_array( $consolidated['facts'] ) ) ? count( $consolidated['facts'] ) : 0;
+            back_trace(
+                'NOTICE',
+                sprintf(
+                    '[LCM][temp_fallback_before_emit] path=scored_sentences intent=%s shape=%s confidence=%g medium_min=%g facts=%d reason=below_medium_min',
+                    str_replace( '"', "'", (string) $intent ),
+                    str_replace( '"', "'", (string) $shape_s ),
+                    (float) $confidence,
+                    (float) $medium_min,
+                    (int) $facts_n
+                )
             );
         }
         return array(
