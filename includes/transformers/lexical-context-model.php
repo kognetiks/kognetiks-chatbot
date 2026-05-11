@@ -10416,29 +10416,6 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
     }
 
     // Phase 2: build structured intermediate object as the handoff between ranking and synthesis.
-    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-        $detected_intent_dbg = transformer_model_lexical_context_detect_query_intent( $input_text_raw );
-        $resolved_dbg        = lcm_resolve_assembly_intent(
-            $detected_intent_dbg,
-            is_array( $query_shape ) ? $query_shape : array(),
-            is_array( $meaningful_query_tokens ) ? $meaningful_query_tokens : array(),
-            (string) $input_text_raw
-        );
-        $shape_dbg = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
-        $sel_dbg   = isset( $resolved_dbg['intent'] ) ? (string) $resolved_dbg['intent'] : (string) $detected_intent_dbg;
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][pre_fact_condenser_intent] path=scored_sentences detected=%s shape=%s selected=%s overridden=%d reason=%s meaningful=%d',
-                str_replace( '"', "'", (string) $detected_intent_dbg ),
-                str_replace( '"', "'", (string) $shape_dbg ),
-                str_replace( '"', "'", (string) $sel_dbg ),
-                ! empty( $resolved_dbg['overridden'] ) ? 1 : 0,
-                isset( $resolved_dbg['reason'] ) ? str_replace( '"', "'", (string) $resolved_dbg['reason'] ) : '',
-                is_array( $meaningful_query_tokens ) ? count( $meaningful_query_tokens ) : 0
-            )
-        );
-    }
     $consolidated = transformer_model_lexical_context_build_consolidation_object(
         $input_text_raw,
         $query_shape,
@@ -15277,26 +15254,6 @@ function transformer_model_lexical_context_filter_facts_by_answer_intent( array 
         );
     }
 
-    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-        $intent_dbg = isset( $slice['intent'] ) ? (string) $slice['intent'] : '';
-        $q_dbg      = isset( $slice['query'] ) ? (string) $slice['query'] : '';
-        $shape_dbg  = '';
-        if ( isset( $slice['query_shape'] ) && is_array( $slice['query_shape'] ) && isset( $slice['query_shape']['shape'] ) ) {
-            $shape_dbg = (string) $slice['query_shape']['shape'];
-        }
-        $compat_dbg = transformer_model_lexical_context_evidence_sufficiency_compat_profile( $q_dbg, $intent_dbg, is_array( $slice ) ? $slice : array() );
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][pre_evidence_sufficiency] stage=fact_filter intent=%s compat_profile=%s shape=%s facts=%d',
-                str_replace( '"', "'", (string) $intent_dbg ),
-                str_replace( '"', "'", (string) $compat_dbg ),
-                str_replace( '"', "'", (string) $shape_dbg ),
-                is_array( $facts ) ? count( $facts ) : 0
-            )
-        );
-    }
-
     $eval = transformer_model_lexical_context_evidence_sufficiency_evaluate_facts(
         $facts,
         $slice,
@@ -15451,9 +15408,6 @@ function lcm_adjust_relation_confidence_from_evidence( $base_confidence, $query_
         $txt_norm = preg_replace( '/\s+/u', ' ', trim( (string) $txt_norm ) );
 
         if ( $txt_norm !== '' && preg_match( $test_artifact_re, $txt_norm ) ) {
-            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                back_trace( 'NOTICE', sprintf( '[LCM][relation_bonus_candidate_rejected] reason=test_artifact text="%s"', str_replace( '"', "'", transformer_model_lexical_context_diag_preview_text( $txt, 180 ) ) ) );
-            }
             continue;
         }
 
@@ -15463,9 +15417,6 @@ function lcm_adjust_relation_confidence_from_evidence( $base_confidence, $query_
                 || ( strlen( $txt_norm ) >= 14 && strpos( $txt_norm, $q_norm ) !== false )
                 || ( strlen( $q_norm ) >= 14 && strpos( $q_norm, $txt_norm ) !== false );
             if ( $is_echo ) {
-                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                    back_trace( 'NOTICE', sprintf( '[LCM][relation_bonus_candidate_rejected] reason=query_echo text="%s"', str_replace( '"', "'", transformer_model_lexical_context_diag_preview_text( $txt, 180 ) ) ) );
-                }
                 continue;
             }
         }
@@ -15488,9 +15439,6 @@ function lcm_adjust_relation_confidence_from_evidence( $base_confidence, $query_
             $wc     = ( $txt_norm !== '' ) ? str_word_count( $txt_norm ) : 0;
             $wc_rem = ( $plain !== '' ) ? str_word_count( $plain ) : 0;
             if ( $wc <= 6 || $wc_rem <= 2 ) {
-                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                    back_trace( 'NOTICE', sprintf( '[LCM][relation_bonus_candidate_rejected] reason=bare_token_mention text="%s"', str_replace( '"', "'", transformer_model_lexical_context_diag_preview_text( $txt, 180 ) ) ) );
-                }
                 continue;
             }
         }
@@ -17559,25 +17507,6 @@ function transformer_model_lexical_context_apply_confidence_handling_before_emit
             return array(
                 'text'       => transformer_model_lexical_context_definition_low_confidence_message_build( $topic, $seed ),
                 'return_raw' => true,
-            );
-        }
-        // TEMP DIAGNOSTIC: prove fallback selection for non-definition low confidence.
-        if ( function_exists( 'back_trace' ) ) {
-            $shape_s = '';
-            if ( is_array( $consolidated ) && isset( $consolidated['query_shape'] ) && is_array( $consolidated['query_shape'] ) && isset( $consolidated['query_shape']['shape'] ) ) {
-                $shape_s = (string) $consolidated['query_shape']['shape'];
-            }
-            $facts_n = ( is_array( $consolidated ) && isset( $consolidated['facts'] ) && is_array( $consolidated['facts'] ) ) ? count( $consolidated['facts'] ) : 0;
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][temp_fallback_before_emit] path=scored_sentences intent=%s shape=%s confidence=%g medium_min=%g facts=%d reason=below_medium_min',
-                    str_replace( '"', "'", (string) $intent ),
-                    str_replace( '"', "'", (string) $shape_s ),
-                    (float) $confidence,
-                    (float) $medium_min,
-                    (int) $facts_n
-                )
             );
         }
         return array(
