@@ -1154,7 +1154,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'additional_instructions' => $additional_instructions,
         'model' => $model,
         'voice' => $voice,
-        'chatbot_chatgpt_timeout_setting' => esc_attr(get_option('chatbot_chatgpt_timeout_setting', '240')),
+        'chatbot_chatgpt_timeout_setting' => (string) chatbot_chatgpt_get_ajax_timeout_seconds(),
         'chatbot_chatgpt_avatar_icon_setting' => esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', '')),
         'chatbot_chatgpt_custom_avatar_icon_setting' => esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', '')),
         'chatbot_chatgpt_avatar_greeting_setting' => esc_attr(get_option('chatbot_chatgpt_avatar_greeting_setting', 'Howdy!!! Great to see you today! How can I help you?')),
@@ -1355,18 +1355,12 @@ function chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assista
     if (!$message_data) {
         return false;
     }
-    
-    // Set conversation lock for the queued message
-    $conv_lock = 'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
-    set_transient($conv_lock, true, 60);
-    
-    // Process the message using the existing logic
+
+    // Do not set conv_lock here — it caused a race where a second browser request
+    // saw the lock, was queued, and never received a response.
     $response = chatbot_chatgpt_process_queued_message($message_data);
-    
-    // Clear conversation lock
-    delete_transient($conv_lock);
-    
-    // Recursively process the next message in queue
+
+    // Recursively process the next message in queue (legacy backlog only)
     chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
     
     return true;
@@ -1382,17 +1376,17 @@ function chatbot_chatgpt_get_queue_status_ajax() {
         return;
     }
 
-    $user_id = sanitize_text_field($_POST['user_id']);
     $page_id = sanitize_text_field($_POST['page_id']);
     $session_id = sanitize_text_field($_POST['session_id']);
     $assistant_id = sanitize_text_field($_POST['assistant_id']);
-    
-    if (!$user_id || !$page_id || !$session_id || !$assistant_id) {
+    $lock_user_id = chatbot_chatgpt_get_conversation_lock_user_id(get_current_user_id());
+
+    if (!$page_id || !$session_id || !$assistant_id) {
         wp_send_json_error('Missing required parameters');
         return;
     }
-    
-    $queue_status = chatbot_chatgpt_get_queue_status($user_id, $page_id, $session_id, $assistant_id);
+
+    $queue_status = chatbot_chatgpt_get_queue_status($lock_user_id, $page_id, $session_id, $assistant_id);
     wp_send_json_success($queue_status);
 
 }
@@ -2152,39 +2146,43 @@ function chatbot_chatgpt_send_message() {
     // back_trace('NOTICE', 'Conv Lock: ' . $conv_lock);
     // back_trace('NOTICE', 'Is Processing: ' . $is_processing);
     
-    // For visitors, add additional lock validation to prevent stuck locks
-    if ($is_processing && $current_user_id === 0) {
-        // Check if the lock is older than 2 minutes (120 seconds) - likely stuck
+    // Clear expired or stuck conversation locks (all users)
+    if ($is_processing) {
         $lock_timeout_key = '_transient_timeout_' . $conv_lock;
-        $lock_timeout = get_option($lock_timeout_key);
-        
-        if ($lock_timeout && (time() - ($lock_timeout - 60)) > 120) {
-            // Lock is older than 2 minutes, clear it
+        $lock_expires = (int) get_option($lock_timeout_key);
+
+        if ($lock_expires > 0 && time() >= $lock_expires) {
             delete_transient($conv_lock);
             $is_processing = false;
+            prod_trace('WARNING', 'Cleared expired conversation lock before processing message.');
+        } elseif ($current_user_id === 0) {
+            // Legacy fallback for visitor locks when timeout option is missing
+            if ($lock_expires > 0 && (time() - ($lock_expires - 60)) > 120) {
+                delete_transient($conv_lock);
+                $is_processing = false;
+                prod_trace('WARNING', 'Cleared stale visitor conversation lock before processing message.');
+            }
         }
     }
     
     if ($is_processing) {
-        // If already processing, enqueue the message
-        $enqueued_id = chatbot_chatgpt_enqueue_message($user_id, $page_id, $session_id, $assistant_id, $message, $client_message_id);
-        
-        // Return queue status
         global $chatbot_chatgpt_fixed_literal_messages;
-        $default_message = 'Message queued. Processing...';
-        $queued_message = isset($chatbot_chatgpt_fixed_literal_messages[20]) 
-            ? $chatbot_chatgpt_fixed_literal_messages[20] 
-            : $default_message;
-            
-        wp_send_json_success([
-            'queued' => true,
-            'client_message_id' => $enqueued_id,
-            'message' => $queued_message
-        ]);
+
+        $default_busy = 'The system is busy processing requests. Please wait for the current reply, then try again.';
+        $busy_message = isset($chatbot_chatgpt_fixed_literal_messages[19])
+            ? $chatbot_chatgpt_fixed_literal_messages[19]
+            : $default_busy;
+
+        wp_send_json_success($busy_message);
+        return;
     }
-    
-    // Set conversation lock with shorter timeout for visitors to prevent stuck locks
-    $lock_timeout = ($current_user_id === 0) ? 30 : 60; // 30 seconds for visitors, 60 for logged-in users
+
+    // Clear any orphaned queue from a previous stuck request
+    $queue_key = 'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    delete_transient($queue_key);
+
+    // Lock TTL must cover the full API + enhancement time (not 30–60s while AJAX waits up to 240s+)
+    $lock_timeout = min(chatbot_chatgpt_get_ajax_timeout_seconds() + 30, 600);
     set_transient($conv_lock, true, $lock_timeout);
     
     foreach ($kchat_settings as $key => $value) {
@@ -2382,6 +2380,8 @@ function chatbot_chatgpt_send_message() {
         // Send message to ChatGPT API - Ver 1.6.7
         $response = chatbot_chatgpt_call_flow_api($api_key, $message);
 
+        delete_transient($conv_lock);
+        chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
         wp_send_json_success($response);
 
     } elseif ($use_assistant_id == 'Yes') {
@@ -2459,7 +2459,7 @@ function chatbot_chatgpt_send_message() {
                 ? $chatbot_chatgpt_fixed_literal_messages[0] 
                 : $default_message;
         
-            // Send error response
+            delete_transient($conv_lock);
             wp_send_json_error($error_message);
 
         } else {
@@ -2646,9 +2646,15 @@ function chatbot_chatgpt_send_message() {
             }
         }
         
-        // Use TF-IDF to enhance response
+        // Local API errors as JSON success so the UI always clears the typing indicator
+        if ($chatbot_ai_platform_choice === 'Local Server' && is_string($response) && str_starts_with($response, 'Error:')) {
+            delete_transient($conv_lock);
+            wp_send_json_success($response);
+            return;
+        }
+
         $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
-        if ( $chatbot_chatgpt_suppress_learnings != 'None') {
+        if ($chatbot_chatgpt_suppress_learnings != 'None') {
             $response = $response . '<br><br>' . chatbot_chatgpt_enhance_with_tfidf($message);
         }
 

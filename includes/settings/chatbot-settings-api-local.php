@@ -61,25 +61,8 @@ function chatbot_local_chat_model_choice_callback($args) {
     $model_choice = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
     $local_api_enabled = esc_attr(get_option('chatbot_local_api_enabled', 'Yes'));
 
-    // Fetch models from the API
+    // Fetch models from the Jan.ai /v1/models endpoint
     $models = chatbot_local_get_models();
-
-    // Auto-sync: Update chatbot setting to match Jan.ai active model - Ver 2.3.3
-    if (!empty($models) && is_array($models)) {
-        $active_model = $models[0]; // Jan.ai API now returns only the active model
-        $current_setting = get_option('chatbot_local_model_choice', '');
-        
-        // If the active model is different from our setting, update it
-        if ($current_setting !== $active_model) {
-            update_option('chatbot_local_model_choice', $active_model);
-            $model_choice = $active_model;
-            
-            // Show sync notification
-            echo '<div style="background-color: #e7f3ff; padding: 8px; margin-bottom: 10px; border-left: 4px solid #0073aa;">';
-            echo '<strong>Auto-Sync:</strong> Model setting updated to match Jan.ai active model: <code>' . esc_html($active_model) . '</code>';
-            echo '</div>';
-        }
-    }
 
     // Check for errors
     if (is_string($models) && strpos($models, 'Error:') === 0) {
@@ -94,6 +77,11 @@ function chatbot_local_chat_model_choice_callback($args) {
         </p>
         <?php
     } else {
+        // Keep saved choice visible if it is not in the current API list
+        if (!empty($model_choice) && is_array($models) && !in_array($model_choice, $models, true)) {
+            array_unshift($models, $model_choice);
+        }
+
         // If models are fetched successfully, display them dynamically
         ?>
         <select id="chatbot_local_model_choice" name="chatbot_local_model_choice">
@@ -102,8 +90,8 @@ function chatbot_local_chat_model_choice_callback($args) {
             <?php endforeach; ?>
         </select>
         <p class="description">
-            <strong>Active Model:</strong> This reflects the currently active model in Jan.ai. 
-            To use a different model, activate it in Jan.ai first, then refresh this page.
+            Choose which model Jan.ai should use for chat requests. The list is loaded from your Jan.ai server; save changes to apply your selection.
+            The first chat with a newly selected model may take several minutes while Jan.ai loads it — increase <strong>Local timeout</strong> under Advanced if needed.
         </p>
         <?php
     }
@@ -190,8 +178,8 @@ function chatbot_local_base_url_callback($args) {
 // Timeout Settings Callback
 function chatbot_local_timeout_setting_callback($args) {
 
-    // Get the saved chatbot_local_timeout value or default to 240
-    $timeout = esc_attr(get_option('chatbot_local_timeout_setting', 240));
+    // Get the saved chatbot_local_timeout value or default to 120 (Jan.ai can stall on large models)
+    $timeout = esc_attr(get_option('chatbot_local_timeout_setting', 120));
 
     // Allow for a range of tokens between 5 and 500 in 5-step increments - Ver 2.2.6
     ?>
@@ -202,8 +190,43 @@ function chatbot_local_timeout_setting_callback($args) {
         }
         ?>
     </select>
+    <p class="description">Seconds to wait for Jan.ai. Large models (e.g. 20B) often need 120–180. The chat UI caps this at 180 seconds so a stuck Jan.ai call does not leave the typing indicator running for many minutes.</p>
     <?php
 
+}
+
+/**
+ * Sanitize Jan.ai cooldown (0–30 seconds).
+ *
+ * @param mixed $value Submitted value.
+ * @return int
+ */
+function chatbot_local_sanitize_jan_cooldown_setting($value) {
+
+    $value = intval($value);
+    if ($value < 0) {
+        return 0;
+    }
+    if ($value > 30) {
+        return 30;
+    }
+    return $value;
+}
+
+// Jan.ai cooldown between prompts - Ver 2.3.3+
+function chatbot_local_jan_cooldown_setting_callback($args) {
+
+    $cooldown = (int) get_option('chatbot_local_jan_cooldown_setting', 3);
+    ?>
+    <select id="chatbot_local_jan_cooldown_setting" name="chatbot_local_jan_cooldown_setting">
+        <?php for ($i = 0; $i <= 30; $i++) : ?>
+            <option value="<?php echo esc_attr($i); ?>" <?php selected($cooldown, $i, false); ?>><?php echo esc_html($i); ?></option>
+        <?php endfor; ?>
+    </select>
+    <p class="description">
+        Minimum seconds between chat prompts so Jan.ai can finish the previous reply. Use <code>0</code> for no delay (typical with Jan 8.0 and smaller models). Increase for very large local models if back-to-back messages stall or time out.
+    </p>
+    <?php
 }
 
 // Register API settings
@@ -311,6 +334,15 @@ function chatbot_local_api_settings_init() {
     // Advanced Model Settings - Ver 2.2.6
     register_setting('chatbot_local_api_model', 'chatbot_local_base_url'); // Ver 2.2.6
     register_setting('chatbot_local_api_model', 'chatbot_local_timeout_setting'); // Ver 2.2.6
+    register_setting(
+        'chatbot_local_api_model',
+        'chatbot_local_jan_cooldown_setting',
+        array(
+            'type'              => 'integer',
+            'default'           => 3,
+            'sanitize_callback' => 'chatbot_local_sanitize_jan_cooldown_setting',
+        )
+    );
 
     add_settings_section(
         'chatbot_local_api_model_advanced_section',
@@ -333,6 +365,14 @@ function chatbot_local_api_settings_init() {
         'chatbot_local_timeout_setting',
         'Timeout Setting (in seconds)',
         'chatbot_local_timeout_setting_callback',
+        'chatbot_local_api_model_advanced',
+        'chatbot_local_api_model_advanced_section'
+    );
+
+    add_settings_field(
+        'chatbot_local_jan_cooldown_setting',
+        'Cooldown (seconds)',
+        'chatbot_local_jan_cooldown_setting_callback',
         'chatbot_local_api_model_advanced',
         'chatbot_local_api_model_advanced_section'
     );

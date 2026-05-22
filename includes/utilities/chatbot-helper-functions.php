@@ -199,3 +199,109 @@ function kognetiks_insights_send_email( $to, $subject, $message, $headers = [] )
 }
 // Add an action to send the email
 add_action( 'kognetiks_insights_send_email', 'kognetiks_insights_send_email' );
+
+/**
+ * AJAX timeout (seconds) exposed to the chatbot UI.
+ * Local Server uses its own timeout setting because model load/inference can run much longer.
+ *
+ * @return int
+ */
+function chatbot_chatgpt_get_ajax_timeout_seconds() {
+
+    $platform = esc_attr( get_option( 'chatbot_ai_platform_choice', 'OpenAI' ) );
+
+    if ( $platform === 'Local Server' ) {
+        // Cap UI wait at 3 minutes so a stuck Jan.ai call does not spin for 6+ minutes
+        $local_timeout = max( 5, intval( get_option( 'chatbot_local_timeout_setting', 120 ) ) );
+        return min( $local_timeout, 180 );
+    }
+
+    return max( 5, intval( get_option( 'chatbot_chatgpt_timeout_setting', 240 ) ) );
+}
+
+/**
+ * Extend PHP max_execution_time for a long-running HTTP call.
+ *
+ * @param int $timeout_seconds Remote request timeout in seconds.
+ * @return int|false Original limit, or false if unchanged.
+ */
+function chatbot_chatgpt_extend_php_execution_for_timeout( $timeout_seconds ) {
+
+    $current = (int) ini_get( 'max_execution_time' );
+    $required = (int) $timeout_seconds + 30;
+
+    if ( $current > 0 && $required > $current ) {
+        @set_time_limit( $required );
+        return $current;
+    }
+
+    return false;
+}
+
+/**
+ * Restore PHP max_execution_time after a long-running HTTP call.
+ *
+ * @param int|false $original_time Original limit from chatbot_chatgpt_extend_php_execution_for_timeout().
+ */
+function chatbot_chatgpt_restore_php_execution_time( $original_time ) {
+
+    if ( $original_time !== false && $original_time > 0 ) {
+        @set_time_limit( $original_time );
+    }
+}
+
+/**
+ * User id segment for conversation lock/queue hashes.
+ * Must match chatbot_chatgpt_send_message() (0 for anonymous visitors).
+ *
+ * @param int|null $current_user_id WordPress user ID, or null to use get_current_user_id().
+ * @return int
+ */
+function chatbot_chatgpt_get_conversation_lock_user_id( $current_user_id = null ) {
+
+    if ( $current_user_id === null ) {
+        $current_user_id = get_current_user_id();
+    }
+
+    return $current_user_id > 0 ? (int) $current_user_id : 0;
+}
+
+/**
+ * Clear conversation lock and queued messages for a conversation.
+ * Also clears legacy keys where session_id was stored in the user_id slot (pre-2.3.7 erase handler).
+ *
+ * @param string $assistant_id Assistant id.
+ * @param int    $lock_user_id Canonical lock user id (0 for anonymous).
+ * @param string $page_id Page id.
+ * @param string $session_id Session id.
+ */
+function chatbot_chatgpt_clear_conversation_locks_and_queue( $assistant_id, $lock_user_id, $page_id, $session_id ) {
+
+    $lock_user_ids = array( $lock_user_id );
+
+    if ( $lock_user_id === 0 && ! empty( $session_id ) ) {
+        $lock_user_ids[] = $session_id;
+    }
+
+    $lock_user_ids = array_unique( $lock_user_ids, SORT_REGULAR );
+
+    foreach ( $lock_user_ids as $uid ) {
+        $hash_input = $assistant_id . '|' . $uid . '|' . $page_id . '|' . $session_id;
+        delete_transient( 'chatgpt_conv_lock_' . wp_hash( $hash_input ) );
+        delete_transient( 'chatbot_message_queue_' . wp_hash( $hash_input ) );
+        delete_transient( 'chatbot_local_jan_busy_' . wp_hash( $hash_input ) );
+    }
+}
+
+/**
+ * Seconds to wait between Jan.ai chat completions (0 disables post-reply cooldown).
+ *
+ * @return int 0–30
+ */
+function chatbot_local_get_jan_cooldown_seconds() {
+
+    $seconds = (int) get_option( 'chatbot_local_jan_cooldown_setting', 3 );
+    $seconds = max( 0, min( 30, $seconds ) );
+
+    return (int) apply_filters( 'chatbot_local_jan_cooldown_seconds', $seconds );
+}

@@ -104,13 +104,10 @@ function chatbot_chatgpt_erase_conversation_handler() {
     delete_chatbot_chatgpt_threads($user_id, $page_id);
     delete_any_file_transients($session_id);
     
-    // Clear the message queue for this conversation
-    $queue_key = 'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
-    delete_transient($queue_key);
-    
-    // Clear any conversation locks
-    $conv_lock = 'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
-    delete_transient($conv_lock);
+    // Clear queue and locks using the same user_id key as chatbot_chatgpt_send_message() (0 for visitors).
+    // Also clears legacy keys that used session_id in the user_id slot.
+    $lock_user_id = chatbot_chatgpt_get_conversation_lock_user_id( $current_user_id );
+    chatbot_chatgpt_clear_conversation_locks_and_queue( $assistant_id, $lock_user_id, $page_id, $session_id );
     
     // Clear all duplicate message UUID transients for this conversation - Ver 2.3.7
     // This prevents false positive duplicate detection after clearing conversation

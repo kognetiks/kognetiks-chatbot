@@ -400,8 +400,7 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
         
         // Context History - Ver 1.6.1
         addEntry('chatbot_chatgpt_context_history', $content);
-        // Clear locks on success
-        // Lock clearing removed - main send function handles locking
+        delete_transient($duplicate_key);
         return $content;
     } else {
         // FIXME - Decide what to return here - it's an error
