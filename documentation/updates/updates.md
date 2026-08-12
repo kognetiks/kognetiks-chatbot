@@ -1,9 +1,22 @@
 # Past Updates
 
-## What's new in Version 2.4.7
+## What's new in Version 2.4.8
 
 ### Bug Fixes
-* **Miscellaneous**: Fixed miscellaneous bugs and issues identified after release of version 2.4.6.
+
+* **Bug Fixes**: Minor bug fixes and improvements.
+
+## What's new in Version 2.4.7
+
+### Improvements
+* **Lexical Context Model**: Major upgrades to on-site answer quality, including answer intent detection, fact condensation, template-based synthesis, quality gates, IDF scoring, query expansion, and scheduled lexical cache builds.
+* **Local AI (JAN.AI)**: Updated Local API integration for compatibility with JAN.AI Version 8.0, including model discovery and chat-completions handling improvements.
+* **Assistants Admin UI**: Refined OpenAI, Azure, and Mistral assistant/agent management table action buttons for clearer WordPress admin styling.
+* **Documentation**: Fixed missing images, broken links, and orphaned documentation pages.
+
+### Bug Fixes
+* **Lexical Context Reliability**: Fixed lexical context timeouts and stabilized retrieval/build behavior for larger corpora.
+* **Conversation Handling**: Improved erase-conversation and related helper-path robustness for Local AI and frontend flows.
 
 ## What's new in Version 2.4.6
 
