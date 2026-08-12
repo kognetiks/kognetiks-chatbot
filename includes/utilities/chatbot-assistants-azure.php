@@ -268,9 +268,9 @@ function display_chatbot_azure_assistants_table() {
         echo '<tr>';
         echo '<td>';  // Actions column for each assistant row
         // Update button to trigger the updateAssistant function
-        echo '<button type="button" class="button-primary" onclick="updateAssistant(' . $assistant->id . ')">Update</button>&nbsp';
+        echo '<button type="button" class="button button-primary button-small" onclick="updateAssistant(' . $assistant->id . ')">Update</button>&nbsp';
         // Delete button to trigger the deleteAssistant function
-        echo '<button type="button" class="button-primary" onclick="deleteAssistant(' . $assistant->id . ')">Delete</button>';
+        echo '<button type="button" class="button button-primary button-small" onclick="deleteAssistant(' . $assistant->id . ')">Delete</button>';
         echo '</td>';
         // echo '<td onclick="copyToClipboard(\'[assistant-' . $assistant->id . ']\')"><b>' . '&#91;assistant-' . $assistant->id . '&#93;' . '</b></br>or</br>[chatbot-' . $assistant->id . ']</td>';
         echo '<td onclick="copyToClipboard(\'[assistant-' . $assistant->id . ']\')"><b>' . '&#91;assistant-' . $assistant->id . '&#93;' . '</b></td>';
@@ -315,7 +315,7 @@ function display_chatbot_azure_assistants_table() {
 
     // Row for adding a new assistant
     echo '<tr>';
-    echo '<td><button type="button" class="button-primary" onclick="addNewAssistant()">Add New Assistant</button></td>';  // Actions column for adding new assistant
+    echo '<td><button type="button" class="button button-primary button-small" onclick="addNewAssistant()">Add New Assistant</button></td>';  // Actions column for adding new assistant
     echo '<td>New</td>';
     echo '<td><input type="text" name="new_assistant_id" placeholder="Please provide the GPT Assistant Id."></td>';
     echo '<td><input type="text" name="new_common_name" placeholder="Common Name"></td>';

@@ -32,6 +32,24 @@ Now your website visitors can enjoy a seamless and personalized chat experience 
 
 9. By default, the chatbot will appear in the lower right corner of the page. This is adjustable in the .css file but not recommended for the causal site builders.
 
+# Site-wide Display
+
+To show the chatbot on every page as a floating widget (typically bottom-right):
+
+1. Go to the **Appearance** tab in the plugin settings and configure the chatbot style (colors, width, icons, etc.), then click **Save Settings**.
+
+2. In WordPress admin, go to **Appearance → Widgets**.
+
+3. Add a **Shortcode** widget to a site-wide area such as the Footer (e.g. Footer #1).
+
+4. In the widget, paste this shortcode:
+
+   `[chatbot_chatgpt style="floating"]`
+
+5. Save the widget settings. If your site uses caching, clear the cache if needed.
+
+After that, the chatbot appears on all pages as a floating widget.
+
 # Floating Chatbot Example
 
 <img src="chatbot-floating-example.png" alt="Floating Chatbot Example" style="width:auto;height:auto;">

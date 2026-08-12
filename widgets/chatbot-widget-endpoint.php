@@ -183,7 +183,7 @@ $kchat_settings = array_merge($kchat_settings, array(
     'page_id' => esc_html($page_id),
     'model' => esc_html($model),
     'voice' => esc_html($voice),
-    'chatbot_chatgpt_timeout_setting' => esc_attr(get_option('chatbot_chatgpt_timeout_setting', '240')),
+    'chatbot_chatgpt_timeout_setting' => (string) chatbot_chatgpt_get_ajax_timeout_seconds(),
     'chatbot_chatgpt_avatar_icon_setting' => esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', '')),
     'chatbot_chatgpt_custom_avatar_icon_setting' => esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', '')),
     'chatbot_chatgpt_avatar_greeting_setting' => esc_attr(get_option('chatbot_chatgpt_avatar_greeting_setting', 'Howdy!!! Great to see you today! How can I help you?')),
@@ -199,6 +199,7 @@ $kchat_settings = array_merge($kchat_settings, array(
     'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
     'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
     'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
+    'chatbot_log_error_nonce' => wp_create_nonce('chatbot_log_error_nonce'),
     'nonce_timestamp' => time() * 1000,
 ));
 

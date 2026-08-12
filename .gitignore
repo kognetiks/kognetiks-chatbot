@@ -3,7 +3,6 @@
 /workspace.xml
 
 # Editor-based HTTP Client requests
-
 /httpRequests/
 
 # Datasource local storage ignored files
@@ -21,6 +20,7 @@ package.json
 /debug/
 # package.json is now needed for Snyk configuration
 # package.json
+/test-harness/
 
 # Ignore internal folders and files
 /z-internal/
@@ -51,6 +51,9 @@ includes/transformers/sentential_embeddings_cache.php
 includes/transformers/lexical_embeddings_cache.php
 includes/tools/test-jan-ai.php
 includes/insights/DEFINITIONS.md
+
+# Ignore copy of chatbot-call-local-api.php FOR DEVELOPMENT ONLY - 2026-08-12
+includes/chatbot-call-local-api.copy
 
 # Ignore compressed cache files
 *.gz

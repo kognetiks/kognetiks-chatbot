@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.4.6
+ * Version:     2.4.7
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -22,7 +22,7 @@
  * along with Kognetiks Chatbot. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  * 
  * @package chatbot-chatgpt
- * @version 2.4.6
+ * @version 2.4.7
  * @author Kognetiks.com
  */
 
@@ -89,7 +89,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.4.6';
+$chatbot_chatgpt_plugin_version = '2.4.7';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -1126,6 +1126,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
         'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
         'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
+        'chatbot_log_error_nonce' => wp_create_nonce('chatbot_log_error_nonce'),
         'nonce_timestamp' => time() * 1000, // JavaScript timestamp format
     ));
     
@@ -1154,7 +1155,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'additional_instructions' => $additional_instructions,
         'model' => $model,
         'voice' => $voice,
-        'chatbot_chatgpt_timeout_setting' => esc_attr(get_option('chatbot_chatgpt_timeout_setting', '240')),
+        'chatbot_chatgpt_timeout_setting' => (string) chatbot_chatgpt_get_ajax_timeout_seconds(),
         'chatbot_chatgpt_avatar_icon_setting' => esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', '')),
         'chatbot_chatgpt_custom_avatar_icon_setting' => esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', '')),
         'chatbot_chatgpt_avatar_greeting_setting' => esc_attr(get_option('chatbot_chatgpt_avatar_greeting_setting', 'Howdy!!! Great to see you today! How can I help you?')),
@@ -1355,18 +1356,12 @@ function chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assista
     if (!$message_data) {
         return false;
     }
-    
-    // Set conversation lock for the queued message
-    $conv_lock = 'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
-    set_transient($conv_lock, true, 60);
-    
-    // Process the message using the existing logic
+
+    // Do not set conv_lock here — it caused a race where a second browser request
+    // saw the lock, was queued, and never received a response.
     $response = chatbot_chatgpt_process_queued_message($message_data);
-    
-    // Clear conversation lock
-    delete_transient($conv_lock);
-    
-    // Recursively process the next message in queue
+
+    // Recursively process the next message in queue (legacy backlog only)
     chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
     
     return true;
@@ -1382,18 +1377,103 @@ function chatbot_chatgpt_get_queue_status_ajax() {
         return;
     }
 
-    $user_id = sanitize_text_field($_POST['user_id']);
     $page_id = sanitize_text_field($_POST['page_id']);
     $session_id = sanitize_text_field($_POST['session_id']);
     $assistant_id = sanitize_text_field($_POST['assistant_id']);
-    
-    if (!$user_id || !$page_id || !$session_id || !$assistant_id) {
+    $lock_user_id = chatbot_chatgpt_get_conversation_lock_user_id(get_current_user_id());
+
+    if (!$page_id || !$session_id || !$assistant_id) {
         wp_send_json_error('Missing required parameters');
         return;
     }
-    
-    $queue_status = chatbot_chatgpt_get_queue_status($user_id, $page_id, $session_id, $assistant_id);
+
+    $queue_status = chatbot_chatgpt_get_queue_status($lock_user_id, $page_id, $session_id, $assistant_id);
     wp_send_json_success($queue_status);
+
+}
+
+/**
+ * True when the id is an Assistants / Responses / Agents / Websearch identifier.
+ *
+ * @param string $id Candidate assistant / prompt / agent id.
+ * @return bool
+ */
+function chatbot_chatgpt_is_specialized_assistant_id( $id ) {
+    $id = (string) $id;
+    if ( $id === '' ) {
+        return false;
+    }
+    return str_starts_with( $id, 'asst_' )
+        || str_starts_with( $id, 'pmpt_' )
+        || str_starts_with( $id, 'ag:' )
+        || str_starts_with( $id, 'websearch' );
+}
+
+/**
+ * Resolve assistant_id / alias / use_assistant_id for API routing and conversation logging.
+ * Prefers a specialized id (pmpt_/asst_/ag:/websearch) over a stale "original" alias.
+ *
+ * @param string $assistant_id Current assistant id (from transient, POST, or queue).
+ * @param string $assistant_alias Current assistant alias.
+ * @return array{assistant_id:string,assistant_alias:string,use_assistant_id:string}
+ */
+function chatbot_chatgpt_resolve_assistant_identity( $assistant_id, $assistant_alias ) {
+
+    $assistant_id    = is_string( $assistant_id ) ? $assistant_id : '';
+    $assistant_alias = is_string( $assistant_alias ) ? $assistant_alias : '';
+    $use_assistant_id = 'No';
+
+    if ( $assistant_alias === 'original' ) {
+
+        // Stale alias with a real specialized id: prefer the specialized id - Ver 2.3.7
+        if ( chatbot_chatgpt_is_specialized_assistant_id( $assistant_id ) ) {
+            $assistant_alias  = $assistant_id;
+            $use_assistant_id = 'Yes';
+        } else {
+            $use_assistant_id = 'No';
+        }
+
+    } elseif ( $assistant_alias === 'primary' ) {
+
+        $assistant_id     = esc_attr( get_option( 'assistant_id' ) );
+        $use_assistant_id = 'Yes';
+
+        if ( empty( $assistant_id ) || $assistant_id === 'Please provide the Assistant Id.' ) {
+            $assistant_alias  = 'original';
+            $use_assistant_id = 'No';
+        }
+
+    } elseif ( $assistant_alias === 'alternate' ) {
+
+        $assistant_id     = esc_attr( get_option( 'chatbot_chatgpt_assistant_id_alternate' ) );
+        $use_assistant_id = 'Yes';
+
+        if ( empty( $assistant_id ) || $assistant_id === 'Please provide the Assistant Id.' ) {
+            $assistant_alias  = 'original';
+            $use_assistant_id = 'No';
+        }
+
+    } elseif ( chatbot_chatgpt_is_specialized_assistant_id( $assistant_id ) ) {
+
+        $assistant_alias  = $assistant_id;
+        $use_assistant_id = 'Yes';
+
+    } elseif ( chatbot_chatgpt_is_specialized_assistant_id( $assistant_alias ) ) {
+
+        $assistant_id     = $assistant_alias;
+        $use_assistant_id = 'Yes';
+
+    } else {
+
+        $use_assistant_id = 'No';
+
+    }
+
+    return array(
+        'assistant_id'    => $assistant_id,
+        'assistant_alias' => $assistant_alias,
+        'use_assistant_id'=> $use_assistant_id,
+    );
 
 }
 
@@ -1528,113 +1608,21 @@ function chatbot_chatgpt_process_queued_message($message_data) {
         $assistant_id = $kchat_settings['assistant_id'];
     }
 
-    // DIAG - Diagnostics - Ver 2.4.5
-    // back_trace('NOTICE', '$kchat_settings[\'chatbot_chatgpt_assistant_alias\']: ' . $kchat_settings['chatbot_chatgpt_assistant_alias']);
-    // back_trace('NOTICE', '$kchat_settings[\'assistant_id\']: ' . $kchat_settings['assistant_id']);
-    // back_trace('NOTICE', '$assistant_id: ' . $assistant_id);
+    // Prefer a specialized id (pmpt_/asst_/ag:/websearch) when alias is stale "original" - Ver 2.3.7
+    $assistant_resolution = chatbot_chatgpt_resolve_assistant_identity( $assistant_id, $chatbot_chatgpt_assistant_alias );
+    $assistant_id = $assistant_resolution['assistant_id'];
+    $chatbot_chatgpt_assistant_alias = $assistant_resolution['assistant_alias'];
+    $use_assistant_id = $assistant_resolution['use_assistant_id'];
 
-    // Get thread information
-    $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
-    
-    // Log the message
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
-
-    // Determine whether to use assistant_id or regular ChatGPT API (same logic as main handler) - Ver 2.3.6
-    // Which Assistant ID to use - Ver 1.7.2
-    if ($chatbot_chatgpt_assistant_alias == 'original') {
-
-        $use_assistant_id = 'No';
-
-    } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
-
-        $assistant_id = esc_attr(get_option('assistant_id'));
-        $use_assistant_id = 'Yes';
-       
-        // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
-        if (empty($assistant_id) || $assistant_id == "Please provide the Assistant Id.") {
-        
-            // Primary assistant_id not set
-            $chatbot_chatgpt_assistant_alias = 'original';
-            $use_assistant_id = 'No';
-        
-        }
-
-    } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
-
-        $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
-        $use_assistant_id = 'Yes';
-
-        // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
-        if (empty($assistant_id) || $assistant_id == "Please provide the Assistant Id.") {
-
-            /// Alternate assistant_id not set
-            $chatbot_chatgpt_assistant_alias = 'original';
-            $use_assistant_id = 'No';
-        
-        }
-
-    } elseif (str_starts_with($assistant_id, 'asst_')) {
-
-        $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
-        $use_assistant_id = 'Yes';
-
-    } elseif (str_starts_with($assistant_id, 'pmpt_')) {
-
-        $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
-        $use_assistant_id = 'Yes';
-
-    } elseif (str_starts_with($assistant_id, 'ag:')) {
-
-        $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
-        $use_assistant_id = 'Yes';
-
-    } elseif (str_starts_with($assistant_id, 'websearch')) {
-
-        $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
-        $use_assistant_id = 'Yes';
-
-    } else {
-
-        // Reference GPT Assistant IDs directly - Ver 1.7.3
-        // Check both $chatbot_chatgpt_assistant_alias and $assistant_id - Ver 2.3.6
-        if (!empty($chatbot_chatgpt_assistant_alias) && ((str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_') || str_starts_with($chatbot_chatgpt_assistant_alias, 'pmpt_')) || str_starts_with($chatbot_chatgpt_assistant_alias, 'ag:') || str_starts_with($chatbot_chatgpt_assistant_alias, 'websearch'))) {
-
-            // Override the $assistant_id with the GPT Assistant ID
-            $assistant_id = $chatbot_chatgpt_assistant_alias;
-            $use_assistant_id = 'Yes';
-
-            // DIAG - Diagnostics - Ver 2.4.5
-            // back_trace('NOTICE', 'Using Assistant ID - Ver 2.4.5');
-            // back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
-            // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-            // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
-
-        } elseif (!empty($assistant_id) && ((str_starts_with($assistant_id, 'asst_') || str_starts_with($assistant_id, 'pmpt_')) || str_starts_with($assistant_id, 'ag:') || str_starts_with($assistant_id, 'websearch'))) {
-            
-            // Set the alias to match the assistant_id
-            $chatbot_chatgpt_assistant_alias = $assistant_id;
-            $use_assistant_id = 'Yes';
-
-            // DIAG - Diagnostics - Ver 2.4.5
-            // back_trace('NOTICE', 'Using Assistant ID - Ver 2.4.5');
-            // back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
-            // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-            // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
-
-        } else {
-
-            // Override the $use_assistant_id and set it to 'No'
-            $use_assistant_id = 'No';
-            
-            // DIAG - Diagnostics - Ver 2.4.5
-            // back_trace('NOTICE', 'Using Original Assistant ID - Ver 2.4.5');
-            // back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
-            // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-            // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
-
-        }
-
+    // Persist resolved ids so conversation log and later requests stay in sync
+    if ( ! empty( $assistant_id ) && $assistant_id !== 'original' ) {
+        set_chatbot_chatgpt_transients( 'assistant_id', $assistant_id, $user_id, $page_id, $session_id, null );
+        set_chatbot_chatgpt_transients( 'assistant_alias', $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
     }
+
+    // Get thread information and log AFTER resolving assistant_id - Ver 2.3.7
+    $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
 
     // Process the message based on platform and use_assistant_id - Ver 2.3.6   
     // Check if we should use assistant_id or regular API
@@ -1843,6 +1831,14 @@ function chatbot_chatgpt_send_message() {
         ), 403);
         return;
 
+    }
+
+    // Lexical Context Model runs long on large corpora; extend PHP budget before session locks and routing.
+    // Generic Apache 500 ~30s with full LCM logs usually means Apache TimeOut — PHP limits alone cannot fix that.
+    $early_ai_platform = esc_attr( get_option( 'chatbot_ai_platform_choice', 'OpenAI' ) );
+    $early_transformer   = esc_attr( get_option( 'chatbot_transformer_model_choice', 'sentential-context-model' ) );
+    if ( $early_ai_platform === 'Transformer' && $early_transformer === 'lexical-context-model' && function_exists( 'transformer_model_lexical_context_lcm_request_extend_time_limit' ) ) {
+        transformer_model_lexical_context_lcm_request_extend_time_limit();
     }
 
     // Security: Get current user and verify authorization
@@ -2125,16 +2121,40 @@ function chatbot_chatgpt_send_message() {
     $additional_instructions = $kchat_settings['additional_instructions'];
     $chatbot_chatgpt_assistant_alias = $kchat_settings['chatbot_chatgpt_assistant_alias'];
 
-    // Get the thread information - Ver 2.0.7
-    $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
-    $kchat_settings['thread_id'] = $thread_id;
-    // $kchat_settings = array_merge($kchat_settings, get_chatbot_chatgpt_threads($user_id, $page_id));
-
     $assistant_id = isset($kchat_settings['assistant_id']) ? $kchat_settings['assistant_id'] : '';
     $thread_Id = isset($kchat_settings['thread_id']) ? $kchat_settings['thread_id'] : '';
     $model = isset($kchat_settings['chatbot_chatgpt_model']) ? $kchat_settings['chatbot_chatgpt_model'] : '';
 
     $voice = isset($kchat_settings['chatbot_chatgpt_voice_option']) ? $kchat_settings['chatbot_chatgpt_voice_option'] : '';
+
+    // Fallback to POST assistant_id when transient is missing/stale (page cache) - Ver 2.3.7
+    if ( isset( $_POST['assistant_id'] ) ) {
+        $posted_assistant_id = sanitize_text_field( wp_unslash( $_POST['assistant_id'] ) );
+        if ( chatbot_chatgpt_is_specialized_assistant_id( $posted_assistant_id )
+            && ( empty( $assistant_id ) || $assistant_id === 'original' ) ) {
+            $assistant_id = $posted_assistant_id;
+            $kchat_settings['assistant_id'] = $posted_assistant_id;
+            if ( empty( $chatbot_chatgpt_assistant_alias ) || $chatbot_chatgpt_assistant_alias === 'original' ) {
+                $chatbot_chatgpt_assistant_alias = $posted_assistant_id;
+                $kchat_settings['chatbot_chatgpt_assistant_alias'] = $posted_assistant_id;
+            }
+        }
+    }
+
+    // Resolve specialized ids before locking / logging so pmpt_ is not left as "original"
+    $assistant_resolution = chatbot_chatgpt_resolve_assistant_identity( $assistant_id, $chatbot_chatgpt_assistant_alias );
+    $assistant_id = $assistant_resolution['assistant_id'];
+    $chatbot_chatgpt_assistant_alias = $assistant_resolution['assistant_alias'];
+    $use_assistant_id = $assistant_resolution['use_assistant_id'];
+
+    if ( ! empty( $assistant_id ) && $assistant_id !== 'original' ) {
+        set_chatbot_chatgpt_transients( 'assistant_id', $assistant_id, $user_id, $page_id, $session_id, null );
+        set_chatbot_chatgpt_transients( 'assistant_alias', $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
+    }
+
+    // Get the thread information - Ver 2.0.7
+    $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+    $kchat_settings['thread_id'] = $thread_id;
     
     // Check if there's already a conversation lock (active processing)
     $conv_lock = 'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
@@ -2144,39 +2164,43 @@ function chatbot_chatgpt_send_message() {
     // back_trace('NOTICE', 'Conv Lock: ' . $conv_lock);
     // back_trace('NOTICE', 'Is Processing: ' . $is_processing);
     
-    // For visitors, add additional lock validation to prevent stuck locks
-    if ($is_processing && $current_user_id === 0) {
-        // Check if the lock is older than 2 minutes (120 seconds) - likely stuck
+    // Clear expired or stuck conversation locks (all users)
+    if ($is_processing) {
         $lock_timeout_key = '_transient_timeout_' . $conv_lock;
-        $lock_timeout = get_option($lock_timeout_key);
-        
-        if ($lock_timeout && (time() - ($lock_timeout - 60)) > 120) {
-            // Lock is older than 2 minutes, clear it
+        $lock_expires = (int) get_option($lock_timeout_key);
+
+        if ($lock_expires > 0 && time() >= $lock_expires) {
             delete_transient($conv_lock);
             $is_processing = false;
+            prod_trace('WARNING', 'Cleared expired conversation lock before processing message.');
+        } elseif ($current_user_id === 0) {
+            // Legacy fallback for visitor locks when timeout option is missing
+            if ($lock_expires > 0 && (time() - ($lock_expires - 60)) > 120) {
+                delete_transient($conv_lock);
+                $is_processing = false;
+                prod_trace('WARNING', 'Cleared stale visitor conversation lock before processing message.');
+            }
         }
     }
     
     if ($is_processing) {
-        // If already processing, enqueue the message
-        $enqueued_id = chatbot_chatgpt_enqueue_message($user_id, $page_id, $session_id, $assistant_id, $message, $client_message_id);
-        
-        // Return queue status
         global $chatbot_chatgpt_fixed_literal_messages;
-        $default_message = 'Message queued. Processing...';
-        $queued_message = isset($chatbot_chatgpt_fixed_literal_messages[20]) 
-            ? $chatbot_chatgpt_fixed_literal_messages[20] 
-            : $default_message;
-            
-        wp_send_json_success([
-            'queued' => true,
-            'client_message_id' => $enqueued_id,
-            'message' => $queued_message
-        ]);
+
+        $default_busy = 'The system is busy processing requests. Please wait for the current reply, then try again.';
+        $busy_message = isset($chatbot_chatgpt_fixed_literal_messages[19])
+            ? $chatbot_chatgpt_fixed_literal_messages[19]
+            : $default_busy;
+
+        wp_send_json_success($busy_message);
+        return;
     }
-    
-    // Set conversation lock with shorter timeout for visitors to prevent stuck locks
-    $lock_timeout = ($current_user_id === 0) ? 30 : 60; // 30 seconds for visitors, 60 for logged-in users
+
+    // Clear any orphaned queue from a previous stuck request
+    $queue_key = 'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    delete_transient($queue_key);
+
+    // Lock TTL must cover the full API + enhancement time (not 30–60s while AJAX waits up to 240s+)
+    $lock_timeout = min(chatbot_chatgpt_get_ajax_timeout_seconds() + 30, 600);
     set_transient($conv_lock, true, $lock_timeout);
     
     foreach ($kchat_settings as $key => $value) {
@@ -2190,155 +2214,7 @@ function chatbot_chatgpt_send_message() {
     // $chatbot_chatgpt_assistant_alias == 'pmpt_xxxxxxxxxxxxxxxxxxxxxxxx'; // GPT Prompt Id
     // $chatbot_chatgpt_assistant_alias == 'ag:xxxxxxxxxxxxxxxxxxxxxxxx'; // MistralAgent Id
     // $chatbot_chatgpt_assistant_alias == 'websearch'; // Mistral Websearch Id
-  
-    // Which Assistant ID to use - Ver 1.7.2
-    if ($chatbot_chatgpt_assistant_alias == 'original') {
-
-        $use_assistant_id = 'No';
-
-        // DIAG - Diagnostics - Ver 2.4.5
-        // back_trace('NOTICE', 'Using Original Assistant ID - Ver 2.4.5');
-        // back_trace('NOTICE', 'Original Assistant ID: ' . $assistant_id);
-        // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-        // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
-
-    } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
-
-        $assistant_id = esc_attr(get_option('assistant_id'));
-        $use_assistant_id = 'Yes';
-
-        // DIAG - Diagnostics - Ver 2.4.5
-        // back_trace('NOTICE', 'Using Primary Assistant ID - Ver 2.4.5');
-        // back_trace('NOTICE', 'Primary Assistant ID: ' . $assistant_id);
-        // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-        // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
-        
-        // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
-        if (empty($assistant_id) || $assistant_id == "Please provide the Assistant Id.") {
-        
-            // Primary assistant_id not set
-            $chatbot_chatgpt_assistant_alias = 'original';
-            $use_assistant_id = 'No';
-        
-            // DIAG - Diagnostics - Ver 2.4.5
-            // back_trace('NOTICE', 'Primary Assistant ID not set - Ver 2.4.5');
-            // back_trace('NOTICE', 'Primary Assistant ID: ' . $assistant_id);
-            // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-            // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
-
-        }
-
-    } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
-
-        $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
-        $use_assistant_id = 'Yes';
-
-        // DIAG - Diagnostics - Ver 2.4.5
-        // back_trace('NOTICE', 'Using Alternate Assistant ID - Ver 2.4.5');
-        // back_trace('NOTICE', 'Alternate Assistant ID: ' . $assistant_id);
-        // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-        // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
-
-        // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
-        if (empty($assistant_id) || $assistant_id == "Please provide the Assistant Id.") {
-
-            /// Alternate assistant_id not set
-            $chatbot_chatgpt_assistant_alias = 'original';
-            $use_assistant_id = 'No';
-
-            // DIAG - Diagnostics - Ver 2.4.5
-            // back_trace('NOTICE', 'Alternate Assistant ID not set - Ver 2.4.5');
-            // back_trace('NOTICE', 'Alternate Assistant ID: ' . $assistant_id);
-            // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-            // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
-        
-        }
-
-    } elseif (str_starts_with($assistant_id, 'asst_')) {
-
-        $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
-        $use_assistant_id = 'Yes';
-
-        // DIAG - Diagnostics - Ver 2.4.5
-        // back_trace('NOTICE', 'Using Assistant ID - Ver 2.4.5');
-        // back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
-        // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-        // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
-
-    } elseif (str_starts_with($assistant_id, 'pmpt_')) {
-
-        $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
-        $use_assistant_id = 'Yes';
-
-        // DIAG - Diagnostics - Ver 2.4.5
-        // back_trace('NOTICE', 'Using Prompt ID - Ver 2.4.5');
-        // back_trace('NOTICE', 'Prompt ID: ' . $assistant_id);
-        // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-        // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias); 
-
-    } elseif (str_starts_with($assistant_id, 'ag:')) {
-
-        $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
-        $use_assistant_id = 'Yes';
-
-        // DIAG - Diagnostics - Ver 2.4.5
-        // back_trace('NOTICE', 'Using Mistral Agent ID - Ver 2.4.5');
-        // back_trace('NOTICE', 'Mistral Agent ID: ' . $assistant_id);
-        // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-
-    } elseif (str_starts_with($assistant_id, 'websearch')) {
-
-        $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
-        $use_assistant_id = 'Yes';
-
-        // DIAG - Diagnostics - Ver 2.4.5
-        // back_trace('NOTICE', 'Using Mistral Agent ID - Ver 2.4.5');
-        // back_trace('NOTICE', 'Mistral Agent ID: ' . $assistant_id);
-        // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-        // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
-
-    } else {
-
-        // Reference GPT Assistant IDs directly - Ver 1.7.3
-        // Check both $chatbot_chatgpt_assistant_alias and $assistant_id - Ver 2.3.6
-        if (!empty($chatbot_chatgpt_assistant_alias) && (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_') || str_starts_with($chatbot_chatgpt_assistant_alias, 'ag:') || str_starts_with($chatbot_chatgpt_assistant_alias, 'websearch') || str_starts_with($chatbot_chatgpt_assistant_alias, 'pmpt_'))) {
-
-            // Override the $assistant_id with the GPT Assistant ID
-            $assistant_id = $chatbot_chatgpt_assistant_alias;
-            $use_assistant_id = 'Yes';
-
-            // DIAG - Diagnostics - Ver 2.4.5
-            // back_trace('NOTICE', 'Using Assistant ID - Ver 2.4.5');
-            // back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
-            // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-            // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
-
-        } elseif (!empty($assistant_id) && (str_starts_with($assistant_id, 'asst_') || str_starts_with($assistant_id, 'ag:') || str_starts_with($assistant_id, 'websearch') || str_starts_with($assistant_id, 'pmpt_'))) {
-            
-            // Set the alias to match the assistant_id
-            $chatbot_chatgpt_assistant_alias = $assistant_id;
-            $use_assistant_id = 'Yes';
-
-            // DIAG - Diagnostics - Ver 2.4.5
-            // back_trace('NOTICE', 'Using Assistant ID - Ver 2.4.5');
-            // back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
-            // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-            // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
-
-        } else {
-
-            // Override the $use_assistant_id and set it to 'No'
-            $use_assistant_id = 'No';
-            
-            // DIAG - Diagnostics - Ver 2.4.5
-            // back_trace('NOTICE', 'Using Original Assistant ID - Ver 2.4.5');
-            // back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
-            // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-            // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
-
-        }
-
-    }
+    // Resolution via chatbot_chatgpt_resolve_assistant_identity() above - Ver 2.3.7
 
     // Get any additional instructions - Ver 2.0.9
     $additional_instructions = get_chatbot_chatgpt_transients( 'additional_instructions', $user_id, $page_id, $session_id);
@@ -2374,6 +2250,8 @@ function chatbot_chatgpt_send_message() {
         // Send message to ChatGPT API - Ver 1.6.7
         $response = chatbot_chatgpt_call_flow_api($api_key, $message);
 
+        delete_transient($conv_lock);
+        chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
         wp_send_json_success($response);
 
     } elseif ($use_assistant_id == 'Yes') {
@@ -2451,7 +2329,7 @@ function chatbot_chatgpt_send_message() {
                 ? $chatbot_chatgpt_fixed_literal_messages[0] 
                 : $default_message;
         
-            // Send error response
+            delete_transient($conv_lock);
             wp_send_json_error($error_message);
 
         } else {
@@ -2638,9 +2516,15 @@ function chatbot_chatgpt_send_message() {
             }
         }
         
-        // Use TF-IDF to enhance response
+        // Local API errors as JSON success so the UI always clears the typing indicator
+        if ($chatbot_ai_platform_choice === 'Local Server' && is_string($response) && str_starts_with($response, 'Error:')) {
+            delete_transient($conv_lock);
+            wp_send_json_success($response);
+            return;
+        }
+
         $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
-        if ( $chatbot_chatgpt_suppress_learnings != 'None') {
+        if ($chatbot_chatgpt_suppress_learnings != 'None') {
             $response = $response . '<br><br>' . chatbot_chatgpt_enhance_with_tfidf($message);
         }
 
@@ -2691,6 +2575,7 @@ function chatbot_chatgpt_refresh_nonce() {
         'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
         'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
         'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
+        'chatbot_log_error_nonce' => wp_create_nonce('chatbot_log_error_nonce'),
     );
     
     wp_send_json_success($nonces);

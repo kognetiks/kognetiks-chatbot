@@ -167,6 +167,10 @@ Although there is no hard-coded maximum corpus size, the transformer models ulti
 
 If you encounter recurring memory or timeout issues, consider splitting the site into smaller topic-focused corpora, trimming the content included in the corpus, or migrating to the Sentential Context Model, which scales differently.
 
+## Related
+
+- [API/Transformer Model Build Status](api-transformer-model-build-status.md) – Monitor transformer model cache build progress and status.
+
 ---
 
 - **[Back to the Overview](/overview.md)**

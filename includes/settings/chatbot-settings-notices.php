@@ -62,11 +62,23 @@ add_action('admin_notices', 'display_option_value_admin_notice');
 
 // Handle outcome notification dismissal - Ver 1.6.3
 function dismiss_chatgpt_notice() {
-    if (isset($_GET['dismiss_chatgpt_notice'])) {
-        delete_option('chatbot_chatgpt_kn_results');
+    // Capability check - Ver 2.4.7
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
     }
-    if (isset($_GET['dismiss_kn_status_notice'])) {
-        update_option('chatbot_chatgpt_kn_dismissed', '1');
+
+    if ( isset( $_GET['dismiss_chatgpt_notice'] ) ) {
+        if ( ! isset( $_GET['_chatgpt_dismiss_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_chatgpt_dismiss_nonce'] ) ), 'dismiss_chatgpt_notice' ) ) {
+            return;
+        }
+        delete_option( 'chatbot_chatgpt_kn_results' );
+    }
+
+    if ( isset( $_GET['dismiss_kn_status_notice'] ) ) {
+        if ( ! isset( $_GET['_chatgpt_dismiss_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_chatgpt_dismiss_nonce'] ) ), 'dismiss_kn_status_notice' ) ) {
+            return;
+        }
+        update_option( 'chatbot_chatgpt_kn_dismissed', '1' );
     }
 }
 add_action('admin_init', 'dismiss_chatgpt_notice');

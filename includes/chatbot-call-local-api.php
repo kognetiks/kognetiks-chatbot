@@ -85,21 +85,14 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
     $max_tokens = intval(get_option('chatbot_local_max_tokens_setting', 1000)); // Reduced from 10000 to 1000 for local models
     $temperature = floatval(get_option('chatbot_local_temperature', 0.8));
     $top_p = floatval(get_option('chatbot_local_top_p', 0.95));
+    // Use the Local settings system prompt (not the global ChatGPT one) - Ver 2.3.3
     $context = esc_attr(get_option('chatbot_local_conversation_context', 'You are a versatile, friendly, and helpful assistant that responds using Markdown syntax.'));
     $timeout = intval(get_option('chatbot_local_timeout_setting', 360));
 
-    // Conversation Context - Ver 1.6.1
-    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
- 
-    // Build conversation context using standardized function - Ver 2.3.9+
-    // This function handles conversation history building, message cleaning, and conversation continuity
-    $conversation_context = chatbot_chatgpt_build_conversation_context('standard', 10, $session_id);
-    
-    // Knowledge Navigator keyword append for context
-    $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', 'Yes'));
+    // Keep local prompts small — many local models (e.g. llama.cpp / Jan.ai) run with n_ctx=4096.
+    // Stuffing KN keywords, session history, and 10 turns routinely exceeds that window.
+    $conversation_context = chatbot_chatgpt_build_conversation_context('standard', 2, $session_id);
 
-    // Build a summary of conversation history for system message (backward compatibility)
-    // Extract text content from structured messages to create a summary string
     $chatgpt_last_response = '';
     if (!empty($conversation_context['messages'])) {
         $message_texts = [];
@@ -113,65 +106,42 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
         }
     }
 
-    $sys_message = 'We previously have been talking about the following things: ';
+    if (!empty($chatgpt_last_response)) {
+        $context = 'Recent conversation: ' . $chatgpt_last_response . ' ' . $context;
+    }
 
-    // ENHANCED CONTEXT - Select some context to send with the message - Ver 2.2.4
-    $use_enhanced_content_search = esc_attr(get_option('chatbot_chatgpt_use_advanced_content_search', 'No'));
+    // Budget tokens so system + user + completion fit the local context window - Ver 2.3.3
+    // ~3 chars/token is a conservative estimate (actual tokenizers are often closer to 4).
+    $n_ctx = 4096;
+    $template_overhead = 64;
+    $max_tokens = min($max_tokens, max(64, intval(($n_ctx - $template_overhead) / 2)));
 
-    if ($use_enhanced_content_search == 'Yes') {
-
-        $search_results = chatbot_chatgpt_content_search($message);
-        If ( !empty ($search_results) ) {
-            // Extract relevant content from search results array
-            $content_texts = [];
-            foreach ($search_results['results'] as $result) {
-                if (!empty($result['excerpt'])) {
-                    $content_texts[] = $result['excerpt'];
-                }
-            }
-            // Join the content texts and append to context
-            if (!empty($content_texts)) {
-                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts) . ' ' . $context;
-            }
+    $estimate_tokens = static function ($text) {
+        return max(1, intval(strlen((string) $text) / 3));
+    };
+    $truncate_to_tokens = static function ($text, $max_tok) {
+        $max_chars = max(0, intval($max_tok) * 3);
+        if ($max_chars <= 0 || strlen($text) <= $max_chars) {
+            return $text;
         }
-
-    } else {
-
-        // Original Context Instructions - No Enhanced Context
-        $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-    }
-
-    // Add session history to context if available (from conversation continuity)
-    if (!empty($conversation_context['session_history'])) {
-        // Session history is a concatenated string, so we'll add it to context
-        $context = $conversation_context['session_history'] . ' ' . $context;
-    }
-
-    // Check the length of the context and truncate if necessary - Ver 2.3.3 - 2025-08-13
-    // More conservative token estimation for local models
-    $context_length = intval(strlen($context) / 3); // Assuming 1 token ≈ 3 characters (more conservative)
-    
-    // For local models, use a much smaller context to avoid "context size exceeded" errors
-    // Most local models have 4K-8K context windows, so we'll be very conservative
-    $max_context_length = 8000; // Conservative estimate for local models
-    
-    if ($context_length > $max_context_length) {
-        // Truncate to the max length
-        $truncated_context = substr($context, 0, $max_context_length * 3); // Convert back to characters
-        
-        // Ensure truncation happens at the last complete word
-        $truncated_context = preg_replace('/\s+[^\s]*$/', '', $truncated_context);
-        
-        // Fallback if regex fails (e.g., no spaces in the string)
-        if (empty($truncated_context)) {
-            $truncated_context = substr($context, 0, $max_context_length * 3);
+        $truncated = substr($text, 0, $max_chars);
+        $truncated = preg_replace('/\s+[^\s]*$/', '', $truncated);
+        if ($truncated === null || $truncated === '') {
+            $truncated = substr($text, 0, $max_chars);
         }
-        
-        // Add a note that context was truncated
-        $context = $truncated_context . ' [Context truncated due to length limits]';
+        return $truncated . ' [Context truncated due to length limits]';
+    };
 
+    $prompt_budget = max(256, $n_ctx - $max_tokens - $template_overhead);
+    $user_tokens = $estimate_tokens($message);
+    // Leave at least half the prompt budget for the system message when the user text is huge
+    $max_user_tokens = max(256, intval($prompt_budget * 0.5));
+    if ($user_tokens > $max_user_tokens) {
+        $message = $truncate_to_tokens($message, $max_user_tokens);
+        $user_tokens = $estimate_tokens($message);
     }
+    $max_system_tokens = max(128, $prompt_budget - $user_tokens);
+    $context = $truncate_to_tokens($context, $max_system_tokens);
 
     // Construct request body to match the expected schema
     // Note: Local servers with "context shift" disabled only support system + user messages
@@ -474,4 +444,3 @@ function chatbot_local_get_models() {
     return array_values(array_unique($models));
     
 }
-

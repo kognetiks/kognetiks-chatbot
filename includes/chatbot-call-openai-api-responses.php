@@ -277,8 +277,8 @@ function kchat_openai_extract_output_text( $response_json ) {
 function check_assistant_tool_usage_responses( $response_json ) {
 
     // DIAG - Diagnostics - Ver 2.4.5
-    back_trace('NOTICE', 'check_assistant_tool_usage_responses');
-    back_trace('NOTICE', 'Response JSON: ' . print_r($response_json, true));
+    // back_trace('NOTICE', 'check_assistant_tool_usage_responses');
+    // back_trace('NOTICE', 'Response JSON: ' . print_r($response_json, true));
 
     if ( ! is_array( $response_json ) ) { return false; }
     if ( empty( $response_json['output'] ) || ! is_array( $response_json['output'] ) ) { return false; }

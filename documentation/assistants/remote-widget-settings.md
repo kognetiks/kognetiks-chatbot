@@ -28,34 +28,8 @@ The **Kognetiks Chatbot** now includes the advanced feature to allow access to y
 
     For example:
 
-    ```
-    <iframe
-        id="chatbot-widget-iframe"
-        src="https://localhost/wpdev/wp-content/plugins/chatbot-chatgpt/widgets/chatbot-widget-endpoint.php?assistant=assistant-21"
-        style="width: 100%; max-width: 600px; height: 100%; max-height: 600px; border: none; position: fixed; bottom: 20px; right: 20px; background: transparent; z-index: 999999 !important; outline: none; box-shadow: none;"
-        allowtransparency="true"
-        scrolling="no"
-        frameborder="0">
-    </iframe>
+    <img src="remote-iframe-snippet.png" alt="Remote iframe code snippet" style="width:auto;height:auto;">
 
-    <script>
-    function rightsizeChatbot(event) {
-        if (event.origin !== "http://localhost") return; // Change this to match your domain
-
-            const iframe = document.getElementById("chatbot-widget-iframe");
-            if (event.data.height) {
-                let newHeight = Math.min(event.data.height, window.innerHeight - 40); // Prevent overflow
-                iframe.style.height = newHeight + "px";
-            }
-        }
-
-        // Ensure the iframe resizes dynamically
-        window.addEventListener("message", rightsizeChatbot, false);
-        window.addEventListener("resize", () => {
-            document.getElementById("chatbot-widget-iframe").contentWindow.postMessage("resize", "*");
-        });
-    </script>
-    ```
 
     **NOTE**: Be sure to substitute your `domain name` for `localhost` in the above examples.
 

@@ -1,5 +1,10 @@
 # Past Updates
 
+## What's new in Version 2.4.7
+
+### Bug Fixes
+* **Miscellaneous**: Fixed miscellaneous bugs and issues identified after release of version 2.4.6.
+
 ## What's new in Version 2.4.6
 
 ### Bug Fixes

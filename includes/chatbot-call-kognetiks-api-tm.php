@@ -57,7 +57,14 @@ function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     $model = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
- 
+
+    // LCM often runs 30+ seconds (large corpus). Extend PHP max_execution_time before context build + retrieval.
+    // If admin-ajax still returns a generic Apache 500 HTML page after ~30s with no PHP fatal in logs, the web server
+    // is cutting the request (raise Apache TimeOut, e.g. MAMP: /Applications/MAMP/conf/apache/httpd.conf → TimeOut 300).
+    if ( $model === 'lexical-context-model' && function_exists( 'transformer_model_lexical_context_lcm_request_extend_time_limit' ) ) {
+        transformer_model_lexical_context_lcm_request_extend_time_limit();
+    }
+
     // Max tokens
     $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1000')));
 
@@ -168,6 +175,14 @@ function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $
     if (!empty($response)) {
         // Prepare the response body
         $response_body['choices'][0]['message']['content'] = trim($response);
+
+        // Final emitted-response normalization (Unicode whitespace + quote/punctuation spacing).
+        // Applies regardless of the underlying transformer model path.
+        if ( function_exists( 'transformer_model_lexical_context_normalize_emitted_response_spacing' ) ) {
+            $response_body['choices'][0]['message']['content'] = transformer_model_lexical_context_normalize_emitted_response_spacing(
+                (string) $response_body['choices'][0]['message']['content']
+            );
+        }
     
         // Remove any trailing comma, colon, semicolon, or spaces and replace them with a period
         $response_body['choices'][0]['message']['content'] = preg_replace('/[,;:\s]+$/', '.', $response_body['choices'][0]['message']['content']);
@@ -180,8 +195,14 @@ function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $
         $response_body['response']['code'] = 200; // Success code
     
     } else {
-        // Set the error response code
-        $response_body['response']['code'] = 500; // Internal server error
+        // Empty/false response: do not mark as HTTP 500 — consuming code treats 500 as "internal server error".
+        // Typical causes: timeout before return, empty assembly, or guard stripping all sentences.
+        $fallback = apply_filters(
+            'chatbot_transformer_model_empty_response_message',
+            __( 'I could not generate a response from the site content (empty result). Try a shorter or more specific question. If this persists, increase PHP max_execution_time or reduce corpus size.', 'chatbot-chatgpt' )
+        );
+        $response_body['choices'][0]['message']['content'] = is_string( $fallback ) ? $fallback : '';
+        $response_body['response']['code']                   = 200;
     }
 
     // Get the user ID and page ID

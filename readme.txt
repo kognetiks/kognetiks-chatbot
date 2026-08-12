@@ -2,8 +2,8 @@
 Contributors: kognetiks
 Tags: chat, chatgpt, ai, reporting, insights
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
-Tested up to: 6.9.1
-Stable tag: 2.4.6
+Tested up to: 7.0.4
+Stable tag: 2.4.7
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -170,7 +170,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 == Disclaimer ==
 
-WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, Azure and related trademarks are the property of their respective owners. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic, DeepSeek, or Mistral.
+WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, Azure, JAN.AI and related trademarks are the property of their respective owners. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic, DeepSeek, or Mistral or other AI vendor or platform.
 
 == Screenshots ==
 
@@ -181,6 +181,18 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 5. Chatbot settings and configuration
 
 == Changelog ==
+
+= 2.4.7 - Released 2026-08-12 =
+
+### Improvements
+* **Lexical Context Model**: Major upgrades to on-site answer quality, including answer intent detection, fact condensation, template-based synthesis, quality gates, IDF scoring, query expansion, and scheduled lexical cache builds.
+* **Local AI (JAN.AI)**: Updated Local API integration for compatibility with JAN.AI Version 8.0, including model discovery and chat-completions handling improvements.
+* **Assistants Admin UI**: Refined OpenAI, Azure, and Mistral assistant/agent management table action buttons for clearer WordPress admin styling.
+* **Documentation**: Fixed missing images, broken links, and orphaned documentation pages.
+
+### Bug Fixes
+* **Lexical Context Reliability**: Fixed lexical context timeouts and stabilized retrieval/build behavior for larger corpora.
+* **Conversation Handling**: Improved erase-conversation and related helper-path robustness for Local AI and frontend flows.
 
 = 2.4.6 - Released 2026-02-13 =
 

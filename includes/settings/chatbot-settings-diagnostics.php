@@ -609,6 +609,11 @@ function chatbot_error_log($message) {
 // Log Chatbot Errors to the Server - Ver 2.0.3
 function log_chatbot_error() {
 
+    // Security: Require nonce (CSRF protection) - Ver 2.4.7
+    if ( ! isset( $_POST['chatbot_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['chatbot_nonce'] ) ), 'chatbot_log_error_nonce' ) ) {
+        wp_die( 'Invalid security token.', 'Forbidden', array( 'response' => 403 ) );
+    }
+
     // Security: Rate limiting for unauthenticated users to prevent log spam
     $user_id = get_current_user_id();
     $is_authenticated = $user_id > 0;

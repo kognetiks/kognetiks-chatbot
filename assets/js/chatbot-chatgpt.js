@@ -1003,8 +1003,15 @@ window.resetAllLocks = resetAllLocks;
         localStorage.setItem('chatbot_chatgpt_last_reset', today); // Update last reset date
     }
 
+    // Prevent overlapping AJAX calls (Jan.ai/local APIs handle one completion at a time)
+    let chatRequestInFlight = false;
+
     // Submit the message when the submit button is clicked
     submitButton.on('click', function () {
+
+        if (chatRequestInFlight) {
+            return;
+        }
 
         // Sanitize the input - Ver 2.0.0
         message = sanitizeInput(messageInput.val().trim());
@@ -1131,6 +1138,7 @@ window.resetAllLocks = resetAllLocks;
                 user_id: user_id, // pass the user ID here
                 page_id: page_id, // pass the page ID here
                 session_id: session_id, // pass the session ID here
+                assistant_id: assistant_id, // pass the assistant/prompt ID for logging and routing
                 client_message_id: client_message_id, // pass the client message ID for idempotency
                 chatbot_nonce: kchat_settings.chatbot_message_nonce, // Security: CSRF protection
             },
@@ -1140,6 +1148,7 @@ window.resetAllLocks = resetAllLocks;
                 'Expires': '0'
             },        
             beforeSend: function () {
+                chatRequestInFlight = true;
                 showTypingIndicator();
                 submitButton.prop('disabled', true);
                 
@@ -1168,10 +1177,12 @@ window.resetAllLocks = resetAllLocks;
                 
                 // Gate the success path - if server returned a structured object with success flag
                 if (response && typeof response === 'object' && response.success === false) {
-                    appendMessage(toSafeString(response.data || response.message || response));
+                    const errText = toSafeString(response.data || response.message || response);
+                    appendMessage(errText, errText.startsWith('Error') ? 'error' : 'bot');
                     botResponse = '';
                     removeTypingIndicator();
                     submitButton.prop('disabled', false);
+                    chatRequestInFlight = false;
                     return;
                 }
                 
@@ -1194,10 +1205,21 @@ window.resetAllLocks = resetAllLocks;
                     botResponse = toSafeString(botResponse);
                     // console.log('Chatbot: Non-queued response - botResponse set to:', botResponse);
                 }
+
+                // Jan/local errors come back as success + "Error: ..." — show immediately and stop
+                if (botResponse && botResponse.startsWith('Error')) {
+                    appendMessage(botResponse, 'error');
+                    botResponse = '';
+                    removeTypingIndicator();
+                    submitButton.prop('disabled', false);
+                    chatRequestInFlight = false;
+                    return;
+                }
                 
                 // Check if this is a "still working" message that should re-enable the button
                 if (botResponse) {
-                    isStillWorkingMessage = botResponse.includes("The system is currently busy processing requests");
+                    isStillWorkingMessage = botResponse.includes("The system is currently busy processing requests")
+                        || botResponse.includes("The system is busy processing requests");
                 }
                 // Revision to how disclaimers are handled - Ver 1.5.0
                 if (kchat_settings.chatbot_chatgpt_disclaimer_setting === 'No') {
@@ -1237,10 +1259,11 @@ window.resetAllLocks = resetAllLocks;
                 botResponse = markdownToHtml(botResponse || '');
             },
             error: function (jqXHR, status, error) {
+                chatRequestInFlight = false;
+                removeTypingIndicator();
+                submitButton.prop('disabled', false);
                 if(status === "timeout") {
-                    // appendMessage('Error: ' + error, 'error');
-                    // console.log('Chatbot: ERROR: ' + error);
-                    appendMessage('Oops! This request timed out. Please try again.', 'error');
+                    appendMessage('Oops! This request timed out. If you use Jan.ai, wait 15 seconds after the previous reply, try a smaller model, or lower the Local timeout setting.', 'error');
                     botResponse = '';
                 } else if (jqXHR.status === 403) {
                     // Handle 403 with safe error message extraction
@@ -1416,11 +1439,14 @@ window.resetAllLocks = resetAllLocks;
                 }
             },
             complete: function () {
-                // Only remove typing indicator for non-queued responses
+                chatRequestInFlight = false;
                 const isQueuedResponse = ajaxResponse && ajaxResponse.data && typeof ajaxResponse.data === 'object' && ajaxResponse.data.queued;
-                if (!isQueuedResponse) {
-                    removeTypingIndicator();
+                removeTypingIndicator();
+
+                if (isQueuedResponse && ajaxResponse.data.message) {
+                    appendMessage(toSafeString(ajaxResponse.data.message), 'bot');
                 }
+
                 if (botResponse) {
                     // console.log('Chatbot: Appending botResponse:', botResponse);
                     appendMessage(botResponse, 'bot');
@@ -1439,15 +1465,9 @@ window.resetAllLocks = resetAllLocks;
                 }
                 scrollToLastBotResponse();
                 
-                // Re-enable the button if this is not a queued response OR if it's a "still working" message
-                // For queued responses, keep the button disabled until queue processing is complete
-                // For "still working" messages, the button should be re-enabled immediately
-                const isQueuedForButton = ajaxResponse && ajaxResponse.data && typeof ajaxResponse.data === 'object' && ajaxResponse.data.queued;
-                if (ajaxResponse && (!isQueuedForButton || isStillWorkingMessage)) {
+                // Always re-enable the submit button when the request finishes
+                if (ajaxResponse) {
                     submitButton.prop('disabled', false);
-                } else if (isQueuedForButton) {
-                    // For queued responses, poll the queue status and re-enable when empty
-                    pollQueueStatus();
                 }
             },
             cache: false, // This ensures jQuery does not cache the result
@@ -2492,5 +2512,12 @@ function logErrorToServer(error) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', kchat_settings.ajax_url, true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.send('action=log_chatbot_error&error_message=' + encodeURIComponent(error));
+    var nonce = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_log_error_nonce)
+        ? kchat_settings.chatbot_log_error_nonce
+        : '';
+    xhr.send(
+        'action=log_chatbot_error' +
+        '&error_message=' + encodeURIComponent(error) +
+        '&chatbot_nonce=' + encodeURIComponent(nonce)
+    );
 }
