@@ -52,6 +52,9 @@ includes/transformers/lexical_embeddings_cache.php
 includes/tools/test-jan-ai.php
 includes/insights/DEFINITIONS.md
 
+# Ignore copy of chatbot-call-local-api.php FOR DEVELOPMENT ONLY - 2026-08-12
+includes/chatbot-call-local-api.copy
+
 # Ignore compressed cache files
 *.gz
 *.ser

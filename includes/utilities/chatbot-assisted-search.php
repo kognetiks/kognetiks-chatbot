@@ -48,8 +48,22 @@ add_action('rest_api_init', function () {
 
 });
 
+/**
+ * Site-specific secret for assistant search REST auth - Ver 2.4.7
+ * Derived from WordPress salts so it is not guessable from the assistant ID alone.
+ */
+function chatbot_chatgpt_get_assistant_search_key() {
+    return hash_hmac( 'sha256', 'chatbot_assistant_search_v1', wp_salt( 'auth' ) );
+}
+
 // Secure the endpoint with a permission callback
 function assistant_permission_callback( $request ) {
+
+    // Require shared search key (not just assistant ID) - Ver 2.4.7
+    $provided_key = $request->get_header( 'x-assistant-search-key' );
+    if ( empty( $provided_key ) || ! hash_equals( chatbot_chatgpt_get_assistant_search_key(), $provided_key ) ) {
+        return new WP_Error( 'unauthorized', __( 'Unauthorized', 'chatbot-chatgpt' ), array( 'status' => 403 ) );
+    }
 
     // Retrieve the assistant ID from a custom header
     $assistant_id = $request->get_header('x-assistant-id');
@@ -73,8 +87,12 @@ function assistant_permission_callback( $request ) {
     );
     
     if ( ! $exists ) {
-        // return new WP_Error( 'invalid_assistant_id', __('Invalid Assistant ID'), array( 'status' => 403 ) );
-        return new WP_Error( 'unauthorized', __('Unauthorized', 'chatbot-chatgpt'), array( 'status' => 403 ) );
+        // Also allow the primary/alternate assistant IDs from options (not only the assistants table)
+        $primary = esc_attr( get_option( 'assistant_id', '' ) );
+        $alternate = esc_attr( get_option( 'chatbot_chatgpt_assistant_id_alternate', '' ) );
+        if ( $assistant_id !== $primary && $assistant_id !== $alternate ) {
+            return new WP_Error( 'unauthorized', __('Unauthorized', 'chatbot-chatgpt'), array( 'status' => 403 ) );
+        }
     }
 
     return true;

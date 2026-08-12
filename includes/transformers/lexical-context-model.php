@@ -90,18 +90,18 @@ function transformer_model_lexical_context_log_request_start_diagnostics( $docum
     $doc_n      = count( $documents );
     $chunk_n    = transformer_model_lexical_context_count_document_chunks( $documents );
 
-    back_trace(
-        'NOTICE',
-        sprintf(
-            '[LCM][start] intent_expansion_enabled=%s intent_opt=%s local_idf_enabled=%s pmi_cache=%s document_count=%d chunk_count=%d',
-            $intent_on ? '1' : '0',
-            $intent_opt,
-            $idf_on ? '1' : '0',
-            $pmi,
-            $doc_n,
-            $chunk_n
-        )
-    );
+    // back_trace(
+    //     'NOTICE',
+    //     sprintf(
+    //         '[LCM][start] intent_expansion_enabled=%s intent_opt=%s local_idf_enabled=%s pmi_cache=%s document_count=%d chunk_count=%d',
+    //         $intent_on ? '1' : '0',
+    //         $intent_opt,
+    //         $idf_on ? '1' : '0',
+    //         $pmi,
+    //         $doc_n,
+    //         $chunk_n
+    //     )
+    // );
 }
 
 /**
@@ -187,10 +187,10 @@ function transformer_model_lexical_context_lcm_timing_segment( $stage ) {
         return;
     }
 
-    back_trace(
-        'NOTICE',
-        sprintf( '[LCM][timing] stage=%s elapsed=%.3f total=%.3f', $stage, $elapsed, $total )
-    );
+    // back_trace(
+    //     'NOTICE',
+    //     sprintf( '[LCM][timing] stage=%s elapsed=%.3f total=%.3f', $stage, $elapsed, $total )
+    // );
 }
 
 /**
@@ -301,10 +301,10 @@ function transformer_model_lexical_context_lcm_idf_io_timing_line( $phase, $segm
         $suffix = sprintf( ' bytes=%d', (int) $extra['bytes'] );
     }
 
-    back_trace(
-        'NOTICE',
-        sprintf( '[LCM][timing] stage=idf_cache_%s elapsed=%.3f total=%.3f%s', $phase, $elapsed, $total, $suffix )
-    );
+    // back_trace(
+    //     'NOTICE',
+    //     sprintf( '[LCM][timing] stage=idf_cache_%s elapsed=%.3f total=%.3f%s', $phase, $elapsed, $total, $suffix )
+    // );
 }
 
 /**
@@ -2039,9 +2039,9 @@ function transformer_model_lexical_context_apply_cross_document_consensus_boost(
         }
     }
 
-    if ( $boosted > 0 && transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-        back_trace( 'NOTICE', sprintf( '[LCM][cross_document_consensus] boosted=%d', $boosted ) );
-    }
+    // if ( $boosted > 0 && transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+    //     back_trace( 'NOTICE', sprintf( '[LCM][cross_document_consensus] boosted=%d', $boosted ) );
+    // }
 
     return $sentenceScores;
 }
@@ -2064,9 +2064,9 @@ function transformer_model_lexical_context_apply_document_gate( $sentenceScores,
     $shape = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
     $max_documents = ( $shape === 'informational_query' ) ? 3 : 1;
 
-    if ( $shape === 'informational_query' && transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-        back_trace( 'NOTICE', sprintf( '[LCM][document_gate_adjusted] shape=informational_query max_documents=%d', $max_documents ) );
-    }
+    // if ( $shape === 'informational_query' && transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+    //     back_trace( 'NOTICE', sprintf( '[LCM][document_gate_adjusted] shape=informational_query max_documents=%d', $max_documents ) );
+    // }
 
     if ( empty( $sentenceScores ) ) {
         return $sentenceScores;
@@ -3486,26 +3486,26 @@ function transformer_model_lexical_context_diag_log_local_idf( $option_on, $acti
 
     $map_terms = is_array( $idf_map ) ? count( $idf_map ) : 0;
 
-    if ( $active && ! empty( $idf_map ) ) {
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][local_idf] option=1 active=1 diag=loaded source=%s N_docs=%d map_terms=%d',
-                $source,
-                $n_docs,
-                $map_terms
-            )
-        );
-    } else {
-        $diag = $inactive_reason !== null && $inactive_reason !== '' ? $inactive_reason : 'inactive';
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][local_idf] option=1 active=0 diag=%s',
-                str_replace( array( "\r", "\n" ), ' ', $diag )
-            )
-        );
-    }
+    // if ( $active && ! empty( $idf_map ) ) {
+    //     back_trace(
+    //         'NOTICE',
+    //         sprintf(
+    //             '[LCM][local_idf] option=1 active=1 diag=loaded source=%s N_docs=%d map_terms=%d',
+    //             $source,
+    //             $n_docs,
+    //             $map_terms
+    //         )
+    //     );
+    // } else {
+    //     $diag = $inactive_reason !== null && $inactive_reason !== '' ? $inactive_reason : 'inactive';
+    //     back_trace(
+    //         'NOTICE',
+    //         sprintf(
+    //             '[LCM][local_idf] option=1 active=0 diag=%s',
+    //             str_replace( array( "\r", "\n" ), ' ', $diag )
+    //         )
+    //     );
+    // }
 }
 
 /**
@@ -4064,15 +4064,15 @@ function transformer_model_lexical_context_lexical_sentence_score_row( $sentence
             }
             $ph_str  = ! empty( $ph_list ) ? implode( '|', $ph_list ) : '';
             $prox_s  = ( $phrase_prox['proximity'] !== '' ) ? $phrase_prox['proximity'] : 'none';
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][phrase_bonus] bonus=%g phrases=[%s] proximity=%s',
-                    $phrase_prox['bonus'],
-                    $ph_str,
-                    $prox_s
-                )
-            );
+            // back_trace(
+            //     'NOTICE',
+            //     sprintf(
+            //         '[LCM][phrase_bonus] bonus=%g phrases=[%s] proximity=%s',
+            //         $phrase_prox['bonus'],
+            //         $ph_str,
+            //         $prox_s
+            //     )
+            // );
             $lcm_phrase_bonus_sample_logged = true;
         }
     }
@@ -4087,14 +4087,14 @@ function transformer_model_lexical_context_lexical_sentence_score_row( $sentence
             foreach ( $intent_pack['matched'] as $m ) {
                 $matched_safe[] = str_replace( array( "\r", "\n", '|' ), array( ' ', ' ', '/' ), (string) $m );
             }
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][intent_bonus] bonus=%g matched=[%s]',
-                    $intent_pack['bonus'],
-                    implode( '|', $matched_safe )
-                )
-            );
+            // back_trace(
+            //     'NOTICE',
+            //     sprintf(
+            //         '[LCM][intent_bonus] bonus=%g matched=[%s]',
+            //         $intent_pack['bonus'],
+            //         implode( '|', $matched_safe )
+            //     )
+            // );
             $lcm_intent_bonus_sample_logged = true;
         }
     }
@@ -4135,15 +4135,15 @@ function transformer_model_lexical_context_lexical_sentence_score_row( $sentence
                         $tw_safe      = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $tw );
                         $term_parts[] = sprintf( '%s=%g', $tw_safe, $iw );
                     }
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][local_idf] sample direct_query_idf bonus=%g sum_capped=%g terms=[%s]',
-                            $idf_bonus,
-                            $idf_sum_capped,
-                            implode( ', ', $term_parts )
-                        )
-                    );
+                    // back_trace(
+                    //     'NOTICE',
+                    //     sprintf(
+                    //         '[LCM][local_idf] sample direct_query_idf bonus=%g sum_capped=%g terms=[%s]',
+                    //         $idf_bonus,
+                    //         $idf_sum_capped,
+                    //         implode( ', ', $term_parts )
+                    //     )
+                    // );
                     $lcm_local_idf_bonus_sample_logged = true;
                 }
             }
@@ -5402,14 +5402,14 @@ function transformer_model_lexical_context_low_value_sentence_row_reason_codes( 
                 $clean_prev  = transformer_model_lexical_context_diag_preview_text( $cleaned, 165 );
                 $orig_prev   = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $orig_prev );
                 $clean_prev  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $clean_prev );
-                back_trace(
-                    'NOTICE',
-                    sprintf(
-                        '[LCM][quality_filter_salvaged:caption] original="%s" cleaned="%s"',
-                        $orig_prev,
-                        $clean_prev
-                    )
-                );
+                // back_trace(
+                //     'NOTICE',
+                //     sprintf(
+                //         '[LCM][quality_filter_salvaged:caption] original="%s" cleaned="%s"',
+                //         $orig_prev,
+                //         $clean_prev
+                //     )
+                // );
                 ++$lcm_salvaged_caption_logged_reason_codes;
             }
 
@@ -5521,14 +5521,14 @@ function transformer_model_lexical_context_filter_low_value_sentence_rows( $rows
                         $clean_prev = transformer_model_lexical_context_diag_preview_text( $cleaned, 165 );
                         $orig_prev  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $orig_prev );
                         $clean_prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $clean_prev );
-                        back_trace(
-                            'NOTICE',
-                            sprintf(
-                                '[LCM][quality_filter_salvaged:caption] original="%s" cleaned="%s"',
-                                $orig_prev,
-                                $clean_prev
-                            )
-                        );
+                        // back_trace(
+                        //     'NOTICE',
+                        //     sprintf(
+                        //         '[LCM][quality_filter_salvaged:caption] original="%s" cleaned="%s"',
+                        //         $orig_prev,
+                        //         $clean_prev
+                        //     )
+                        // );
                         ++$lcm_salvaged_caption_logged_filter;
                     }
 
@@ -5559,36 +5559,36 @@ function transformer_model_lexical_context_filter_low_value_sentence_rows( $rows
             $preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
             $reason_join = implode( '|', array_values( array_unique( $reasons ) ) );
 
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][quality_filter_removed:%s] reason=[%s] score=%.4f post_id=%s title="%s" text="%s"',
-                    $slug,
-                    $reason_join,
-                    $score,
-                    $pid,
-                    $title,
-                    $preview
-                )
-            );
+            // back_trace(
+            //     'NOTICE',
+            //     sprintf(
+            //         '[LCM][quality_filter_removed:%s] reason=[%s] score=%.4f post_id=%s title="%s" text="%s"',
+            //         $slug,
+            //         $reason_join,
+            //         $score,
+            //         $pid,
+            //         $title,
+            //         $preview
+            //     )
+            // );
             ++$removed_logged;
         }
     }
 
     $after = count( $out );
 
-    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][quality_filter:%s] candidates before=%d after=%d removed=%d',
-                $slug,
-                $before,
-                $after,
-                max( 0, $before - $after )
-            )
-        );
-    }
+    // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+    //     back_trace(
+    //         'NOTICE',
+    //         sprintf(
+    //             '[LCM][quality_filter:%s] candidates before=%d after=%d removed=%d',
+    //             $slug,
+    //             $before,
+    //             $after,
+    //             max( 0, $before - $after )
+    //         )
+    //     );
+    // }
 
     return $out;
 }
@@ -5613,12 +5613,12 @@ function transformer_model_lexical_context_limit_rows_per_document( $rows, $max_
     $max  = (int) apply_filters( 'chatbot_lcm_max_rows_per_document', $base );
 
     if ( $max <= 0 ) {
-        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-            back_trace(
-                'NOTICE',
-                sprintf( '[LCM][doc_limit] candidates before=%d after=%d max_per_document=%d', $before, $before, 0 )
-            );
-        }
+        // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        //     back_trace(
+        //         'NOTICE',
+        //         sprintf( '[LCM][doc_limit] candidates before=%d after=%d max_per_document=%d', $before, $before, 0 )
+        //     );
+        // }
         return $rows;
     }
 
@@ -5637,12 +5637,12 @@ function transformer_model_lexical_context_limit_rows_per_document( $rows, $max_
 
     $after = count( $out );
 
-    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-        back_trace(
-            'NOTICE',
-            sprintf( '[LCM][doc_limit] candidates before=%d after=%d max_per_document=%d', $before, $after, $max )
-        );
-    }
+    // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+    //     back_trace(
+    //         'NOTICE',
+    //         sprintf( '[LCM][doc_limit] candidates before=%d after=%d max_per_document=%d', $before, $after, $max )
+    //     );
+    // }
 
     return $out;
 }
@@ -5724,19 +5724,19 @@ function transformer_model_lexical_context_diag_log_query_token_pipeline( $raw_q
     $safe_dec  = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $decoded );
     $safe_norm = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $normalized_query_text );
 
-    back_trace(
-        'NOTICE',
-        sprintf(
-            '[LCM][query_tokens] raw="%s" decoded="%s" normalized="%s" inputWords=[%s] meaningful=[%s] phrase_bigrams=[%s] phrase_trigrams=[%s]',
-            $safe_raw,
-            $safe_dec,
-            $safe_norm,
-            implode( ',', array_map( 'strval', (array) $inputWordsLower ) ),
-            implode( ',', $meaningful_query_tokens ),
-            implode( '|', $bigrams ),
-            implode( '|', $trigrams )
-        )
-    );
+    // back_trace(
+    //     'NOTICE',
+    //     sprintf(
+    //         '[LCM][query_tokens] raw="%s" decoded="%s" normalized="%s" inputWords=[%s] meaningful=[%s] phrase_bigrams=[%s] phrase_trigrams=[%s]',
+    //         $safe_raw,
+    //         $safe_dec,
+    //         $safe_norm,
+    //         implode( ',', array_map( 'strval', (array) $inputWordsLower ) ),
+    //         implode( ',', $meaningful_query_tokens ),
+    //         implode( '|', $bigrams ),
+    //         implode( '|', $trigrams )
+    //     )
+    // );
 }
 
 /**
@@ -6307,15 +6307,15 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
     $shape  = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
 
     if ( $shape !== 'informational_query' ) {
-        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][answer_shape_bias] applied=0 reason=%s',
-                    $shape !== '' ? $shape : 'missing_shape'
-                )
-            );
-        }
+        // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        //     back_trace(
+        //         'NOTICE',
+        //         sprintf(
+        //             '[LCM][answer_shape_bias] applied=0 reason=%s',
+        //             $shape !== '' ? $shape : 'missing_shape'
+        //         )
+        //     );
+        // }
 
         return $result;
     }
@@ -6332,10 +6332,9 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
     $m    = count( $norm );
 
     if ( $m < 1 ) {
-        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-            back_trace( 'NOTICE', '[LCM][answer_shape_bias] applied=0 reason=no_meaningful_tokens' );
-        }
-
+        // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        //     back_trace( 'NOTICE', '[LCM][answer_shape_bias] applied=0 reason=no_meaningful_tokens' );
+        // }
         return $result;
     }
 
@@ -6343,10 +6342,9 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
     $c       = count( $content );
 
     if ( $c < 1 ) {
-        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-            back_trace( 'NOTICE', '[LCM][answer_shape_bias] applied=0 reason=no_content_anchors' );
-        }
-
+        // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        //     back_trace( 'NOTICE', '[LCM][answer_shape_bias] applied=0 reason=no_content_anchors' );
+        // }
         return $result;
     }
 
@@ -6484,17 +6482,17 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
                     $after_dbg = $base_dbg + $delta;
                     $preview = transformer_model_lexical_context_diag_preview_text( (string) $sentence, 165 );
                     $preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][answer_shape_bias_definition] boost=%g pattern="%s" before=%g after=%g text="%s"',
-                            $defpat_boost,
-                            $defpat_pattern,
-                            $base_dbg,
-                            $after_dbg,
-                            $preview
-                        )
-                    );
+                    // back_trace(
+                    //     'NOTICE',
+                    //     sprintf(
+                    //         '[LCM][answer_shape_bias_definition] boost=%g pattern="%s" before=%g after=%g text="%s"',
+                    //         $defpat_boost,
+                    //         $defpat_pattern,
+                    //         $base_dbg,
+                    //         $after_dbg,
+                    //         $preview
+                    //     )
+                    // );
                     ++$defpat_logged;
                 }
             }
@@ -6520,17 +6518,17 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
                     $after_dbg = $base_dbg + $delta;
                     $preview   = transformer_model_lexical_context_diag_preview_text( (string) $sentence, 165 );
                     $preview   = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][answer_shape_bias_action] boost=%g cue="%s" before=%g after=%g text="%s"',
-                            $action_boost,
-                            $hit_cue,
-                            $base_dbg,
-                            $after_dbg,
-                            $preview
-                        )
-                    );
+                    // back_trace(
+                    //     'NOTICE',
+                    //     sprintf(
+                    //         '[LCM][answer_shape_bias_action] boost=%g cue="%s" before=%g after=%g text="%s"',
+                    //         $action_boost,
+                    //         $hit_cue,
+                    //         $base_dbg,
+                    //         $after_dbg,
+                    //         $preview
+                    //     )
+                    // );
                     ++$action_logged;
                 }
             }
@@ -6556,16 +6554,16 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
                     $after_dbg = $base_dbg + $delta;
                     $preview   = transformer_model_lexical_context_diag_preview_text( (string) $sentence, 165 );
                     $preview   = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][answer_shape_bias_penalty] penalty=%g reason="anchor_no_info" before=%g after=%g text="%s"',
-                            $pen,
-                            $base_dbg,
-                            $after_dbg,
-                            $preview
-                        )
-                    );
+                    // back_trace(
+                    //     'NOTICE',
+                    //     sprintf(
+                    //         '[LCM][answer_shape_bias_penalty] penalty=%g reason="anchor_no_info" before=%g after=%g text="%s"',
+                    //         $pen,
+                    //         $base_dbg,
+                    //         $after_dbg,
+                    //         $preview
+                    //     )
+                    // );
                     ++$penalty_logged;
                 }
             }
@@ -6626,40 +6624,40 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
 
     if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
         if ( $suppressed_single !== '' && $phrase_re !== array() ) {
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][answer_shape_anchor] suppressed_single="%s" reason="phrase_anchor_available" phrase_anchor="%s"',
-                    str_replace( '"', "'", $suppressed_single ),
-                    str_replace( '"', "'", (string) $phrase_re['label'] )
-                )
-            );
+            // back_trace(
+            //     'NOTICE',
+            //     sprintf(
+            //         '[LCM][answer_shape_anchor] suppressed_single="%s" reason="phrase_anchor_available" phrase_anchor="%s"',
+            //         str_replace( '"', "'", $suppressed_single ),
+            //         str_replace( '"', "'", (string) $phrase_re['label'] )
+            //     )
+            // );
         }
         $anchors_json = wp_json_encode( $anchors_diag );
         if ( ! is_string( $anchors_json ) ) {
             $anchors_json = '[]';
         }
 
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][answer_shape_bias] applied=1 anchors=%s boosted=%d penalized=%d shape=informational_query',
-                $anchors_json,
-                $boosted,
-                $penalized
-            )
-        );
+        // back_trace(
+        //     'NOTICE',
+        //     sprintf(
+        //         '[LCM][answer_shape_bias] applied=1 anchors=%s boosted=%d penalized=%d shape=informational_query',
+        //         $anchors_json,
+        //         $boosted,
+        //         $penalized
+        //     )
+        // );
 
-        if ( $total_rows > 0 && ( $boosted > 100 || $boosted > (int) floor( 0.1 * $total_rows ) ) ) {
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][answer_shape_bias] warning=boost_overbroad boosted=%d total=%d',
-                    $boosted,
-                    $total_rows
-                )
-            );
-        }
+        // if ( $total_rows > 0 && ( $boosted > 100 || $boosted > (int) floor( 0.1 * $total_rows ) ) ) {
+        //     back_trace(
+        //         'NOTICE',
+        //         sprintf(
+        //             '[LCM][answer_shape_bias] warning=boost_overbroad boosted=%d total=%d',
+        //             $boosted,
+        //             $total_rows
+        //         )
+        //     );
+        // }
 
         if ( $row_affected !== array() ) {
             usort(
@@ -6681,20 +6679,20 @@ function transformer_model_lexical_context_apply_answer_shape_bias( $sentence_sc
                 $anc      = str_replace( '"', "'", $anc );
                 $cue      = str_replace( '"', "'", $cue );
                 $cue_str  = str_replace( '"', "'", $cue_str );
-                back_trace(
-                    'NOTICE',
-                    sprintf(
-                        '[LCM][answer_shape_bias_row] boosted=%d penalized=%d anchor="%s" cue="%s" cue_strength="%s" before=%g after=%g text="%s"',
-                        (int) $e['boosted'],
-                        (int) $e['penalized'],
-                        $anc,
-                        $cue,
-                        $cue_str,
-                        (float) $e['before'],
-                        (float) $e['after'],
-                        $preview
-                    )
-                );
+                // back_trace(
+                //     'NOTICE',
+                //     sprintf(
+                //         '[LCM][answer_shape_bias_row] boosted=%d penalized=%d anchor="%s" cue="%s" cue_strength="%s" before=%g after=%g text="%s"',
+                //         (int) $e['boosted'],
+                //         (int) $e['penalized'],
+                //         $anc,
+                //         $cue,
+                //         $cue_str,
+                //         (float) $e['before'],
+                //         (float) $e['after'],
+                //         $preview
+                //     )
+                // );
             }
         }
     }
@@ -7209,16 +7207,16 @@ function transformer_model_lexical_context_diag_log_semantic_cohesion( $cohesion
     $anchor_preview = isset( $cohesion['anchor_preview'] ) ? (string) $cohesion['anchor_preview'] : '';
     $anchor_preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $anchor_preview );
 
-    back_trace(
-        'NOTICE',
-        sprintf(
-            '[LCM][semantic_cohesion] count=%d avg=%.4f min=%.4f anchor="%s"',
-            $count,
-            $avg,
-            $min,
-            $anchor_preview
-        )
-    );
+    // back_trace(
+    //     'NOTICE',
+    //     sprintf(
+    //         '[LCM][semantic_cohesion] count=%d avg=%.4f min=%.4f anchor="%s"',
+    //         $count,
+    //         $avg,
+    //         $min,
+    //         $anchor_preview
+    //     )
+    // );
 
     $rows = isset( $cohesion['rows'] ) && is_array( $cohesion['rows'] ) ? $cohesion['rows'] : array();
     $rows = array_slice( $rows, 0, 10 );
@@ -7229,18 +7227,18 @@ function transformer_model_lexical_context_diag_log_semantic_cohesion( $cohesion
         $preview = isset( $r['preview'] ) ? (string) $r['preview'] : '';
         $preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
 
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][semantic_cohesion_row] cohesion=%.4f anchor_overlap=%.4f query_overlap=%.4f score=%.4f post_id=%s text="%s"',
-                (float) ( $r['cohesion'] ?? 0.0 ),
-                (float) ( $r['anchor_overlap'] ?? 0.0 ),
-                (float) ( $r['query_overlap'] ?? 0.0 ),
-                (float) ( $r['score'] ?? 0.0 ),
-                (string) ( $r['post_id'] ?? '' ),
-                $preview
-            )
-        );
+        // back_trace(
+        //     'NOTICE',
+        //     sprintf(
+        //         '[LCM][semantic_cohesion_row] cohesion=%.4f anchor_overlap=%.4f query_overlap=%.4f score=%.4f post_id=%s text="%s"',
+        //         (float) ( $r['cohesion'] ?? 0.0 ),
+        //         (float) ( $r['anchor_overlap'] ?? 0.0 ),
+        //         (float) ( $r['query_overlap'] ?? 0.0 ),
+        //         (float) ( $r['score'] ?? 0.0 ),
+        //         (string) ( $r['post_id'] ?? '' ),
+        //         $preview
+        //     )
+        // );
     }
 }
 
@@ -7930,10 +7928,10 @@ function transformer_model_lcm_apply_vague_query_gate_core( &$sentenceScores, $v
             $st   = isset( $row['sentence'] ) ? (string) $row['sentence'] : '';
             $prev = transformer_model_lexical_context_diag_preview_text( $st, 120 );
             $prev = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $prev );
-            back_trace(
-                'NOTICE',
-                sprintf( '[LCM][vague_query_gate_row] candidate=1 text="%s"', $prev )
-            );
+            // back_trace(
+            //     'NOTICE',
+            //     sprintf( '[LCM][vague_query_gate_row] candidate=1 text="%s"', $prev )
+            // );
             ++$nr;
         }
     }
@@ -7968,16 +7966,16 @@ function transformer_model_lcm_log_vague_query_gate_check( $raw_query, array $ev
 
     $mt = isset( $eval['meaningful_tokens'] ) ? (string) $eval['meaningful_tokens'] : '';
 
-    back_trace(
-        'NOTICE',
-        sprintf(
-            '[LCM][vague_query_gate_check] raw="%s" meaningful=[%s] is_vague=%d reason="%s"',
-            $esc( $raw_query ),
-            $esc( $mt ),
-            isset( $eval['is_vague'] ) ? (int) $eval['is_vague'] : 0,
-            $esc( isset( $eval['reason'] ) ? $eval['reason'] : '' )
-        )
-    );
+    // back_trace(
+    //     'NOTICE',
+    //     sprintf(
+    //         '[LCM][vague_query_gate_check] raw="%s" meaningful=[%s] is_vague=%d reason="%s"',
+    //         $esc( $raw_query ),
+    //         $esc( $mt ),
+    //         isset( $eval['is_vague'] ) ? (int) $eval['is_vague'] : 0,
+    //         $esc( isset( $eval['reason'] ) ? $eval['reason'] : '' )
+    //     )
+    // );
 }
 
 /**
@@ -8004,20 +8002,20 @@ function transformer_model_lcm_log_vague_query_decision( $raw_query, array $eval
         return $s;
     };
 
-    back_trace(
-        'NOTICE',
-        sprintf(
-            '[LCM][vague_query_decision] raw_query="%s" meaningful_tokens="%s" weak_tokens="%s" non_weak_tokens="%s" is_vague=%d reason=%s strong_anchor_matched=%d matched_row_preview="%s"',
-            $esc( $raw_query ),
-            $esc( isset( $eval['meaningful_tokens'] ) ? $eval['meaningful_tokens'] : '' ),
-            $esc( isset( $eval['weak_tokens'] ) ? $eval['weak_tokens'] : '' ),
-            $esc( isset( $eval['non_weak_tokens'] ) ? $eval['non_weak_tokens'] : '' ),
-            isset( $eval['is_vague'] ) ? (int) $eval['is_vague'] : 0,
-            $esc( isset( $eval['reason'] ) ? $eval['reason'] : '' ),
-            (int) (bool) $strong_anchor,
-            $esc( $matched_preview )
-        )
-    );
+    // back_trace(
+    //     'NOTICE',
+    //     sprintf(
+    //         '[LCM][vague_query_decision] raw_query="%s" meaningful_tokens="%s" weak_tokens="%s" non_weak_tokens="%s" is_vague=%d reason=%s strong_anchor_matched=%d matched_row_preview="%s"',
+    //         $esc( $raw_query ),
+    //         $esc( isset( $eval['meaningful_tokens'] ) ? $eval['meaningful_tokens'] : '' ),
+    //         $esc( isset( $eval['weak_tokens'] ) ? $eval['weak_tokens'] : '' ),
+    //         $esc( isset( $eval['non_weak_tokens'] ) ? $eval['non_weak_tokens'] : '' ),
+    //         isset( $eval['is_vague'] ) ? (int) $eval['is_vague'] : 0,
+    //         $esc( isset( $eval['reason'] ) ? $eval['reason'] : '' ),
+    //         (int) (bool) $strong_anchor,
+    //         $esc( $matched_preview )
+    //     )
+    // );
 }
 
 /**
@@ -8464,13 +8462,13 @@ function transformer_model_lexical_context_apply_constraint_gate( $rows, $query_
                 if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) && $removed_rows_logged < 10 ) {
                     $preview = transformer_model_lexical_context_diag_preview_text( $text, 120 );
                     $preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][constraint_gate_row] removed=1 reason="negated_domain" text="%s"',
-                            $preview
-                        )
-                    );
+                    // back_trace(
+                    //     'NOTICE',
+                    //     sprintf(
+                    //         '[LCM][constraint_gate_row] removed=1 reason="negated_domain" text="%s"',
+                    //         $preview
+                    //     )
+                    // );
                     ++$removed_rows_logged;
                 }
                 continue;
@@ -8497,13 +8495,13 @@ function transformer_model_lexical_context_apply_constraint_gate( $rows, $query_
                 if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) && $removed_rows_logged < 10 ) {
                     $preview = transformer_model_lexical_context_diag_preview_text( $text, 120 );
                     $preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][constraint_gate_row] removed=1 reason="domain_mismatch" text="%s"',
-                            $preview
-                        )
-                    );
+                    // back_trace(
+                    //     'NOTICE',
+                    //     sprintf(
+                    //         '[LCM][constraint_gate_row] removed=1 reason="domain_mismatch" text="%s"',
+                    //         $preview
+                    //     )
+                    // );
                     ++$removed_rows_logged;
                 }
             }
@@ -8564,17 +8562,17 @@ function transformer_model_lexical_context_apply_constraint_gate( $rows, $query_
         if ( $type === 'domain' && $domain !== '' && $kept === 0 ) {
             $reason = ' reason="no_domain_match"';
         }
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][constraint_gate] applied=1 type="%s" constraint="%s" kept=%d removed=%d%s',
-                $type !== '' ? $type : 'unknown',
-                str_replace( '"', "'", $constraint !== '' ? $constraint : 'n/a' ),
-                $kept,
-                max( 0, $before - $after ),
-                $reason
-            )
-        );
+        // back_trace(
+        //     'NOTICE',
+        //     sprintf(
+        //         '[LCM][constraint_gate] applied=1 type="%s" constraint="%s" kept=%d removed=%d%s',
+        //         $type !== '' ? $type : 'unknown',
+        //         str_replace( '"', "'", $constraint !== '' ? $constraint : 'n/a' ),
+        //         $kept,
+        //         max( 0, $before - $after ),
+        //         $reason
+        //     )
+        // );
     }
 
     transformer_model_lexical_context_constraint_gate_last_meta(
@@ -8706,14 +8704,14 @@ function transformer_model_lexical_context_apply_case_sense_guard( $rows, $meani
             if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) && $removed_logged < 10 ) {
                 $preview = transformer_model_lexical_context_diag_preview_text( $text, 120 );
                 $preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
-                back_trace(
-                    'NOTICE',
-                    sprintf(
-                        '[LCM][case_sense_guard_row] removed=1 token="%s" reason="proper_name_collision" text="%s"',
-                        str_replace( '"', "'", $hit_token ),
-                        $preview
-                    )
-                );
+                // back_trace(
+                //     'NOTICE',
+                //     sprintf(
+                //         '[LCM][case_sense_guard_row] removed=1 token="%s" reason="proper_name_collision" text="%s"',
+                //         str_replace( '"', "'", $hit_token ),
+                //         $preview
+                //     )
+                // );
                 ++$removed_logged;
             }
             continue;
@@ -8723,16 +8721,16 @@ function transformer_model_lexical_context_apply_case_sense_guard( $rows, $meani
     }
 
     $after = count( $out );
-    if ( $removed > 0 && transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][case_sense_guard] applied=1 kept=%d removed=%d',
-                $after,
-                max( 0, $before - $after )
-            )
-        );
-    }
+    // if ( $removed > 0 && transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+    //     back_trace(
+    //         'NOTICE',
+    //         sprintf(
+    //             '[LCM][case_sense_guard] applied=1 kept=%d removed=%d',
+    //             $after,
+    //             max( 0, $before - $after )
+    //         )
+    //     );
+    // }
 
     return $out;
 }
@@ -8769,15 +8767,15 @@ function transformer_model_lexical_context_diag_log_pipeline_stage( $stage_slug,
         }
     }
 
-    back_trace(
-        'NOTICE',
-        sprintf(
-            '[LCM][%s] candidates=%d top_score=%s',
-            $stage_slug,
-            $count,
-            $top_score === null ? 'n/a' : sprintf( '%g', (float) $top_score )
-        )
-    );
+    // back_trace(
+    //     'NOTICE',
+    //     sprintf(
+    //         '[LCM][%s] candidates=%d top_score=%s',
+    //         $stage_slug,
+    //         $count,
+    //         $top_score === null ? 'n/a' : sprintf( '%g', (float) $top_score )
+    //     )
+    // );
 }
 
 /**
@@ -8805,34 +8803,34 @@ function transformer_model_lexical_context_cap_ranked_sentence_rows( $rows, $max
     $max_rows = (int) apply_filters( 'chatbot_lcm_candidate_cap', (int) $max_rows, $slug );
 
     if ( $max_rows <= 0 ) {
-        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-            back_trace(
-                'NOTICE',
-                sprintf( '[LCM][cap:%s] candidates before=%d after=%d cap=disabled', $slug, $before, $before )
-            );
-        }
+        // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        //     back_trace(
+        //         'NOTICE',
+        //         sprintf( '[LCM][cap:%s] candidates before=%d after=%d cap=disabled', $slug, $before, $before )
+        //     );
+        // }
         return $rows;
     }
 
     if ( $before <= $max_rows ) {
-        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-            back_trace(
-                'NOTICE',
-                sprintf( '[LCM][cap:%s] candidates before=%d after=%d cap=%d', $slug, $before, $before, $max_rows )
-            );
-        }
+        // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        //     back_trace(
+        //         'NOTICE',
+        //         sprintf( '[LCM][cap:%s] candidates before=%d after=%d cap=%d', $slug, $before, $before, $max_rows )
+        //     );
+        // }
         return $rows;
     }
 
     $out   = array_slice( $rows, 0, $max_rows );
     $after = count( $out );
 
-    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-        back_trace(
-            'NOTICE',
-            sprintf( '[LCM][cap:%s] candidates before=%d after=%d cap=%d', $slug, $before, $after, $max_rows )
-        );
-    }
+    // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+    //     back_trace(
+    //         'NOTICE',
+    //         sprintf( '[LCM][cap:%s] candidates before=%d after=%d cap=%d', $slug, $before, $after, $max_rows )
+    //     );
+    // }
 
     return $out;
 }
@@ -9097,23 +9095,22 @@ function transformer_model_lexical_context_diag_log_coverage_gate_result( $cover
     );
 
     if ( 'skipped_meaningful_lt_3' === $reason || 'skipped_rare_exact_token_match' === $reason ) {
-        back_trace(
-            'NOTICE',
-            sprintf( '[LCM][coverage_gate] allow=%d reason=%s', $allow, $reason )
-        );
-
+        // back_trace(
+        //     'NOTICE',
+        //     sprintf( '[LCM][coverage_gate] allow=%d reason=%s', $allow, $reason )
+        // );
         return;
     }
 
-    back_trace(
-        'NOTICE',
-        sprintf(
-            '[LCM][coverage_gate] allow=%d reason=%s matched=[%s] required=2',
-            $allow,
-            $reason,
-            $matched_safe
-        )
-    );
+    // back_trace(
+    //     'NOTICE',
+    //     sprintf(
+    //         '[LCM][coverage_gate] allow=%d reason=%s matched=[%s] required=2',
+    //         $allow,
+    //         $reason,
+    //         $matched_safe
+    //     )
+    // );
 }
 
 /**
@@ -9419,33 +9416,33 @@ function transformer_model_lexical_context_should_return_scored_rows( $rows, $in
         $adapted_s         = ( isset( $adaptive ) && is_array( $adaptive ) && ! empty( $adaptive['adapted'] ) ) ? 1 : 0;
         $adapt_reason_s    = ( isset( $adaptive ) && is_array( $adaptive ) && isset( $adaptive['reason'] ) ) ? (string) $adaptive['reason'] : '';
 
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][return_gate_diag] min_default=%g min_used=%g adapted=%d adapt_reason=%s shape=%s meaningful=%d top_score=%g candidates=%d local_idf=%d',
-                $min_top_default_s,
-                $min_top_used_s,
-                $adapted_s,
-                $adapt_reason_s,
-                $shape_s,
-                $meaningful_count,
-                isset( $result['top_score'] ) ? (float) $result['top_score'] : 0.0,
-                isset( $result['candidate_count'] ) ? (int) $result['candidate_count'] : 0,
-                $local_idf_available ? 1 : 0
-            )
-        );
+        // back_trace(
+        //     'NOTICE',
+        //     sprintf(
+        //         '[LCM][return_gate_diag] min_default=%g min_used=%g adapted=%d adapt_reason=%s shape=%s meaningful=%d top_score=%g candidates=%d local_idf=%d',
+        //         $min_top_default_s,
+        //         $min_top_used_s,
+        //         $adapted_s,
+        //         $adapt_reason_s,
+        //         $shape_s,
+        //         $meaningful_count,
+        //         isset( $result['top_score'] ) ? (float) $result['top_score'] : 0.0,
+        //         isset( $result['candidate_count'] ) ? (int) $result['candidate_count'] : 0,
+        //         $local_idf_available ? 1 : 0
+        //     )
+        // );
 
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][return_gate] allow=%d reason=%s top_score=%g candidates=%d%s',
-                ! empty( $result['allow'] ) ? 1 : 0,
-                isset( $result['reason'] ) ? (string) $result['reason'] : '',
-                isset( $result['top_score'] ) ? (float) $result['top_score'] : 0.0,
-                isset( $result['candidate_count'] ) ? (int) $result['candidate_count'] : 0,
-                $return_gate_terms_suffix
-            )
-        );
+        // back_trace(
+        //     'NOTICE',
+        //     sprintf(
+        //         '[LCM][return_gate] allow=%d reason=%s top_score=%g candidates=%d%s',
+        //         ! empty( $result['allow'] ) ? 1 : 0,
+        //         isset( $result['reason'] ) ? (string) $result['reason'] : '',
+        //         isset( $result['top_score'] ) ? (float) $result['top_score'] : 0.0,
+        //         isset( $result['candidate_count'] ) ? (int) $result['candidate_count'] : 0,
+        //         $return_gate_terms_suffix
+        //     )
+        // );
     }
 
     return $result;
@@ -9505,10 +9502,10 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                     $sig
                 )
             );
-            back_trace(
-                'NOTICE',
-                sprintf( '[LCM][query_shape] shape=%s confidence=%g signals=[%s]', $shape, $conf, $sig_s )
-            );
+            // back_trace(
+            //     'NOTICE',
+            //     sprintf( '[LCM][query_shape] shape=%s confidence=%g signals=[%s]', $shape, $conf, $sig_s )
+            // );
             $lcm_query_shape_logged = true;
         }
     }
@@ -9703,29 +9700,29 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         if ( is_array( $meaningful_query_tokens ) && count( $meaningful_query_tokens ) > 0 ) {
             if ( $avg < 0.20 && $qo < 0.15 ) {
                 $sentenceScores = array();
-                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][semantic_cohesion_gate] allow=0 reason="low_cohesion_low_query_overlap" avg=%.4f query_overlap=%.4f candidates=%d',
-                            $avg,
-                            $qo,
-                            $n
-                        )
-                    );
-                }
+                // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                //     back_trace(
+                //         'NOTICE',
+                //         sprintf(
+                //             '[LCM][semantic_cohesion_gate] allow=0 reason="low_cohesion_low_query_overlap" avg=%.4f query_overlap=%.4f candidates=%d',
+                //             $avg,
+                //             $qo,
+                //             $n
+                //         )
+                //     );
+                // }
             } else {
-                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][semantic_cohesion_gate] allow=1 avg=%.4f query_overlap=%.4f candidates=%d',
-                            $avg,
-                            $qo,
-                            $n
-                        )
-                    );
-                }
+                // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                //     back_trace(
+                //         'NOTICE',
+                //         sprintf(
+                //             '[LCM][semantic_cohesion_gate] allow=1 avg=%.4f query_overlap=%.4f candidates=%d',
+                //             $avg,
+                //             $qo,
+                //             $n
+                //         )
+                //     );
+                // }
             }
         }
     }
@@ -9758,17 +9755,17 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
             $rescued = ( 1 === $vg['strong_anchor'] );
 
             if ( ! $rescued ) {
-                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                    back_trace(
-                        'NOTICE',
-                        sprintf( '[LCM][vague_query_gate] allow=0 reason="no_strong_anchor" tokens="%s"', $toks )
-                    );
-                }
+                // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                //     back_trace(
+                //         'NOTICE',
+                //         sprintf( '[LCM][vague_query_gate] allow=0 reason="no_strong_anchor" tokens="%s"', $toks )
+                //     );
+                // }
             } elseif ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                back_trace(
-                    'NOTICE',
-                    sprintf( '[LCM][vague_query_gate] allow=1 reason="strong_anchor_found" tokens="%s"', $toks )
-                );
+                // back_trace(
+                //     'NOTICE',
+                //     sprintf( '[LCM][vague_query_gate] allow=1 reason="strong_anchor_found" tokens="%s"', $toks )
+                // );
             }
         }
     } elseif ( $shape_s === 'short_anchor_query' && transformer_model_lcm_raw_query_matches_vague_question_structure( $vague_raw ) ) {
@@ -9809,16 +9806,16 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                 $vr_esc = substr( $vr_esc, 0, 350 ) . '...';
             }
 
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][vague_query_gate_short_anchor] allow=%d reason="%s" raw="%s" meaningful=[%s]',
-                    (int) (bool) $sa_allow,
-                    str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $sa_reason ),
-                    $vr_esc,
-                    $mt_join
-                )
-            );
+            // back_trace(
+            //     'NOTICE',
+            //     sprintf(
+            //         '[LCM][vague_query_gate_short_anchor] allow=%d reason="%s" raw="%s" meaningful=[%s]',
+            //         (int) (bool) $sa_allow,
+            //         str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $sa_reason ),
+            //         $vr_esc,
+            //         $mt_join
+            //     )
+            // );
         }
     } elseif ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
         $shape_lbl = $shape_s;
@@ -9836,15 +9833,15 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         if ( strlen( $vr_esc ) > 350 ) {
             $vr_esc = substr( $vr_esc, 0, 350 ) . '...';
         }
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][vague_query_gate_skip] shape=%s raw="%s" meaningful=[%s] note=vague_guard_not_applicable',
-                $shape_lbl,
-                $vr_esc,
-                $mt_join
-            )
-        );
+        // back_trace(
+        //     'NOTICE',
+        //     sprintf(
+        //         '[LCM][vague_query_gate_skip] shape=%s raw="%s" meaningful=[%s] note=vague_guard_not_applicable',
+        //         $shape_lbl,
+        //         $vr_esc,
+        //         $mt_join
+        //     )
+        // );
     }
 
     // Low-quality fragment guard (slang/junk-heavy queries): separate from vague-query gate; clears rows if no strong anchor.
@@ -9879,16 +9876,16 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
             if ( strlen( $vr_frag ) > 350 ) {
                 $vr_frag = substr( $vr_frag, 0, 350 ) . '...';
             }
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][fragment_query_gate] allow=%d reason="%s" raw="%s" meaningful=[%s]',
-                    $frag_rescued ? 1 : 0,
-                    $frag_rescued ? 'strong_anchor_found' : 'no_strong_anchor',
-                    $vr_frag,
-                    $mt_frag
-                )
-            );
+            // back_trace(
+            //     'NOTICE',
+            //     sprintf(
+            //         '[LCM][fragment_query_gate] allow=%d reason="%s" raw="%s" meaningful=[%s]',
+            //         $frag_rescued ? 1 : 0,
+            //         $frag_rescued ? 'strong_anchor_found' : 'no_strong_anchor',
+            //         $vr_frag,
+            //         $mt_frag
+            //     )
+            // );
         }
     }
 
@@ -10037,13 +10034,13 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                 if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) && $log_count < 10 ) {
                     $preview = transformer_model_lexical_context_diag_preview_text( $text, 120 );
                     $preview = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), $preview );
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][answerability_gate_row] skipped=1 reason="not_answerable" text="%s"',
-                            $preview
-                        )
-                    );
+                    // back_trace(
+                    //     'NOTICE',
+                    //     sprintf(
+                    //         '[LCM][answerability_gate_row] skipped=1 reason="not_answerable" text="%s"',
+                    //         $preview
+                    //     )
+                    // );
                     ++$log_count;
                 }
             }
@@ -10052,16 +10049,16 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         if ( $filtered !== array() ) {
             $sentenceScores = $filtered;
             $fallback       = 0;
-            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                back_trace(
-                    'NOTICE',
-                    sprintf(
-                        '[LCM][answerability_gate] applied=1 kept=%d skipped=%d',
-                        count( $filtered ),
-                        $skipped
-                    )
-                );
-            }
+            // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            //     back_trace(
+            //         'NOTICE',
+            //         sprintf(
+            //             '[LCM][answerability_gate] applied=1 kept=%d skipped=%d',
+            //             count( $filtered ),
+            //             $skipped
+            //         )
+            //     );
+            // }
         } else {
             $cg = transformer_model_lexical_context_constraint_gate_last_meta();
             $cg_applied = ! empty( $cg['applied'] );
@@ -10076,9 +10073,9 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                 }
             } else {
                 $fallback = 1;
-                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                    back_trace( 'NOTICE', '[LCM][answerability_gate] fallback=1 reason="no_valid_rows"' );
-                }
+                // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                //     back_trace( 'NOTICE', '[LCM][answerability_gate] fallback=1 reason="no_valid_rows"' );
+                // }
             }
         }
 
@@ -10259,27 +10256,27 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                     $sentenceScores = array();
                 }
 
-                if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                    back_trace(
-                        'NOTICE',
-                        sprintf(
-                            '[LCM][fragment_completion_gate] allow=%d reason="subject_leading_definition_required"',
-                            $lead_ok ? 1 : 0
-                        )
-                    );
-                }
+                // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+                //     back_trace(
+                //         'NOTICE',
+                //         sprintf(
+                //             '[LCM][fragment_completion_gate] allow=%d reason="subject_leading_definition_required"',
+                //             $lead_ok ? 1 : 0
+                //         )
+                //     );
+                // }
             }
         }
 
-        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][answer_directness_order] applied=1 candidates=%d',
-                    count( $sentenceScores )
-                )
-            );
-        }
+        // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        //     back_trace(
+        //         'NOTICE',
+        //         sprintf(
+        //             '[LCM][answer_directness_order] applied=1 candidates=%d',
+        //             count( $sentenceScores )
+        //         )
+        // );
+        // }
     }
 
     $return_gate = transformer_model_lexical_context_should_return_scored_rows(
@@ -10399,19 +10396,19 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
                 $assembly_sentenceScores = $filtered;
             }
 
-            if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-                $subj_esc = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $subject );
-                back_trace(
-                    'NOTICE',
-                    sprintf(
-                        '[LCM][definition_query_assembly_filter] applied=%d before=%d after=%d subject="%s"',
-                        ( $filtered !== array() ) ? 1 : 0,
-                        is_array( $sentenceScores ) ? count( $sentenceScores ) : 0,
-                        is_array( $assembly_sentenceScores ) ? count( $assembly_sentenceScores ) : 0,
-                        $subj_esc
-                    )
-                );
-            }
+            // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+            //     $subj_esc = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) $subject );
+            //     back_trace(
+            //         'NOTICE',
+            //         sprintf(
+            //             '[LCM][definition_query_assembly_filter] applied=%d before=%d after=%d subject="%s"',
+            //             ( $filtered !== array() ) ? 1 : 0,
+            //             is_array( $sentenceScores ) ? count( $sentenceScores ) : 0,
+            //             is_array( $assembly_sentenceScores ) ? count( $assembly_sentenceScores ) : 0,
+            //             $subj_esc
+            //         )
+            //     );
+            // }
         }
     }
 
@@ -10424,20 +10421,20 @@ function transformer_model_lexical_context_build_sentences_from_documents( $docu
         isset( $lcm_all_ranked_pool ) && is_array( $lcm_all_ranked_pool ) ? $lcm_all_ranked_pool : $sentenceScores
     );
 
-    if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][consolidated] intent=%s topic="%s" best_doc=%d facts=%d discarded=%d confidence=%.2f',
-                isset( $consolidated['intent'] ) ? (string) $consolidated['intent'] : '',
-                str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) ( $consolidated['primary_topic'] ?? '' ) ),
-                (int) ( $consolidated['best_document_id'] ?? 0 ),
-                is_array( $consolidated['facts'] ?? null ) ? count( (array) $consolidated['facts'] ) : 0,
-                is_array( $consolidated['discarded'] ?? null ) ? count( (array) $consolidated['discarded'] ) : 0,
-                isset( $consolidated['confidence'] ) ? (float) $consolidated['confidence'] : 0.0
-            )
-        );
-    }
+    // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+    //     back_trace(
+    //         'NOTICE',
+    //         sprintf(
+    //             '[LCM][consolidated] intent=%s topic="%s" best_doc=%d facts=%d discarded=%d confidence=%.2f',
+    //             isset( $consolidated['intent'] ) ? (string) $consolidated['intent'] : '',
+    //             str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), (string) ( $consolidated['primary_topic'] ?? '' ) ),
+    //             (int) ( $consolidated['best_document_id'] ?? 0 ),
+    //             is_array( $consolidated['facts'] ?? null ) ? count( (array) $consolidated['facts'] ) : 0,
+    //             is_array( $consolidated['discarded'] ?? null ) ? count( (array) $consolidated['discarded'] ) : 0,
+    //             isset( $consolidated['confidence'] ) ? (float) $consolidated['confidence'] : 0.0
+    //         )
+    //     );
+    // }
 
     $assembled = transformer_model_lexical_context_assemble_response_from_consolidated(
         $consolidated,
@@ -11285,15 +11282,15 @@ function lcm_consolidate_facts( array $ranked_sentences, string $intent, string 
             $t = isset( $candidates[ $i ]['text'] ) ? (string) $candidates[ $i ]['text'] : '';
             $p[] = str_replace( array( "\r", "\n", '"' ), array( ' ', ' ', "'" ), transformer_model_lexical_context_diag_preview_text( $t, 140 ) );
         }
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][fact_condenser] intent=%s candidates=%d preview="%s"',
-                str_replace( '"', "'", $intent ),
-                count( $candidates ),
-                implode( ' | ', $p )
-            )
-        );
+        // back_trace(
+        //     'NOTICE',
+        //     sprintf(
+        //         '[LCM][fact_condenser] intent=%s candidates=%d preview="%s"',
+        //         str_replace( '"', "'", $intent ),
+        //         count( $candidates ),
+        //         implode( ' | ', $p )
+        //     )
+        // );
     }
 
     // Dedupe exact/near-exact (by existing dedupe token signature) before selection.
@@ -15531,18 +15528,18 @@ function transformer_model_lexical_context_build_consolidation_object( $query_ra
 
     if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
         $shape_s = isset( $query_shape['shape'] ) ? (string) $query_shape['shape'] : '';
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][assembly_intent] detected=%s shape=%s selected=%s overridden=%d reason=%s meaningful=%d',
-                str_replace( '"', "'", (string) $detected_intent ),
-                str_replace( '"', "'", (string) $shape_s ),
-                str_replace( '"', "'", (string) $intent ),
-                ! empty( $resolved_intent['overridden'] ) ? 1 : 0,
-                isset( $resolved_intent['reason'] ) ? str_replace( '"', "'", (string) $resolved_intent['reason'] ) : '',
-                is_array( $meaningful_query_tokens ) ? count( $meaningful_query_tokens ) : 0
-            )
-        );
+        // back_trace(
+        //     'NOTICE',
+        //     sprintf(
+        //         '[LCM][assembly_intent] detected=%s shape=%s selected=%s overridden=%d reason=%s meaningful=%d',
+        //         str_replace( '"', "'", (string) $detected_intent ),
+        //         str_replace( '"', "'", (string) $shape_s ),
+        //         str_replace( '"', "'", (string) $intent ),
+        //         ! empty( $resolved_intent['overridden'] ) ? 1 : 0,
+        //         isset( $resolved_intent['reason'] ) ? str_replace( '"', "'", (string) $resolved_intent['reason'] ) : '',
+        //         is_array( $meaningful_query_tokens ) ? count( $meaningful_query_tokens ) : 0
+        //     )
+        // );
     }
 
     $primary_topic = transformer_model_lcm_informational_subject_phrase_for_definition_score( $query_raw, $meaningful_query_tokens );
@@ -15685,21 +15682,21 @@ function transformer_model_lexical_context_build_consolidation_object( $query_ra
                 $confidence = min( $confidence, $answer_intent_confidence_cap );
             }
         }
-        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][relation_confidence] base=%g after_caps=%g bonus=%g final=%g applied=%d reason=%s signals=%d',
-                    (float) $confidence_base,
-                    (float) ( is_array( $relation_conf_adj ) ? (float) ( $relation_conf_adj['base'] ?? $confidence ) : $confidence ),
-                    (float) ( is_array( $relation_conf_adj ) ? (float) ( $relation_conf_adj['bonus'] ?? 0.0 ) : 0.0 ),
-                    (float) $confidence,
-                    ( is_array( $relation_conf_adj ) && ! empty( $relation_conf_adj['applied'] ) ) ? 1 : 0,
-                    is_array( $relation_conf_adj ) && isset( $relation_conf_adj['reason'] ) ? str_replace( '"', "'", (string) $relation_conf_adj['reason'] ) : '',
-                    is_array( $relation_conf_adj ) && isset( $relation_conf_adj['signals'] ) ? (int) $relation_conf_adj['signals'] : 0
-                )
-            );
-        }
+        // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        //     back_trace(
+        //         'NOTICE',
+        //         sprintf(
+        //             '[LCM][relation_confidence] base=%g after_caps=%g bonus=%g final=%g applied=%d reason=%s signals=%d',
+        //             (float) $confidence_base,
+        //             (float) ( is_array( $relation_conf_adj ) ? (float) ( $relation_conf_adj['base'] ?? $confidence ) : $confidence ),
+        //             (float) ( is_array( $relation_conf_adj ) ? (float) ( $relation_conf_adj['bonus'] ?? 0.0 ) : 0.0 ),
+        //             (float) $confidence,
+        //             ( is_array( $relation_conf_adj ) && ! empty( $relation_conf_adj['applied'] ) ) ? 1 : 0,
+        //             is_array( $relation_conf_adj ) && isset( $relation_conf_adj['reason'] ) ? str_replace( '"', "'", (string) $relation_conf_adj['reason'] ) : '',
+        //             is_array( $relation_conf_adj ) && isset( $relation_conf_adj['signals'] ) ? (int) $relation_conf_adj['signals'] : 0
+        //         )
+        //     );
+        // }
     }
 
     $repair_ranked_pool = array();
@@ -17469,17 +17466,17 @@ function transformer_model_lexical_context_apply_confidence_handling_before_emit
         if ( is_array( $consolidated ) && isset( $consolidated['query_shape'] ) && is_array( $consolidated['query_shape'] ) && isset( $consolidated['query_shape']['shape'] ) ) {
             $shape_s = (string) $consolidated['query_shape']['shape'];
         }
-        back_trace(
-            'NOTICE',
-            sprintf(
-                '[LCM][confidence_gate] intent=%s shape=%s confidence=%g high_min=%g medium_min=%g',
-                str_replace( '"', "'", (string) $intent ),
-                str_replace( '"', "'", (string) $shape_s ),
-                (float) $confidence,
-                (float) $high_min,
-                (float) $medium_min
-            )
-        );
+        // back_trace(
+        //     'NOTICE',
+        //     sprintf(
+        //         '[LCM][confidence_gate] intent=%s shape=%s confidence=%g high_min=%g medium_min=%g',
+        //         str_replace( '"', "'", (string) $intent ),
+        //         str_replace( '"', "'", (string) $shape_s ),
+        //         (float) $confidence,
+        //         (float) $high_min,
+        //         (float) $medium_min
+        //     )
+        // );
     }
 
     if ( $confidence >= $high_min ) {
@@ -17491,17 +17488,17 @@ function transformer_model_lexical_context_apply_confidence_handling_before_emit
 
     // Low confidence: do not bluff; return uncertainty/no-match.
     if ( $confidence < $medium_min ) {
-        if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
-            back_trace(
-                'NOTICE',
-                sprintf(
-                    '[LCM][confidence_gate_decision] allow=0 reason=below_medium_min intent=%s confidence=%g medium_min=%g',
-                    str_replace( '"', "'", (string) $intent ),
-                    (float) $confidence,
-                    (float) $medium_min
-                )
-            );
-        }
+        // if ( transformer_model_lexical_context_is_lcm_diagnostics_enabled() && function_exists( 'back_trace' ) ) {
+        //     back_trace(
+        //         'NOTICE',
+        //         sprintf(
+        //             '[LCM][confidence_gate_decision] allow=0 reason=below_medium_min intent=%s confidence=%g medium_min=%g',
+        //             str_replace( '"', "'", (string) $intent ),
+        //             (float) $confidence,
+        //             (float) $medium_min
+        //         )
+        //     );
+        // }
         if ( transformer_model_lexical_context_lcm_intent_is_definition_family( $intent ) ) {
             $seed = trim( (string) $raw_query_text ) . '|' . $topic;
             return array(

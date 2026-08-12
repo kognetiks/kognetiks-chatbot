@@ -70,20 +70,14 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
     // No need for manual model starting or seeding - Ver 2.3.3 - 2025-08-13
     $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
 
-    // API key for the local server (required by Jan.ai)
+    // API key for the local server - Typically not needed
     $api_key = esc_attr(get_option('chatbot_local_api_key', ''));
     // Decrypt the API key - Ver 2.2.6
     $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
 
-    if (empty($api_key)) {
-        delete_transient($duplicate_key);
-        return 'Error: Local API key is missing. Add your Jan.ai API key under API/Local settings and try again.';
-    }
-
     $headers = array(
         'Authorization' => 'Bearer ' . $api_key,
         'Content-Type'  => 'application/json',
-        'Connection'    => 'close',
     );
 
     // Retrieve model settings
@@ -91,22 +85,12 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
     $max_tokens = intval(get_option('chatbot_local_max_tokens_setting', 1000)); // Reduced from 10000 to 1000 for local models
     $temperature = floatval(get_option('chatbot_local_temperature', 0.8));
     $top_p = floatval(get_option('chatbot_local_top_p', 0.95));
+    // Use the Local settings system prompt (not the global ChatGPT one) - Ver 2.3.3
     $context = esc_attr(get_option('chatbot_local_conversation_context', 'You are a versatile, friendly, and helpful assistant that responds using Markdown syntax.'));
-    $timeout = min(max(5, intval(get_option('chatbot_local_timeout_setting', 120))), 180);
+    $timeout = intval(get_option('chatbot_local_timeout_setting', 360));
 
-    // Jan.ai handles one completion at a time; hold off rapid follow-ups while the model finishes
-    $jan_busy_key = 'chatbot_local_jan_busy_' . wp_hash((string) $assistant_id . '|' . (string) $user_id . '|' . (string) $page_id . '|' . (string) $session_id);
-    $jan_cooldown_seconds = chatbot_local_get_jan_cooldown_seconds();
-    if ($jan_cooldown_seconds > 0) {
-        $jan_busy_since = get_transient($jan_busy_key);
-        if ($jan_busy_since !== false && (time() - (int) $jan_busy_since) < $jan_cooldown_seconds) {
-            delete_transient($duplicate_key);
-            return 'Error: Jan.ai is still finishing the previous reply. Please wait ' . $jan_cooldown_seconds . ' seconds and try again.';
-        }
-    }
-    set_transient($jan_busy_key, time(), $timeout + 60);
-
-    // Keep local prompts small — only the last exchange, not full site-enhanced context
+    // Keep local prompts small — many local models (e.g. llama.cpp / Jan.ai) run with n_ctx=4096.
+    // Stuffing KN keywords, session history, and 10 turns routinely exceeds that window.
     $conversation_context = chatbot_chatgpt_build_conversation_context('standard', 2, $session_id);
 
     $chatgpt_last_response = '';
@@ -126,29 +110,38 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
         $context = 'Recent conversation: ' . $chatgpt_last_response . ' ' . $context;
     }
 
-    // Context History - keep user/assistant pairs aligned (same as other API handlers)
-    addEntry('chatbot_chatgpt_context_history', $message);
+    // Budget tokens so system + user + completion fit the local context window - Ver 2.3.3
+    // ~3 chars/token is a conservative estimate (actual tokenizers are often closer to 4).
+    $n_ctx = 4096;
+    $template_overhead = 64;
+    $max_tokens = min($max_tokens, max(64, intval(($n_ctx - $template_overhead) / 2)));
 
-    // Check the length of the context and truncate if necessary - Ver 2.3.3 - 2025-08-13
-    $context_length = intval(strlen($context) / 3);
-    $max_context_length = 4096;
-    
-    if ($context_length > $max_context_length) {
-        // Truncate to the max length
-        $truncated_context = substr($context, 0, $max_context_length * 3); // Convert back to characters
-        
-        // Ensure truncation happens at the last complete word
-        $truncated_context = preg_replace('/\s+[^\s]*$/', '', $truncated_context);
-        
-        // Fallback if regex fails (e.g., no spaces in the string)
-        if (empty($truncated_context)) {
-            $truncated_context = substr($context, 0, $max_context_length * 3);
+    $estimate_tokens = static function ($text) {
+        return max(1, intval(strlen((string) $text) / 3));
+    };
+    $truncate_to_tokens = static function ($text, $max_tok) {
+        $max_chars = max(0, intval($max_tok) * 3);
+        if ($max_chars <= 0 || strlen($text) <= $max_chars) {
+            return $text;
         }
-        
-        // Add a note that context was truncated
-        $context = $truncated_context . ' [Context truncated due to length limits]';
+        $truncated = substr($text, 0, $max_chars);
+        $truncated = preg_replace('/\s+[^\s]*$/', '', $truncated);
+        if ($truncated === null || $truncated === '') {
+            $truncated = substr($text, 0, $max_chars);
+        }
+        return $truncated . ' [Context truncated due to length limits]';
+    };
 
+    $prompt_budget = max(256, $n_ctx - $max_tokens - $template_overhead);
+    $user_tokens = $estimate_tokens($message);
+    // Leave at least half the prompt budget for the system message when the user text is huge
+    $max_user_tokens = max(256, intval($prompt_budget * 0.5));
+    if ($user_tokens > $max_user_tokens) {
+        $message = $truncate_to_tokens($message, $max_user_tokens);
+        $user_tokens = $estimate_tokens($message);
     }
+    $max_system_tokens = max(128, $prompt_budget - $user_tokens);
+    $context = $truncate_to_tokens($context, $max_system_tokens);
 
     // Construct request body to match the expected schema
     // Note: Local servers with "context shift" disabled only support system + user messages
@@ -180,31 +173,8 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
         'data_format' => 'body',
     );
 
-    prod_trace('NOTICE', 'Local API request model: ' . $model . ' context_chars: ' . strlen($context) . ' URL: ' . $api_url);
-
-    $original_php_time_limit = chatbot_chatgpt_extend_php_execution_for_timeout($timeout);
-
-    try {
-        $response = wp_remote_post($api_url, $args);
-    } finally {
-        if ($jan_cooldown_seconds > 0) {
-            set_transient($jan_busy_key, time(), $jan_cooldown_seconds);
-        } else {
-            delete_transient($jan_busy_key);
-        }
-        chatbot_chatgpt_restore_php_execution_time($original_php_time_limit);
-    }
-
-    // Handle transport errors before reading the body
-    if (is_wp_error($response)) {
-        delete_transient($duplicate_key);
-        $error_message = $response->get_error_message();
-        prod_trace('ERROR', 'Local API wp_remote_post failed: ' . $error_message);
-        if (stripos($error_message, 'timed out') !== false || stripos($error_message, 'timeout') !== false) {
-            return 'Error: The request to Jan.ai timed out after ' . $timeout . ' seconds. The model may still be loading — try again, increase the Local timeout setting, or pick a smaller model.';
-        }
-        return 'Error: ' . $error_message . ' Check API/Local settings (base URL, API key) and that Jan.ai is running.';
-    }
+    // Send request
+    $response = wp_remote_post($api_url, $args);
 
     // Decode the response
     $raw_response_body = wp_remote_retrieve_body($response);
@@ -219,18 +189,22 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
         prod_trace('ERROR', 'JSON decode error: ' . json_last_error_msg() . '. Response size: ' . $response_body_size . ' bytes');
     }
 
-    // Check for HTTP error status codes
-    if ($response_code >= 400) {
-        delete_transient($duplicate_key);
-        $error_detail = chatbot_local_parse_api_error_message($raw_response_body, $response_code);
-        prod_trace('ERROR', 'Local API HTTP ' . $response_code . ' model ' . $model . ': ' . $error_detail);
-        return 'Error: ' . $error_detail;
+    // Handle request errors
+    if (is_wp_error($response)) {
+        // Clear locks on error
+        // Lock clearing removed - main send function handles locking
+        return 'Error: ' . $response->get_error_message() . ' Please check Settings for a valid API key.';
     }
 
-    if ($response_code === 0 || empty($raw_response_body)) {
-        delete_transient($duplicate_key);
-        prod_trace('ERROR', 'Local API empty response for model ' . $model);
-        return 'Error: Jan.ai returned an empty response. Check Jan.ai server logs and confirm the model "' . $model . '" is available.';
+    // Check for HTTP error status codes
+    $response_code = wp_remote_retrieve_response_code($response);
+    if ($response_code >= 400) {
+        $error_body = wp_remote_retrieve_body($response);
+        $error_message = 'HTTP ' . $response_code . ' Error: ' . $error_body;
+        
+        // Clear locks on error
+        // Lock clearing removed - main send function handles locking
+        return 'Error: ' . $error_message . ' Please check the request format and try again.';
     }
 
     // Get the user ID and page ID
@@ -274,7 +248,7 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
         prod_trace('NOTICE', 'Finish reason: ' . $finish_reason);
     }
 
-    if ($response_code === 200) {
+    if ($response['response']['code'] == 200) {
 
         if ($input_tokens > 0) {
             append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $input_tokens);
@@ -312,57 +286,23 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
         }
         
         addEntry('chatbot_chatgpt_context_history', $response_text);
-        delete_transient($duplicate_key);
+        // Clear locks on success
+        // Lock clearing removed - main send function handles locking
         return $response_text;
     } else {
 
-        delete_transient($duplicate_key);
-        $error_detail = chatbot_local_parse_api_error_message($raw_response_body, $response_code);
-        prod_trace('WARNING', 'Local API no choices content for model ' . $model . ': ' . $error_detail);
-
-        return 'Error: No response from Jan.ai for model "' . $model . '". ' . $error_detail;
+        // DIAG - Diagnostics - Ver 2.4.5
+        prod_trace('WARNING', 'No valid response text found in API response.');
+    
+        $localized_errorResponses = (get_locale() !== "en_US") 
+            ? get_localized_errorResponses(get_locale(), $errorResponses) 
+            : $errorResponses;
+    
+        // Clear locks on error
+        // Lock clearing removed - main send function handles locking
+        return $localized_errorResponses[array_rand($localized_errorResponses)];
     }
 
-}
-
-/**
- * Extract a readable error message from a Jan.ai / OpenAI-compatible JSON body.
- *
- * @param string $raw_body Raw response body.
- * @param int    $http_code HTTP status code.
- * @return string
- */
-function chatbot_local_parse_api_error_message($raw_body, $http_code = 0) {
-
-    $http_code = (int) $http_code;
-    $fallback = $http_code > 0
-        ? 'HTTP ' . $http_code . ' from Jan.ai.'
-        : 'Unexpected response from Jan.ai.';
-
-    if (empty($raw_body)) {
-        return $fallback;
-    }
-
-    $json = json_decode($raw_body, true);
-    if (!is_array($json)) {
-        $snippet = substr(trim(wp_strip_all_tags($raw_body)), 0, 300);
-        return $fallback . ($snippet ? ' ' . $snippet : '');
-    }
-
-    if (!empty($json['error'])) {
-        if (is_string($json['error'])) {
-            return $json['error'];
-        }
-        if (is_array($json['error']) && !empty($json['error']['message'])) {
-            return (string) $json['error']['message'];
-        }
-    }
-
-    if (!empty($json['message']) && is_string($json['message'])) {
-        return $json['message'];
-    }
-
-    return $fallback;
 }
 
 // Clean up response text from local models - Ver 2.3.4 - Fixed aggressive cleaning
@@ -504,4 +444,3 @@ function chatbot_local_get_models() {
     return array_values(array_unique($models));
     
 }
-

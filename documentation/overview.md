@@ -44,17 +44,17 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
-## What's new in Version 2.4.5
-
-### New Features
-* **OpenAI Prompts (Responses API)**: Shortcode now supports prompt IDs (`pmpt_...`) in addition to assistant IDs (`asst_...`) for OpenAI Responses API usage.
-* **Conversation Logging**: Added option to retain conversation logs indefinitely.
+## What's new in Version 2.4.7
 
 ### Improvements
-* **Documentation**: Updated documentation for OpenAI Prompts (Responses API) and Conversation Logging.
+* **Lexical Context Model**: Major upgrades to on-site answer quality, including answer intent detection, fact condensation, template-based synthesis, quality gates, IDF scoring, query expansion, and scheduled lexical cache builds.
+* **Local AI (JAN.AI)**: Updated Local API integration for compatibility with JAN.AI Version 8.0, including model discovery and chat-completions handling improvements.
+* **Assistants Admin UI**: Refined OpenAI, Azure, and Mistral assistant/agent management table action buttons for clearer WordPress admin styling.
+* **Documentation**: Fixed missing images, broken links, and orphaned documentation pages.
 
 ### Bug Fixes
-* **PHP execution time**: Fixed timeouts on long-running API calls by temporarily adjusting and restoring `max_execution_time` for OpenAI Chat Completions and Assistants API requests.
+* **Lexical Context Reliability**: Fixed lexical context timeouts and stabilized retrieval/build behavior for larger corpora.
+* **Conversation Handling**: Improved erase-conversation and related helper-path robustness for Local AI and frontend flows.
 
 * Information about past updates can be found [here](updates/updates.md).
 

@@ -199,6 +199,7 @@ $kchat_settings = array_merge($kchat_settings, array(
     'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
     'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
     'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
+    'chatbot_log_error_nonce' => wp_create_nonce('chatbot_log_error_nonce'),
     'nonce_timestamp' => time() * 1000,
 ));
 

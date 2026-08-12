@@ -1138,6 +1138,7 @@ window.resetAllLocks = resetAllLocks;
                 user_id: user_id, // pass the user ID here
                 page_id: page_id, // pass the page ID here
                 session_id: session_id, // pass the session ID here
+                assistant_id: assistant_id, // pass the assistant/prompt ID for logging and routing
                 client_message_id: client_message_id, // pass the client message ID for idempotency
                 chatbot_nonce: kchat_settings.chatbot_message_nonce, // Security: CSRF protection
             },
@@ -2511,5 +2512,12 @@ function logErrorToServer(error) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', kchat_settings.ajax_url, true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.send('action=log_chatbot_error&error_message=' + encodeURIComponent(error));
+    var nonce = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_log_error_nonce)
+        ? kchat_settings.chatbot_log_error_nonce
+        : '';
+    xhr.send(
+        'action=log_chatbot_error' +
+        '&error_message=' + encodeURIComponent(error) +
+        '&chatbot_nonce=' + encodeURIComponent(nonce)
+    );
 }

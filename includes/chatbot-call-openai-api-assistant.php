@@ -1481,9 +1481,10 @@ function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key
                                 'headers' => [
                                     'Content-Type' => 'application/json',
                                     'X-Assistant-ID' => $assistant_id, // Added header for endpoint security
+                                    'X-Assistant-Search-Key' => chatbot_chatgpt_get_assistant_search_key(), // Shared secret - Ver 2.4.7
                                 ],
-                                // FIXME - REMOVE THIS FOR PRODUCTION
-                                'sslverify' => false,
+                                // Prefer verifying TLS in production; keep false only if local certs fail
+                                'sslverify' => true,
                             ];
                             
                             // Add the query parameters
