@@ -4,7 +4,7 @@
 
 The **Kognetiks Chatbot** is a comprehensive WordPress plugin that integrates advanced AI capabilities into WordPress websites. It provides intelligent conversational experiences through multiple AI platforms, offering both cloud-based and local AI solutions for enhanced visitor engagement, customer support, and interactive assistance.
 
-**Version:** 2.4.7
+**Version:** 2.4.8
 **License:** GPLv3 or later  
 **WordPress Compatibility:** Tested up to WordPress 7.0.4
 
@@ -561,6 +561,12 @@ Users must agree to terms of service for each AI platform:
 - **JAN.AI**: JAN.AI About and Privacy Policy
 
 ## Version History
+
+## What's new in Version 2.4.8
+
+### Improvements
+* **OpenAI Responses migration**: OpenAI `asst_` IDs now chat through the Responses API. Local Common Name and Additional Instructions are included in each call. Hosted `pmpt_` prompt objects remain a temporary bridge until 30 November 2026.
+* **Vector stores**: Optional `vs_…` ID on each GPT Assistants row enables Responses `file_search` for large documents.
 
 ## What's new in Version 2.4.7
 

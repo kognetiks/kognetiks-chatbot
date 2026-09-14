@@ -212,9 +212,9 @@ add_action('admin_init', 'chatbot_chatgpt_assistant_settings_init');
 // GPT Assistants / Responses settings section callback - Ver 1.7.2 - Updated Ver 2.0.4, Ver 2.4.5
 function chatbot_chatgpt_assistant_settings_section_callback($args) {
     ?>
-    <p>Manage your chatbot <b>Assistants</b> and <b>Responses</b> (prompts) in one place using the interface below. Both types work with the same shortcodes and settings.</p>
-    <p><b>ID prefixes:</b> Use <code>asst_</code> for <b>Assistants</b> (OpenAI Assistants API; <a href="https://platform.openai.com/assistants" target="_blank">Assistants</a>). Use <code>pmpt_</code> for <b>Responses</b> (Responses API; <a href=https://platform.openai.com/chat" target="_blank">Chat</a>). The plugin detects the type from the ID prefix, so both work side by side.</p>
-    <p><b>Note:</b> The Assistants API is scheduled for deprecation around mid-2026. For new setups, prefer creating prompts in the Responses API and using <code>pmpt_</code> IDs.</p>
+    <p>Manage your chatbot <b>Assistants</b> and <b>Responses</b> in one place using the interface below. Both types work with the same shortcodes and settings.</p>
+    <p><b>ID prefixes:</b> Use <code>asst_</code> for former Assistants (now served by the Responses API). Use <code>pmpt_</code> for dashboard Prompt IDs (<a href="https://platform.openai.com/chat" target="_blank">Chat</a>). The plugin detects the type from the ID prefix.</p>
+    <p><b>Note:</b> OpenAI’s Assistants API was sunset on 26 August 2026. This plugin now sends both <code>asst_</code> and <code>pmpt_</code> traffic through the Responses API. Display names and extra instructions come from this table (<b>Common Name</b> and <b>Additional Instructions</b>). For large PDFs and other knowledge bases, paste the OpenAI <b>Vector Store ID</b> (<code>vs_…</code>) on the row — do not paste the document into Additional Instructions. Reusable prompt objects (<code>pmpt_</code>) are a temporary bridge until 30 November 2026.</p>
     <p>Tailor each Assistant or Response to your audience. When you're ready, add a shortcode such as <code>[chatbot-1]</code>, <code>[chatbot-2]</code>, etc. to your page.</p>
     <p><b>TIP:</b> For best results ensure that the shortcode appears only once on the page.</p>
     <p><b>TIP:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</p>

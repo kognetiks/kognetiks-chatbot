@@ -268,9 +268,9 @@ function display_chatbot_azure_assistants_table() {
         echo '<tr>';
         echo '<td>';  // Actions column for each assistant row
         // Update button to trigger the updateAssistant function
-        echo '<button type="button" class="button button-primary button-small" onclick="updateAssistant(' . $assistant->id . ')">Update</button>&nbsp';
+        echo '<button type="button" class="button button-primary button-small" onclick="updateAzureAssistant(' . $assistant->id . ')">Update</button>&nbsp';
         // Delete button to trigger the deleteAssistant function
-        echo '<button type="button" class="button button-primary button-small" onclick="deleteAssistant(' . $assistant->id . ')">Delete</button>';
+        echo '<button type="button" class="button button-primary button-small" onclick="deleteAzureAssistant(' . $assistant->id . ')">Delete</button>';
         echo '</td>';
         // echo '<td onclick="copyToClipboard(\'[assistant-' . $assistant->id . ']\')"><b>' . '&#91;assistant-' . $assistant->id . '&#93;' . '</b></br>or</br>[chatbot-' . $assistant->id . ']</td>';
         echo '<td onclick="copyToClipboard(\'[assistant-' . $assistant->id . ']\')"><b>' . '&#91;assistant-' . $assistant->id . '&#93;' . '</b></td>';
@@ -315,7 +315,7 @@ function display_chatbot_azure_assistants_table() {
 
     // Row for adding a new assistant
     echo '<tr>';
-    echo '<td><button type="button" class="button button-primary button-small" onclick="addNewAssistant()">Add New Assistant</button></td>';  // Actions column for adding new assistant
+    echo '<td><button type="button" class="button button-primary button-small" onclick="addNewAzureAssistant()">Add New Assistant</button></td>';  // Actions column for adding new assistant
     echo '<td>New</td>';
     echo '<td><input type="text" name="new_assistant_id" placeholder="Please provide the GPT Assistant Id."></td>';
     echo '<td><input type="text" name="new_common_name" placeholder="Common Name"></td>';
@@ -363,9 +363,17 @@ function display_chatbot_azure_assistants_table() {
 // Scripts for the chatbot assistants table
 function chatbot_azure_assistants_scripts() {
 
-    if ( current_user_can('manage_options') ) {
+    if ( ! current_user_can('manage_options') ) {
+        return;
+    }
 
-        $nonce = wp_create_nonce('chatbot_nonce_action');
+    $page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+    $tab  = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : '';
+    if ( $page !== 'chatbot-chatgpt' || $tab !== 'gpt_azure_assistants' ) {
+        return;
+    }
+
+    $nonce = wp_create_nonce('chatbot_nonce_action');
 
         ?>
         <script type="text/javascript">
@@ -373,7 +381,7 @@ function chatbot_azure_assistants_scripts() {
             var chatbot_nonce = "<?php echo esc_js($nonce); ?>";
 
             // Function to update an assistant's details
-            function updateAssistant(id) {
+            function updateAzureAssistant(id) {
                 var data = {
                     action: 'azure_update_assistant',
                     id: id,
@@ -402,7 +410,7 @@ function chatbot_azure_assistants_scripts() {
             }
 
             // Function to delete an assistant
-            function deleteAssistant(id) {
+            function deleteAzureAssistant(id) {
                 var data = {
                     action: 'azure_delete_assistant',
                     id: id
@@ -419,7 +427,7 @@ function chatbot_azure_assistants_scripts() {
             }
 
             // Function to add a new assistant
-            function addNewAssistant() {
+            function addNewAzureAssistant() {
                 var data = {
                     action: 'azure_add_new_assistant',
                     assistant_id: document.getElementsByName('new_assistant_id')[0].value,
@@ -448,8 +456,6 @@ function chatbot_azure_assistants_scripts() {
 
         </script>
         <?php
-
-    }
 
 }
 add_action('admin_footer', 'chatbot_azure_assistants_scripts');

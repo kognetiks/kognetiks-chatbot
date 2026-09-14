@@ -6,6 +6,12 @@
 
 ---
 
+= 2.4.8 - Released 2026-09-14 =
+
+### Improvements
+* **OpenAI Responses migration**: OpenAI `asst_` IDs now chat through the Responses API (Assistants API sunset). Local Common Name and Additional Instructions are sent with each call. Hosted `pmpt_` prompt objects remain a temporary bridge until 30 November 2026.
+* **Vector stores (file search)**: GPT Assistants rows can store an OpenAI Vector Store ID (`vs_…`). Responses calls then send `file_search` so large PDFs stay searchable without pasting them into Additional Instructions.
+
 = 2.4.7 - Released 2026-08-12 =
 
 ### Improvements

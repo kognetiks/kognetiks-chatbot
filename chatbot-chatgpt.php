@@ -1626,24 +1626,14 @@ function chatbot_chatgpt_process_queued_message($message_data) {
 
     // Process the message based on platform and use_assistant_id - Ver 2.3.6   
     // Check if we should use assistant_id or regular API
-    if ($use_assistant_id == 'Yes' && $chatbot_ai_platform_choice == 'OpenAI' && str_starts_with($assistant_id, 'asst_')) {
+    if ($use_assistant_id == 'Yes' && $chatbot_ai_platform_choice == 'OpenAI' && (str_starts_with($assistant_id, 'asst_') || str_starts_with($assistant_id, 'pmpt_'))) {
         
         // DIAG - Diagnostics - Ver 2.4.5
-        // back_trace('NOTICE', 'Using Assistant ID - Ver 2.4.5');
+        // back_trace('NOTICE', 'Using Responses API for Assistant/Prompt ID - Ver 2.4.8');
         // back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
         // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
         // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
 
-        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
-
-    } elseif ($use_assistant_id == 'Yes' && $chatbot_ai_platform_choice == 'OpenAI' && str_starts_with($assistant_id, 'pmpt_')) {
-        
-        // DIAG - Diagnostics - Ver 2.4.5
-        // back_trace('NOTICE', 'Using Prompt ID - Ver 2.4.5');
-        // back_trace('NOTICE', 'Prompt ID: ' . $assistant_id);
-        // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-        // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
-        
         $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
 
     } elseif ($use_assistant_id == 'Yes' && $chatbot_ai_platform_choice == 'Azure OpenAI') {
@@ -2265,12 +2255,8 @@ function chatbot_chatgpt_send_message() {
         // Route based on chatbot_ai_platform_choice setting - Ver 2.3.6
         if ($chatbot_ai_platform_choice == 'OpenAI') {
 
-            // Original Assistant or Prompt
-            if (str_starts_with($assistant_id, 'asst_')) {
-
-                $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
-
-            } elseif (str_starts_with($assistant_id, 'pmpt_')) {
+            // Former Assistants (asst_) and hosted Prompts (pmpt_) both use Responses.
+            if (str_starts_with($assistant_id, 'asst_') || str_starts_with($assistant_id, 'pmpt_')) {
 
                 $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
 

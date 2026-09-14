@@ -54,11 +54,13 @@ What you already set up is a good baseline:
 
 ---
 
-### Step 4) Attach any supporting documentation PDF to the Prompt (Tools)
-In this case, the attachmenet refers to the **official Kognetiks Chatbot documentation PDF** in the Prompt’s Tools area, so the support agent can consult it.
+### Step 4) Attach any supporting documentation PDF (Vector store)
+Large manuals do **not** go in Additional Instructions. Upload the PDF to an OpenAI **Vector store**, then paste the store ID (`vs_…`) into the GPT Assistants row **Vector Store ID** field. The plugin sends Responses `file_search` with that ID.
 
-Because the PDF may be replaced over time, the Developer message should refer to it generically as:
+Because the PDF may be replaced over time, the Developer message / Additional Instructions should refer to it generically as:
 > “the attached official Kognetiks Chatbot documentation PDF”
+
+You can still attach the PDF on a hosted Prompt until 30 November 2026, but the Vector Store ID in WordPress is what survives after prompt objects shut down.
 
 <img src="supporting-documentation.png" alt="Supporting Documentation" style="width:auto;height:auto;">
 
@@ -72,8 +74,7 @@ After you save/publish, you’ll have a **Prompt ID** (commonly starting with ``
 
 <img src="publish-the-prompt.png" alt="Prompt ID" style="width:auto;height:auto;">
 
-> Important note: The Kognetiks documentation examples refer to OpenAI Assistant IDs that usually start with ```asst_...```. This refers to the Assistant API which is being deprecated mid-2026.
-> If you are using a ```pmpt_...``` ID in the shortcode (as in the example at the top of this guide), make sure the plugin version that supports prompts will be Version 2.4.5 or later. If it does not, you may need to use an ```asst_...``` Assistant ID instead.
+> Important: OpenAI’s Assistants API was sunset on 26 August 2026. Kognetiks now sends both ```asst_...``` and ```pmpt_...``` IDs through the Responses API. Prompt objects (```pmpt_...```) are a temporary bridge until 30 November 2026 — copy important prompt *text* into **Additional Instructions**. Keep large PDFs in an OpenAI Vector store and put the ```vs_...``` ID on the GPT Assistants row. Prompt IDs in the shortcode require plugin Version 2.4.5 or later.
 
 ---
 
@@ -116,11 +117,11 @@ The documentation describes this as GPT Assistants when configuration flow in th
 - enabling use of prompt IDs
 - saving the settings
 
-Prompts ues a Responses API ID that start with ```pmpt_```, for example: ```pmpt_698cc2c1d4a08190981f3ca4780270660bed802bdb1373d7```. Its the same process as using an Assistant API ID which start with ```asst_```.
+Prompts use a Responses API ID that starts with ```pmpt_```, for example: ```pmpt_698cc2c1d4a08190981f3ca4780270660bed802bdb1373d7```. Former Assistants (`asst_`) now use the same Responses path.
 
 <img src="assistant-settings.png" alt="Assistant settings" style="width:auto;height:auto;">
 
-> Note: The docs describe Assistant IDs that typically start with ```asst_...```, however, OpenAI is migrating to the Responses API, and you'll be using a ```pmpt_...``` ID, either on the ```GPT Assistants``` page or when using the ```assistant=``` parameter in the shortcode as to invoke the prompt/response in your environment.
+> Note: Both ```asst_...``` and ```pmpt_...``` IDs work on the ```GPT Assistants``` page and in the ```assistant=``` shortcode parameter. Copy important prompt text into **Additional Instructions** in WordPress; hosted prompt objects are scheduled to shut down on 30 November 2026.
 
 ---
 

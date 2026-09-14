@@ -5,15 +5,16 @@
  * This file contains the code for access the OpenAI Responses API.
  * 
  * OpenAI now has Assistant-like and Thread-like objects in the Responses API. Learn more in the migration guide.
- * As of August 26th, 2025, we’re deprecating the Assistants API, with a sunset date of August 26, 2026.
+ * Assistants API was sunset on August 26, 2026. OpenAI prompt objects (pmpt_)
+ * remain a temporary bridge until November 30, 2026. This file sends both
+ * asst_ and pmpt_ traffic through Responses + Conversations, overlaying
+ * Common Name and Additional Instructions stored in WordPress.
  * 
  * https://developers.openai.com/api/reference/responses/overview
  * 
  * End points
  * https://api.openai.com/v1/responses
  * https://api.openai.com/v1/conversations
- * 
- * Responses/Conversations now start with "pmpt_" instead of "asst_"
  *
  * @package chatbot-chatgpt
  */
@@ -296,6 +297,139 @@ function check_assistant_tool_usage_responses( $response_json ) {
 }
 
 /* -------------------------------------------------------------------------
+ * Local Common Name + Additional Instructions for Responses calls
+ * ------------------------------------------------------------------------- */
+function chatbot_chatgpt_get_responses_local_row( $assistant_id ) {
+
+    if ( ! function_exists( 'get_chatbot_chatgpt_assistant_by_assistant_id' ) ) {
+        return array();
+    }
+
+    $row = get_chatbot_chatgpt_assistant_by_assistant_id( $assistant_id );
+    return is_array( $row ) ? $row : array();
+
+}
+
+/**
+ * Resolve extra instructions: session transient, then kchat_settings, then the assistants table.
+ *
+ * @param string $assistant_id
+ * @param mixed  $user_id
+ * @param mixed  $page_id
+ * @param mixed  $session_id
+ * @param array  $local_row
+ * @return string
+ */
+function chatbot_chatgpt_resolve_local_additional_instructions( $assistant_id, $user_id, $page_id, $session_id, $local_row = array() ) {
+
+    if ( function_exists( 'get_chatbot_chatgpt_transients' ) ) {
+        $from_transient = get_chatbot_chatgpt_transients( 'additional_instructions', $user_id, $page_id, $session_id );
+        if ( is_string( $from_transient ) && trim( $from_transient ) !== '' ) {
+            return trim( wp_unslash( $from_transient ) );
+        }
+    }
+
+    global $kchat_settings;
+    if ( isset( $kchat_settings['additional_instructions'] ) && is_string( $kchat_settings['additional_instructions'] ) && trim( $kchat_settings['additional_instructions'] ) !== '' ) {
+        return trim( wp_unslash( $kchat_settings['additional_instructions'] ) );
+    }
+
+    if ( ! empty( $local_row['additional_instructions'] ) && is_string( $local_row['additional_instructions'] ) ) {
+        return trim( $local_row['additional_instructions'] );
+    }
+
+    return '';
+
+}
+
+/**
+ * Build Responses `instructions` from Common Name + additional instructions.
+ * Used for asst_ IDs (no hosted prompt object).
+ *
+ * @param array  $local_row
+ * @param string $additional_instructions
+ * @return string
+ */
+function chatbot_chatgpt_build_responses_instructions( $local_row, $additional_instructions ) {
+
+    $parts = array();
+
+    $common_name = '';
+    if ( ! empty( $local_row['common_name'] ) && is_string( $local_row['common_name'] ) ) {
+        $common_name = trim( $local_row['common_name'] );
+    }
+
+    $reserved_names = array( 'primary', 'alternate' );
+    if ( $common_name !== '' && ! in_array( strtolower( $common_name ), $reserved_names, true ) ) {
+        $parts[] = sprintf( 'You are %s.', $common_name );
+    }
+
+    if ( is_string( $additional_instructions ) && trim( $additional_instructions ) !== '' ) {
+        $parts[] = trim( $additional_instructions );
+    }
+
+    if ( function_exists( 'chatbot_chatgpt_parse_vector_store_ids' ) && ! empty( $local_row['vector_store_id'] ) ) {
+        $vs_ids = chatbot_chatgpt_parse_vector_store_ids( $local_row['vector_store_id'] );
+        if ( ! empty( $vs_ids ) ) {
+            $parts[] = 'When answering, use the file_search tool against the attached documentation. If the documentation does not contain the answer, say so.';
+        }
+    }
+
+    if ( empty( $parts ) ) {
+        $fallback = get_option( 'chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.' );
+        if ( is_string( $fallback ) && trim( $fallback ) !== '' ) {
+            $parts[] = trim( $fallback );
+        }
+    }
+
+    return implode( "\n\n", $parts );
+
+}
+
+/**
+ * Model for asst_ Responses calls (prompt objects already include a model).
+ *
+ * @param mixed $user_id
+ * @param mixed $page_id
+ * @param mixed $session_id
+ * @return string
+ */
+function chatbot_chatgpt_resolve_responses_model( $user_id, $page_id, $session_id ) {
+
+    $model = '';
+    if ( function_exists( 'get_chatbot_chatgpt_transients' ) ) {
+        $model = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id );
+    }
+    if ( ! is_string( $model ) || trim( $model ) === '' ) {
+        $model = get_option( 'chatbot_chatgpt_model_choice', 'gpt-3.5-turbo' );
+    }
+
+    return sanitize_text_field( (string) $model );
+
+}
+
+/**
+ * Vector store IDs for Responses file_search (vs_...).
+ *
+ * @param array $local_row Assistants table row.
+ * @return string[]
+ */
+function chatbot_chatgpt_resolve_vector_store_ids( $local_row ) {
+
+    $raw = '';
+    if ( is_array( $local_row ) && ! empty( $local_row['vector_store_id'] ) && is_string( $local_row['vector_store_id'] ) ) {
+        $raw = $local_row['vector_store_id'];
+    }
+
+    if ( function_exists( 'chatbot_chatgpt_parse_vector_store_ids' ) ) {
+        return chatbot_chatgpt_parse_vector_store_ids( $raw );
+    }
+
+    return array();
+
+}
+
+/* -------------------------------------------------------------------------
  * Main call used by the plugin (signature preserved)
  * ------------------------------------------------------------------------- */
 function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null ) {
@@ -306,9 +440,12 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
     // back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
 
     // Migration behavior:
-    // - $assistant_id => Prompt ID (pmpt_...)
+    // - $assistant_id => Prompt ID (pmpt_...) or former Assistant ID (asst_...)
     // - $thread_id    => Conversation ID (cnv_...)
     // Variable names preserved for compatibility with the rest of the plugin.
+    // asst_ uses model + local instructions. pmpt_ still references the hosted
+    // prompt object until OpenAI retires v1/prompts (2026-11-30), with local
+    // Additional Instructions added as a developer message.
 
     // Decrypt the API key if the plugin provides a helper.
     if ( function_exists( 'chatbot_chatgpt_decrypt_api_key' ) ) {
@@ -322,7 +459,7 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
 
     $prompt_id = trim( (string) $assistant_id );
     if ( empty( $prompt_id ) ) {
-        return 'Error: Missing OpenAI Prompt ID (pmpt_...). Create a Prompt from your Assistant in the OpenAI dashboard and store its ID.';
+        return 'Error: Missing OpenAI Prompt ID (pmpt_...) or Assistant ID (asst_...). Store the ID in GPT Assistants and copy important instructions into Additional Instructions.';
     }
 
     $message = (string) $message;
@@ -478,22 +615,65 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
         // back_trace('NOTICE', 'Step 2: Create the model response (Responses API)');
         // back_trace('NOTICE', 'Message: ' . $message);
 
+        $is_prompt = function_exists( 'chatbot_chatgpt_id_starts_with' )
+            ? chatbot_chatgpt_id_starts_with( $prompt_id, 'pmpt_' )
+            : ( strpos( $prompt_id, 'pmpt_' ) === 0 );
+
+        $local_row = chatbot_chatgpt_get_responses_local_row( $prompt_id );
+        $additional_instructions = chatbot_chatgpt_resolve_local_additional_instructions( $prompt_id, $user_id, $page_id, $session_id, $local_row );
+
+        // Prompt objects already carry dashboard instructions. Extra WordPress
+        // instructions are additive so they do not replace the hosted prompt.
+        if ( $is_prompt && $additional_instructions !== '' ) {
+            array_unshift(
+                $input_payload,
+                array(
+                    'type'    => 'message',
+                    'role'    => 'developer',
+                    'content' => $additional_instructions,
+                )
+            );
+        }
+
         $payload = array(
             // The conversation that this response belongs to. Conversation items are
             // prepended automatically and the new items are appended after completion.
-            'conversation' => $thread_id,
-            // Reference your migrated Prompt (created from the former Assistant).
-            // API expects prompt.id, not prompt.prompt_id.
-            'prompt'       => array(
-                'id' => $prompt_id,
-            ),
+            'conversation'      => $thread_id,
             // The new user input for this turn (text + optional file/image attachments).
-            'input'        => $input_payload,
+            'input'             => $input_payload,
             // Helpful for abuse detection without sending PII.
             'safety_identifier' => wp_hash( (string) $user_id ),
             // Let the API auto-truncate old items if context would overflow.
-            'truncation'   => 'auto',
+            'truncation'        => 'auto',
         );
+
+        if ( $is_prompt ) {
+            // Temporary bridge: hosted prompt objects shut down 2026-11-30.
+            $payload['prompt'] = array(
+                'id' => $prompt_id,
+            );
+        } else {
+            $model = chatbot_chatgpt_resolve_responses_model( $user_id, $page_id, $session_id );
+            if ( $model === '' ) {
+                return 'Error: Missing model. Set a ChatGPT model in Settings before using an Assistant ID (asst_...).';
+            }
+            $payload['model'] = $model;
+            $instructions = chatbot_chatgpt_build_responses_instructions( $local_row, $additional_instructions );
+            if ( $instructions !== '' ) {
+                $payload['instructions'] = $instructions;
+            }
+        }
+
+        $vector_store_ids = chatbot_chatgpt_resolve_vector_store_ids( $local_row );
+        if ( ! empty( $vector_store_ids ) ) {
+            $payload['tools'] = array(
+                array(
+                    'type'             => 'file_search',
+                    'vector_store_ids' => $vector_store_ids,
+                    'max_num_results'  => 8,
+                ),
+            );
+        }
 
         // DIAG - Diagnostics - Ver 2.4.5
         // back_trace( 'NOTICE', 'Step 2: Payload: ' . print_r( $payload, true ) );

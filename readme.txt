@@ -2,7 +2,7 @@
 Contributors: kognetiks
 Tags: chat, chatgpt, ai, reporting, insights
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
-Tested up to: 7.0.4
+Tested up to: 7.1
 Stable tag: 2.4.8
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -181,6 +181,12 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 5. Chatbot settings and configuration
 
 == Changelog ==
+
+= 2.4.8 - Released 2026-09-14 =
+
+### Improvements
+* **OpenAI Responses migration**: OpenAI `asst_` IDs now chat through the Responses API (Assistants API sunset). Local Common Name and Additional Instructions are sent with each call. Hosted `pmpt_` prompt objects remain a temporary bridge until 30 November 2026.
+* **Vector stores (file search)**: GPT Assistants rows can store an OpenAI Vector Store ID (`vs_…`). Responses calls then send `file_search` so large PDFs stay searchable without pasting them into Additional Instructions.
 
 = 2.4.7 - Released 2026-08-12 =
 
