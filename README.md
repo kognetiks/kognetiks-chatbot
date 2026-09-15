@@ -1,4 +1,4 @@
-# Kognetiks Chatbot for WordPress
+# Kognetiks Chatbot
 
 ### Turn chatbot conversations into insight, not just answers.
 

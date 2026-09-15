@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Search - Ver 2.2.4 - Updated in Ver 2.2.9
+ * Kognetiks Chatbot - Search - Ver 2.2.4 - Updated in Ver 2.2.9
  *
  * This file contains the code for implementing pre-processor before engaging with an LLM.
  *

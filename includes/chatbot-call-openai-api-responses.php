@@ -454,17 +454,17 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
 
     $api_key = trim( (string) $api_key );
     if ( empty( $api_key ) ) {
-        return 'Error: Missing OpenAI API key.';
+        return __( 'Error: Missing OpenAI API key.', 'chatbot-chatgpt' );
     }
 
     $prompt_id = trim( (string) $assistant_id );
     if ( empty( $prompt_id ) ) {
-        return 'Error: Missing OpenAI Prompt ID (pmpt_...) or Assistant ID (asst_...). Store the ID in GPT Assistants and copy important instructions into Additional Instructions.';
+        return __( 'Error: Missing OpenAI Prompt ID (pmpt_...) or Assistant ID (asst_...). Store the ID in GPT Assistants and copy important instructions into Additional Instructions.', 'chatbot-chatgpt' );
     }
 
     $message = (string) $message;
     if ( $message === '' ) {
-        return 'Error: Empty message.';
+        return __( 'Error: Empty message.', 'chatbot-chatgpt' );
     }
 
     // Idempotency: reuse client_message_id if provided, else generate UUID.
@@ -476,7 +476,7 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
 
     if ( function_exists( 'get_transient' ) && function_exists( 'set_transient' ) ) {
         if ( get_transient( $conv_lock ) ) {
-            return 'Error: Conversation is busy. Please retry.';
+            return __( 'Error: Conversation is busy. Please retry.', 'chatbot-chatgpt' );
         }
         set_transient( $conv_lock, 1, $lock_timeout );
     }
@@ -522,13 +522,17 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
             $conv = kchat_openai_create_conversation( $api_key, $meta, $timeout );
 
             if ( isset( $conv['error'] ) ) {
-                $msg = is_array( $conv['error'] ) ? ( $conv['error']['message'] ?? 'Conversation create failed.' ) : 'Conversation create failed.';
-                return 'Error: ' . $msg;
+                $msg = is_array( $conv['error'] ) ? ( $conv['error']['message'] ?? __( 'Conversation create failed.', 'chatbot-chatgpt' ) ) : __( 'Conversation create failed.', 'chatbot-chatgpt' );
+                return sprintf(
+                    /* translators: %s: API error message */
+                    __( 'Error: %s', 'chatbot-chatgpt' ),
+                    $msg
+                );
             }
 
             $thread_id = $conv['id'] ?? '';
             if ( empty( $thread_id ) ) {
-                return 'Error: Conversation created but missing ID.';
+                return __( 'Error: Conversation created but missing ID.', 'chatbot-chatgpt' );
             }
 
             // Persist the new conversation id using existing helper (kept for compatibility).
@@ -589,7 +593,7 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
                         ? get_chatbot_chatgpt_transients_files( 'chatbot_chatgpt_assistant_file_text', $session_id, $idx )
                         : '';
                     if ( $content === '' ) {
-                        return 'Error: Could not read the uploaded text content. Please re-upload as PDF or try uploading again.';
+                        return __( 'Error: Could not read the uploaded text content. Please re-upload as PDF or try uploading again.', 'chatbot-chatgpt' );
                     }
                     $display_name = $filename !== '' ? $filename : ( 'file_' . $idx );
                     $text_block = "BEGIN FILE: " . $display_name . "\n\n" . $content . "\n\nEND FILE: " . $display_name;
@@ -655,7 +659,7 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
         } else {
             $model = chatbot_chatgpt_resolve_responses_model( $user_id, $page_id, $session_id );
             if ( $model === '' ) {
-                return 'Error: Missing model. Set a ChatGPT model in Settings before using an Assistant ID (asst_...).';
+                return __( 'Error: Missing model. Set a ChatGPT model in Settings before using an Assistant ID (asst_...).', 'chatbot-chatgpt' );
             }
             $payload['model'] = $model;
             $instructions = chatbot_chatgpt_build_responses_instructions( $local_row, $additional_instructions );
@@ -691,8 +695,12 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
         // }
 
         if ( isset( $resp['error'] ) ) {
-            $msg = is_array( $resp['error'] ) ? ( $resp['error']['message'] ?? 'OpenAI error.' ) : 'OpenAI error.';
-            return 'Error: ' . $msg;
+            $msg = is_array( $resp['error'] ) ? ( $resp['error']['message'] ?? __( 'OpenAI error.', 'chatbot-chatgpt' ) ) : __( 'OpenAI error.', 'chatbot-chatgpt' );
+            return sprintf(
+                /* translators: %s: API error message */
+                __( 'Error: %s', 'chatbot-chatgpt' ),
+                $msg
+            );
         }
 
         // Add the usage to the conversation tracker (Responses API: input_tokens = Prompt, output_tokens = Completion)
@@ -727,10 +735,10 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
 
         // No text: if the response included tool calls we can't fulfill client-side, explain.
         if ( check_assistant_tool_usage_responses( $resp ) ) {
-            return 'Error: This Prompt triggered tool calls. Update the Prompt to disable tools for this chat endpoint, or implement a tool-call orchestration loop for Responses.';
+            return __( 'Error: This Prompt triggered tool calls. Update the Prompt to disable tools for this chat endpoint, or implement a tool-call orchestration loop for Responses.', 'chatbot-chatgpt' );
         }
 
-        return 'Error: Empty response from OpenAI.';
+        return __( 'Error: Empty response from OpenAI.', 'chatbot-chatgpt' );
 
     } finally {
 

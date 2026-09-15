@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Transformer Model - Scheduler - Ver 2.2.1
+ * Kognetiks Chatbot - Transformer Model - Scheduler - Ver 2.2.1
  *
  * This is the file that schedules the building of the Transformer Model.
  * Scheduling can be set to now, daily, weekly, etc.

@@ -296,7 +296,15 @@ function display_chatbot_chatgpt_assistants_table() {
     echo '<h1>Manage Assistants</h1>';
     echo '<p>Click the <code>Update</code> button to save changes to an Assistant, or the <code>Delete</code> button to remove an Assistant.</p>';
     echo '<p>Click the <code>Add New Assistant</code> button to create a new Assistant.</p>';
-    echo '<p>Greetings, placeholder, and Additional Instructions are unchanged. Scroll right if needed. <code>Vector Store ID</code> is an extra column at the end (<code>vs_…</code>) for large PDFs — it does not replace Additional Instructions.</p>';
+    echo '<p>' . wp_kses(
+        sprintf(
+            /* translators: 1: Vector Store ID label, 2: vs_ ID prefix example */
+            __( 'Greetings, placeholder, and Additional Instructions are unchanged. Scroll right if needed. %1$s is an extra column at the end (%2$s) for large PDFs — it does not replace Additional Instructions.', 'chatbot-chatgpt' ),
+            '<code>' . esc_html__( 'Vector Store ID', 'chatbot-chatgpt' ) . '</code>',
+            '<code>vs_…</code>'
+        ),
+        array( 'code' => array() )
+    ) . '</p>';
     echo '<table>';
     echo '<thead>';
     echo '<tr>';
@@ -314,7 +322,7 @@ function display_chatbot_chatgpt_assistants_table() {
     echo '<th>Subsequent Greeting</th>';
     echo '<th>Placeholder Prompt</th>';
     echo '<th>Additional Instructions</th>';
-    echo '<th>Vector Store ID</th>';
+    echo '<th>' . esc_html__( 'Vector Store ID', 'chatbot-chatgpt' ) . '</th>';
     echo '</tr>';
     echo '</thead>';
     echo '<tbody>';

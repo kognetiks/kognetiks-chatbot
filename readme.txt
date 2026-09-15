@@ -1,4 +1,4 @@
-=== Kognetiks Chatbot for WordPress ===
+=== Kognetiks Chatbot ===
 Contributors: kognetiks
 Tags: chat, chatgpt, ai, reporting, insights
 Donate link: https://kognetiks.com/wordpress-plugins/donate/

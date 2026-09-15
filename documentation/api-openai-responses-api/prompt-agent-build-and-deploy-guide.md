@@ -1,4 +1,4 @@
-# Building and Deploying a Prompt-Based Support Agent (Kognetiks Chatbot for WordPress)
+# Building and Deploying a Prompt-Based Support Agent (Kognetiks Chatbot)
 
 This guide walks through an end-to-end setup: creating a **Prompt** on the OpenAI platform and deploying it on a WordPress page using the Kognetiks Chatbot shortcode:
 
@@ -11,7 +11,7 @@ This guide walks through an end-to-end setup: creating a **Prompt** on the OpenA
 ## What you need before you start
 
 - An OpenAI account with access to the OpenAI dashboard. This is where you will create and save a Prompt.
-- The **Kognetiks Chatbot for WordPress** plugin installed and activated.
+- The **Kognetiks Chatbot** plugin installed and activated.
 - An API key for your chosen AI platform (OpenAI, NVIDIA, etc.). The Kognetiks documentation notes the plugin requires an API key to function.
 - The latest Kognetiks Chatbot documentation PDF (you’ll attach it to your Prompt and replace it whenever you publish new docs).
 
