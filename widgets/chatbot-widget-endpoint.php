@@ -260,8 +260,8 @@ $chatbot_widget_height = ($iframe_height - 20) . 'px';
     <script type="text/javascript">
 
         // Set values for the chatbot
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON from wp_json_encode for JavaScript, escaping would corrupt the data ?>;
-        var kchat_settings = <?php echo $kchat_settings_json;
+        var kchat_settings = <?php echo $kchat_settings_json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON from wp_json_encode for JavaScript, escaping would corrupt the data ?>;
+
         // Set values in local storage
         localStorage.setItem('chatbot_chatgpt_opened', 'true');
         localStorage.setItem('chatbot_chatgpt_start_status', 'open');
