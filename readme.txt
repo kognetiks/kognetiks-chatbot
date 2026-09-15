@@ -2,7 +2,9 @@
 Contributors: kognetiks
 Tags: chat, chatgpt, ai, reporting, insights
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
+Requires at least: 5.0
 Tested up to: 7.1
+Requires PHP: 7.0
 Stable tag: 2.4.8
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -165,6 +167,15 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
    - Consent to sending user queries and related data to the selected AI provider for processing and response generation.
    - Agree to abide by the provider's terms of service, pricing, and privacy policy.
    - Acknowledge that your data, including text submitted by users, may be transferred to and processed by the AI platform in accordance with its privacy policy.
+
+**Freemius** ([https://freemius.com](https://freemius.com)) is used for optional account connection, licensing, checkout, the 7-day Premium trial, and premium updates. It is not an AI provider and does not process chatbot conversations.
+
+Free chatbot features work if you skip connecting an account. Freemius is contacted when you start a trial, activate a license, open checkout or the pricing/account screens, or opt in to diagnostics.
+
+When that happens, Freemius may receive the site URL, WordPress version, PHP version, plugin version, and the administrator email used for the account. Visitor queries and chatbot messages are never sent to Freemius.
+
+- [Freemius Terms of Service](https://freemius.com/terms/)
+- [Freemius Privacy Policy](https://freemius.com/privacy/)
 
 **NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider's pricing and usage policies before proceeding.
 
