@@ -24,6 +24,12 @@ function chatbot_chatgpt_activate() {
     // Logic to run during activation
     chatbot_chatgpt_upgrade();
 
+    if ( function_exists( 'chatbot_chatgpt_register_remote_widget_rewrites' ) ) {
+        chatbot_chatgpt_register_remote_widget_rewrites();
+        flush_rewrite_rules( false );
+        update_option( 'chatbot_chatgpt_widget_rewrite_version', '1' );
+    }
+
     // Handle unexpect output during activation - Ver 2.0.6 - 2024 07 10
     $unexpected_output = ob_get_clean();
     if (!empty($unexpected_output)) {

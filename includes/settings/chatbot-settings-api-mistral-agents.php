@@ -396,8 +396,8 @@ function chatbot_mistral_max_completion_tokens_callback($args) {
 // Remote Widget Settings section callback - Ver 2.1.3
 function chatbot_mistral_remote_widget_settings_section_callback($args) {
     ?>
-    <p>Configure the Remote Widget settings to allow access from specific domains to specific agents. Please each pair, seperated with a comma, on their own line.</p>
-    <p>For example the Allowed Remote Domain might be <code>www.example.com,agent-1</code>.</p>
+    <p>Configure the Remote Widget settings to allow access from specific domains to specific agents. Place each pair, separated with a comma, on its own line.</p>
+    <p>For example the Allowed Remote Domain might be <code>www.example.com,agent-1</code>. Access requires the signed token shown below, not the HTTP Referer.</p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the Remote Widget Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=remote-widget-settings.md">here</a>.</b></p>
     <?php
 }
@@ -415,8 +415,12 @@ function chatbot_mistral_enable_remote_widget_callback($args) {
 
 // Allowed Remote Domains field callback - Ver 2.1.3
 function chatbot_mistral_allowed_remote_domains_callback($args) {
-    $allowed_remote_domains = esc_attr(get_option('chatbot_mistral_allowed_remote_domains', ''));
+    $allowed_remote_domains = get_option('chatbot_mistral_allowed_remote_domains', '');
+    $allowed_remote_domains = is_string( $allowed_remote_domains ) ? $allowed_remote_domains : '';
     ?>
-    <textarea id="chatbot_mistral_allowed_remote_domains" name="chatbot_mistral_allowed_remote_domains" placeholder="Enter the allowed remote domains separated by a comma." rows="5" cols="50"><?php echo esc_attr( $allowed_remote_domains ); ?></textarea>
+    <textarea id="chatbot_mistral_allowed_remote_domains" name="chatbot_mistral_allowed_remote_domains" placeholder="Enter the allowed remote domains separated by a comma." rows="5" cols="50"><?php echo esc_textarea( $allowed_remote_domains ); ?></textarea>
     <?php
+    if ( function_exists( 'chatbot_chatgpt_render_remote_widget_embed_snippets' ) ) {
+        chatbot_chatgpt_render_remote_widget_embed_snippets( $allowed_remote_domains );
+    }
 }

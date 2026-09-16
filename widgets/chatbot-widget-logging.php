@@ -21,6 +21,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @param string|null $request_ip The IP address of the request
  * @return bool Whether the logging was successful
  */
+if ( ! function_exists( 'chatbot_widget_logging' ) ) {
 function chatbot_widget_logging( $message, $referer = null, $request_ip = null ) {
     try {
         // Plugin directory path
@@ -71,12 +72,14 @@ function chatbot_widget_logging( $message, $referer = null, $request_ip = null )
         return false;
     }
 }
+}
 
 /**
  * Get the real IP address of the user with proper validation
  *
  * @return string The validated IP address
  */
+if ( ! function_exists( 'getUserIP' ) ) {
 function getUserIP() {
     $ip = '';
 
@@ -106,4 +109,5 @@ function getUserIP() {
     }
 
     return $ip;
+}
 }

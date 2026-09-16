@@ -32,6 +32,9 @@ function chatbot_chatgpt_deactivate() {
     // Clean up conversation digest cron job on deactivation
     wp_clear_scheduled_hook('kognetiks_insights_send_conversation_digest_email_hook');
 
+    delete_option( 'chatbot_chatgpt_widget_rewrite_version' );
+    flush_rewrite_rules( false );
+
 }
 
 // Delete Plugin Data Notice - Ver 1.9.9

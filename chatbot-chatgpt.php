@@ -442,6 +442,8 @@ if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
 }
 
 // Include necessary files - Widgets - Ver 2.1.3
+require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-widget-logging.php';
+require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-remote-widget.php'; // Signed remote widget - Ver 2.4.8
 require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-manage-widget-logs.php';
 
 // Log the User ID and Session ID - Ver 2.0.6 - 2024 07 11

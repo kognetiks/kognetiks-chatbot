@@ -273,9 +273,12 @@ Cross-domain chatbot deployment with security controls:
   - Only whitelisted pairs can access chatbots
 
 - **Widget Endpoint**: Dedicated endpoint for remote access
-  - URL: `/widgets/chatbot-widget-endpoint.php`
+  - URL: `/kognetiks-chatbot-widget/` (signed `assistant` + `token` query args)
+  - Legacy `widgets/chatbot-widget-endpoint.php` redirects into WordPress; it does not load `wp-load.php`
   - Supports iframe embedding
   - Dynamic resizing support
+  - Authorization is HMAC token + exact-host allowlist; Referer is audit-only
+  - CSP `frame-ancestors` limits which sites may embed the iframe
 
 - **Widget Logging**: Track all remote access attempts
   - Valid and invalid access logging
