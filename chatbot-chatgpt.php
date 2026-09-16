@@ -781,6 +781,7 @@ if (!wp_next_scheduled('chatbot_chatgpt_cleanup_event')) {
     wp_schedule_event(time(), 'daily', 'chatbot_chatgpt_cleanup_event');
 }
 add_action('chatbot_chatgpt_cleanup_event', 'clean_specific_expired_transients');
+add_action('chatbot_chatgpt_cleanup_event', 'chatbot_chatgpt_clear_stuck_visitor_locks');
 
 // Schedule Conversation Log Cleanup - Ver 1.6.7
 if (!wp_next_scheduled('chatbot_chatgpt_conversation_log_cleanup_event')) {
@@ -2113,36 +2114,34 @@ function chatbot_chatgpt_refresh_nonce() {
 
 }
 
-// Function to clear stuck visitor locks - Ver 2.3.6
+// Clear expired conversation locks from wp_options. Run from daily cleanup cron
+// and the admin tool — never on front-end init (table scan/write on every
+// anonymous request). Active requests still expire a lock on contention in
+// chatbot_chatgpt_send_message(). - Ver 2.3.6
 function chatbot_chatgpt_clear_stuck_visitor_locks() {
 
     global $wpdb;
-    
-    // Only run for visitors (not logged in users)
-    if (is_user_logged_in()) {
+
+    // Timeout rows hold a unix expiry. Lock value rows hold 1/true — never
+    // compare those to a timestamp (that would delete in-flight locks).
+    $expired_time = time() - 120;
+
+    $timeout_names = $wpdb->get_col($wpdb->prepare(
+        "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
+        $wpdb->esc_like('_transient_timeout_chatgpt_conv_lock_') . '%',
+        $expired_time
+    ));
+
+    if (empty($timeout_names) || !is_array($timeout_names)) {
         return;
     }
-    
-    // Clear locks older than 2 minutes
-    $expired_time = time() - 120; // 2 minutes ago
-    
-    $lock_patterns = [
-        '_transient_chatgpt_conv_lock_%',
-        '_transient_timeout_chatgpt_conv_lock_%',
-    ];
-    
-    foreach ($lock_patterns as $pattern) {
-        $wpdb->query($wpdb->prepare(
-            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
-            $pattern,
-            $expired_time
-        ));
+
+    foreach ($timeout_names as $timeout_name) {
+        $transient_name = str_replace('_transient_timeout_', '', $timeout_name);
+        delete_transient($transient_name);
     }
 
 }
-
-// Hook to clear stuck locks on init for visitors
-add_action('init', 'chatbot_chatgpt_clear_stuck_visitor_locks', 5);
 
 // Add admin menu for visitor lock clearing tool - Ver 2.3.6
 function chatbot_chatgpt_add_visitor_lock_tool_menu() {
