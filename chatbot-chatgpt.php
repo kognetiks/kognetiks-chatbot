@@ -662,18 +662,8 @@ function chatbot_chatgpt_enqueue_scripts() {
         'additional_instructions' => $additional_instructions,
         'model' => $model,
         'voice' => $voice,
-        // Security: Generate nonces for AJAX requests
-        'chatbot_message_nonce' => wp_create_nonce('chatbot_message_nonce'),
-        'chatbot_upload_nonce' => wp_create_nonce('chatbot_upload_nonce'),
-        'chatbot_erase_nonce' => wp_create_nonce('chatbot_erase_nonce'),
-        'chatbot_unlock_nonce' => wp_create_nonce('chatbot_unlock_nonce'),
-        'chatbot_reset_nonce' => wp_create_nonce('chatbot_reset_nonce'),
-        'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
-        'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
-        'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
-        'chatbot_log_error_nonce' => wp_create_nonce('chatbot_log_error_nonce'),
         'nonce_timestamp' => time() * 1000, // JavaScript timestamp format
-    ));
+    ), chatbot_chatgpt_get_ajax_nonces());
     
     // Set visitor and logged in user limits - Ver 2.0.1
     if (is_user_logged_in()) {
@@ -1159,6 +1149,12 @@ function chatbot_chatgpt_process_queued_message($message_data) {
     $assistant_id = $assistant_resolution['assistant_id'];
     $chatbot_chatgpt_assistant_alias = $assistant_resolution['assistant_alias'];
     $use_assistant_id = $assistant_resolution['use_assistant_id'];
+
+    // Assistants / prompts / agents are only implemented for OpenAI, Azure, and Mistral.
+    if ($use_assistant_id === 'Yes'
+        && !in_array($chatbot_ai_platform_choice, array('OpenAI', 'Azure OpenAI', 'Mistral'), true)) {
+        $use_assistant_id = 'No';
+    }
 
     // Persist resolved ids so conversation log and later requests stay in sync
     if ( ! empty( $assistant_id ) && $assistant_id !== 'original' ) {
@@ -1683,6 +1679,13 @@ function chatbot_chatgpt_send_message() {
     $chatbot_chatgpt_assistant_alias = $assistant_resolution['assistant_alias'];
     $use_assistant_id = $assistant_resolution['use_assistant_id'];
 
+    // Assistants / prompts / agents are only implemented for OpenAI, Azure, and Mistral.
+    // Ignore asst_/pmpt_/ag: on Transformer and other chat-only platforms.
+    if ($use_assistant_id === 'Yes'
+        && !in_array($chatbot_ai_platform_choice, array('OpenAI', 'Azure OpenAI', 'Mistral'), true)) {
+        $use_assistant_id = 'No';
+    }
+
     if ( ! empty( $assistant_id ) && $assistant_id !== 'original' ) {
         set_chatbot_chatgpt_transients( 'assistant_id', $assistant_id, $user_id, $page_id, $session_id, null );
         set_chatbot_chatgpt_transients( 'assistant_alias', $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
@@ -1808,7 +1811,9 @@ function chatbot_chatgpt_send_message() {
 
             } else {
 
-                return 'ERROR: Invalid Assistant ID';
+                delete_transient($conv_lock);
+                wp_send_json_error('ERROR: Invalid Assistant ID');
+                return;
 
             }
 
@@ -1823,7 +1828,9 @@ function chatbot_chatgpt_send_message() {
             $response = chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
         } else {
 
-            return 'ERROR: Invalid AI Platform';
+            delete_transient($conv_lock);
+            wp_send_json_error('ERROR: Invalid AI Platform');
+            return;
 
         }
 
@@ -2094,23 +2101,56 @@ function chatbot_chatgpt_send_message() {
 
 }
 
-// Handle nonce refresh requests - Ver 2.3.6
-function chatbot_chatgpt_refresh_nonce() {
+// AJAX nonces for the chatbot UI. Unlock/reset only for manage_options. - Ver 2.4.8
+function chatbot_chatgpt_get_ajax_nonces() {
 
-    // Generate fresh nonces
     $nonces = array(
         'chatbot_message_nonce' => wp_create_nonce('chatbot_message_nonce'),
         'chatbot_upload_nonce' => wp_create_nonce('chatbot_upload_nonce'),
         'chatbot_erase_nonce' => wp_create_nonce('chatbot_erase_nonce'),
-        'chatbot_unlock_nonce' => wp_create_nonce('chatbot_unlock_nonce'),
-        'chatbot_reset_nonce' => wp_create_nonce('chatbot_reset_nonce'),
         'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
         'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
         'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
         'chatbot_log_error_nonce' => wp_create_nonce('chatbot_log_error_nonce'),
     );
-    
-    wp_send_json_success($nonces);
+
+    if (is_user_logged_in() && current_user_can('manage_options')) {
+        $nonces['chatbot_unlock_nonce'] = wp_create_nonce('chatbot_unlock_nonce');
+        $nonces['chatbot_reset_nonce'] = wp_create_nonce('chatbot_reset_nonce');
+    }
+
+    return $nonces;
+
+}
+
+// Handle nonce refresh requests - Ver 2.3.6
+function chatbot_chatgpt_refresh_nonce() {
+
+    $incoming = isset($_POST['chatbot_nonce']) ? sanitize_text_field(wp_unslash($_POST['chatbot_nonce'])) : '';
+
+    if ($incoming === '' || !wp_verify_nonce($incoming, 'chatbot_message_nonce')) {
+        wp_send_json_error(array(
+            'message' => 'Security check failed. Please refresh the page and try again.',
+            'code' => 'nonce_failed',
+        ), 403);
+        return;
+    }
+
+    if (!is_user_logged_in()) {
+        $client_ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : 'unknown';
+        $rate_limit_key = 'chatbot_refresh_nonce_rl_' . (function_exists('wp_fast_hash') ? wp_fast_hash($client_ip) : hash('sha256', $client_ip));
+        $current_count = (int) get_transient($rate_limit_key);
+        if ($current_count >= 10) {
+            wp_send_json_error(array(
+                'message' => 'Too many requests. Please try again later.',
+                'code' => 'rate_limited',
+            ), 429);
+            return;
+        }
+        set_transient($rate_limit_key, $current_count + 1, MINUTE_IN_SECONDS);
+    }
+
+    wp_send_json_success(chatbot_chatgpt_get_ajax_nonces());
 
 }
 

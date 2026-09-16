@@ -191,17 +191,8 @@ $kchat_settings = array_merge($kchat_settings, array(
     'chatbot_chatgpt_custom_error_message' => esc_attr(get_option('chatbot_chatgpt_custom_error_message', 'Your custom error message goes here.')),
     'chatbot_chatgpt_start_status' => esc_attr(get_option('chatbot_chatgpt_start_status', 'closed')),
     'chatbot_chatgpt_start_status_new_visitor' => esc_attr(get_option('chatbot_chatgpt_start_status_new_visitor', 'closed')),
-    'chatbot_message_nonce' => wp_create_nonce('chatbot_message_nonce'),
-    'chatbot_upload_nonce' => wp_create_nonce('chatbot_upload_nonce'),
-    'chatbot_erase_nonce' => wp_create_nonce('chatbot_erase_nonce'),
-    'chatbot_unlock_nonce' => wp_create_nonce('chatbot_unlock_nonce'),
-    'chatbot_reset_nonce' => wp_create_nonce('chatbot_reset_nonce'),
-    'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
-    'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
-    'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
-    'chatbot_log_error_nonce' => wp_create_nonce('chatbot_log_error_nonce'),
     'nonce_timestamp' => time() * 1000,
-));
+), chatbot_chatgpt_get_ajax_nonces());
 
 $kchat_settings_json = wp_json_encode($kchat_settings);
 

@@ -8,9 +8,37 @@ jQuery(document).ready(function ($) {
     } else {
         // console.log('Chatbot: NOTICE: kchat_settings:', kchat_settings);
     }
+
+    function applyChatbotNonces(nonceData) {
+        if (!nonceData || typeof nonceData !== 'object' || !nonceData.chatbot_message_nonce) {
+            return false;
+        }
+        const nonceKeys = [
+            'chatbot_message_nonce',
+            'chatbot_upload_nonce',
+            'chatbot_erase_nonce',
+            'chatbot_queue_nonce',
+            'chatbot_tts_nonce',
+            'chatbot_transcript_nonce',
+            'chatbot_log_error_nonce',
+            'chatbot_unlock_nonce',
+            'chatbot_reset_nonce'
+        ];
+        for (let i = 0; i < nonceKeys.length; i++) {
+            if (typeof nonceData[nonceKeys[i]] === 'string' && nonceData[nonceKeys[i]]) {
+                kchat_settings[nonceKeys[i]] = nonceData[nonceKeys[i]];
+            }
+        }
+        kchat_settings.nonce_timestamp = Date.now();
+        return true;
+    }
     
 // Unlock conversation on page load/refresh to prevent stuck locks
 function unlockConversationOnLoad() {
+    if (!kchat_settings.chatbot_unlock_nonce) {
+        return;
+    }
+
     let user_id = kchat_settings.user_id;
     let page_id = kchat_settings.page_id;
     let session_id = kchat_settings.session_id;
@@ -47,6 +75,10 @@ function unlockConversationOnLoad() {
 
 // Reset all locks - emergency function
 function resetAllLocks() {
+    if (!kchat_settings.chatbot_reset_nonce) {
+        return;
+    }
+
     let user_id = kchat_settings.user_id;
     let page_id = kchat_settings.page_id;
     let session_id = kchat_settings.session_id;
@@ -1160,12 +1192,11 @@ window.resetAllLocks = resetAllLocks;
                         url: kchat_settings.ajax_url,
                         method: 'POST',
                         data: {
-                            action: 'chatbot_chatgpt_refresh_nonce'
+                            action: 'chatbot_chatgpt_refresh_nonce',
+                            chatbot_nonce: kchat_settings.chatbot_message_nonce
                         },
                         success: function(response) {
-                            if (response.success && response.data && response.data.chatbot_message_nonce) {
-                                kchat_settings.chatbot_message_nonce = response.data.chatbot_message_nonce;
-                                kchat_settings.nonce_timestamp = Date.now();
+                            if (response.success && applyChatbotNonces(response.data)) {
                                 // console.log('Chatbot: Nonce proactively refreshed');
                             }
                         }
@@ -1309,12 +1340,11 @@ window.resetAllLocks = resetAllLocks;
                         url: kchat_settings.ajax_url,
                         method: 'POST',
                         data: {
-                            action: 'chatbot_chatgpt_refresh_nonce'
+                            action: 'chatbot_chatgpt_refresh_nonce',
+                            chatbot_nonce: kchat_settings.chatbot_message_nonce
                         },
                         success: function(response) {
-                            if (response.success && response.data && response.data.chatbot_message_nonce) {
-                                // Update the nonce in settings
-                                kchat_settings.chatbot_message_nonce = response.data.chatbot_message_nonce;
+                            if (response.success && applyChatbotNonces(response.data)) {
                                 // console.log('Chatbot: Nonce refreshed successfully');
                                 
                                 // Retry the original request with the new nonce
@@ -1473,39 +1503,8 @@ window.resetAllLocks = resetAllLocks;
             cache: false, // This ensures jQuery does not cache the result
         });
         } // End of sendMessageWithNonce function
-        
-        // Check if nonce exists, if not fetch it first
-        if (!kchat_settings.chatbot_message_nonce) {
-            // console.log('Chatbot: Nonce missing, fetching before request');
-            // Fetch nonce before proceeding
-            $.ajax({
-                url: kchat_settings.ajax_url,
-                method: 'POST',
-                data: {
-                    action: 'chatbot_chatgpt_refresh_nonce'
-                },
-                success: function(response) {
-                    if (response.success && response.data && response.data.chatbot_message_nonce) {
-                        kchat_settings.chatbot_message_nonce = response.data.chatbot_message_nonce;
-                        kchat_settings.nonce_timestamp = Date.now();
-                        // Retry the original request now that we have a nonce
-                        sendMessageWithNonce();
-                    } else {
-                        appendMessage('Oops! Unable to initialize security token. Please refresh the page.', 'error');
-                        removeTypingIndicator();
-                        submitButton.prop('disabled', false);
-                    }
-                },
-                error: function() {
-                    appendMessage('Oops! Unable to initialize security token. Please refresh the page.', 'error');
-                    removeTypingIndicator();
-                    submitButton.prop('disabled', false);
-                }
-            });
-        } else {
-            // Nonce exists, proceed with request
-            sendMessageWithNonce();
-        }
+
+        sendMessageWithNonce();
     });
 
     // Input mitigation - Ver 2.0.0
