@@ -391,33 +391,11 @@ function chatbot_chatgpt_insights_period_filter_handler() {
     }
 }
 
-// Include Insights library - Premium Only (at plugin init)
-// Check for premium access including trial status (trial users should have premium access)
+// Insights load in the premium build only. chatbot_chatgpt_is_premium() requires
+// is__premium_only() then can_use_premium_code(). Paying users on the free ZIP
+// must install the premium plugin — do not load Insights PHP as a fallback.
 if ( function_exists( 'chatbot_chatgpt_is_premium' ) && chatbot_chatgpt_is_premium() ) {
     chatbot_chatgpt_load_insights_files();
-} elseif ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
-    // Fallback: use same logic as chatbot_chatgpt_is_premium()
-    $fs = chatbot_chatgpt_freemius();
-    if ( is_object( $fs ) ) {
-        // Detect whether we are running inside the premium build
-        $running_premium_build = false;
-        if ( method_exists( $fs, 'is__premium_only' ) ) {
-            $running_premium_build = $fs->is__premium_only();
-        }
-        
-        // Check if paying
-        if ( method_exists( $fs, 'is_paying' ) && $fs->is_paying() ) {
-            chatbot_chatgpt_load_insights_files();
-        }
-        // Check if has active valid license
-        elseif ( method_exists( $fs, 'has_active_valid_license' ) && $fs->has_active_valid_license() ) {
-            chatbot_chatgpt_load_insights_files();
-        }
-        // Check if in trial (only grant access if running premium build)
-        elseif ( method_exists( $fs, 'is_trial' ) && $fs->is_trial() && $running_premium_build ) {
-            chatbot_chatgpt_load_insights_files();
-        }
-    }
 }
 
 // Handle plan changes and premium activation - Ver 2.4.2
@@ -2425,14 +2403,6 @@ function chatbot_chatgpt_reset_cache_locks_handler() {
             ));
             $cleared_count += $result;
         }
-        
-        // Clear expired transients
-        $expired_result = $wpdb->query($wpdb->prepare(
-            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
-            '_transient_timeout_%',
-            time()
-        ));
-        $cleared_count += $expired_result;
         
         // Clear WordPress object cache if available
         if (function_exists('wp_cache_flush')) {

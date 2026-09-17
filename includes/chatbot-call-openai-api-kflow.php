@@ -162,18 +162,24 @@ function chatbot_chatgpt_retrieve_answers($session_id, $user_id, $page_id, $assi
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+    $max_answers = max( 0, (int) $max_answers );
 
-    // Get the answers from the conversation log
-    $answers = $wpdb->get_results("SELECT message_text
-                                    FROM $table_name
-                                    WHERE session_id = '$session_id'
-                                    AND user_id = '$user_id'
-                                    AND page_id = '$page_id'
-                                    AND assistant_id = '$assistant_id'
-                                    AND user_type = 'Visitor'
-                                    ORDER BY thread_id DESC
-                                    LIMIT $max_answers;
-                                ");
+    if ( $max_answers < 1 ) {
+        return array();
+    }
+
+    $answers = $wpdb->get_results( $wpdb->prepare(
+        "SELECT message_text FROM {$table_name}
+         WHERE session_id = %s AND user_id = %s AND page_id = %s
+           AND assistant_id = %s AND user_type = %s
+         ORDER BY thread_id DESC LIMIT %d",
+        $session_id,
+        $user_id,
+        $page_id,
+        $assistant_id,
+        'Visitor',
+        $max_answers
+    ) );
 
     // Initialize the answers array
     $answers_array = array();

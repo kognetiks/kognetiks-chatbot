@@ -52,8 +52,10 @@ function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
     if ($options['action'] == 'update' && $options['type'] == 'plugin') {
         if (isset($options['plugins']) && is_array($options['plugins'])) {
             foreach($options['plugins'] as $plugin) {
-                if (plugin_basename(__FILE__) === $plugin) {
-                    // Logic to run during upgrade
+                $this_plugin = defined( 'CHATBOT_CHATGPT_PLUGIN_FILE' )
+                    ? plugin_basename( CHATBOT_CHATGPT_PLUGIN_FILE )
+                    : 'chatbot-chatgpt/chatbot-chatgpt.php';
+                if ( $this_plugin === $plugin ) {
                     chatbot_chatgpt_upgrade();
                     break;
                 }

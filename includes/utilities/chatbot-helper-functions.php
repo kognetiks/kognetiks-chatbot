@@ -16,14 +16,10 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Check if user has premium access.
  * 
- * IMPORTANT: In the FREE plugin build, trial does NOT unlock premium features.
- * Trial + premium functionality requires installing the premium ZIP/plugin.
- * Paid license can still unlock premium (even in free build).
- *
- * Premium access rules:
- * - If user is paying OR has active valid license: return true
- * - If user is in trial: return true ONLY if running premium build
- * - Otherwise return false
+ * IMPORTANT: Premium features run only in the premium Freemius build
+ * (`is__premium_only()`). The free WordPress.org ZIP never unlocks Insights
+ * from a paid license alone — install the premium ZIP. Trial also requires
+ * the premium build.
  *
  * @return bool True if user has premium access
  * @since 2.4.2

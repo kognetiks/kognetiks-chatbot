@@ -58,7 +58,8 @@ function chatbot_chatgpt_admin_notices() {
 // Uninstall Logic - Revised 2.4.4
 function chatbot_chatgpt_uninstall() {
 
-    if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+    // WordPress sets WP_UNINSTALL_PLUGIN. Freemius after_uninstall sets WP_FS__UNINSTALL_MODE only.
+    if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) && ! defined( 'WP_FS__UNINSTALL_MODE' ) ) {
         return;
     }
 

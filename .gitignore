@@ -25,6 +25,9 @@ package.json
 # Ignore internal folders and files
 /z-internal/
 
+# WordFence vendor-ownership challenge (never ship; keep local only)
+wordfence-vendor.txt
+
 # Ignore all files in the results folder
 results/*
 uploads/*

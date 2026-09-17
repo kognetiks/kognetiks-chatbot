@@ -97,6 +97,23 @@ function chatbot_chatgpt_is_valid_widget_host( $host ) {
 }
 
 /**
+ * Whether a remote-widget assistant tag is one of this plugin's chatbot shortcodes.
+ *
+ * @since 2.4.8
+ * @param string $shortcode Shortcode tag without brackets.
+ * @return bool
+ */
+function chatbot_chatgpt_is_remote_widget_shortcode( $shortcode ) {
+    $shortcode = strtolower( (string) $shortcode );
+
+    if ( in_array( $shortcode, array( 'chatbot', 'chatbot_chatgpt', 'kognetiks_chatbot' ), true ) ) {
+        return true;
+    }
+
+    return (bool) preg_match( '/^(chatbot|assistant|agent)-\d+$/', $shortcode );
+}
+
+/**
  * Normalize an allowlist host: URL → host, lowercase, strip leading www.
  *
  * Does not collapse to eTLD+1. example.co.uk stays example.co.uk.
@@ -440,7 +457,11 @@ function chatbot_chatgpt_render_remote_widget() {
         chatbot_chatgpt_deny_remote_widget( 'Unauthorized Access', $referer, $shortcode_param );
     }
 
-    if ( ! is_array( $shortcode_tags ) || ! array_key_exists( $shortcode_param, $shortcode_tags ) ) {
+    if (
+        ! chatbot_chatgpt_is_remote_widget_shortcode( $shortcode_param )
+        || ! is_array( $shortcode_tags )
+        || ! array_key_exists( $shortcode_param, $shortcode_tags )
+    ) {
         chatbot_chatgpt_deny_remote_widget( 'Invalid shortcode: ' . $shortcode_param, $referer, $request_ip );
     }
 

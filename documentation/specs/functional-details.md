@@ -6,7 +6,7 @@ The **Kognetiks Chatbot** is a comprehensive WordPress plugin that integrates ad
 
 **Version:** 2.4.8
 **License:** GPLv3 or later  
-**WordPress Compatibility:** Tested up to WordPress 7.0.4
+**WordPress Compatibility:** Tested up to WordPress 7.1
 
 ## Core Functionality
 
@@ -567,9 +567,19 @@ Users must agree to terms of service for each AI platform:
 
 ## What's new in Version 2.4.8
 
+### New Features
+* **Signed remote widget**: Embed the chatbot on allowlisted remote sites via `/kognetiks-chatbot-widget/` using HMAC tokens bound to each domain + assistant pair. Supporting browsers are limited with CSP `frame-ancestors`. Referer is logged for audit only and is not used for authorization. Remote access stays off until you enable it.
+
 ### Improvements
 * **OpenAI Responses migration**: OpenAI `asst_` IDs now chat through the Responses API. Local Common Name and Additional Instructions are included in each call. Hosted `pmpt_` prompt objects remain a temporary bridge until 30 November 2026.
 * **Vector stores**: Optional `vs_…` ID on each GPT Assistants row enables Responses `file_search` for large documents.
+* **AJAX nonce refresh**: Chat sessions can refresh expired nonces. Refresh requires a valid message nonce, is rate-limited for guests, and only returns admin unlock/reset tokens to users with `manage_options`.
+* **Internationalization**: Plugin header now declares Text Domain and Domain Path; translations load from `/languages`.
+
+### Bug Fixes
+* **Legacy widget bootstrap**: `widgets/chatbot-widget-endpoint.php` no longer walks parent directories to load WordPress; it only redirects to the signed WordPress endpoint.
+* **Uninstall**: Delete-on-uninstall now runs after Freemius uninstall as well as a native WordPress uninstall.
+* **KFlow**: Conversation-log lookups use prepared SQL.
 
 ## What's new in Version 2.4.7
 
@@ -592,18 +602,6 @@ Users must agree to terms of service for each AI platform:
 
 ### Bug Fixes
 * **PHP execution time**: Fixed timeouts on long-running API calls by temporarily adjusting and restoring `max_execution_time` for OpenAI Chat Completions and Assistants API requests.
-
-## What's new in Version 2.4.4
-
-### Improvements
-* **Documentation**: Added Unanswered Questions Detection Analysis documentation.
-* **Vendor management**: Refined free→trial→premium upgrade path and messaging.
-* **Reporting**: Modal prompts conversation logging when enabling digest or proof-of-value reports.
-* **Uninstall**: Improved uninstall process and version handling.
-
-### Bug Fixes
-* Suppressed vendor notices and quieted third-party warnings.
-* Replaced select error_log calls with back_trace for cleaner debugging.
 
 ## What's new in Version 2.4.4
 

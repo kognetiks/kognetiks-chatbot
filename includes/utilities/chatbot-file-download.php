@@ -70,8 +70,13 @@ function download_openai_file($file_id, $filename) {
             return false;
         }
 
-        // Define the full file path
-        $file_path = trailingslashit($downloads_dir) . $filename;
+        $filename = sanitize_file_name( basename( (string) $filename ) );
+        if ( '' === $filename ) {
+            prod_trace( 'ERROR', 'Error: Invalid download filename.');
+            return false;
+        }
+
+        $file_path = trailingslashit( $downloads_dir ) . $filename;
 
         // Save the file locally
         if (file_put_contents($file_path, $file_content) === false) {

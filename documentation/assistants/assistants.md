@@ -32,7 +32,7 @@ These settings allow you to configure the behavior and capabilities of the Assis
    - **Description**: This field is for specifying the primary Assistant ID.
    - **Input**: Enter the Assistant ID provided by OpenAI or your specific setup.
 
-   - **TIP**: If you want a realtime webserach assistant, use `websearach`` (all lowercase) as the Assistant ID.  This will enable the tool.
+   - **TIP**: If you want a realtime websearch assistant, use `websearch` (all lowercase) as the Assistant ID.  This will enable the tool.
 
 2. **Common Name**:
    - **Description**: This field is for specifying the common name that you will refer to the assistant in the shortcode.
@@ -136,7 +136,7 @@ These settings allow you to configure the behavior and capabilities of the Assis
 
 ## Remote Widget Access
 
-The **Kognetiks Chatbot** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes, for example `kognetiks.com,chatbot-4` which will only allow calls from kognetiks.com and only then to chatbot-4.  Your resources are valuable, take appropriate precautions when allowing remote server access.
+The **Kognetiks Chatbot** now includes the advanced feature to allow access to your assistants from remote servers. Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature. This will allow specific remote servers to interact with your chatbot(s) via a signed WordPress endpoint (`/kognetiks-chatbot-widget/`). Authorization is an HMAC token bound to each domain + assistant pair; the HTTP Referer is logged for audit only. For example `kognetiks.com,chatbot-4` will only allow that host to load chatbot-4. Your resources are valuable, take appropriate precautions when allowing remote server access.
 
 <img src="remote-widget-settings.png" alt="Remote Widget Settings" style="width:auto;height:auto;">
 
@@ -147,15 +147,15 @@ The **Kognetiks Chatbot** now includes the advanced feature to allow access to y
    - **Input**: Choose `Yes` or `No`.
 
 2. **Allowed Domains**:
-    - **Description**: Enter the domain and assistant identified to allow remote access to a chatbot.  For example if the domain is `kognetiks.com` and you the chatbot is `chatbot-4`, then enter `kognetiks.com,chatbot-4`.  The pairs will be checked at when the remote server calls the chatbot widget endpoint.  If the pair is domain and chatbot are not paired correctly, no chatbot will be present.
+    - **Description**: Enter one `domain,shortcode` pair per line, for example `kognetiks.com,chatbot-4`. After you save, the settings page shows an iframe snippet that includes a signed `token` bound to that pair. Hosts are matched exactly (after stripping a leading `www.`).
     - **Input**: `domain.com,chatbot-n`
-    - **Tip**: Be sure to put each pair on its own line, seperated the domain name and the chatbot shortcode identifier with a coma.
-    - **Caution**: Your server and OpenAI resources are valuable.  Be sure to secure those resources by carefully maintaining the allowed pairs of domains and chatbots that you have white listed in this section.
+    - **Tip**: Put each pair on its own line, separated by a comma.
+    - **Caution**: Treat the token like an embed key. Anyone with the iframe HTML can load that assistant until you remove the pair.
 
 3. **Widget Logging**:
     - **Description**: Widget logging records valid and invalid access to your chatbot(s) from remote servers.  This is especially helpful to ensure that your resources are used only by those that you have allowed.  On the `Tools` tab you will find a section titled **Manage Widget Access Logs** where you can download and delete remote widget access.
 
-For more information refer to the [Managing Remote Assess to the Kognetiks Chatbot](remote-widget-settings.md) section for details on how to configure a remote server.
+For more information refer to the [Managing Remote Access to the Kognetiks Chatbot](remote-widget-settings.md) section for details on how to configure a remote server.
 
 ---
 

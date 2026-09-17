@@ -116,8 +116,10 @@ function createMarkovChainTable() {
 
     prod_trace( 'NOTICE', 'Markov Chain table created/updated successfully.');
 }
-// Register the table creation function to run on plugin activation
-register_activation_hook(__FILE__, 'createMarkovChainTable');
+// Register on the main plugin file — __FILE__ here is this include, so it would never fire.
+if ( defined( 'CHATBOT_CHATGPT_PLUGIN_FILE' ) ) {
+    register_activation_hook( CHATBOT_CHATGPT_PLUGIN_FILE, 'createMarkovChainTable' );
+}
 
 // Drop the Markov Chain table
 function dropMarkovChainTable() {

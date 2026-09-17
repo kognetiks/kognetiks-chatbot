@@ -162,7 +162,7 @@ When that happens, Freemius may receive the site URL, WordPress version, PHP ver
 
 ## License
 
-- **License:** GPLv3 or latet
+- **License:** GPLv3 or later
 
 - **License URI:** [https://www.gnu.org/licenses/gpl-3.0.html](https://www.gnu.org/licenses/gpl-3.0.html)
 

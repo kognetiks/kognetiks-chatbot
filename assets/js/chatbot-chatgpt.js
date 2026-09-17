@@ -797,7 +797,7 @@ window.resetAllLocks = resetAllLocks;
                 .then(() => {
                     // console.log("MathJax rendering complete");
                 })
-                .catch((err) => console.log("MathJax rendering failed: ", err));
+                .catch((err) => { /* console.log("MathJax rendering failed: ", err); */ });
         } else {
             // console.log("MathJax is not loaded.");
         }
@@ -2421,7 +2421,7 @@ window.resetAllLocks = resetAllLocks;
             .then(() => {
                 // console.log("MathJax re-rendering complete for stored conversation");
             })
-            .catch((err) => console.error("Chatbot: ERROR: MathJax re-rendering failed: ", err));
+            .catch((err) => { /* console.error("Chatbot: ERROR: MathJax re-rendering failed: ", err); */ });
 
         } else {
 
