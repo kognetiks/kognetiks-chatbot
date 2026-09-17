@@ -9,7 +9,7 @@
  * Text Domain: chatbot-chatgpt
  * Domain Path: /languages
  * Network: true
- * Requires at least: 5.0
+ * Requires at least: 6.0
  * Requires PHP: 7.0
  * License:     GPLv3 or later
  * License URI: https://www.gnu.org/licenses/gpl-30.html

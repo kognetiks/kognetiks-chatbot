@@ -817,16 +817,86 @@ function chatbot_transformer_model_api_settings_init() {
     );
 
     // Transformer Options - Ver 2.1.6
-    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_api_enabled'); // Ver 2.1.6
-    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_choice'); // Ver 2.1.8
-    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_max_tokens'); // Ver 2.1.9
-    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_build_schedule'); // Ver 2.1.6
-    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_word_content_window_size'); // Ver 2.1.6
-    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_sentence_response_length'); // Ver 2.1.6
-    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_similarity_threshold'); // Ver 2.2.1
-    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_leading_sentences_ratio'); // Ver 2.2.1
-    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_leading_token_ratio'); // Ver 2.2.1
-    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_lexical_local_idf');
+    register_setting(
+        'chatbot_transformer_model_api_model',
+        'chatbot_transformer_model_api_enabled',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_transformer_model_api_model',
+        'chatbot_transformer_model_choice',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_transformer_model_api_model',
+        'chatbot_transformer_model_max_tokens',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+        )
+    );
+    register_setting(
+        'chatbot_transformer_model_api_model',
+        'chatbot_transformer_model_build_schedule',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_transformer_model_api_model',
+        'chatbot_transformer_model_word_content_window_size',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+        )
+    );
+    register_setting(
+        'chatbot_transformer_model_api_model',
+        'chatbot_transformer_model_sentence_response_length',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+        )
+    );
+    register_setting(
+        'chatbot_transformer_model_api_model',
+        'chatbot_transformer_model_similarity_threshold',
+        array(
+            'type'              => 'number',
+            'sanitize_callback' => 'floatval',
+        )
+    );
+    register_setting(
+        'chatbot_transformer_model_api_model',
+        'chatbot_transformer_model_leading_sentences_ratio',
+        array(
+            'type'              => 'number',
+            'sanitize_callback' => 'floatval',
+        )
+    );
+    register_setting(
+        'chatbot_transformer_model_api_model',
+        'chatbot_transformer_model_leading_token_ratio',
+        array(
+            'type'              => 'number',
+            'sanitize_callback' => 'floatval',
+        )
+    );
+    register_setting(
+        'chatbot_transformer_model_api_model',
+        'chatbot_transformer_model_lexical_local_idf',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
     register_setting(
         'chatbot_transformer_model_api_model',
         'chatbot_lcm_query_intent_expansion',

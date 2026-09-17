@@ -27,20 +27,125 @@ function chatbot_chatgpt_assistant_settings_init() {
 
     // Settings Custom GPTs tab - Ver 1.7.2
     // register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_use_custom_gpt_assistant_id'); // Ver 1.6.7 - REMOVED in Ver 2.0.5
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_allow_file_uploads'); // Ver 1.7.6
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_display_custom_gpt_assistant_name'); // Ver 1.9.4
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_conversation_transcript_email'); // Ver 2.2.7
-    register_setting('chatbot_chatgpt_custom_gpts', 'assistant_id'); // Ver 1.6.7
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_instructions'); // Ver 1.9.3
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id_alternate'); // Alternate Assistant - Ver 1.7.2
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_instructions_alternate'); // Alternate Assistant - Ver 1.9.3
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_beta_version'); // Beta Assistant - Ver 1.9.3
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_thread_retention_period'); // Thread Retention Period - Ver 1.9.9
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_max_prompt_tokens'); // Max Prompt Tokens - Ver 2.0.1
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_max_completion_tokens'); // Max Response Tokens - Ver 2.0.1
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_enable_remote_widget'); // Enable Remote Widget - Ver 2.1.3
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_allowed_remote_domains'); // Allowed Remote Domains - Ver 2.1.3
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_widget_logging'); // Widget Logging - Ver 2.1.3
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_allow_file_uploads',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'No',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_display_custom_gpt_assistant_name',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'Yes',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_conversation_transcript_email',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_email',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'assistant_id',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_assistant_instructions',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_assistant_id_alternate',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_assistant_instructions_alternate',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_assistant_beta_version',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_thread_retention_period',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 36,
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_max_prompt_tokens',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 20000,
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_max_completion_tokens',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 20000,
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_enable_remote_widget',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'No',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_allowed_remote_domains',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_widget_logging',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'No',
+        )
+    );
 
     // General Settings for Assistants
     add_settings_section(

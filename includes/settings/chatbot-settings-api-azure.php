@@ -598,11 +598,47 @@ function chatbot_azure_api_settings_init() {
     );
 
     // Advanced Model Settings - Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_base_url'); // Ver 1.8.1
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_resource_name'); // Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_deployment_name'); // Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_api_version'); // Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_timeout_setting'); // Ver 1.8.8
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_base_url',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_resource_name',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_deployment_name',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_api_version',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_timeout_setting',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 240,
+        )
+    );
 
     add_settings_section(
         'chatbot_azure_api_advanced_section',
@@ -657,12 +693,58 @@ function chatbot_azure_api_settings_init() {
     );
 
     // Chat Options - Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_api_enabled');
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_model_choice');
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_max_tokens_setting'); // Max Tokens setting options - Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_conversation_context'); // Conversation Context - Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_temperature'); // Temperature - Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_top_p'); // Top P - Ver 2.2.6
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_api_enabled',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Yes',
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_model_choice',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_max_tokens_setting',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 1000,
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_conversation_context',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_temperature',
+        array(
+            'type'              => 'number',
+            'sanitize_callback' => 'floatval',
+            'default'           => 0.5,
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_top_p',
+        array(
+            'type'              => 'number',
+            'sanitize_callback' => 'floatval',
+            'default'           => 1.00,
+        )
+    );
 
     add_settings_section(
         'chatbot_azure_api_chat_section',
@@ -716,10 +798,38 @@ function chatbot_azure_api_settings_init() {
     );
 
     // Voice Options - Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_voice_model_option'); // Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_voice_option'); // Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_audio_output_format'); // Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_read_aloud_option'); // Ver 2.2.6
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_voice_model_option',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_voice_option',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_audio_output_format',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_read_aloud_option',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
     
     // Voice Options - Ver 2.2.6
     add_settings_section(
@@ -766,12 +876,55 @@ function chatbot_azure_api_settings_init() {
     );
 
     // Image Options - Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_image_model_option'); // Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_image_output_format'); // Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_image_output_size'); // Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_image_output_quantity'); // Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_image_output_quality'); // Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_image_style_output'); // Ver 2.2.6
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_image_model_option',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_image_output_format',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_image_output_size',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_image_output_quantity',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 1,
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_image_output_quality',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_image_style_output',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
 
     // Image Options - Ver 2.2.6
     add_settings_section(
@@ -830,8 +983,23 @@ function chatbot_azure_api_settings_init() {
     );
 
     // Whisper Options - Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_whisper_model_option');
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_whisper_response_format');
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_whisper_model_option',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_api_model',
+        'chatbot_azure_whisper_response_format',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'text',
+        )
+    );
 
     // Image Options - Ver 2.2.6
     add_settings_section(

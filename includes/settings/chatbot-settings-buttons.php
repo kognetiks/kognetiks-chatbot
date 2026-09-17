@@ -17,15 +17,78 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_button_settings_init() {
 
     // Custom Buttons settings tab - Ver 1.6.5
-    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_enable_custom_buttons');
-    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_name_1');
-    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_url_1');
-    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_name_2');
-    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_url_2');
-    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_name_3');
-    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_url_3');
-    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_name_4');
-    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_url_4');
+    register_setting(
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_enable_custom_buttons',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_name_1',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_url_1',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_name_2',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_url_2',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_name_3',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_url_3',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_name_4',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_url_4',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+        )
+    );
 
     add_settings_section(
         'chatbot_chatgpt_custom_button_overview_section',

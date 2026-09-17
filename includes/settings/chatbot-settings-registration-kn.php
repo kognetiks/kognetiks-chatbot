@@ -36,9 +36,30 @@ function chatbot_chatgpt_kn_settings_init() {
     );
 
     // Knowledge Navigator Settings and Schedule - Ver 2.0.0
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_schedule');
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_maximum_top_words');
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_tuning_percentage');
+    register_setting(
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_kn_schedule',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_kn_maximum_top_words',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_kn_tuning_percentage',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+        )
+    );
 
     add_settings_section(
         'chatbot_chatgpt_kn_scheduling_section',
@@ -101,7 +122,12 @@ function chatbot_chatgpt_kn_settings_init() {
 
         register_setting(
             'chatbot_chatgpt_knowledge_navigator',
-            $option_name
+            $option_name,
+            array(
+                'type'              => 'string',
+                'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+                'default'           => 'No',
+            )
         );
 
         // Add the settings field
@@ -127,10 +153,38 @@ function chatbot_chatgpt_kn_settings_init() {
     );
 
     // Knowledge Navigator Enhanced Responses - Ver 2.0.0
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_suppress_learnings');
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_custom_learnings_message');
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_enhanced_response_limit');
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_enhanced_response_include_excerpts');
+    register_setting(
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_suppress_learnings',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_custom_learnings_message',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_enhanced_response_limit',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_enhanced_response_include_excerpts',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+        )
+    );
 
     add_settings_section(
         'chatbot_chatgpt_kn_enhanced_response_section',
@@ -174,7 +228,14 @@ function chatbot_chatgpt_kn_settings_init() {
     // Analysis Tab
 
     // Knowledge Navigator Analysis settings tab - Ver 1.6.1
-    register_setting('chatbot_chatgpt_kn_analysis', 'chatbot_chatgpt_kn_analysis_output');
+    register_setting(
+        'chatbot_chatgpt_kn_analysis',
+        'chatbot_chatgpt_kn_analysis_output',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
 
     add_settings_section(
         'chatbot_chatgpt_kn_analysis_section',

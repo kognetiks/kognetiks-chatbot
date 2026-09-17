@@ -18,7 +18,14 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_support_settings_init() {
 
     // Support settings tab - Ver 1.3.0
-    register_setting('chatbot_chatgpt_support', 'chatgpt_support_key');
+    register_setting(
+        'chatbot_chatgpt_support',
+        'chatgpt_support_key',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
 
     add_settings_section(
         'chatbot_chatgpt_support_section',

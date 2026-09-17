@@ -144,11 +144,46 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
 function chatbot_chatgpt_avatar_settings_init() {
 
     // Avatar settings tab - Ver 1.5.0
-    register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_avatar_icon_setting');
-    register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_avatar_icon_url_setting');
-    register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_custom_avatar_icon_setting');
-    register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_avatar_greeting_setting');
-    register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_avatar_icon_set');
+    register_setting(
+        'chatbot_chatgpt_avatar',
+        'chatbot_chatgpt_avatar_icon_setting',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_avatar',
+        'chatbot_chatgpt_avatar_icon_url_setting',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_avatar',
+        'chatbot_chatgpt_custom_avatar_icon_setting',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_avatar',
+        'chatbot_chatgpt_avatar_greeting_setting',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_avatar',
+        'chatbot_chatgpt_avatar_icon_set',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
 
     // Register Avatar Overview
     add_settings_section(

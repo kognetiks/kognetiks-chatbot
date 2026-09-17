@@ -17,13 +17,66 @@ if ( ! defined( 'WPINC' ) ) {
 // Register Diagnostics settings - Ver 2.0.7
 function chatbot_chatgpt_diagnostics_settings_init() {
 
-    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_diagnostics');
-    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_custom_error_message');
-    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_notices');
-    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_attribution');
-    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_custom_attribution');
-    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_delete_data');
-    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_enable_beta_features');
+    register_setting(
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_custom_error_message',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_suppress_notices',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Off',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_suppress_attribution',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'On',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_custom_attribution',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_delete_data',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'no',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_enable_beta_features',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'no',
+        )
+    );
 
     add_settings_section(
         'chatbot_chatgpt_diagnostics_overview_section',

@@ -18,9 +18,30 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_reporting_settings_init() {
 
     // Register settings for Reporting
-    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_reporting_period');
-    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_enable_conversation_logging');
-    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_conversation_log_days_to_keep');
+    register_setting(
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_reporting_period',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_enable_conversation_logging',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_conversation_log_days_to_keep',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+        )
+    );
     
     // Register settings for Conversation Digest
     register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_conversation_digest_enabled', 'chatbot_chatgpt_sanitize_conversation_digest_enabled');
