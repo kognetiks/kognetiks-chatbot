@@ -888,7 +888,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // OUTSIDE THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
         // ob_start();
         ?>
-        <div id="chatbot-chatgpt" style="display: flex;" class="chatbot-embedded-style chatbot-full" data-cache-buster="<?php echo time(); ?>">
+        <div id="chatbot-chatgpt" style="display: flex;" class="chatbot-embedded-style chatbot-full" data-cache-buster="<?php echo esc_attr( (string) time() ); ?>">
         <script>
             jQuery(document).ready(function($) {
                 $('#chatbot-chatgpt').removeClass('chatbot-floating-style').addClass('chatbot-embedded-style');
@@ -915,7 +915,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     // Kick off Flow - Ver 1.9.5
                     if ($kflow_enabled == true and !empty($sequence_id)) {
                         // Store the prompt in a hidden input instead of directly in the textarea
-                        echo "<input type='hidden' id='chatbot-chatgpt-message' value='" . htmlspecialchars($chatbot_chatgpt_hot_bot_prompt, ENT_QUOTES) . "'>";
+                        echo "<input type='hidden' id='chatbot-chatgpt-message' value='" . esc_attr($chatbot_chatgpt_hot_bot_prompt) . "'>";
                         // echo "<textarea id='chatbot-chatgpt-message' rows='2' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
                         echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
@@ -939,9 +939,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     if ($kflow_enabled != true and !empty($chatbot_chatgpt_hot_bot_prompt)) {
                         // DIAG - Diagnostics - Ver 2.4.5
                         $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
-                        $chatbot_chatgpt_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_bot_prompt));
-                        $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
-                        echo "<textarea id='chatbot-chatgpt-message' rows='". htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'>" . $chatbot_chatgpt_hot_bot_prompt . "</textarea>";
+                        $chatbot_chatgpt_bot_prompt = sanitize_text_field($chatbot_chatgpt_bot_prompt);
+                        $chatbot_chatgpt_hot_bot_prompt = sanitize_text_field($chatbot_chatgpt_hot_bot_prompt);
+                        echo "<textarea id='chatbot-chatgpt-message' rows='". esc_attr($rows) . "' placeholder='" . esc_attr($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'>" . esc_textarea($chatbot_chatgpt_hot_bot_prompt) . "</textarea>";
                         echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
                             var textarea = document.getElementById('chatbot-chatgpt-message');
@@ -965,19 +965,19 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                             $chatbot_chatgpt_bot_prompt = $assistant_details['placeholder_prompt'];
                         }
                         $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
-                        echo "<center><textarea id='chatbot-chatgpt-message' rows='" . htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'></textarea></center>";
+                        echo "<center><textarea id='chatbot-chatgpt-message' rows='" . esc_attr($rows) . "' placeholder='" . esc_attr($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'></textarea></center>";
                     }
                 ?>
             </div>
         </div>
         <div id="chatbot-chatgpt-buttons-container">
             <button id="chatbot-chatgpt-submit" title="Send Message">
-                <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('send_icon'); ?>" alt="Send">
+                <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('send_icon') ); ?>" alt="Send">
             </button>
             <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
                 <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
                 <button id="chatbot-chatgpt-upload-file" title="Upload Files">
-                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload File">
+                    <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('attach_icon') ); ?>" alt="Upload File">
                 </button>
                 <script type="text/javascript">
                     document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
@@ -988,7 +988,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             <?php if ($chatbot_chatgpt_allow_mp3_uploads == 'Yes'): ?>
                 <input type="file" id="chatbot-chatgpt-upload-mp3-input" name="file[]" style="display: none;" />
                 <button id="chatbot-chatgpt-upload-mp3" title="Upload an Audio/Video">
-                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload MP3">
+                    <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('attach_icon') ); ?>" alt="Upload MP3">
                 </button>
                 <script type="text/javascript">
                     document.getElementById('chatbot-chatgpt-upload-mp3').addEventListener('click', function() {
@@ -997,21 +997,21 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 </script>
             <?php endif; ?>
             <button id="chatbot-chatgpt-erase-btn" title="Clear Conversation">
-                <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('erase_icon'); ?>" alt="Erase Conversation">
+                <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('erase_icon') ); ?>" alt="Erase Conversation">
             </button>
             <?php if ($chatbot_chatgpt_read_aloud_option == 'yes' && $voice != 'none'): ?>
                 <button id="chatbot-chatgpt-text-to-speech-btn" title="Read Aloud">
-                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('read_aloud_icon'); ?>" alt="Read Out Loud">
+                    <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('read_aloud_icon') ); ?>" alt="Read Out Loud">
                 </button>
             <?php endif; ?>
             <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
                 <button id="chatbot-chatgpt-speech-recognition-btn" title="Use your microphone">
-                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('mic_enabled_icon'); ?>" alt="Speech Recognition">
+                    <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('mic_enabled_icon') ); ?>" alt="Speech Recognition">
                 </button>
             <?php endif; ?>
             <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
                 <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
-                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('download_icon'); ?>" alt="Download Transcript">
+                    <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('download_icon') ); ?>" alt="Download Transcript">
                 </button>
             <?php endif; ?>
             </div>
@@ -1041,8 +1041,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // ob_start();
         ?>
         <div id="chatbot-chatgpt">
-            <div id="chatbot-chatgpt-header" data-cache-buster="<?php echo time(); ?>">
-                <div id="chatbot-chatgpt-title" class="title"><?php echo htmlspecialchars($bot_name); ?></div>
+            <div id="chatbot-chatgpt-header" data-cache-buster="<?php echo esc_attr( (string) time() ); ?>">
+                <div id="chatbot-chatgpt-title" class="title"><?php echo esc_html( wp_strip_all_tags( $bot_name ) ); ?></div>
             </div>
             <div id="chatbot-chatgpt-conversation"></div>
             <div id="chatbot-chatgpt-input">
@@ -1052,7 +1052,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         // Kick off Flow - Ver 1.9.5
                         if ($kflow_enabled == true and !empty($sequence_id)) {
                             // Store the prompt in a hidden input instead of directly in the textarea
-                            echo "<input type='hidden' id='chatbot-chatgpt-message' value='" . htmlspecialchars($chatbot_chatgpt_hot_bot_prompt, ENT_QUOTES) . "'>";
+                            echo "<input type='hidden' id='chatbot-chatgpt-message' value='" . esc_attr($chatbot_chatgpt_hot_bot_prompt) . "'>";
                             // echo "<textarea id='chatbot-chatgpt-message' rows='2' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
                             echo "<script>
                             document.addEventListener('DOMContentLoaded', function() {
@@ -1075,9 +1075,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         // Preload with a prompt if it is set - Ver 1.9.5
                         if ($kflow_enabled != true and !empty($chatbot_chatgpt_hot_bot_prompt)) {
                             $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
-                            $chatbot_chatgpt_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_bot_prompt));
-                            $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
-                            echo "<center><textarea id='chatbot-chatgpt-message' rows='". htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'>" . $chatbot_chatgpt_hot_bot_prompt . "</textarea>";
+                            $chatbot_chatgpt_bot_prompt = sanitize_text_field($chatbot_chatgpt_bot_prompt);
+                            $chatbot_chatgpt_hot_bot_prompt = sanitize_text_field($chatbot_chatgpt_hot_bot_prompt);
+                            echo "<center><textarea id='chatbot-chatgpt-message' rows='". esc_attr($rows) . "' placeholder='" . esc_attr($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'>" . esc_textarea($chatbot_chatgpt_hot_bot_prompt) . "</textarea>";
                             echo "<script>
                             document.addEventListener('DOMContentLoaded', function() {
                                 var textarea = document.getElementById('chatbot-chatgpt-message');
@@ -1097,19 +1097,19 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                             if ( !empty($assistant_details['placeholder_prompt']) ) {
                                 $chatbot_chatgpt_bot_prompt = $assistant_details['placeholder_prompt'];
                             }
-                            echo "<center><textarea id='chatbot-chatgpt-message' rows='" . htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'></textarea></center>";
+                            echo "<center><textarea id='chatbot-chatgpt-message' rows='" . esc_attr($rows) . "' placeholder='" . esc_attr($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'></textarea></center>";
                         }
                     ?>
                 </div>
             </div>
             <div id="chatbot-chatgpt-buttons-container">
                 <button id="chatbot-chatgpt-submit" title="Send Message">
-                <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('send_icon'); ?>" alt="Send">
+                <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('send_icon') ); ?>" alt="Send">
                 </button>
                 <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
                     <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
                     <button id="chatbot-chatgpt-upload-file" title="Upload Files">
-                        <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload File">
+                        <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('attach_icon') ); ?>" alt="Upload File">
                     </button>
                     <script type="text/javascript">
                         document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
@@ -1120,7 +1120,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 <?php if ($chatbot_chatgpt_allow_mp3_uploads == 'Yes'): ?>
                     <input type="file" id="chatbot-chatgpt-upload-mp3-input" name="file[]" style="display: none;" />
                     <button id="chatbot-chatgpt-upload-mp3" title="Upload MP3">
-                        <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload MP3">
+                        <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('attach_icon') ); ?>" alt="Upload MP3">
                     </button>
                     <script type="text/javascript">
                         document.getElementById('chatbot-chatgpt-upload-mp3').addEventListener('click', function() {
@@ -1129,21 +1129,21 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     </script>
                 <?php endif; ?>
                 <button id="chatbot-chatgpt-erase-btn" title="Clear Conversation">
-                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('erase_icon'); ?>" alt="Erase Conversation">
+                    <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('erase_icon') ); ?>" alt="Erase Conversation">
                 </button>
                 <?php if ($chatbot_chatgpt_read_aloud_option == 'yes' && $voice != 'none'): ?>
                     <button id="chatbot-chatgpt-text-to-speech-btn" title="Read Aloud">
-                        <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('read_aloud_icon'); ?>" alt="Read Out Loud">
+                        <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('read_aloud_icon') ); ?>" alt="Read Out Loud">
                     </button>
                 <?php endif; ?>
                 <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
                     <button id="chatbot-chatgpt-speech-recognition-btn" title="Use your microphone">
-                        <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('mic_enabled_icon'); ?>" alt="Speech Recognition">
+                        <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('mic_enabled_icon') ); ?>" alt="Speech Recognition">
                     </button>
                 <?php endif; ?>
                 <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
                     <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
-                        <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('download_icon'); ?>" alt="Download Transcript">
+                        <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('download_icon') ); ?>" alt="Download Transcript">
                     </button>
                 <?php endif; ?>
             </div>
@@ -1275,8 +1275,8 @@ function chatbot_chatgpt_custom_buttons_display() {
 // Attribution - Ver 2.0.5
 function chatbot_chatgpt_attribution() {
 
-    $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'On'));
-    $chatbot_chatgpt_custom_attribution = esc_attr(get_option('chatbot_chatgpt_custom_attribution', 'Your custom attribution message goes here.'));
+    $chatbot_chatgpt_suppress_attribution = get_option('chatbot_chatgpt_suppress_attribution', 'On');
+    $chatbot_chatgpt_custom_attribution = get_option('chatbot_chatgpt_custom_attribution', 'Your custom attribution message goes here.');
     
     if ($chatbot_chatgpt_suppress_attribution == 'Off') {
         if ($chatbot_chatgpt_custom_attribution == 'Your custom attribution message goes here.' || empty($chatbot_chatgpt_custom_attribution)) { 
@@ -1288,7 +1288,7 @@ function chatbot_chatgpt_attribution() {
         } else {
             ?>
             <div class="chatbot-attribution">
-                <p class="chatbot-attribution-text"><?php echo $chatbot_chatgpt_custom_attribution; ?></p>
+                <p class="chatbot-attribution-text"><?php echo esc_html( $chatbot_chatgpt_custom_attribution ); ?></p>
             </div>
             <?php
         }

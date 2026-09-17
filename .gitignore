@@ -48,6 +48,7 @@ includes/transformers/lexical_embeddings_cache/*
 !chatbot-logs/index.php
 !widget-logs/index.php
 !includes/transformers/sentential_embeddings_cache/index.php
+!includes/transformers/lexical_embeddings_cache/index.php
 
 # Ignore specific files
 includes/transformers/sentential_embeddings_cache.php

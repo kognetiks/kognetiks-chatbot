@@ -192,11 +192,11 @@ function chatbot_chatgpt_diagnostics_system_settings_section_callback($args) {
         $chatbot_chatgpt_plugin_version = !empty($plugin_data['Version']) ? $plugin_data['Version'] : '0.0.0';
     // }
 
-    echo '<p>Chatbot Version: <b>' . $chatbot_chatgpt_plugin_version . '</b><br>';
-    echo 'PHP Version: <b>' . $php_version . '</b><br>';
-    echo 'PHP Memory Limit: <b>' . ini_get('memory_limit') . '</b><br>';
-    echo 'WordPress Version: <b>' . $wp_version . '</b><br>';
-    echo 'WordPress Language Code: <b>' . get_locale() . '</b></p>';
+    echo '<p>Chatbot Version: <b>' . esc_html( $chatbot_chatgpt_plugin_version ) . '</b><br>';
+    echo 'PHP Version: <b>' . esc_html( $php_version ) . '</b><br>';
+    echo 'PHP Memory Limit: <b>' . esc_html( ini_get('memory_limit') ) . '</b><br>';
+    echo 'WordPress Version: <b>' . esc_html( $wp_version ) . '</b><br>';
+    echo 'WordPress Language Code: <b>' . esc_html( get_locale() ) . '</b></p>';
 
 }
 
@@ -766,7 +766,7 @@ function chatbot_chatgpt_reset_cache_locks_callback($args) {
                 method: 'POST',
                 data: {
                     action: 'chatbot_chatgpt_reset_cache_locks',
-                    chatbot_nonce: '<?php echo wp_create_nonce('chatbot_reset_cache_locks'); ?>'
+                    chatbot_nonce: '<?php echo esc_js( wp_create_nonce('chatbot_reset_cache_locks') ); ?>'
                 },
                 success: function(response) {
                     if (response.success) {

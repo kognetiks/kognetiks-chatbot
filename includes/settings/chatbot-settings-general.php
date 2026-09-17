@@ -31,7 +31,7 @@ function chatbot_ai_engine_section_callback($args) {
     $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
     ?>
-    <p>Configure the AI Platform for the Chatbot plugin. The default will be one of <?php echo $chatbot_ai_platform_choice ?>'s AI models; assumes you have or will provide a valid API key.</p>
+    <p>Configure the AI Platform for the Chatbot plugin. The default will be one of <?php echo esc_html( $chatbot_ai_platform_choice ); ?>'s AI models; assumes you have or will provide a valid API key.</p>
     <?php
 
 }
@@ -305,9 +305,10 @@ function chatbot_chatgpt_input_rows_callback($args) {
     <select id="chatbot_chatgpt_input_rows" name="chatbot_chatgpt_input_rows">
         <?php
         for ($i = 1; $i <= 10; $i++) {
-            echo '<option value="' . $i . '" ' . selected( $chatbot_chatgpt_input_rows, $i ) . '>' . $i . '</option>';
+            echo '<option value="' . esc_attr( (string) $i ) . '"' . selected( $chatbot_chatgpt_input_rows, $i, false ) . '>' . esc_html( (string) $i ) . '</option>';
         }
         ?>
+    </select>
     <?php
 }
 

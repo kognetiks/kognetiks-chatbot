@@ -642,14 +642,15 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
 function chatbot_chatgpt_conversation_reporting_section_callback($args) {
     ?>
     <div>
-        <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both Visitor and User input and chatbot responses).</p>
-        <p>Conversation items stored take up <b><?php echo chatbot_chatgpt_size_conversations(); ?> MB</b> in your database.</p>
+        <p>Conversation items stored in your DB total <b><?php echo esc_html( chatbot_chatgpt_count_conversations() ); ?></b> rows (includes both Visitor and User input and chatbot responses).</p>
+        <p>Conversation items stored take up <b><?php echo esc_html( chatbot_chatgpt_size_conversations() ); ?> MB</b> in your database.</p>
         <p>Use the button (below) to retrieve the conversation data and download as a CSV file.</p>
         <?php
             if (is_admin()) {
-                $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_conversation_data' ), 'chatbot_chatgpt_download_conversation_data' ) ) . '">Download Conversation Data</a>';
-                echo $header;
+                printf(
+                    '<a class="button button-primary" href="%s">Download Conversation Data</a>',
+                    esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_conversation_data' ), 'chatbot_chatgpt_download_conversation_data' ) )
+                );
             }
         ?>
     </div>
@@ -661,13 +662,14 @@ function chatbot_chatgpt_interaction_reporting_section_callback($args) {
     <div>
         <!-- TEMPORARILY REMOVED AS SOME USERS ARE EXPERIENCING ISSUES WITH THE CHARTS - Ver 1.7.8 -->
         <!-- <p><?php echo do_shortcode('[chatbot_simple_chart from_database="true"]'); ?></p> -->
-        <p><?php echo chatbot_chatgpt_interactions_table() ?></p>
+        <p><?php echo wp_kses_post( chatbot_chatgpt_interactions_table() ); ?></p>
         <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
         <?php
             if (is_admin()) {
-                $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_interactions_data' ), 'chatbot_chatgpt_download_interactions_data' ) ) . '">Download Interaction Data</a>';
-                echo $header;
+                printf(
+                    '<a class="button button-primary" href="%s">Download Interaction Data</a>',
+                    esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_interactions_data' ), 'chatbot_chatgpt_download_interactions_data' ) )
+                );
             }
         ?>
     </div>
@@ -677,13 +679,14 @@ function chatbot_chatgpt_interaction_reporting_section_callback($args) {
 function chatbot_chatgpt_token_reporting_section_callback($args) {
     ?>
     <div>
-        <p><?php echo chatbot_chatgpt_total_tokens() ?></p>
+        <p><?php echo wp_kses_post( chatbot_chatgpt_total_tokens() ); ?></p>
         <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
         <?php
             if (is_admin()) {
-                $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_token_usage_data' ), 'chatbot_chatgpt_download_token_usage_data' ) ) . '">Download Token Usage Data</a>';
-                echo $header;
+                printf(
+                    '<a class="button button-primary" href="%s">Download Token Usage Data</a>',
+                    esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_token_usage_data' ), 'chatbot_chatgpt_download_token_usage_data' ) )
+                );
             }
         ?>
     </div>
@@ -1400,6 +1403,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     // Deliver the file for download
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment;filename=' . $filename);
+    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSV file download, not HTML output.
     echo $csv_data;
 
     // Delete the file
@@ -1963,13 +1967,21 @@ add_action('admin_init', 'chatbot_chatgpt_ensure_email_report_settings_saved', 2
 function chatbot_chatgpt_admin_notice() {
     $error_message = get_transient('chatbot_chatgpt_admin_error');
     if (!empty($error_message)) {
-        printf('<div class="%1$s"><p><b>Chatbot: </b>%2$s</p></div>', 'notice notice-error is-dismissible', $error_message);
+        printf(
+            '<div class="%1$s"><p><b>Chatbot: </b>%2$s</p></div>',
+            esc_attr( 'notice notice-error is-dismissible' ),
+            esc_html( $error_message )
+        );
         delete_transient('chatbot_chatgpt_admin_error'); // Clear the transient after displaying the message
     }
     
     $success_message = get_transient('chatbot_chatgpt_admin_success');
     if (!empty($success_message)) {
-        printf('<div class="%1$s"><p><b>Chatbot: </b>%2$s</p></div>', 'notice notice-success is-dismissible', $success_message);
+        printf(
+            '<div class="%1$s"><p><b>Chatbot: </b>%2$s</p></div>',
+            esc_attr( 'notice notice-success is-dismissible' ),
+            esc_html( $success_message )
+        );
         delete_transient('chatbot_chatgpt_admin_success'); // Clear the transient after displaying the message
     }
 }

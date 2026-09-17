@@ -497,7 +497,7 @@ function chatbot_chatgpt_dashboard_widget_content() {
         <div class="chatbot-date-range">
             <?php 
             $end_date = current_time('mysql');
-            echo date('F j, Y', strtotime($start_date)) . ' - ' . date('F j, Y', strtotime($end_date));
+            echo esc_html( date_i18n( 'F j, Y', strtotime( $start_date ) ) ) . ' - ' . esc_html( date_i18n( 'F j, Y', strtotime( $end_date ) ) );
             ?>
         </div>
         
@@ -516,9 +516,9 @@ function chatbot_chatgpt_dashboard_widget_content() {
                     foreach ($daily_chats as $day) {
                         $height = $max_count > 0 ? (round($day->count) / $max_count * 100) : 0;
                         ?>
-                        <div class="chatbot-graph-bar" style="height: <?php echo $height; ?>%">
-                            <div class="chatbot-graph-value"><?php echo round($day->count); ?></div>
-                            <div class="chatbot-graph-label"><?php echo date('m/d', strtotime($day->date)); ?></div>
+                        <div class="chatbot-graph-bar" style="height: <?php echo esc_attr( $height ); ?>%">
+                            <div class="chatbot-graph-value"><?php echo esc_html( (string) round( $day->count ) ); ?></div>
+                            <div class="chatbot-graph-label"><?php echo esc_html( date_i18n( 'm/d', strtotime( $day->date ) ) ); ?></div>
                         </div>
                         <?php
                     }
@@ -552,7 +552,7 @@ function chatbot_chatgpt_dashboard_widget_content() {
         
         <div class="chatbot-stat-box">
             <div class="chatbot-stat-title">Average Conversation Duration</div>
-            <div class="chatbot-stat-value"><?php echo $avg_duration ? format_duration($avg_duration) : '0 seconds'; ?></div>
+            <div class="chatbot-stat-value"><?php echo esc_html( $avg_duration ? format_duration( $avg_duration ) : '0 seconds' ); ?></div>
             <div class="chatbot-stat-label">Average time spent per conversation</div>
         </div>
         

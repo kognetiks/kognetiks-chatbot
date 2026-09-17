@@ -1193,12 +1193,12 @@ function chatbot_chatgpt_process_queued_message($message_data) {
             case 'OpenAI':
 
                 // Determine which OpenAI API to call based on model
-                if (str_starts_with($model, 'gpt-4o')) {
+                if (chatbot_chatgpt_is_openai_image_model($model)) {
+                    $response = chatbot_chatgpt_call_image_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
+                } elseif (str_starts_with($model, 'gpt-4o')) {
                     $response = chatbot_chatgpt_call_omni($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
                 } elseif (str_starts_with($model, 'gpt')) {
                     $response = chatbot_chatgpt_call_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
-                } elseif (str_starts_with($model, 'dall')) {
-                    $response = chatbot_chatgpt_call_image_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
                 } elseif (str_starts_with($model, 'tts')) {
                     $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
                 } elseif (str_starts_with($model, 'whisper')) {
@@ -1893,6 +1893,16 @@ function chatbot_chatgpt_send_message() {
 
                 switch ($model) {
 
+                    case str_starts_with($model, 'gpt-image'):
+                    case str_starts_with($model, 'dall'):
+
+                        // Reload the model - BELT & SUSPENDERS
+                        $kchat_settings['model'] = $model;
+                        // Send message to Image API - Ver 1.9.4
+                        $response = chatbot_chatgpt_call_image_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
+
+                        break;
+
                     case str_starts_with($model, 'gpt-4o'):
 
                         // The string 'gpt-4o' is found in $model
@@ -1909,15 +1919,6 @@ function chatbot_chatgpt_send_message() {
                         $kchat_settings['model'] = $model;
                         // Send message to ChatGPT API - Ver 1.6.7
                         $response = chatbot_chatgpt_call_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
-
-                        break;
-
-                    case str_starts_with($model, 'dall'):
-
-                        // Reload the model - BELT & SUSPENDERS
-                        $kchat_settings['model'] = $model;
-                        // Send message to Image API - Ver 1.9.4
-                        $response = chatbot_chatgpt_call_image_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
 
                         break;
 

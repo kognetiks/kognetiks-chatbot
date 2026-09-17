@@ -57,8 +57,7 @@ function chatbot_chatgpt_avatar_icon_set_callback($args) {
             <?php
             $options = array("Original", "Chinese New Year", "Christmas", "Fall", "Halloween", "Spring", "Summer", "Thanksgiving", "Winter");
             foreach ($options as $option) {
-                $selected = ($avatar_icon_set == $option) ? 'selected' : '';
-                echo "<option value=\"$option\" $selected>$option</option>";
+                echo '<option value="' . esc_attr( $option ) . '"' . selected( $avatar_icon_set, $option, false ) . '>' . esc_html( $option ) . '</option>';
             }
             ?>
         </select>
@@ -124,9 +123,10 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
                         for ($j = 0; $j < $cols; $j++) {
                             if ($iconIndex < $iconCount) {
                                 $iconName = sprintf(strtolower(str_replace(' ', '-', $setName)) . "-%03d.png", $iconIndex);
-                                $selected = ($iconName === $selectedIcon) ? 'class="selected-icon"' : '';
+                                $icon_url = plugins_url('assets/icons/' . $iconName, dirname(__FILE__, 2));
+                                $selected_class = ($iconName === $selectedIcon) ? 'selected-icon' : '';
                                 echo '<td style="padding: 15px;">';
-                                echo '<img src="' . plugins_url('assets/icons/'.$iconName, dirname(__FILE__, 2)) . '" id="'. $iconName .'" onclick="selectIcon(\''.$iconName.'\')" '.$selected.' style="width:60px;height:60px;cursor:pointer;"/>';
+                                echo '<img src="' . esc_url( $icon_url ) . '" id="' . esc_attr( $iconName ) . '" onclick="selectIcon(\'' . esc_js( $iconName ) . '\')" class="' . esc_attr( $selected_class ) . '" style="width:60px;height:60px;cursor:pointer;"/>';
                                 echo '</td>';
                                 $iconIndex++;
                             }

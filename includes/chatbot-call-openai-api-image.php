@@ -92,38 +92,58 @@ function chatbot_chatgpt_call_image_api($api_key, $message, $user_id = null, $pa
     // OpenAI Image API endpoint
     $api_url = 'https://api.openai.com/v1/images/generations';
 
-    // Select the OpenAI Model (dall-e-2 or dall-e-3)
+    // Select the OpenAI image model (GPT Image, or legacy DALL·E if still configured)
     if ( !empty($kchat_settings['model']) ) {
         $model = $kchat_settings['model'];
     } else {
-        $model = esc_attr(get_option('chatbot_chatgpt_image_model_option', 'dall-e-2'));
+        $model = get_option('chatbot_chatgpt_image_model_option', 'gpt-image-1');
     }
+
+    if ( empty( $model ) || str_starts_with( (string) $model, 'dall' ) ) {
+        $model = 'gpt-image-1';
+    }
+
+    $is_gpt_image = str_starts_with( (string) $model, 'gpt-image' );
 
     // Enforce message length constraints based on model
     if ($model === 'dall-e-2' && strlen($message) > 1000) {
         $message = substr($message, 0, 1000);
-    } elseif ($model === 'dall-e-3' && strlen($message) > 10000) {
+    } elseif (strlen($message) > 10000) {
         $message = substr($message, 0, 10000);
     }
 
     // Set number of images to generate
-    $quantity = intval(esc_attr(get_option('chatbot_chatgpt_image_output_quantity', '1')));
-    // The number of images to generate. Must be between 1 and 10. For dall-e-3, only n=1 is supported.
-    if ($model === 'dall-e-3') {
-        $quantity = 1; // dall-e-3 only supports `n=1`
+    $quantity = intval(get_option('chatbot_chatgpt_image_output_quantity', '1'));
+    if ($is_gpt_image || $model === 'dall-e-3') {
+        $quantity = 1;
     }
 
-    // Define allowed image sizes based on the model
-    $size = esc_attr(get_option('chatbot_chatgpt_image_output_size', '1024x1024'));
-        // If the $model is dall-e-2, then size muss be one of 256x256, 512x512, or 1024x1024
-    $allowed_sizes = ($model === 'dall-e-2') ? ['256x256', '512x512', '1024x1024'] : ['1024x1024', '1792x1024', '1024x1792'];
-    if (!in_array($size, $allowed_sizes)) {
+    $size = get_option('chatbot_chatgpt_image_output_size', '1024x1024');
+    if ($is_gpt_image) {
+        $allowed_sizes = array( '1024x1024', '1536x1024', '1024x1536', 'auto' );
+    } elseif ($model === 'dall-e-2') {
+        $allowed_sizes = array( '256x256', '512x512', '1024x1024' );
+    } else {
+        $allowed_sizes = array( '1024x1024', '1792x1024', '1024x1792' );
+    }
+    if (!in_array($size, $allowed_sizes, true)) {
         $size = '1024x1024';
     }
 
-    // Additional image parameters (for dall-e-3)
-    $quality = esc_attr(get_option('chatbot_chatgpt_image_quality_output', 'standard'));
-    $style = esc_attr(get_option('chatbot_chatgpt_image_style_output', 'vivid'));
+    $quality = get_option('chatbot_chatgpt_image_output_quality', $is_gpt_image ? 'auto' : 'standard');
+    if ($is_gpt_image) {
+        if ($quality === 'standard') {
+            $quality = 'medium';
+        } elseif ($quality === 'hd') {
+            $quality = 'high';
+        }
+        if (!in_array($quality, array( 'auto', 'low', 'medium', 'high' ), true)) {
+            $quality = 'auto';
+        }
+    }
+
+    $style = get_option('chatbot_chatgpt_image_style_output', 'vivid');
+    $output_format = get_option('chatbot_chatgpt_image_output_format', 'png');
 
     // User tracking data
     $user_tracking = implode('-', [$session_id, $user_id, $page_id, $thread_id, $assistant_id]);
@@ -137,8 +157,12 @@ function chatbot_chatgpt_call_image_api($api_key, $message, $user_id = null, $pa
         'user'    => $user_tracking
     ];
 
-    // Include additional parameters for dall-e-3
-    if ($model === 'dall-e-3') {
+    if ($is_gpt_image) {
+        $body['quality'] = $quality;
+        if (in_array($output_format, array( 'png', 'jpeg', 'webp' ), true)) {
+            $body['output_format'] = $output_format;
+        }
+    } elseif ($model === 'dall-e-3') {
         $body['quality'] = $quality;
         $body['style'] = $style;
     }
@@ -146,12 +170,12 @@ function chatbot_chatgpt_call_image_api($api_key, $message, $user_id = null, $pa
     // Send the API request using WordPress HTTP API
     $response = wp_remote_post($api_url, [
         'method'    => 'POST',
-        'timeout'   => 30,
+        'timeout'   => $is_gpt_image ? 120 : 30,
         'headers'   => [
             'Authorization'  => 'Bearer ' . $api_key,
             'Content-Type'   => 'application/json'
         ],
-        'body'      => json_encode($body)
+        'body'      => wp_json_encode($body)
     ]);
 
     // Handle errors
@@ -179,18 +203,46 @@ function chatbot_chatgpt_call_image_api($api_key, $message, $user_id = null, $pa
         $image_urls = '';
         foreach ($response_body['data'] as $image_data) {
             if (!empty($image_data['url'])) {
-                $image_url = $image_data['url'];
-                $image_urls .= "![Generated Image]($image_url)\n";
+                $image_urls .= '![Generated Image](' . esc_url_raw( $image_data['url'] ) . ")\n";
+            } elseif (!empty($image_data['b64_json'])) {
+                $saved_url = chatbot_chatgpt_save_generated_image( $image_data['b64_json'], $output_format );
+                if ( ! empty( $saved_url ) ) {
+                    $image_urls .= '![Generated Image](' . esc_url_raw( $saved_url ) . ")\n";
+                }
             }
         }
-        // Clear locks on success
-        // Lock clearing removed - main send function handles locking
-        return $image_urls;
+        if ( $image_urls !== '' ) {
+            return $image_urls;
+        }
     }
 
     // Return a localized error message if no images were generated
     // Clear locks on error
     delete_transient($conv_lock);
     return $errorResponses[array_rand($errorResponses)] ?? 'Error: No images generated.';
+
+}
+
+// Save a GPT Image base64 payload to the WordPress uploads directory and return its URL.
+function chatbot_chatgpt_save_generated_image( $b64_json, $output_format = 'png' ) {
+
+    $bytes = base64_decode( $b64_json, true );
+    if ( $bytes === false || $bytes === '' ) {
+        return '';
+    }
+
+    $ext = in_array( $output_format, array( 'png', 'jpeg', 'jpg', 'webp' ), true ) ? $output_format : 'png';
+    if ( $ext === 'jpeg' ) {
+        $ext = 'jpg';
+    }
+
+    $filename = 'chatbot-generated-' . wp_generate_uuid4() . '.' . $ext;
+    $uploaded = wp_upload_bits( $filename, null, $bytes );
+
+    if ( ! empty( $uploaded['error'] ) || empty( $uploaded['url'] ) ) {
+        return '';
+    }
+
+    return $uploaded['url'];
 
 }

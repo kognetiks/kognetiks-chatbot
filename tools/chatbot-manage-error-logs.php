@@ -112,7 +112,7 @@ function chatbot_chatgpt_manage_error_logs() {
     }
 
     // Start HTML output with styling
-    $output = '<style>
+    $css = '
         .error-log-templates-display {
             overflow-x: auto; /* Add horizontal scroll if needed */
         }
@@ -152,9 +152,9 @@ function chatbot_chatgpt_manage_error_logs() {
             border: 1px solid #ffeaa7;
             color: #856404;
         }
-    </style>';
+    ';
 
-    $output .= '<div class="wrap error-log-templates-display">';
+    $output = '<div class="wrap error-log-templates-display">';
     
     // Display status messages
     if (isset($_GET['deleted']) && $_GET['deleted'] == '1') {
@@ -201,8 +201,21 @@ function chatbot_chatgpt_manage_error_logs() {
     $output .= '</form>';
     $output .= '</div>';
 
-    // Output style block first (wp_kses_post strips <style> and would show CSS as text).
-    echo $output;
+    $allowed_html = array(
+        'div'   => array( 'class' => true ),
+        'p'     => array(),
+        'form'  => array( 'method' => true, 'action' => true ),
+        'table' => array(),
+        'thead' => array(),
+        'tbody' => array(),
+        'tr'    => array(),
+        'th'    => array(),
+        'td'    => array(),
+        'a'     => array( 'href' => true, 'class' => true ),
+    );
+
+    echo '<style>' . wp_kses( $css, array() ) . '</style>';
+    echo wp_kses( $output, $allowed_html );
 
     return;
 
