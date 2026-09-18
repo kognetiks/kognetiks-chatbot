@@ -168,7 +168,7 @@ function transformer_model_sentential_context_cache_embeddings($corpus, $windowS
     // Process the content to build embeddings
     foreach ($corpus as $row) {
 
-        $postContent = strip_tags(html_entity_decode($row['post_content'], ENT_QUOTES | ENT_HTML5));
+        $postContent = wp_strip_all_tags(strip_shortcodes(html_entity_decode($row['post_content'], ENT_QUOTES | ENT_HTML5)));
         $postEmbeddings = transformer_model_sentential_context_build_cooccurrence_matrix($postContent, $windowSize);
 
         // Group embeddings by their cache file

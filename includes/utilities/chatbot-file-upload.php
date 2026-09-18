@@ -97,7 +97,16 @@ function chatbot_chatgpt_upload_files() {
             file_put_contents($index_file_path, $file_content);
         }
     }
-    chmod($uploads_dir, 0700);
+    global $wp_filesystem;
+    if (!function_exists('WP_Filesystem')) {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+    }
+    if (empty($wp_filesystem)) {
+        WP_Filesystem();
+    }
+    if ($wp_filesystem) {
+        $wp_filesystem->chmod($uploads_dir, 0700);
+    }
 
     // Which API key to use?
     $ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice'), 'OpenAI');
@@ -540,7 +549,16 @@ function chatbot_chatgpt_upload_mp3() {
         }
     }
     // Protect the directory - Ver 2.0.0
-    chmod($uploads_dir, 0700);
+    global $wp_filesystem;
+    if (!function_exists('WP_Filesystem')) {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+    }
+    if (empty($wp_filesystem)) {
+        WP_Filesystem();
+    }
+    if ($wp_filesystem) {
+        $wp_filesystem->chmod($uploads_dir, 0700);
+    }
 
     $responses = [];
     $error_flag = false;

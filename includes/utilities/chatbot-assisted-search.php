@@ -204,7 +204,7 @@ function chatbot_assistant_search_handler($request) {
                 ];
 
                 if ($include_excerpt) {
-                    $result['excerpt'] = strip_tags($post->post_content);
+                    $result['excerpt'] = wp_strip_all_tags(strip_shortcodes($post->post_content));
                 }
 
                 $formatted_results[] = $result;

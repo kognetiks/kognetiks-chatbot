@@ -126,7 +126,7 @@ function chatbot_chatgpt_format_search_results($results, $include_excerpt, $page
             'url' => $post->guid,
             'date' => $post->post_date,
             'author' => get_the_author_meta('display_name', $post->post_author),
-            'excerpt' => $include_excerpt ? strip_tags($post->post_content) : null
+            'excerpt' => $include_excerpt ? wp_strip_all_tags(strip_shortcodes($post->post_content)) : null
         ];
     }, $results);
 

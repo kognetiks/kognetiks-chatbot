@@ -1055,10 +1055,13 @@ function transformer_model_lexical_context_save_cache($cacheFile, $embeddings) {
     $compressed = gzencode($serialized, 9); // Maximum compression level
     list($createdAt, $updatedAt) = transformer_model_lexical_context_get_cache_timestamps($cacheFile);
     
+    $directAccessGuard = "if ( ! defined( 'ABSPATH' ) ) {\n    exit;\n}\n";
+
     if ($compressed !== false) {
         if (file_put_contents($compressedFile, $compressed) !== false) {
             // Also create a PHP wrapper for backward compatibility
             $wrapperContent = "<?php\n";
+            $wrapperContent .= $directAccessGuard;
             $wrapperContent .= "// Lexical embeddings cache (compressed)\n";
             $wrapperContent .= "// Created: {$createdAt}\n";
             $wrapperContent .= "// Updated: {$updatedAt}\n";
@@ -1076,6 +1079,7 @@ function transformer_model_lexical_context_save_cache($cacheFile, $embeddings) {
     $serializedFile = $cacheFile . '.ser';
     if (file_put_contents($serializedFile, serialize($embeddings)) !== false) {
         $wrapperContent = "<?php\n";
+        $wrapperContent .= $directAccessGuard;
         $wrapperContent .= "// Lexical embeddings cache (serialized)\n";
         $wrapperContent .= "// Created: {$createdAt}\n";
         $wrapperContent .= "// Updated: {$updatedAt}\n";
@@ -1086,6 +1090,7 @@ function transformer_model_lexical_context_save_cache($cacheFile, $embeddings) {
     
     // Last resort: use var_export (original method, but should rarely be needed)
     $cacheContent = "<?php\n";
+    $cacheContent .= $directAccessGuard;
     $cacheContent .= "// Lexical embeddings cache (exported)\n";
     $cacheContent .= "// Created: {$createdAt}\n";
     $cacheContent .= "// Updated: {$updatedAt}\n";
