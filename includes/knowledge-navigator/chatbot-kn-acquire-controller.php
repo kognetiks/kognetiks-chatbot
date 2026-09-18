@@ -802,7 +802,7 @@ function chatbot_kn_wrap_up() {
     set_transient('chatbot_chatgpt_kn_results', $kn_results);
 
     // Get the current date and time.
-    $date_time_completed = date("Y-m-d H:i:s");
+    $date_time_completed = wp_date('Y-m-d H:i:s');
 
     // Concatenate the status message with the date and time.
     $status_message = 'Completed on ' . $date_time_completed;

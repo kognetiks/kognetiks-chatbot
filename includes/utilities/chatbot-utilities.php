@@ -49,7 +49,16 @@ function create_directory_and_index_file($dir_path) {
     }
 
     // Set directory permissions
-    chmod($dir_path, 0755);
+    global $wp_filesystem;
+    if (!function_exists('WP_Filesystem')) {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+    }
+    if (empty($wp_filesystem)) {
+        WP_Filesystem();
+    }
+    if ($wp_filesystem) {
+        $wp_filesystem->chmod($dir_path, 0755);
+    }
 
     return true;
 

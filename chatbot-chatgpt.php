@@ -2433,13 +2433,13 @@ function chatbot_chatgpt_reset_cache_locks_handler() {
         }
         
         // Log the action
-        $log_message = '[' . date('Y-m-d H:i:s') . '] [Chatbot] [Advanced Reset] Cache and locks reset by admin user ID: ' . get_current_user_id() . ' - Cleared ' . $cleared_count . ' entries';
+        $log_message = '[' . gmdate('Y-m-d H:i:s') . '] [Chatbot] [Advanced Reset] Cache and locks reset by admin user ID: ' . get_current_user_id() . ' - Cleared ' . $cleared_count . ' entries';
         chatbot_error_log($log_message);
         
         wp_send_json_success('Cache and locks reset successfully. Cleared ' . $cleared_count . ' entries.');
         
     } catch (Exception $e) {
-        $log_message = '[' . date('Y-m-d H:i:s') . '] [Chatbot] [Advanced Reset] Error: ' . $e->getMessage();
+        $log_message = '[' . gmdate('Y-m-d H:i:s') . '] [Chatbot] [Advanced Reset] Error: ' . $e->getMessage();
         chatbot_error_log($log_message);
         wp_send_json_error('Error resetting cache and locks: ' . $e->getMessage());
     }

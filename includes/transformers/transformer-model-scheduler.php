@@ -159,8 +159,8 @@ function transformer_model_sentential_context_cache_embeddings($corpus, $windowS
     $cacheDir = __DIR__ . '/sentential_embeddings_cache/';
 
     // Ensure the cache directory exists
-    if (!is_dir($cacheDir)) {
-        mkdir($cacheDir, 0755, true);
+    if (!create_directory_and_index_file($cacheDir)) {
+        return;
     }
 
     $cacheUpdates = []; // To group updates by file

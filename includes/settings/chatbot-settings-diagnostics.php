@@ -461,7 +461,7 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     // Upper case the message type
     $message_type = strtoupper($message_type);
 
-    $date_time = (new DateTime())->format('d-M-Y H:i:s \U\T\C');
+    $date_time = gmdate('d-M-Y H:i:s') . ' UTC';
 
     // Message Type: Indicating whether the log is an error, warning, notice, or success message.
     // Prefix the message with [ERROR], [WARNING], [NOTICE], or [SUCCESS].
@@ -511,7 +511,7 @@ function chatbot_error_log($message) {
     create_directory_and_index_file($chatbot_logs_dir);
 
     // Get the current date to create a daily log file
-    $current_date = date('Y-m-d');
+    $current_date = gmdate('Y-m-d');
     
     $log_file = $chatbot_logs_dir . 'chatbot-error-log-' . $current_date . '.log';
 
@@ -522,8 +522,10 @@ function chatbot_error_log($message) {
     if (file_exists($log_file)) {
         $current_perms = fileperms($log_file);
         if (($current_perms & 0x0080) === 0) { // Check if writable by owner
-            chmod($log_file, 0644);
-            error_log('[Chatbot] [chatbot-settings-Diagnostics.php] Fixed file permissions for: ' . $log_file);
+            if ($wp_filesystem) {
+                $wp_filesystem->chmod($log_file, 0644);
+                error_log('[Chatbot] [chatbot-settings-Diagnostics.php] Fixed file permissions for: ' . $log_file);
+            }
         }
         
         // Check if file is currently being used by another process
@@ -581,7 +583,7 @@ function chatbot_error_log($message) {
             // error_log('[Chatbot] [chatbot-settings-Diagnostics.php] WordPress filesystem write failed, falling back to native method');
             // Try to fix file permissions before attempting to write
             if (file_exists($log_file)) {
-                chmod($log_file, 0644);
+                $wp_filesystem->chmod($log_file, 0644);
             }
             // Use fopen with proper error handling
             $handle = @fopen($log_file, 'a');
@@ -602,10 +604,10 @@ function chatbot_error_log($message) {
                 // Try to create the file with proper permissions
                 $dir = dirname($log_file);
                 if (!is_dir($dir)) {
-                    mkdir($dir, 0755, true);
+                    create_directory_and_index_file($dir);
                 }
                 if (touch($log_file)) {
-                    chmod($log_file, 0644);
+                    $wp_filesystem->chmod($log_file, 0644);
                     @file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
                 } else {
                     // Last resort: try to write to a temporary file and then move it
@@ -648,10 +650,12 @@ function chatbot_error_log($message) {
             // If fopen fails, try to create the file
             $dir = dirname($log_file);
             if (!is_dir($dir)) {
-                mkdir($dir, 0755, true);
+                create_directory_and_index_file($dir);
             }
             if (touch($log_file)) {
-                chmod($log_file, 0644);
+                if ($wp_filesystem) {
+                    $wp_filesystem->chmod($log_file, 0644);
+                }
                 @file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
             }
         }
@@ -699,7 +703,7 @@ function log_chatbot_error() {
         create_directory_and_index_file($chatbot_logs_dir);
 
         // Get the current date to create a daily log file
-        $current_date = date('Y-m-d');
+        $current_date = gmdate('Y-m-d');
 
         $log_file = $chatbot_logs_dir . 'chatbot-error-log-' . $current_date . '.log';
 
@@ -707,7 +711,7 @@ function log_chatbot_error() {
         $session_id = session_id();
         $user_id = get_current_user_id();
         $ip_address = $_SERVER['REMOTE_ADDR'];
-        $date_time = date('Y-m-d H:i:s');
+        $date_time = gmdate('Y-m-d H:i:s');
 
         // Construct the log message - Ver 2.3.7 - Fixed empty error message display
         // Ensure error_message is not empty before logging
@@ -739,7 +743,7 @@ add_action('wp_ajax_nopriv_log_chatbot_error', 'log_chatbot_error');
 // Test function to verify logging functionality
 function test_chatbot_logging() {
 
-    $test_message = '[' . date('Y-m-d H:i:s') . '] [Chatbot] [chatbot-settings-Diagnostics.php] This is a test log message to verify logging functionality.';
+    $test_message = '[' . gmdate('Y-m-d H:i:s') . '] [Chatbot] [chatbot-settings-Diagnostics.php] This is a test log message to verify logging functionality.';
     chatbot_error_log($test_message);
     return 'Test log message written. Check the log file to verify.';
 

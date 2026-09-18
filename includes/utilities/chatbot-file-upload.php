@@ -672,7 +672,7 @@ function create_index_file($directory) {
 
     // Check if the directory exists, if not, create it
     if (!is_dir($directory)) {
-        if (!mkdir($directory, 0755, true)) {
+        if (!create_directory_and_index_file($directory)) {
             // If the directory could not be created, log an error and exit the function
             prod_trace('ERROR', 'Failed to create directory: ' . $directory);
             return;

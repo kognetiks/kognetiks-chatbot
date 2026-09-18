@@ -1002,14 +1002,14 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
         
         // Calculate the start date and group by clause based on the reporting period
         if($reporting_period === 'Daily') {
-            $start_date = date('Y-m-d', strtotime("-7 days"));
+            $start_date = current_datetime()->modify('-7 days')->format('Y-m-d');
             // $group_by = "DATE_FORMAT(date, '%Y-%m-%d')";
             $group_by = "DATE_FORMAT(date, '%m-%d')";
         } elseif($reporting_period === 'Monthly') {
-            $start_date = date('Y-m-01', strtotime("-3 months"));
+            $start_date = current_datetime()->modify('-3 months')->format('Y-m-01');
             $group_by = "DATE_FORMAT(date, '%Y-%m')";
         } else {
-            $start_date = date('Y-01-01', strtotime("-3 years"));
+            $start_date = current_datetime()->modify('-3 years')->format('Y-01-01');
             $group_by = "DATE_FORMAT(date, '%Y')";
         }
         
@@ -1080,15 +1080,15 @@ function chatbot_chatgpt_interactions_table() {
     
     // Calculate the start date and group by clause based on the reporting period
     if($reporting_period === 'Daily') {
-        $start_date = date('Y-m-d H:i:s', strtotime("-7 days"));
+        $start_date = current_datetime()->modify('-7 days')->format('Y-m-d H:i:s');
         $group_by = "DATE_FORMAT(interaction_time, '%%m-%%d')";
         $order_by = "MIN(interaction_time) ASC";
     } elseif($reporting_period === 'Monthly') {
-        $start_date = date('Y-m-01 00:00:00', strtotime("-3 months"));
+        $start_date = current_datetime()->modify('-3 months')->format('Y-m-01 00:00:00');
         $group_by = "DATE_FORMAT(interaction_time, '%%Y-%%m')";
         $order_by = "DATE_FORMAT(interaction_time, '%%Y-%%m') ASC";
     } else {
-        $start_date = date('Y-01-01 00:00:00', strtotime("-3 years"));
+        $start_date = current_datetime()->modify('-3 years')->format('Y-01-01 00:00:00');
         $group_by = "DATE_FORMAT(interaction_time, '%%Y')";
         $order_by = "DATE_FORMAT(interaction_time, '%%Y') ASC";
     }
@@ -1206,15 +1206,15 @@ function chatbot_chatgpt_total_tokens() {
     
     // Calculate the start date and group by clause based on the reporting period
     if ($reporting_period === 'Daily') {
-        $start_date = date('Y-m-d H:i:s', strtotime("-7 days"));
+        $start_date = current_datetime()->modify('-7 days')->format('Y-m-d H:i:s');
         $group_by = "DATE_FORMAT(interaction_time, '%%m-%%d')";
         $order_by = "MIN(interaction_time) ASC";
     } elseif ($reporting_period === 'Monthly') {
-        $start_date = date('Y-m-01 00:00:00', strtotime("-3 months"));
+        $start_date = current_datetime()->modify('-3 months')->format('Y-m-01 00:00:00');
         $group_by = "DATE_FORMAT(interaction_time, '%%Y-%%m')";
         $order_by = "DATE_FORMAT(interaction_time, '%%Y-%%m') ASC";
     } else {
-        $start_date = date('Y-01-01 00:00:00', strtotime("-3 years"));
+        $start_date = current_datetime()->modify('-3 years')->format('Y-01-01 00:00:00');
         $group_by = "DATE_FORMAT(interaction_time, '%%Y')";
         $order_by = "DATE_FORMAT(interaction_time, '%%Y') ASC";
     }
@@ -1345,7 +1345,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     }
 
     // Ask user where to save the file
-    $filename = $t_file_name . '-' . date('Y-m-d') . '.csv';
+    $filename = $t_file_name . '-' . gmdate('Y-m-d') . '.csv';
     // Replace spaces with - in the filename
     $filename = str_replace(' ', '-', $filename);
     $results_dir_path = $chatbot_chatgpt_plugin_dir_path . 'results/';
@@ -1461,7 +1461,7 @@ function chatbot_chatgpt_test_conversation_digest_ajax() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
     
     // Get conversations from the last 24 hours for test
-    $start_time = date('Y-m-d H:i:s', strtotime('-24 hours'));
+    $start_time = current_datetime()->modify('-24 hours')->format('Y-m-d H:i:s');
     
     // Query for conversations (only Visitor and Chatbot messages, not token data)
     $query = $wpdb->prepare("
@@ -1476,10 +1476,10 @@ function chatbot_chatgpt_test_conversation_digest_ajax() {
     $conversations = $wpdb->get_results($query);
     
     // Build email content
-    $subject = 'Test: Kognetiks Chatbot Conversation Digest - ' . date('Y-m-d H:i:s');
+    $subject = 'Test: Kognetiks Chatbot Conversation Digest - ' . current_time('mysql');
     $message = "TEST EMAIL - Kognetiks Chatbot Conversation Digest\n\n";
     $message .= "This is a test email to verify your Conversation Digest settings are working correctly.\n\n";
-    $message .= "Period: " . date('Y-m-d H:i:s', strtotime($start_time)) . " to " . current_time('mysql') . "\n\n";
+    $message .= "Period: " . $start_time . " to " . current_time('mysql') . "\n\n";
     
     if (!empty($conversations)) {
         // Organize conversations by session

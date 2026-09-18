@@ -207,7 +207,7 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
     $offset = ($batch_starting_point - 1) * $batch_size;
 
 
-    $last_updated_date = date('Y-m-d H:i:s', strtotime($last_updated));
+    $last_updated_date = gmdate('Y-m-d H:i:s', strtotime($last_updated));
 
     if ($processing_type == 'posts') {
         // Fetch posts and pages

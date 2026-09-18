@@ -95,7 +95,7 @@ function chatbot_chatgpt_send_conversation_digest() {
     
     // If this is the first run, get conversations from the last 24 hours
     if (empty($last_digest_timestamp)) {
-        $start_time = date('Y-m-d H:i:s', strtotime('-24 hours'));
+        $start_time = current_datetime()->modify('-24 hours')->format('Y-m-d H:i:s');
     } else {
         $start_time = $last_digest_timestamp;
     }
@@ -147,12 +147,12 @@ function chatbot_chatgpt_send_conversation_digest() {
     }
     
     // Build email content
-    $subject = 'Kognetiks Chatbot Conversation Digest - ' . date('Y-m-d H:i:s');
+    $subject = 'Kognetiks Chatbot Conversation Digest - ' . current_time('mysql');
     
     if ($is_premium) {
         // Premium: Full detailed content
         $message = "New Kognetiks Chatbot Conversations Digest\n\n";
-        $message .= "Period: " . date('Y-m-d H:i:s', strtotime($start_time)) . " to " . current_time('mysql') . "\n\n";
+        $message .= "Period: " . $start_time . " to " . current_time('mysql') . "\n\n";
         $message .= "Total Conversations: " . count($conversations_by_session) . "\n";
         $message .= "Total Messages: " . count($conversations) . "\n\n";
         $message .= "---\n\n";
@@ -193,7 +193,7 @@ function chatbot_chatgpt_send_conversation_digest() {
     } else {
         // Free: Limited content - just stats
         $message = "Chatbot Conversation Digest (Weekly Summary)\n\n";
-        $message .= "Period: " . date('Y-m-d H:i:s', strtotime($start_time)) . " to " . current_time('mysql') . "\n\n";
+        $message .= "Period: " . $start_time . " to " . current_time('mysql') . "\n\n";
         $message .= "Summary Statistics:\n";
         $message .= "• New Conversations: " . count($conversations_by_session) . "\n";
         $message .= "• Pages Involved: " . count($page_ids) . "\n";

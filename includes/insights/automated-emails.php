@@ -35,39 +35,45 @@ function kognetiks_insights_get_period_window( $period = 'weekly' ) {
     // Normalize period: accept 'daily', 'monthly', default to 'weekly'
     $period = ( $period === 'monthly' ) ? 'monthly' : ( ( $period === 'daily' ) ? 'daily' : 'weekly' );
 
-    $now = current_time( 'timestamp' ); // WP local time
-    // Normalize to start-of-day for consistency.
-    $today_start = strtotime( date( 'Y-m-d 00:00:00', $now ) );
-    // End of today (23:59:59) to ensure we include all of today's data
-    $today_end = strtotime( date( 'Y-m-d 23:59:59', $now ) );
+    $now         = current_datetime();
+    $today_start = $now->setTime( 0, 0, 0 );
+    $today_end   = $now->setTime( 23, 59, 59 );
 
     if ( $period === 'monthly' ) {
-        $start = strtotime( date( 'Y-m-01 00:00:00', $today_start ) );
-        $end   = $today_end; // Include full current day
-        $label = date_i18n( 'F Y', $today_start );
+        $start = $today_start->modify( 'first day of this month' )->setTime( 0, 0, 0 );
+        $end   = $today_end;
+        $label = wp_date( 'F Y', $today_start->getTimestamp() );
     } elseif ( $period === 'daily' ) {
-        // Daily window: just today
         $start = $today_start;
-        $end   = $today_end; // Include full current day
-        $label = date_i18n( 'F j, Y', $today_start );
+        $end   = $today_end;
+        $label = wp_date( 'F j, Y', $today_start->getTimestamp() );
     } else {
         // Week window: last 7 days (including today), simple rolling window.
-        // Go back 6 days from start of today, so we get 7 days total (including today)
-        $start = strtotime( '-6 days', $today_start );
-        $end   = $today_end; // Include full current day
+        $start = $today_start->modify( '-6 days' );
+        $end   = $today_end;
         $label = sprintf(
             '%s – %s',
-            date_i18n( 'M j', $start ),
-            date_i18n( 'M j, Y', $end )
+            wp_date( 'M j', $start->getTimestamp() ),
+            wp_date( 'M j, Y', $end->getTimestamp() )
         );
     }
 
     return [
         'period' => $period,
-        'start'  => $start,
-        'end'    => $end,
+        'start'  => $start->getTimestamp(),
+        'end'    => $end->getTimestamp(),
         'label'  => $label,
     ];
+}
+
+/**
+ * Format a Unix timestamp as a MySQL DATETIME in the site timezone.
+ *
+ * @param int $timestamp Unix timestamp (UTC-based).
+ * @return string
+ */
+function kognetiks_insights_mysql_datetime( $timestamp ) {
+    return wp_date( 'Y-m-d H:i:s', (int) $timestamp );
 }
 
 /**
@@ -202,16 +208,16 @@ function kognetiks_insights_get_usage_stats( $start_ts, $end_ts ) {
 
     // Convert timestamps to MySQL DATETIME strings using WordPress date functions
     // WordPress stores dates in local time, so we need to ensure proper conversion
-    $start_dt = date( 'Y-m-d H:i:s', $start_ts );
-    $end_dt   = date( 'Y-m-d H:i:s', $end_ts );
+    $start_dt = kognetiks_insights_mysql_datetime( $start_ts );
+    $end_dt   = kognetiks_insights_mysql_datetime( $end_ts );
 
     // Previous equal-length window immediately before start.
     $window_seconds = max( 1, (int) ( $end_ts - $start_ts ) );
     $prev_end_ts    = $start_ts;
     $prev_start_ts  = $start_ts - $window_seconds;
 
-    $prev_start_dt = date( 'Y-m-d H:i:s', $prev_start_ts );
-    $prev_end_dt   = date( 'Y-m-d H:i:s', $prev_end_ts );
+    $prev_start_dt = kognetiks_insights_mysql_datetime( $prev_start_ts );
+    $prev_end_dt   = kognetiks_insights_mysql_datetime( $prev_end_ts );
 
     /**
      * Simplified query: Count distinct session_ids, page_ids, etc. for human messages
@@ -329,8 +335,8 @@ function kognetiks_insights_get_top_unanswered_questions( $start_ts, $end_ts, $l
     $log    = $tables['conversation_log'];
 
     // Convert timestamps to MySQL DATETIME strings using WordPress date functions
-    $start_dt = date( 'Y-m-d H:i:s', $start_ts );
-    $end_dt   = date( 'Y-m-d H:i:s', $end_ts );
+    $start_dt = kognetiks_insights_mysql_datetime( $start_ts );
+    $end_dt   = kognetiks_insights_mysql_datetime( $end_ts );
 
     // Allowlist for human messages
     $human_types = [ 'Visitor', 'User' ];
@@ -458,8 +464,8 @@ function kognetiks_insights_get_top_pages_by_activity( $start_ts, $end_ts, $limi
     $log    = $tables['conversation_log'];
 
     // Convert timestamps to MySQL DATETIME strings using WordPress date functions
-    $start_dt = date( 'Y-m-d H:i:s', $start_ts );
-    $end_dt   = date( 'Y-m-d H:i:s', $end_ts );
+    $start_dt = kognetiks_insights_mysql_datetime( $start_ts );
+    $end_dt   = kognetiks_insights_mysql_datetime( $end_ts );
 
     $human_types = [ 'Visitor', 'User' ];
     $human_in    = implode( ',', array_fill( 0, count( $human_types ), '%s' ) );
@@ -548,8 +554,8 @@ function kognetiks_insights_get_top_assistants_used( $start_ts, $end_ts, $limit 
     $log    = $tables['conversation_log'];
 
     // Convert timestamps to MySQL DATETIME strings using WordPress date functions
-    $start_dt = date( 'Y-m-d H:i:s', $start_ts );
-    $end_dt   = date( 'Y-m-d H:i:s', $end_ts );
+    $start_dt = kognetiks_insights_mysql_datetime( $start_ts );
+    $end_dt   = kognetiks_insights_mysql_datetime( $end_ts );
 
     // Count by session_id to avoid inflating from token rows.
     $sql = "

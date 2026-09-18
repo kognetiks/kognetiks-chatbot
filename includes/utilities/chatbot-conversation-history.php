@@ -241,7 +241,7 @@ function interactive_chat_history() {
     $output = '<div class="chatbot-chatgpt-chatbot-history-wrapper">';
     foreach ($grouped_conversations as $interaction_date => $messages) {
         $first_message = reset($messages); // Get the first message to use its date
-        $date_label = date("F j, Y, g:i a", strtotime($first_message->interaction_time)); // Format the date
+        $date_label = mysql2date('F j, Y, g:i a', $first_message->interaction_time); // Site timezone and locale
         // Create a unique ID based on the date (sanitize for use in HTML ID attribute)
         $date_id = sanitize_html_class($interaction_date);
 
