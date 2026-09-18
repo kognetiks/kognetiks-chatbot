@@ -81,7 +81,7 @@ function transformer_model_sentential_context_reset_cache() {
         $files = glob($cacheDir . '*.php'); // Get all PHP files in the directory
         foreach ($files as $file) {
             if (is_file($file)) {
-                unlink($file); // Delete the file
+                wp_delete_file($file); // Delete the file
             }
         }
         // Optionally, delete the folder itself if required

@@ -65,6 +65,34 @@ function create_directory_and_index_file($dir_path) {
 }
 
 /**
+ * Move or rename a file using the WordPress filesystem API.
+ *
+ * @param string $source      Absolute source path.
+ * @param string $destination Absolute destination path.
+ * @param bool   $overwrite   Whether to overwrite an existing destination. Default true.
+ * @return bool True on success, false on failure.
+ */
+function chatbot_chatgpt_move_file( $source, $destination, $overwrite = true ) {
+
+    global $wp_filesystem;
+
+    if ( ! function_exists( 'WP_Filesystem' ) ) {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+    }
+
+    if ( empty( $wp_filesystem ) ) {
+        WP_Filesystem();
+    }
+
+    if ( ! $wp_filesystem ) {
+        return false;
+    }
+
+    return (bool) $wp_filesystem->move( $source, $destination, $overwrite );
+
+}
+
+/**
  * Check if a model requires max_completion_tokens instead of max_tokens
  * Newer OpenAI models (gpt-5, o1, o3, etc.) require max_completion_tokens
  * 

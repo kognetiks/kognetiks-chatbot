@@ -177,7 +177,7 @@ function handle_widget_log_actions() {
             $file_path = $chatbot_logs_dir . $file;
 
             if (file_exists($file_path)) {
-                unlink($file_path);
+                wp_delete_file($file_path);
                 wp_redirect(admin_url('admin.php?page=chatbot-chatgpt&tab=tools')); // Redirect to plugin page
                 exit;
             } else {
@@ -195,7 +195,7 @@ function handle_widget_log_actions() {
             foreach ($files as $file) {
                 $file_path = $chatbot_logs_dir . $file;
                 if (file_exists($file_path)) {
-                    unlink($file_path);
+                    wp_delete_file($file_path);
                 }
             }
 

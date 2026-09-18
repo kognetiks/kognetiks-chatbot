@@ -378,7 +378,7 @@ function deleteAudioFile($file_id) {
     }
 
     // Try to delete the file
-    if (!unlink($file_id)) {
+    if (!wp_delete_file($file_id)) {
         return;
     }
 
@@ -394,7 +394,7 @@ function chatbot_chatgpt_cleanup_audio_directory() {
     foreach (glob($audio_dir . '*') as $file) {
         // Delete files older than 1 hour
         if (filemtime($file) < time() - 60 * 60 * 1) {
-            unlink($file);
+            wp_delete_file($file);
         }
     }
     // Create the index.php file if it does not exist

@@ -74,7 +74,7 @@ function chatbot_chatgpt_cleanup_transcripts_directory() {
     foreach (glob($transcripts_dir . '*') as $file) {
         // Delete files older than 1 hour
         if (filemtime($file) < time() - 60 * 60 * 1) {
-            unlink($file);
+            wp_delete_file($file);
         }
     }
     // Create the index.php file if it does not exist

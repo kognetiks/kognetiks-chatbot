@@ -1131,7 +1131,7 @@ function chatbot_transformer_model_handle_clear_lexical_rebuild() {
             );
             foreach ( $paths as $p ) {
                 if ( $p && file_exists( $p ) ) {
-                    @unlink( $p );
+                    wp_delete_file( $p );
                 }
             }
         }

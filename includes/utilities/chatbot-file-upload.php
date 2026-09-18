@@ -213,7 +213,7 @@ function chatbot_chatgpt_upload_files() {
                 ];
                 $error_flag = true;
                 if ( file_exists( $file_path ) ) {
-                    unlink( $file_path );
+                    wp_delete_file( $file_path );
                 }
                 continue;
             }
@@ -265,14 +265,14 @@ function chatbot_chatgpt_upload_files() {
                         'message' => 'Upload failed: server does not support cURL.',
                     ];
                     $error_flag = true;
-                    unlink( $file_path );
+                    wp_delete_file( $file_path );
                     continue;
                 }
                 $ch = curl_init( $api_url );
                 if ( $ch === false ) {
                     $responses[] = [ 'status' => 'error', 'message' => 'Upload failed: could not initialize request.' ];
                     $error_flag = true;
-                    unlink( $file_path );
+                    wp_delete_file( $file_path );
                     continue;
                 }
                 $headers = [
@@ -300,7 +300,7 @@ function chatbot_chatgpt_upload_files() {
                         'message' => 'API Error: ' . $curl_err,
                     ];
                     $error_flag = true;
-                    unlink( $file_path );
+                    wp_delete_file( $file_path );
                     chatbot_file_upload_debug_log( $api_url, 0, $response_body, $payload_keys_log, $file_path, $file_size, $file_mime_type );
                     continue;
                 }
@@ -310,7 +310,7 @@ function chatbot_chatgpt_upload_files() {
                     'message' => 'Unsupported AI platform for file uploads.',
                 ];
                 $error_flag = true;
-                unlink( $file_path );
+                wp_delete_file( $file_path );
                 continue;
             }
 
@@ -335,7 +335,7 @@ function chatbot_chatgpt_upload_files() {
                     'message'     => $errorMessage,
                 ];
                 $error_flag = true;
-                unlink( $file_path );
+                wp_delete_file( $file_path );
                 continue;
             }
 
@@ -362,7 +362,7 @@ function chatbot_chatgpt_upload_files() {
                 'id'         => $responseData['id'],
                 'message'    => 'File ' . $newFileName . ' uploaded successfully.',
             ];
-            unlink( $file_path );
+            wp_delete_file( $file_path );
 
         }
 
@@ -658,7 +658,7 @@ function chatbot_chatgpt_cleanup_uploads_directory() {
     foreach (glob($uploads_dir . '*') as $file) {
         // Delete files older than 1 hour
         if (filemtime($file) < time() - 60 * 60 * 1) {
-            unlink($file);
+            wp_delete_file($file);
         }
     }
     // Create the index.php file if it does not exist

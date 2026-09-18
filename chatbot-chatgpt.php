@@ -2425,7 +2425,7 @@ function chatbot_chatgpt_reset_cache_locks_handler() {
                 $files = glob($cache_dir . '*');
                 foreach ($files as $file) {
                     if (is_file($file) && filemtime($file) < (time() - 3600)) { // Older than 1 hour
-                        @unlink($file);
+                        wp_delete_file($file);
                         $cleared_count++;
                     }
                 }

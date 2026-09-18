@@ -48,7 +48,7 @@ function check_web_server_permissions($dir_path) {
     }
     
     // Try to delete the test file
-    if (!unlink($test_file)) {
+    if (!wp_delete_file($test_file)) {
         return false;
     }
     
@@ -280,7 +280,7 @@ function handle_log_actions() {
                 }
                 
                 // Attempt to delete the file with error handling
-                if (!unlink($file_path)) {
+                if (!wp_delete_file($file_path)) {
                     if ( defined('WP_DEBUG') && WP_DEBUG ) {
                         error_log('[Chatbot] [chatbot-manage-error-logs.php] Failed to delete file: ' . $file_path);
                     }
@@ -317,7 +317,7 @@ function handle_log_actions() {
                     }
                     
                     // Attempt to delete the file
-                    if (unlink($file_path)) {
+                    if (wp_delete_file($file_path)) {
                         $deleted_count++;
                     } else {
                         if ( defined('WP_DEBUG') && WP_DEBUG ) {

@@ -619,7 +619,7 @@ function chatbot_error_log($message) {
                                 @file_put_contents($temp_file, $existing_content . $message . PHP_EOL, LOCK_EX);
                             }
                         }
-                        @rename($temp_file, $log_file);
+                        chatbot_chatgpt_move_file($temp_file, $log_file);
                     }
                 }
             }

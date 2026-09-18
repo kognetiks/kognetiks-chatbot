@@ -1037,7 +1037,7 @@ function transformer_model_lexical_context_migrate_old_cache($cacheFile) {
                         copy($cacheFile, $backupFile);
                     }
                     // Delete old uncompressed file (keep backup for safety)
-                    // unlink($cacheFile); // Uncomment to delete old file after migration
+                    // wp_delete_file($cacheFile); // Uncomment to delete old file after migration
                     prod_trace('NOTICE', 'Cache migration completed. Backup saved to: ' . basename($backupFile));
                 }
             }
@@ -1316,7 +1316,7 @@ function transformer_model_lexical_context_rebuild_counts_save( $base, array &$c
     $ok_ex = transformer_model_lexical_context_rebuild_blob_save( $base . '.extra.bin', $extra );
 
     if ( $ok_co && $ok_wc && $ok_ex ) {
-        @unlink( $base . '.bin' );
+        wp_delete_file( $base . '.bin' );
     }
 
     return $ok_co && $ok_wc && $ok_ex;
@@ -1375,7 +1375,7 @@ function transformer_model_lexical_context_rebuild_counts_unlink_all( $base ) {
 
     foreach ( array( '.co.bin', '.wc.bin', '.extra.bin', '.bin' ) as $suf ) {
         if ( $base !== '' && file_exists( $base . $suf ) ) {
-            @unlink( $base . $suf );
+            wp_delete_file( $base . $suf );
         }
     }
 }
@@ -1389,7 +1389,7 @@ function transformer_model_lexical_context_rebuild_counts_unlink_all( $base ) {
 function transformer_model_lexical_context_rebuild_counts_unlink_heavy_only( $base ) {
     foreach ( array( '.co.bin', '.wc.bin', '.bin' ) as $suf ) {
         if ( $base !== '' && file_exists( $base . $suf ) ) {
-            @unlink( $base . $suf );
+            wp_delete_file( $base . $suf );
         }
     }
 }
@@ -2538,7 +2538,7 @@ function transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cac
 
     foreach ( $patterns as $p ) {
         if ( $p && file_exists( $p ) ) {
-            @unlink( $p );
+            wp_delete_file( $p );
         }
     }
 }
@@ -2728,7 +2728,7 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $cont
     $ver_staging = $cache_dir . '/lexical_embeddings_cache_version.staging.' . $token . '.txt';
     if ( false === file_put_contents( $ver_staging, $corpus_hash, LOCK_EX ) ) {
         transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cache_dir, $token );
-        @unlink( $ver_staging );
+        wp_delete_file( $ver_staging );
         transformer_model_lexical_context_lexical_rebuild_log( 'step=aborted reason=version_staging_write_failed' );
         return array( 'ok' => false, 'error' => 'write_error' );
     }
@@ -2740,7 +2740,7 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $cont
     $backup_sfx = '.lcm_bak_' . $token;
 
     /**
-     * Install staging file over production; roll back one step if rename fails.
+     * Install staging file over production; roll back one step if the move fails.
      *
      * @param string $staging_path Absolute staging path.
      * @param string $final_path   Absolute production path.
@@ -2752,18 +2752,18 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $cont
             return false;
         }
         if ( file_exists( $final_path ) ) {
-            if ( ! @rename( $final_path, $final_path . $backup_sfx ) ) {
+            if ( ! chatbot_chatgpt_move_file( $final_path, $final_path . $backup_sfx ) ) {
                 return false;
             }
         }
-        if ( ! @rename( $staging_path, $final_path ) ) {
+        if ( ! chatbot_chatgpt_move_file( $staging_path, $final_path ) ) {
             if ( file_exists( $final_path . $backup_sfx ) ) {
-                @rename( $final_path . $backup_sfx, $final_path );
+                chatbot_chatgpt_move_file( $final_path . $backup_sfx, $final_path );
             }
             return false;
         }
         if ( file_exists( $final_path . $backup_sfx ) ) {
-            @unlink( $final_path . $backup_sfx );
+            wp_delete_file( $final_path . $backup_sfx );
         }
 
         return true;
@@ -3125,7 +3125,7 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
         $embeddings = transformer_model_lexical_context_rebuild_blob_load( $pmi_path );
         if ( ! is_array( $embeddings ) || empty( $embeddings ) ) {
             delete_option( $state_key );
-            @unlink( $pmi_path );
+            wp_delete_file( $pmi_path );
             $err = array( 'done' => true, 'ok' => false, 'error' => 'pmi_missing' );
             transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
             transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'] ) );
@@ -3136,7 +3136,7 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
         // Stable corpus hash from streamed corpus file created during accumulation.
         if ( ! file_exists( $corpus_path ) ) {
             delete_option( $state_key );
-            @unlink( $pmi_path );
+            wp_delete_file( $pmi_path );
             $err = array( 'done' => true, 'ok' => false, 'error' => 'corpus_stream_missing' );
             transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
             transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'] ) );
@@ -3146,7 +3146,7 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
         $corpus_hash = hash_file( 'sha256', $corpus_path );
         if ( ! is_string( $corpus_hash ) || $corpus_hash === '' ) {
             delete_option( $state_key );
-            @unlink( $pmi_path );
+            wp_delete_file( $pmi_path );
             $err = array( 'done' => true, 'ok' => false, 'error' => 'corpus_hash' );
             transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
             transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'] ) );
@@ -3158,7 +3158,7 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
         if ( ! file_exists( $cache_dir ) ) {
             if ( ! wp_mkdir_p( $cache_dir ) ) {
                 delete_option( $state_key );
-                @unlink( $pmi_path );
+                wp_delete_file( $pmi_path );
                 $err = array( 'done' => true, 'ok' => false, 'error' => 'cache_dir' );
                 transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
                 transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'] ) );
@@ -3246,10 +3246,10 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
                 return false;
             }
             if ( file_exists( $to ) ) {
-                @unlink( $to . '.bak' );
-                @rename( $to, $to . '.bak' );
+                wp_delete_file( $to . '.bak' );
+                chatbot_chatgpt_move_file( $to, $to . '.bak' );
             }
-            return @rename( $from, $to );
+            return chatbot_chatgpt_move_file( $from, $to );
         };
 
         $ok_move = $install_one( $staging_php, $final_php );
@@ -3277,8 +3277,8 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
         );
 
         // Cleanup.
-        @unlink( $pmi_path );
-        @unlink( $corpus_path );
+        wp_delete_file( $pmi_path );
+        wp_delete_file( $corpus_path );
         delete_option( $state_key );
         // DF/N no longer needed once caches are installed.
         transformer_model_lexical_context_rebuild_counts_unlink_all( $counts_base );
@@ -3290,8 +3290,8 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
     // Unknown stage; reset.
     delete_option( $state_key );
     transformer_model_lexical_context_rebuild_counts_unlink_all( $counts_base );
-    @unlink( $pmi_path );
-    @unlink( $corpus_path );
+    wp_delete_file( $pmi_path );
+    wp_delete_file( $corpus_path );
     $err = array( 'done' => true, 'ok' => false, 'error' => 'bad_stage' );
     transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] );
     transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'unknown', 'error' => $err['error'] ) );

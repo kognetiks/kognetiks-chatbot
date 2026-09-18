@@ -119,7 +119,7 @@ function chatbot_chatgpt_download_options_data() {
     }
 
     // Delete the file after download
-    if (!unlink($options_file)) {
+    if (!wp_delete_file($options_file)) {
         $class = 'notice notice-error';
         $message = __('Failed to delete options file after download.', 'chatbot-chatgpt');
         chatbot_chatgpt_general_admin_notice($message);

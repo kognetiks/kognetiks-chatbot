@@ -1056,7 +1056,7 @@ function chatbot_chatgpt_delete_chart() {
     $png_files = glob($img_dir_path . '*.png'); // Search for .png files in the directory
 
     foreach ($png_files as $png_file) {
-        unlink($png_file); // Delete each .png file
+        wp_delete_file($png_file); // Delete each .png file
     }
 }
 add_action('chatbot_chatgpt_delete_chart', 'chatbot_chatgpt_delete_chart');
@@ -1428,7 +1428,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     echo $csv_data;
 
     // Delete the file
-    unlink($results_csv_file);
+    wp_delete_file($results_csv_file);
     exit;
 
 }

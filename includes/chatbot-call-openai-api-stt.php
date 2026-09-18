@@ -148,7 +148,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
     $response_data = json_decode($response_body, true);
 
     // Delete the uploaded file
-    unlink($audio_file_name);
+    wp_delete_file($audio_file_name);
 
     // Handle API errors
     if (isset($response_data['error'])) {
