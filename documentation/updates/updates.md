@@ -1,5 +1,9 @@
 # Past Updates
 
+## What's new in Version 2.4.9
+
+* **TBD**
+
 ## What's new in Version 2.4.8
 
 ### New Features
