@@ -159,7 +159,7 @@ function kognetiks_insights_score_conversations_without_sentiment_score() {
     kognetiks_insights_set_scoring_lock(false); // Clear lock at end
 
     // Set the last scoring date/time in the options table
-    update_option('kognetiks_insights_last_scoring_date', date('Y-m-d H:i:s'));
+    update_option('kognetiks_insights_last_scoring_date', current_time('mysql'));
 
 }
 

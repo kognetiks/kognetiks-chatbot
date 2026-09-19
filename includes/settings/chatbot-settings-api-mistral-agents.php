@@ -27,20 +27,125 @@ function chatbot_mistral_agent_settings_init() {
 
     // Settings Custom GPTs tab - Ver 1.7.2
     // register_setting('chatbot_mistral_agents', 'chatbot_mistral_use_agents_assistant_id'); // Ver 1.6.7 - REMOVED in Ver 2.0.5
-    register_setting('chatbot_mistral_agents', 'chatbot_mistral_allow_file_uploads'); // Ver 1.7.6
-    register_setting('chatbot_mistral_agents', 'chatbot_mistral_display_agents_assistant_name'); // Ver 1.9.4
-    register_setting('chatbot_mistral_agents', 'chatbot_mistral_conversation_transcript_email'); // Ver 2.2.7
-    register_setting('chatbot_mistral_agents', 'assistant_id'); // Ver 1.6.7
-    register_setting('chatbot_mistral_agents', 'chatbot_mistral_agent_instructions'); // Ver 1.9.3
-    register_setting('chatbot_mistral_agents', 'chatbot_mistral_agent_id_alternate'); // Alternate Agent - Ver 1.7.2
-    register_setting('chatbot_mistral_agents', 'chatbot_mistral_agent_instructions_alternate'); // Alternate Agent - Ver 1.9.3
-    register_setting('chatbot_mistral_agents', 'chatbot_mistral_agent_beta_version'); // Beta Agent - Ver 1.9.3
-    register_setting('chatbot_mistral_agents', 'chatbot_mistral_thread_retention_period'); // Thread Retention Period - Ver 1.9.9
-    register_setting('chatbot_mistral_agents', 'chatbot_mistral_max_prompt_tokens'); // Max Prompt Tokens - Ver 2.0.1
-    register_setting('chatbot_mistral_agents', 'chatbot_mistral_max_completion_tokens'); // Max Response Tokens - Ver 2.0.1
-    register_setting('chatbot_mistral_agents', 'chatbot_mistral_enable_remote_widget'); // Enable Remote Widget - Ver 2.1.3
-    register_setting('chatbot_mistral_agents', 'chatbot_mistral_allowed_remote_domains'); // Allowed Remote Domains - Ver 2.1.3
-    register_setting('chatbot_mistral_agents', 'chatbot_widget_logging'); // Widget Logging - Ver 2.1.3
+    register_setting(
+        'chatbot_mistral_agents',
+        'chatbot_mistral_allow_file_uploads',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'No',
+        )
+    );
+    register_setting(
+        'chatbot_mistral_agents',
+        'chatbot_mistral_display_agents_assistant_name',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'Yes',
+        )
+    );
+    register_setting(
+        'chatbot_mistral_agents',
+        'chatbot_mistral_conversation_transcript_email',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_email',
+        )
+    );
+    register_setting(
+        'chatbot_mistral_agents',
+        'assistant_id',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_mistral_agents',
+        'chatbot_mistral_agent_instructions',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_mistral_agents',
+        'chatbot_mistral_agent_id_alternate',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_mistral_agents',
+        'chatbot_mistral_agent_instructions_alternate',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_mistral_agents',
+        'chatbot_mistral_agent_beta_version',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_mistral_agents',
+        'chatbot_mistral_thread_retention_period',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 36,
+        )
+    );
+    register_setting(
+        'chatbot_mistral_agents',
+        'chatbot_mistral_max_prompt_tokens',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 20000,
+        )
+    );
+    register_setting(
+        'chatbot_mistral_agents',
+        'chatbot_mistral_max_completion_tokens',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 20000,
+        )
+    );
+    register_setting(
+        'chatbot_mistral_agents',
+        'chatbot_mistral_enable_remote_widget',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'No',
+        )
+    );
+    register_setting(
+        'chatbot_mistral_agents',
+        'chatbot_mistral_allowed_remote_domains',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_mistral_agents',
+        'chatbot_widget_logging',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'No',
+        )
+    );
 
     // General Settings for Agents
     add_settings_section(
@@ -396,8 +501,8 @@ function chatbot_mistral_max_completion_tokens_callback($args) {
 // Remote Widget Settings section callback - Ver 2.1.3
 function chatbot_mistral_remote_widget_settings_section_callback($args) {
     ?>
-    <p>Configure the Remote Widget settings to allow access from specific domains to specific agents. Please each pair, seperated with a comma, on their own line.</p>
-    <p>For example the Allowed Remote Domain might be <code>www.example.com,agent-1</code>.</p>
+    <p>Configure the Remote Widget settings to allow access from specific domains to specific agents. Place each pair, separated with a comma, on its own line.</p>
+    <p>For example the Allowed Remote Domain might be <code>www.example.com,agent-1</code>. Access requires the signed token shown below, not the HTTP Referer.</p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the Remote Widget Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=remote-widget-settings.md">here</a>.</b></p>
     <?php
 }
@@ -415,8 +520,12 @@ function chatbot_mistral_enable_remote_widget_callback($args) {
 
 // Allowed Remote Domains field callback - Ver 2.1.3
 function chatbot_mistral_allowed_remote_domains_callback($args) {
-    $allowed_remote_domains = esc_attr(get_option('chatbot_mistral_allowed_remote_domains', ''));
+    $allowed_remote_domains = get_option('chatbot_mistral_allowed_remote_domains', '');
+    $allowed_remote_domains = is_string( $allowed_remote_domains ) ? $allowed_remote_domains : '';
     ?>
-    <textarea id="chatbot_mistral_allowed_remote_domains" name="chatbot_mistral_allowed_remote_domains" placeholder="Enter the allowed remote domains separated by a comma." rows="5" cols="50"><?php echo esc_attr( $allowed_remote_domains ); ?></textarea>
+    <textarea id="chatbot_mistral_allowed_remote_domains" name="chatbot_mistral_allowed_remote_domains" placeholder="Enter the allowed remote domains separated by a comma." rows="5" cols="50"><?php echo esc_textarea( $allowed_remote_domains ); ?></textarea>
     <?php
+    if ( function_exists( 'chatbot_chatgpt_render_remote_widget_embed_snippets' ) ) {
+        chatbot_chatgpt_render_remote_widget_embed_snippets( $allowed_remote_domains );
+    }
 }

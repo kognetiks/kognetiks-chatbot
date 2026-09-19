@@ -230,13 +230,58 @@ function chatbot_google_api_settings_init() {
     );
 
     // API/Google settings tab - Ver 2.3.9
-    register_setting('chatbot_google_api_model', 'chatbot_google_api_enabled');
+    register_setting(
+        'chatbot_google_api_model',
+        'chatbot_google_api_enabled',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Yes',
+        )
+    );
     register_setting('chatbot_google_api_model', 'chatbot_google_api_key', 'chatbot_chatgpt_sanitize_api_key');
-    register_setting('chatbot_google_api_model', 'chatbot_google_max_tokens_setting');
-    register_setting('chatbot_google_api_model', 'chatbot_google_conversation_context');
-    register_setting('chatbot_google_api_model', 'chatbot_google_temperature');
-    register_setting('chatbot_google_api_model', 'chatbot_google_media_resolution');
-    register_setting('chatbot_google_api_model', 'chatbot_google_thinking_level');
+    register_setting(
+        'chatbot_google_api_model',
+        'chatbot_google_max_tokens_setting',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 1000,
+        )
+    );
+    register_setting(
+        'chatbot_google_api_model',
+        'chatbot_google_conversation_context',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_google_api_model',
+        'chatbot_google_temperature',
+        array(
+            'type'              => 'number',
+            'sanitize_callback' => 'floatval',
+            'default'           => 0.5,
+        )
+    );
+    register_setting(
+        'chatbot_google_api_model',
+        'chatbot_google_media_resolution',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_google_api_model',
+        'chatbot_google_thinking_level',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
 
     add_settings_section(
         'chatbot_google_api_model_general_section',
@@ -332,8 +377,23 @@ function chatbot_google_api_settings_init() {
     );
 
     // Advanced Model Settings - Ver 2.3.9
-    register_setting('chatbot_google_api_model', 'chatbot_google_base_url');
-    register_setting('chatbot_google_api_model', 'chatbot_google_timeout_setting');
+    register_setting(
+        'chatbot_google_api_model',
+        'chatbot_google_base_url',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+        )
+    );
+    register_setting(
+        'chatbot_google_api_model',
+        'chatbot_google_timeout_setting',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 240,
+        )
+    );
 
     add_settings_section(
         'chatbot_google_api_model_advanced_section',

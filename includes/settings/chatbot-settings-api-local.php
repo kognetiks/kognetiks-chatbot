@@ -240,12 +240,51 @@ function chatbot_local_api_settings_init() {
     );
 
     // API/Local settings tab - Ver 2.2.6
-    register_setting('chatbot_local_api_model', 'chatbot_local_api_enabled');
+    register_setting(
+        'chatbot_local_api_model',
+        'chatbot_local_api_enabled',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Yes',
+        )
+    );
     register_setting('chatbot_local_api_model', 'chatbot_local_api_key', 'chatbot_chatgpt_sanitize_api_key'); // API key
-    register_setting('chatbot_local_api_model', 'chatbot_local_max_tokens_setting'); // Max Tokens setting options
-    register_setting('chatbot_local_api_model', 'chatbot_local_conversation_context'); // Conversation Context
-    register_setting('chatbot_local_api_model', 'chatbot_local_temperature'); // Temperature
-    register_setting('chatbot_local_api_model', 'chatbot_local_top_p'); // Top P
+    register_setting(
+        'chatbot_local_api_model',
+        'chatbot_local_max_tokens_setting',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 1000,
+        )
+    );
+    register_setting(
+        'chatbot_local_api_model',
+        'chatbot_local_conversation_context',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_local_api_model',
+        'chatbot_local_temperature',
+        array(
+            'type'              => 'number',
+            'sanitize_callback' => 'floatval',
+            'default'           => 0.5,
+        )
+    );
+    register_setting(
+        'chatbot_local_api_model',
+        'chatbot_local_top_p',
+        array(
+            'type'              => 'number',
+            'sanitize_callback' => 'floatval',
+            'default'           => 1.00,
+        )
+    );
 
     add_settings_section(
         'chatbot_local_api_model_general_section',
@@ -332,8 +371,23 @@ function chatbot_local_api_settings_init() {
     );
 
     // Advanced Model Settings - Ver 2.2.6
-    register_setting('chatbot_local_api_model', 'chatbot_local_base_url'); // Ver 2.2.6
-    register_setting('chatbot_local_api_model', 'chatbot_local_timeout_setting'); // Ver 2.2.6
+    register_setting(
+        'chatbot_local_api_model',
+        'chatbot_local_base_url',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+        )
+    );
+    register_setting(
+        'chatbot_local_api_model',
+        'chatbot_local_timeout_setting',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 240,
+        )
+    );
     register_setting(
         'chatbot_local_api_model',
         'chatbot_local_jan_cooldown_setting',

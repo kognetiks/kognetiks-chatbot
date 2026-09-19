@@ -382,7 +382,7 @@ function chatbot_chatgpt_conversation_log_cleanup() {
     }
 
     // Get the date that is $days_to_keep days ago
-    $purge_date = date('Y-m-d', strtotime('-' . $days_to_keep . ' days'));
+    $purge_date = current_datetime()->modify('-' . intval($days_to_keep) . ' days')->format('Y-m-d');
 
     // Get the table name
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';

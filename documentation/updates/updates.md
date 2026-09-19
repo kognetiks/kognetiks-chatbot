@@ -1,9 +1,32 @@
 # Past Updates
 
-## What's new in Version 2.4.7
+## What's new in Version 2.4.8
+
+### New Features
+* **Signed remote widget**: Embed the chatbot on allowlisted remote sites via `/kognetiks-chatbot-widget/` using HMAC tokens bound to each domain + assistant pair. Supporting browsers are limited with CSP `frame-ancestors`. Referer is logged for audit only and is not used for authorization. Remote access stays off until you enable it.
+
+### Improvements
+* **OpenAI Responses migration**: OpenAI `asst_` IDs now chat through the Responses API (Assistants API sunset). Local Common Name and Additional Instructions are sent with each call. Hosted `pmpt_` prompt objects remain a temporary bridge until 30 November 2026.
+* **Vector stores (file search)**: GPT Assistants rows can store an OpenAI Vector Store ID (`vs_…`). Responses calls then send `file_search` so large PDFs stay searchable without pasting them into Additional Instructions.
+* **AJAX nonce refresh**: Chat sessions can refresh expired nonces. Refresh requires a valid message nonce, is rate-limited for guests, and only returns admin unlock/reset tokens to users with `manage_options`.
+* **Internationalization**: Plugin header now declares Text Domain and Domain Path; translations load from `/languages`. A `chatbot-chatgpt.pot` template is bundled.
 
 ### Bug Fixes
-* **Miscellaneous**: Fixed miscellaneous bugs and issues identified after release of version 2.4.6.
+* **Legacy widget bootstrap**: `widgets/chatbot-widget-endpoint.php` no longer walks parent directories to load WordPress; it only redirects to the signed WordPress endpoint.
+* **Uninstall**: Delete-on-uninstall now runs after Freemius uninstall as well as a native WordPress uninstall.
+* **KFlow conversation lookup**: Visitor answers are now fetched with `$wpdb->prepare()` so session, user, page, and assistant IDs cannot alter the conversation-log query.
+
+## What's new in Version 2.4.7
+
+### Improvements
+* **Lexical Context Model**: Major upgrades to on-site answer quality, including answer intent detection, fact condensation, template-based synthesis, quality gates, IDF scoring, query expansion, and scheduled lexical cache builds.
+* **Local AI (JAN.AI)**: Updated Local API integration for compatibility with JAN.AI Version 8.0, including model discovery and chat-completions handling improvements.
+* **Assistants Admin UI**: Refined OpenAI, Azure, and Mistral assistant/agent management table action buttons for clearer WordPress admin styling.
+* **Documentation**: Fixed missing images, broken links, and orphaned documentation pages.
+
+### Bug Fixes
+* **Lexical Context Reliability**: Fixed lexical context timeouts and stabilized retrieval/build behavior for larger corpora.
+* **Conversation Handling**: Improved erase-conversation and related helper-path robustness for Local AI and frontend flows.
 
 ## What's new in Version 2.4.6
 

@@ -31,7 +31,7 @@ function chatbot_ai_engine_section_callback($args) {
     $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
     ?>
-    <p>Configure the AI Platform for the Chatbot plugin. The default will be one of <?php echo $chatbot_ai_platform_choice ?>'s AI models; assumes you have or will provide a valid API key.</p>
+    <p>Configure the AI Platform for the Chatbot plugin. The default will be one of <?php echo esc_html( $chatbot_ai_platform_choice ); ?>'s AI models; assumes you have or will provide a valid API key.</p>
     <?php
 
 }
@@ -305,9 +305,10 @@ function chatbot_chatgpt_input_rows_callback($args) {
     <select id="chatbot_chatgpt_input_rows" name="chatbot_chatgpt_input_rows">
         <?php
         for ($i = 1; $i <= 10; $i++) {
-            echo '<option value="' . $i . '" ' . selected( $chatbot_chatgpt_input_rows, $i ) . '>' . $i . '</option>';
+            echo '<option value="' . esc_attr( (string) $i ) . '"' . selected( $chatbot_chatgpt_input_rows, $i, false ) . '>' . esc_html( (string) $i ) . '</option>';
         }
         ?>
+    </select>
     <?php
 }
 
@@ -351,27 +352,171 @@ function chatbot_chatgpt_settings_setup_init() {
     );
 
     // Settings settings tab - Ver 1.3.0
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_bot_name');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_start_status');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_start_status_new_visitor');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_bot_prompt');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_initial_greeting');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_subsequent_greeting');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_allow_download_transcript');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_force_page_reload');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_conversation_continuation');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_disclaimer_setting');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_audience_choice');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_input_rows');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_speech_recognition');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_display_message_count');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_user_message_limit_setting');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_user_message_limit_period_setting');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_visitor_message_limit_setting');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_visitor_message_limit_period_setting');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_use_advanced_content_search');
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_bot_name',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_start_status',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_start_status_new_visitor',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_bot_prompt',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_initial_greeting',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_subsequent_greeting',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_allow_download_transcript',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'Yes',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_force_page_reload',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'No',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_conversation_continuation',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Off',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_disclaimer_setting',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_audience_choice',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_input_rows',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_speech_recognition',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_display_message_count',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_user_message_limit_setting',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 999,
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_user_message_limit_period_setting',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_visitor_message_limit_setting',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_visitor_message_limit_period_setting',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_use_advanced_content_search',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+        )
+    );
 
-    register_setting('chatbot_chatgpt_settings', 'chatbot_ai_platform_choice');
+    register_setting(
+        'chatbot_chatgpt_settings',
+        'chatbot_ai_platform_choice',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
 
     // Chatbot Settings - AI Platform Selection
     add_settings_section(

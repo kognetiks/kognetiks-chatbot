@@ -27,19 +27,118 @@ function chatbot_azure_assistant_settings_init() {
 
     // Settings Custom GPTs tab - Ver 2.2.6
     // register_setting('chatbot_azure_custom_gpts', 'chatbot_azure_use_custom_gpt_assistant_id'); // Ver 2.2.6
-    register_setting('chatbot_azure_custom_gpts', 'chatbot_azure_allow_file_uploads'); // Ver 2.2.6
-    register_setting('chatbot_azure_custom_gpts', 'chatbot_azure_display_custom_gpt_assistant_name'); // Ver 2.2.6
-    register_setting('chatbot_azure_custom_gpts', 'assistant_id'); // Ver 2.2.6
-    register_setting('chatbot_azure_custom_gpts', 'chatbot_azure_assistant_instructions'); // Ver 2.2.6
-    register_setting('chatbot_azure_custom_gpts', 'chatbot_azure_assistant_id_alternate'); // Alternate Assistant - Ver 2.2.6
-    register_setting('chatbot_azure_custom_gpts', 'chatbot_azure_assistant_instructions_alternate'); // Alternate Assistant - Ver 2.2.6
-    register_setting('chatbot_azure_custom_gpts', 'chatbot_azure_assistant_beta_version'); // Beta Assistant - Ver 2.2.6
-    register_setting('chatbot_azure_custom_gpts', 'chatbot_azure_thread_retention_period'); // Thread Retention Period - Ver 2.2.6
-    register_setting('chatbot_azure_custom_gpts', 'chatbot_azure_max_prompt_tokens'); // Max Prompt Tokens - Ver 2.2.6
-    register_setting('chatbot_azure_custom_gpts', 'chatbot_azure_max_completion_tokens'); // Max Response Tokens - Ver 2.2.6
-    register_setting('chatbot_azure_custom_gpts', 'chatbot_azure_enable_remote_widget'); // Enable Remote Widget - Ver 2.2.6
-    register_setting('chatbot_azure_custom_gpts', 'chatbot_azure_allowed_remote_domains'); // Allowed Remote Domains - Ver 2.2.6
-    register_setting('chatbot_azure_custom_gpts', 'chatbot_azure_widget_logging'); // Widget Logging - Ver 2.2.6
+    register_setting(
+        'chatbot_azure_custom_gpts',
+        'chatbot_azure_allow_file_uploads',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'No',
+        )
+    );
+    register_setting(
+        'chatbot_azure_custom_gpts',
+        'chatbot_azure_display_custom_gpt_assistant_name',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'Yes',
+        )
+    );
+    register_setting(
+        'chatbot_azure_custom_gpts',
+        'assistant_id',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_custom_gpts',
+        'chatbot_azure_assistant_instructions',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_custom_gpts',
+        'chatbot_azure_assistant_id_alternate',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_custom_gpts',
+        'chatbot_azure_assistant_instructions_alternate',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_custom_gpts',
+        'chatbot_azure_assistant_beta_version',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'v2',
+        )
+    );
+    register_setting(
+        'chatbot_azure_custom_gpts',
+        'chatbot_azure_thread_retention_period',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 36,
+        )
+    );
+    register_setting(
+        'chatbot_azure_custom_gpts',
+        'chatbot_azure_max_prompt_tokens',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 20000,
+        )
+    );
+    register_setting(
+        'chatbot_azure_custom_gpts',
+        'chatbot_azure_max_completion_tokens',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 20000,
+        )
+    );
+    register_setting(
+        'chatbot_azure_custom_gpts',
+        'chatbot_azure_enable_remote_widget',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'No',
+        )
+    );
+    register_setting(
+        'chatbot_azure_custom_gpts',
+        'chatbot_azure_allowed_remote_domains',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_azure_custom_gpts',
+        'chatbot_azure_widget_logging',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'No',
+        )
+    );
 
     // General Settings for Assistants
     add_settings_section(
@@ -378,8 +477,8 @@ function chatbot_azure_max_completion_tokens_callback($args) {
 // Remote Widget Settings section callback - Ver 2.2.6
 function chatbot_azure_remote_widget_settings_section_callback($args) {
     ?>
-    <p>Configure the Remote Widget settings to allow access from specific domains to specific assistants. Please each pair, seperated with a comma, on their own line.</p>
-    <p>For example the Allowed Remote Domain might be <code>www.example.com,assistant-1</code>.</p>
+    <p>Configure the Remote Widget settings to allow access from specific domains to specific assistants. Place each pair, separated with a comma, on its own line.</p>
+    <p>For example the Allowed Remote Domain might be <code>www.example.com,assistant-1</code>. Access requires the signed token shown below, not the HTTP Referer.</p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the Remote Widget Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=remote-widget-settings.md">here</a>.</b></p>
     <?php
 }
@@ -397,10 +496,14 @@ function chatbot_azure_enable_remote_widget_callback($args) {
 
 // Allowed Remote Domains field callback - Ver 2.2.6
 function chatbot_azure_allowed_remote_domains_callback($args) {
-    $allowed_remote_domains = esc_attr(get_option('chatbot_azure_allowed_remote_domains', ''));
+    $allowed_remote_domains = get_option('chatbot_azure_allowed_remote_domains', '');
+    $allowed_remote_domains = is_string( $allowed_remote_domains ) ? $allowed_remote_domains : '';
     ?>
-    <textarea id="chatbot_azure_allowed_remote_domains" name="chatbot_azure_allowed_remote_domains" placeholder="Enter the allowed remote domains separated by a comma." rows="5" cols="50"><?php echo esc_attr( $allowed_remote_domains ); ?></textarea>
+    <textarea id="chatbot_azure_allowed_remote_domains" name="chatbot_azure_allowed_remote_domains" placeholder="Enter the allowed remote domains separated by a comma." rows="5" cols="50"><?php echo esc_textarea( $allowed_remote_domains ); ?></textarea>
     <?php
+    if ( function_exists( 'chatbot_chatgpt_render_remote_widget_embed_snippets' ) ) {
+        chatbot_chatgpt_render_remote_widget_embed_snippets( $allowed_remote_domains );
+    }
 }
 
 // Widget logging field callback - Ver 2.2.6

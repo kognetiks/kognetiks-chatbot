@@ -679,13 +679,13 @@ function chatbot_kn_output_the_results() {
 
     // Remove legacy files
     if (file_exists($results_dir_path . 'results-comments.log')) {
-        unlink($results_dir_path . 'results-comments.log');
+        wp_delete_file($results_dir_path . 'results-comments.log');
     }
     if (file_exists($results_dir_path . 'results-pages.log')) {
-        unlink($results_dir_path . 'results-pages.log');
+        wp_delete_file($results_dir_path . 'results-pages.log');
     }
     if (file_exists($results_dir_path . 'results-posts.log')) {
-        unlink($results_dir_path . 'results-posts.log');
+        wp_delete_file($results_dir_path . 'results-posts.log');
     }
 
     // Prepare CSV file for output
@@ -693,7 +693,7 @@ function chatbot_kn_output_the_results() {
 
     // Delete CSV file if it already exists
     if (file_exists($results_csv_file)) {
-        unlink($results_csv_file);
+        wp_delete_file($results_csv_file);
     }
 
     // Prepare JSON file for output
@@ -701,7 +701,7 @@ function chatbot_kn_output_the_results() {
 
     // Delete JSON file if it already exists
     if (file_exists($results_json_file)) {
-        unlink($results_json_file);
+        wp_delete_file($results_json_file);
     }
 
     // Retrieve the list of words and the score for each word ordered by score descending in the TF-IDF table
@@ -756,7 +756,7 @@ function chatbot_kn_output_the_results() {
 
     // // Delete log file if it already exists
     // if (file_exists($tfidf_results)) {
-    //     unlink($tfidf_results);
+    //     wp_delete_file($tfidf_results);
     // }
 
     // // Retrieve the words and the scores for each URL in the knowledge base table
@@ -802,7 +802,7 @@ function chatbot_kn_wrap_up() {
     set_transient('chatbot_chatgpt_kn_results', $kn_results);
 
     // Get the current date and time.
-    $date_time_completed = date("Y-m-d H:i:s");
+    $date_time_completed = wp_date('Y-m-d H:i:s');
 
     // Concatenate the status message with the date and time.
     $status_message = 'Completed on ' . $date_time_completed;

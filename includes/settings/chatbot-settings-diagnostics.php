@@ -17,13 +17,66 @@ if ( ! defined( 'WPINC' ) ) {
 // Register Diagnostics settings - Ver 2.0.7
 function chatbot_chatgpt_diagnostics_settings_init() {
 
-    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_diagnostics');
-    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_custom_error_message');
-    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_notices');
-    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_attribution');
-    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_custom_attribution');
-    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_delete_data');
-    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_enable_beta_features');
+    register_setting(
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_custom_error_message',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_suppress_notices',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Off',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_suppress_attribution',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'On',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_custom_attribution',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_delete_data',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'no',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_enable_beta_features',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'no',
+        )
+    );
 
     add_settings_section(
         'chatbot_chatgpt_diagnostics_overview_section',
@@ -192,11 +245,11 @@ function chatbot_chatgpt_diagnostics_system_settings_section_callback($args) {
         $chatbot_chatgpt_plugin_version = !empty($plugin_data['Version']) ? $plugin_data['Version'] : '0.0.0';
     // }
 
-    echo '<p>Chatbot Version: <b>' . $chatbot_chatgpt_plugin_version . '</b><br>';
-    echo 'PHP Version: <b>' . $php_version . '</b><br>';
-    echo 'PHP Memory Limit: <b>' . ini_get('memory_limit') . '</b><br>';
-    echo 'WordPress Version: <b>' . $wp_version . '</b><br>';
-    echo 'WordPress Language Code: <b>' . get_locale() . '</b></p>';
+    echo '<p>Chatbot Version: <b>' . esc_html( $chatbot_chatgpt_plugin_version ) . '</b><br>';
+    echo 'PHP Version: <b>' . esc_html( $php_version ) . '</b><br>';
+    echo 'PHP Memory Limit: <b>' . esc_html( ini_get('memory_limit') ) . '</b><br>';
+    echo 'WordPress Version: <b>' . esc_html( $wp_version ) . '</b><br>';
+    echo 'WordPress Language Code: <b>' . esc_html( get_locale() ) . '</b></p>';
 
 }
 
@@ -380,7 +433,8 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
 
     $backtrace = debug_backtrace();
     // $caller = isset($backtrace[1]) ? $backtrace[1] : null; // Get the second element from the backtrace array
-    $caller = isset($backtrace[0]) ? $backtrace[0] : null; // Get the first element from the backtrace array
+    // $caller = isset($backtrace[0]) ? $backtrace[0] : null; // Get the first element from the backtrace array
+    $caller = isset($backtrace[1]) ? $backtrace[2] : null; // Get the first and second elements from the backtrace array
 
     if ($caller) {
         $file = isset($caller['file']) ? basename($caller['file']) : 'unknown';
@@ -407,7 +461,7 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     // Upper case the message type
     $message_type = strtoupper($message_type);
 
-    $date_time = (new DateTime())->format('d-M-Y H:i:s \U\T\C');
+    $date_time = gmdate('d-M-Y H:i:s') . ' UTC';
 
     // Message Type: Indicating whether the log is an error, warning, notice, or success message.
     // Prefix the message with [ERROR], [WARNING], [NOTICE], or [SUCCESS].
@@ -457,7 +511,7 @@ function chatbot_error_log($message) {
     create_directory_and_index_file($chatbot_logs_dir);
 
     // Get the current date to create a daily log file
-    $current_date = date('Y-m-d');
+    $current_date = gmdate('Y-m-d');
     
     $log_file = $chatbot_logs_dir . 'chatbot-error-log-' . $current_date . '.log';
 
@@ -468,8 +522,10 @@ function chatbot_error_log($message) {
     if (file_exists($log_file)) {
         $current_perms = fileperms($log_file);
         if (($current_perms & 0x0080) === 0) { // Check if writable by owner
-            chmod($log_file, 0644);
-            error_log('[Chatbot] [chatbot-settings-Diagnostics.php] Fixed file permissions for: ' . $log_file);
+            if ($wp_filesystem) {
+                $wp_filesystem->chmod($log_file, 0644);
+                error_log('[Chatbot] [chatbot-settings-Diagnostics.php] Fixed file permissions for: ' . $log_file);
+            }
         }
         
         // Check if file is currently being used by another process
@@ -527,7 +583,7 @@ function chatbot_error_log($message) {
             // error_log('[Chatbot] [chatbot-settings-Diagnostics.php] WordPress filesystem write failed, falling back to native method');
             // Try to fix file permissions before attempting to write
             if (file_exists($log_file)) {
-                chmod($log_file, 0644);
+                $wp_filesystem->chmod($log_file, 0644);
             }
             // Use fopen with proper error handling
             $handle = @fopen($log_file, 'a');
@@ -548,10 +604,10 @@ function chatbot_error_log($message) {
                 // Try to create the file with proper permissions
                 $dir = dirname($log_file);
                 if (!is_dir($dir)) {
-                    mkdir($dir, 0755, true);
+                    create_directory_and_index_file($dir);
                 }
                 if (touch($log_file)) {
-                    chmod($log_file, 0644);
+                    $wp_filesystem->chmod($log_file, 0644);
                     @file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
                 } else {
                     // Last resort: try to write to a temporary file and then move it
@@ -563,7 +619,7 @@ function chatbot_error_log($message) {
                                 @file_put_contents($temp_file, $existing_content . $message . PHP_EOL, LOCK_EX);
                             }
                         }
-                        @rename($temp_file, $log_file);
+                        chatbot_chatgpt_move_file($temp_file, $log_file);
                     }
                 }
             }
@@ -594,10 +650,12 @@ function chatbot_error_log($message) {
             // If fopen fails, try to create the file
             $dir = dirname($log_file);
             if (!is_dir($dir)) {
-                mkdir($dir, 0755, true);
+                create_directory_and_index_file($dir);
             }
             if (touch($log_file)) {
-                chmod($log_file, 0644);
+                if ($wp_filesystem) {
+                    $wp_filesystem->chmod($log_file, 0644);
+                }
                 @file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
             }
         }
@@ -645,7 +703,7 @@ function log_chatbot_error() {
         create_directory_and_index_file($chatbot_logs_dir);
 
         // Get the current date to create a daily log file
-        $current_date = date('Y-m-d');
+        $current_date = gmdate('Y-m-d');
 
         $log_file = $chatbot_logs_dir . 'chatbot-error-log-' . $current_date . '.log';
 
@@ -653,7 +711,7 @@ function log_chatbot_error() {
         $session_id = session_id();
         $user_id = get_current_user_id();
         $ip_address = $_SERVER['REMOTE_ADDR'];
-        $date_time = date('Y-m-d H:i:s');
+        $date_time = gmdate('Y-m-d H:i:s');
 
         // Construct the log message - Ver 2.3.7 - Fixed empty error message display
         // Ensure error_message is not empty before logging
@@ -685,7 +743,7 @@ add_action('wp_ajax_nopriv_log_chatbot_error', 'log_chatbot_error');
 // Test function to verify logging functionality
 function test_chatbot_logging() {
 
-    $test_message = '[' . date('Y-m-d H:i:s') . '] [Chatbot] [chatbot-settings-Diagnostics.php] This is a test log message to verify logging functionality.';
+    $test_message = '[' . gmdate('Y-m-d H:i:s') . '] [Chatbot] [chatbot-settings-Diagnostics.php] This is a test log message to verify logging functionality.';
     chatbot_error_log($test_message);
     return 'Test log message written. Check the log file to verify.';
 
@@ -765,7 +823,7 @@ function chatbot_chatgpt_reset_cache_locks_callback($args) {
                 method: 'POST',
                 data: {
                     action: 'chatbot_chatgpt_reset_cache_locks',
-                    chatbot_nonce: '<?php echo wp_create_nonce('chatbot_reset_cache_locks'); ?>'
+                    chatbot_nonce: '<?php echo esc_js( wp_create_nonce('chatbot_reset_cache_locks') ); ?>'
                 },
                 success: function(response) {
                     if (response.success) {

@@ -71,7 +71,7 @@ add_action('chatbot_markov_chain_scan_hook', 'chatbot_markov_chain_scan');
 // Markov Chain Build Schedule handler
 function chatbot_markov_chain_build_results_callback($run_scanner) {
 
-    // update_option('chatbot_markov_chain_last_updated', date('Y-m-d H:i:s')); // REMOVED - Ver 2.2.0 - 2924-11-27
+    // update_option('chatbot_markov_chain_last_updated', current_time('mysql')); // REMOVED - Ver 2.2.0 - 2924-11-27
 
     if (!isset($run_scanner)) {
         $run_scanner = 'No';

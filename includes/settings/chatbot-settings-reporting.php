@@ -18,9 +18,30 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_reporting_settings_init() {
 
     // Register settings for Reporting
-    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_reporting_period');
-    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_enable_conversation_logging');
-    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_conversation_log_days_to_keep');
+    register_setting(
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_reporting_period',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_enable_conversation_logging',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_conversation_log_days_to_keep',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+        )
+    );
     
     // Register settings for Conversation Digest
     register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_conversation_digest_enabled', 'chatbot_chatgpt_sanitize_conversation_digest_enabled');
@@ -642,14 +663,15 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
 function chatbot_chatgpt_conversation_reporting_section_callback($args) {
     ?>
     <div>
-        <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both Visitor and User input and chatbot responses).</p>
-        <p>Conversation items stored take up <b><?php echo chatbot_chatgpt_size_conversations(); ?> MB</b> in your database.</p>
+        <p>Conversation items stored in your DB total <b><?php echo esc_html( chatbot_chatgpt_count_conversations() ); ?></b> rows (includes both Visitor and User input and chatbot responses).</p>
+        <p>Conversation items stored take up <b><?php echo esc_html( chatbot_chatgpt_size_conversations() ); ?> MB</b> in your database.</p>
         <p>Use the button (below) to retrieve the conversation data and download as a CSV file.</p>
         <?php
             if (is_admin()) {
-                $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_conversation_data' ), 'chatbot_chatgpt_download_conversation_data' ) ) . '">Download Conversation Data</a>';
-                echo $header;
+                printf(
+                    '<a class="button button-primary" href="%s">Download Conversation Data</a>',
+                    esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_conversation_data' ), 'chatbot_chatgpt_download_conversation_data' ) )
+                );
             }
         ?>
     </div>
@@ -661,13 +683,14 @@ function chatbot_chatgpt_interaction_reporting_section_callback($args) {
     <div>
         <!-- TEMPORARILY REMOVED AS SOME USERS ARE EXPERIENCING ISSUES WITH THE CHARTS - Ver 1.7.8 -->
         <!-- <p><?php echo do_shortcode('[chatbot_simple_chart from_database="true"]'); ?></p> -->
-        <p><?php echo chatbot_chatgpt_interactions_table() ?></p>
+        <p><?php echo wp_kses_post( chatbot_chatgpt_interactions_table() ); ?></p>
         <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
         <?php
             if (is_admin()) {
-                $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_interactions_data' ), 'chatbot_chatgpt_download_interactions_data' ) ) . '">Download Interaction Data</a>';
-                echo $header;
+                printf(
+                    '<a class="button button-primary" href="%s">Download Interaction Data</a>',
+                    esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_interactions_data' ), 'chatbot_chatgpt_download_interactions_data' ) )
+                );
             }
         ?>
     </div>
@@ -677,13 +700,14 @@ function chatbot_chatgpt_interaction_reporting_section_callback($args) {
 function chatbot_chatgpt_token_reporting_section_callback($args) {
     ?>
     <div>
-        <p><?php echo chatbot_chatgpt_total_tokens() ?></p>
+        <p><?php echo wp_kses_post( chatbot_chatgpt_total_tokens() ); ?></p>
         <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
         <?php
             if (is_admin()) {
-                $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_token_usage_data' ), 'chatbot_chatgpt_download_token_usage_data' ) ) . '">Download Token Usage Data</a>';
-                echo $header;
+                printf(
+                    '<a class="button button-primary" href="%s">Download Token Usage Data</a>',
+                    esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_token_usage_data' ), 'chatbot_chatgpt_download_token_usage_data' ) )
+                );
             }
         ?>
     </div>
@@ -978,14 +1002,14 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
         
         // Calculate the start date and group by clause based on the reporting period
         if($reporting_period === 'Daily') {
-            $start_date = date('Y-m-d', strtotime("-7 days"));
+            $start_date = current_datetime()->modify('-7 days')->format('Y-m-d');
             // $group_by = "DATE_FORMAT(date, '%Y-%m-%d')";
             $group_by = "DATE_FORMAT(date, '%m-%d')";
         } elseif($reporting_period === 'Monthly') {
-            $start_date = date('Y-m-01', strtotime("-3 months"));
+            $start_date = current_datetime()->modify('-3 months')->format('Y-m-01');
             $group_by = "DATE_FORMAT(date, '%Y-%m')";
         } else {
-            $start_date = date('Y-01-01', strtotime("-3 years"));
+            $start_date = current_datetime()->modify('-3 years')->format('Y-01-01');
             $group_by = "DATE_FORMAT(date, '%Y')";
         }
         
@@ -1032,7 +1056,7 @@ function chatbot_chatgpt_delete_chart() {
     $png_files = glob($img_dir_path . '*.png'); // Search for .png files in the directory
 
     foreach ($png_files as $png_file) {
-        unlink($png_file); // Delete each .png file
+        wp_delete_file($png_file); // Delete each .png file
     }
 }
 add_action('chatbot_chatgpt_delete_chart', 'chatbot_chatgpt_delete_chart');
@@ -1056,15 +1080,15 @@ function chatbot_chatgpt_interactions_table() {
     
     // Calculate the start date and group by clause based on the reporting period
     if($reporting_period === 'Daily') {
-        $start_date = date('Y-m-d H:i:s', strtotime("-7 days"));
+        $start_date = current_datetime()->modify('-7 days')->format('Y-m-d H:i:s');
         $group_by = "DATE_FORMAT(interaction_time, '%%m-%%d')";
         $order_by = "MIN(interaction_time) ASC";
     } elseif($reporting_period === 'Monthly') {
-        $start_date = date('Y-m-01 00:00:00', strtotime("-3 months"));
+        $start_date = current_datetime()->modify('-3 months')->format('Y-m-01 00:00:00');
         $group_by = "DATE_FORMAT(interaction_time, '%%Y-%%m')";
         $order_by = "DATE_FORMAT(interaction_time, '%%Y-%%m') ASC";
     } else {
-        $start_date = date('Y-01-01 00:00:00', strtotime("-3 years"));
+        $start_date = current_datetime()->modify('-3 years')->format('Y-01-01 00:00:00');
         $group_by = "DATE_FORMAT(interaction_time, '%%Y')";
         $order_by = "DATE_FORMAT(interaction_time, '%%Y') ASC";
     }
@@ -1182,15 +1206,15 @@ function chatbot_chatgpt_total_tokens() {
     
     // Calculate the start date and group by clause based on the reporting period
     if ($reporting_period === 'Daily') {
-        $start_date = date('Y-m-d H:i:s', strtotime("-7 days"));
+        $start_date = current_datetime()->modify('-7 days')->format('Y-m-d H:i:s');
         $group_by = "DATE_FORMAT(interaction_time, '%%m-%%d')";
         $order_by = "MIN(interaction_time) ASC";
     } elseif ($reporting_period === 'Monthly') {
-        $start_date = date('Y-m-01 00:00:00', strtotime("-3 months"));
+        $start_date = current_datetime()->modify('-3 months')->format('Y-m-01 00:00:00');
         $group_by = "DATE_FORMAT(interaction_time, '%%Y-%%m')";
         $order_by = "DATE_FORMAT(interaction_time, '%%Y-%%m') ASC";
     } else {
-        $start_date = date('Y-01-01 00:00:00', strtotime("-3 years"));
+        $start_date = current_datetime()->modify('-3 years')->format('Y-01-01 00:00:00');
         $group_by = "DATE_FORMAT(interaction_time, '%%Y')";
         $order_by = "DATE_FORMAT(interaction_time, '%%Y') ASC";
     }
@@ -1321,7 +1345,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     }
 
     // Ask user where to save the file
-    $filename = $t_file_name . '-' . date('Y-m-d') . '.csv';
+    $filename = $t_file_name . '-' . gmdate('Y-m-d') . '.csv';
     // Replace spaces with - in the filename
     $filename = str_replace(' ', '-', $filename);
     $results_dir_path = $chatbot_chatgpt_plugin_dir_path . 'results/';
@@ -1400,10 +1424,11 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     // Deliver the file for download
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment;filename=' . $filename);
+    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSV file download, not HTML output.
     echo $csv_data;
 
     // Delete the file
-    unlink($results_csv_file);
+    wp_delete_file($results_csv_file);
     exit;
 
 }
@@ -1436,7 +1461,7 @@ function chatbot_chatgpt_test_conversation_digest_ajax() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
     
     // Get conversations from the last 24 hours for test
-    $start_time = date('Y-m-d H:i:s', strtotime('-24 hours'));
+    $start_time = current_datetime()->modify('-24 hours')->format('Y-m-d H:i:s');
     
     // Query for conversations (only Visitor and Chatbot messages, not token data)
     $query = $wpdb->prepare("
@@ -1451,10 +1476,10 @@ function chatbot_chatgpt_test_conversation_digest_ajax() {
     $conversations = $wpdb->get_results($query);
     
     // Build email content
-    $subject = 'Test: Kognetiks Chatbot Conversation Digest - ' . date('Y-m-d H:i:s');
+    $subject = 'Test: Kognetiks Chatbot Conversation Digest - ' . current_time('mysql');
     $message = "TEST EMAIL - Kognetiks Chatbot Conversation Digest\n\n";
     $message .= "This is a test email to verify your Conversation Digest settings are working correctly.\n\n";
-    $message .= "Period: " . date('Y-m-d H:i:s', strtotime($start_time)) . " to " . current_time('mysql') . "\n\n";
+    $message .= "Period: " . $start_time . " to " . current_time('mysql') . "\n\n";
     
     if (!empty($conversations)) {
         // Organize conversations by session
@@ -1963,13 +1988,21 @@ add_action('admin_init', 'chatbot_chatgpt_ensure_email_report_settings_saved', 2
 function chatbot_chatgpt_admin_notice() {
     $error_message = get_transient('chatbot_chatgpt_admin_error');
     if (!empty($error_message)) {
-        printf('<div class="%1$s"><p><b>Chatbot: </b>%2$s</p></div>', 'notice notice-error is-dismissible', $error_message);
+        printf(
+            '<div class="%1$s"><p><b>Chatbot: </b>%2$s</p></div>',
+            esc_attr( 'notice notice-error is-dismissible' ),
+            esc_html( $error_message )
+        );
         delete_transient('chatbot_chatgpt_admin_error'); // Clear the transient after displaying the message
     }
     
     $success_message = get_transient('chatbot_chatgpt_admin_success');
     if (!empty($success_message)) {
-        printf('<div class="%1$s"><p><b>Chatbot: </b>%2$s</p></div>', 'notice notice-success is-dismissible', $success_message);
+        printf(
+            '<div class="%1$s"><p><b>Chatbot: </b>%2$s</p></div>',
+            esc_attr( 'notice notice-success is-dismissible' ),
+            esc_html( $success_message )
+        );
         delete_transient('chatbot_chatgpt_admin_success'); // Clear the transient after displaying the message
     }
 }

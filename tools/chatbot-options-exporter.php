@@ -36,11 +36,9 @@ function chatbot_chatgpt_download_options_data() {
 
     $debug_dir_path = $chatbot_chatgpt_plugin_dir_path . 'debug/';
 
-    // Create debug directory if it doesn't exist
-    if (!file_exists($debug_dir_path)) {
-        if (!mkdir($debug_dir_path, 0777, true)) {
-            wp_die( esc_html__( 'Failed to create debug directory.', 'chatbot-chatgpt' ) );
-        }
+    // Ensure the directory exists or attempt to create it
+    if (!create_directory_and_index_file($debug_dir_path)) {
+        wp_die( esc_html__( 'Failed to create debug directory.', 'chatbot-chatgpt' ) );
     }
 
     $output_choice = strtolower(esc_attr(get_option('chatbot_chatgpt_options_exporter_extension', 'csv')));
@@ -121,7 +119,7 @@ function chatbot_chatgpt_download_options_data() {
     }
 
     // Delete the file after download
-    if (!unlink($options_file)) {
+    if (!wp_delete_file($options_file)) {
         $class = 'notice notice-error';
         $message = __('Failed to delete options file after download.', 'chatbot-chatgpt');
         chatbot_chatgpt_general_admin_notice($message);

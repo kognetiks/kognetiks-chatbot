@@ -32,6 +32,9 @@ function chatbot_chatgpt_deactivate() {
     // Clean up conversation digest cron job on deactivation
     wp_clear_scheduled_hook('kognetiks_insights_send_conversation_digest_email_hook');
 
+    delete_option( 'chatbot_chatgpt_widget_rewrite_version' );
+    flush_rewrite_rules( false );
+
 }
 
 // Delete Plugin Data Notice - Ver 1.9.9
@@ -55,7 +58,8 @@ function chatbot_chatgpt_admin_notices() {
 // Uninstall Logic - Revised 2.4.4
 function chatbot_chatgpt_uninstall() {
 
-    if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+    // WordPress sets WP_UNINSTALL_PLUGIN. Freemius after_uninstall sets WP_FS__UNINSTALL_MODE only.
+    if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) && ! defined( 'WP_FS__UNINSTALL_MODE' ) ) {
         return;
     }
 

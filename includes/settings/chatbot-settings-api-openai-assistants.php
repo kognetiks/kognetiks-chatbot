@@ -27,20 +27,125 @@ function chatbot_chatgpt_assistant_settings_init() {
 
     // Settings Custom GPTs tab - Ver 1.7.2
     // register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_use_custom_gpt_assistant_id'); // Ver 1.6.7 - REMOVED in Ver 2.0.5
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_allow_file_uploads'); // Ver 1.7.6
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_display_custom_gpt_assistant_name'); // Ver 1.9.4
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_conversation_transcript_email'); // Ver 2.2.7
-    register_setting('chatbot_chatgpt_custom_gpts', 'assistant_id'); // Ver 1.6.7
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_instructions'); // Ver 1.9.3
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id_alternate'); // Alternate Assistant - Ver 1.7.2
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_instructions_alternate'); // Alternate Assistant - Ver 1.9.3
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_beta_version'); // Beta Assistant - Ver 1.9.3
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_thread_retention_period'); // Thread Retention Period - Ver 1.9.9
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_max_prompt_tokens'); // Max Prompt Tokens - Ver 2.0.1
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_max_completion_tokens'); // Max Response Tokens - Ver 2.0.1
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_enable_remote_widget'); // Enable Remote Widget - Ver 2.1.3
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_allowed_remote_domains'); // Allowed Remote Domains - Ver 2.1.3
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_widget_logging'); // Widget Logging - Ver 2.1.3
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_allow_file_uploads',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'No',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_display_custom_gpt_assistant_name',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'Yes',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_conversation_transcript_email',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_email',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'assistant_id',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_assistant_instructions',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_assistant_id_alternate',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_assistant_instructions_alternate',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_assistant_beta_version',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_thread_retention_period',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 36,
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_max_prompt_tokens',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 20000,
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_max_completion_tokens',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 20000,
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_enable_remote_widget',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'No',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_allowed_remote_domains',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_widget_logging',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'No',
+        )
+    );
 
     // General Settings for Assistants
     add_settings_section(
@@ -209,18 +314,123 @@ function chatbot_chatgpt_assistant_settings_init() {
 }
 add_action('admin_init', 'chatbot_chatgpt_assistant_settings_init');
 
-// GPT Assistants / Responses settings section callback - Ver 1.7.2 - Updated Ver 2.0.4, Ver 2.4.5
+// GPT Assistants / Responses settings section callback - Ver 1.7.2 - Updated Ver 2.0.4, Ver 2.4.5, Ver 2.4.8
 function chatbot_chatgpt_assistant_settings_section_callback($args) {
+    $kses_inline = array(
+        'b'    => array(),
+        'i'    => array(),
+        'code' => array(),
+        'a'    => array(
+            'href'   => array(),
+            'target' => array(),
+            'rel'    => array(),
+        ),
+    );
+    $responses_docs  = '?page=chatbot-chatgpt&tab=support&dir=api-openai-responses-api&file=prompt-agent-build-and-deploy-guide.md';
+    $assistants_docs = '?page=chatbot-chatgpt&tab=support&dir=assistants&file=manage-assistants.md';
     ?>
-    <p>Manage your chatbot <b>Assistants</b> and <b>Responses</b> (prompts) in one place using the interface below. Both types work with the same shortcodes and settings.</p>
-    <p><b>ID prefixes:</b> Use <code>asst_</code> for <b>Assistants</b> (OpenAI Assistants API; <a href="https://platform.openai.com/assistants" target="_blank">Assistants</a>). Use <code>pmpt_</code> for <b>Responses</b> (Responses API; <a href=https://platform.openai.com/chat" target="_blank">Chat</a>). The plugin detects the type from the ID prefix, so both work side by side.</p>
-    <p><b>Note:</b> The Assistants API is scheduled for deprecation around mid-2026. For new setups, prefer creating prompts in the Responses API and using <code>pmpt_</code> IDs.</p>
-    <p>Tailor each Assistant or Response to your audience. When you're ready, add a shortcode such as <code>[chatbot-1]</code>, <code>[chatbot-2]</code>, etc. to your page.</p>
-    <p><b>TIP:</b> For best results ensure that the shortcode appears only once on the page.</p>
-    <p><b>TIP:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</p>
-    <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes you might make.</i></b></p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of Responses settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-openai-responses-api&file=prompt-agent-build-and-deploy-guide.md">here</a>.</b></p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of Assistant settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=manage-assistants.md">here</a>.</b></p>
+    <p><?php
+        echo wp_kses(
+            sprintf(
+                /* translators: 1: Assistants label, 2: Responses label */
+                __( 'Manage your chatbot %1$s and %2$s in one place using the interface below. Both types work with the same shortcodes and settings.', 'chatbot-chatgpt' ),
+                '<b>' . esc_html__( 'Assistants', 'chatbot-chatgpt' ) . '</b>',
+                '<b>' . esc_html__( 'Responses', 'chatbot-chatgpt' ) . '</b>'
+            ),
+            $kses_inline
+        );
+    ?></p>
+    <p><?php
+        echo wp_kses(
+            sprintf(
+                /* translators: 1: ID prefixes label, 2: asst_ prefix, 3: Responses API label, 4: pmpt_ prefix, 5: Chat dashboard link */
+                __( '%1$s Use %2$s for former Assistants (now served by the %3$s). Use %4$s for dashboard Prompt IDs (%5$s). The plugin detects the type from the ID prefix.', 'chatbot-chatgpt' ),
+                '<b>' . esc_html__( 'ID prefixes:', 'chatbot-chatgpt' ) . '</b>',
+                '<code>asst_</code>',
+                esc_html__( 'Responses API', 'chatbot-chatgpt' ),
+                '<code>pmpt_</code>',
+                '<a href="https://platform.openai.com/chat" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Chat', 'chatbot-chatgpt' ) . '</a>'
+            ),
+            $kses_inline
+        );
+    ?></p>
+    <p><?php
+        echo wp_kses(
+            sprintf(
+                /* translators: 1: asst_ prefix, 2: pmpt_ prefix, 3: Common Name, 4: Additional Instructions, 5: Vector Store ID, 6: vs_ prefix */
+                __( '<b>Note:</b> OpenAI’s Assistants API was sunset on 26 August 2026. This plugin now sends both %1$s and %2$s traffic through the Responses API. Display names and extra instructions come from this table (%3$s and %4$s). For large PDFs and other knowledge bases, paste the OpenAI %5$s (%6$s) on the row — do not paste the document into Additional Instructions. Reusable prompt objects (%2$s) are a temporary bridge until 30 November 2026.', 'chatbot-chatgpt' ),
+                '<code>asst_</code>',
+                '<code>pmpt_</code>',
+                '<b>' . esc_html__( 'Common Name', 'chatbot-chatgpt' ) . '</b>',
+                '<b>' . esc_html__( 'Additional Instructions', 'chatbot-chatgpt' ) . '</b>',
+                '<b>' . esc_html__( 'Vector Store ID', 'chatbot-chatgpt' ) . '</b>',
+                '<code>vs_…</code>'
+            ),
+            $kses_inline
+        );
+    ?></p>
+    <p><?php
+        echo wp_kses(
+            sprintf(
+                /* translators: 1: chatbot-1 shortcode, 2: chatbot-2 shortcode */
+                __( 'Tailor each Assistant or Response to your audience. When you\'re ready, add a shortcode such as %1$s, %2$s, etc. to your page.', 'chatbot-chatgpt' ),
+                '<code>[chatbot-1]</code>',
+                '<code>[chatbot-2]</code>'
+            ),
+            $kses_inline
+        );
+    ?></p>
+    <p><?php
+        echo wp_kses(
+            sprintf(
+                /* translators: %s: TIP label */
+                __( '%s For best results ensure that the shortcode appears only once on the page.', 'chatbot-chatgpt' ),
+                '<b>' . esc_html__( 'TIP:', 'chatbot-chatgpt' ) . '</b>'
+            ),
+            $kses_inline
+        );
+    ?></p>
+    <p><?php
+        echo wp_kses(
+            sprintf(
+                /* translators: 1: TIP label, 2: embedded style name */
+                __( '%1$s When using the %2$s style, it\'s best to put the shortcode in a page or post, not in a footer.', 'chatbot-chatgpt' ),
+                '<b>' . esc_html__( 'TIP:', 'chatbot-chatgpt' ) . '</b>',
+                '<code>embedded</code>'
+            ),
+            $kses_inline
+        );
+    ?></p>
+    <p><?php
+        echo wp_kses(
+            sprintf(
+                /* translators: %s: Save Settings button label */
+                __( '<b><i>Don\'t forget to click </i>%s<i> to save any changes you might make.</i></b>', 'chatbot-chatgpt' ),
+                '<code>' . esc_html__( 'Save Settings', 'chatbot-chatgpt' ) . '</code>'
+            ),
+            $kses_inline
+        );
+    ?></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b><?php
+        echo wp_kses(
+            sprintf(
+                /* translators: %s: link to Responses documentation */
+                __( 'For an explanation of Responses settings and additional documentation please click <a href="%s">here</a>.', 'chatbot-chatgpt' ),
+                esc_url( $responses_docs )
+            ),
+            $kses_inline
+        );
+    ?></b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b><?php
+        echo wp_kses(
+            sprintf(
+                /* translators: %s: link to Assistant documentation */
+                __( 'For an explanation of Assistant settings and additional documentation please click <a href="%s">here</a>.', 'chatbot-chatgpt' ),
+                esc_url( $assistants_docs )
+            ),
+            $kses_inline
+        );
+    ?></b></p>
     <?php
 }
 
@@ -396,8 +606,8 @@ function chatbot_chatgpt_max_completion_tokens_callback($args) {
 // Remote Widget Settings section callback - Ver 2.1.3
 function chatbot_chatgpt_remote_widget_settings_section_callback($args) {
     ?>
-    <p>Configure the Remote Widget settings to allow access from specific domains to specific assistants. Please each pair, seperated with a comma, on their own line.</p>
-    <p>For example the Allowed Remote Domain might be <code>www.example.com,assistant-1</code>.</p>
+    <p>Configure the Remote Widget settings to allow access from specific domains to specific assistants. Place each pair, separated with a comma, on its own line.</p>
+    <p>For example the Allowed Remote Domain might be <code>www.example.com,assistant-1</code>. Access requires the signed token shown below, not the HTTP Referer.</p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the Remote Widget Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=remote-widget-settings.md">here</a>.</b></p>
     <?php
 }
@@ -415,10 +625,14 @@ function chatbot_chatgpt_enable_remote_widget_callback($args) {
 
 // Allowed Remote Domains field callback - Ver 2.1.3
 function chatbot_chatgpt_allowed_remote_domains_callback($args) {
-    $allowed_remote_domains = esc_attr(get_option('chatbot_chatgpt_allowed_remote_domains', ''));
+    $allowed_remote_domains = get_option('chatbot_chatgpt_allowed_remote_domains', '');
+    $allowed_remote_domains = is_string( $allowed_remote_domains ) ? $allowed_remote_domains : '';
     ?>
-    <textarea id="chatbot_chatgpt_allowed_remote_domains" name="chatbot_chatgpt_allowed_remote_domains" placeholder="Enter the allowed remote domains separated by a comma." rows="5" cols="50"><?php echo esc_attr( $allowed_remote_domains ); ?></textarea>
+    <textarea id="chatbot_chatgpt_allowed_remote_domains" name="chatbot_chatgpt_allowed_remote_domains" placeholder="Enter the allowed remote domains separated by a comma." rows="5" cols="50"><?php echo esc_textarea( $allowed_remote_domains ); ?></textarea>
     <?php
+    if ( function_exists( 'chatbot_chatgpt_render_remote_widget_embed_snippets' ) ) {
+        chatbot_chatgpt_render_remote_widget_embed_snippets( $allowed_remote_domains );
+    }
 }
 
 // Widget logging field callback - Ver 2.1.3

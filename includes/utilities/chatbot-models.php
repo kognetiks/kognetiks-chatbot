@@ -40,9 +40,9 @@ function chatbot_openai_get_models() {
     $default_model_list = '';
     $default_model_list = array(
         array(
-            'id' => 'dall-e-3',
+            'id' => 'gpt-image-1',
             'object' => 'model',
-            'created' => 1698785189,
+            'created' => 1743465600,
             'owned_by' => 'system'
         ),
         array(
@@ -70,7 +70,7 @@ function chatbot_openai_get_models() {
         update_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo');
     }
     if (esc_attr(get_option('chatbot_chatgpt_image_model_option')) === false) {
-        update_option('chatbot_chatgpt_image_model_option', 'dall-e-3');
+        update_option('chatbot_chatgpt_image_model_option', 'gpt-image-1');
     }
     if (esc_attr(get_option('chatbot_chatgpt_voice_model_option')) === false) {
         update_option('chatbot_chatgpt_voice_model_option', 'tts-1-hd');
@@ -137,6 +137,43 @@ function chatbot_openai_get_models() {
 
     // Return the list of models
     return $models;
+
+}
+
+// Whether a model should be sent to the Images API instead of Chat Completions.
+function chatbot_chatgpt_is_openai_image_model( $model ) {
+
+    $model = strtolower( (string) $model );
+
+    return ( str_starts_with( $model, 'gpt-image' ) || str_starts_with( $model, 'dall' ) );
+
+}
+
+// Image models for the settings dropdown. OpenAI removed DALL·E from the API in May 2026.
+function chatbot_chatgpt_get_openai_image_models() {
+
+    $fallback_models = array(
+        array( 'id' => 'gpt-image-1' ),
+        array( 'id' => 'gpt-image-1-mini' ),
+        array( 'id' => 'gpt-image-2' ),
+    );
+
+    $models = chatbot_openai_get_models();
+
+    if ( ! is_array( $models ) ) {
+        return $fallback_models;
+    }
+
+    $image_models = array_values(
+        array_filter(
+            $models,
+            function( $model ) {
+                return ! empty( $model['id'] ) && chatbot_chatgpt_is_openai_image_model( $model['id'] );
+            }
+        )
+    );
+
+    return ! empty( $image_models ) ? $image_models : $fallback_models;
 
 }
 

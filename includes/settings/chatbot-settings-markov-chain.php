@@ -246,15 +246,78 @@ function chatbot_markov_chain_api_settings_init() {
     );
 
     // Markov Chain Options - Ver 2.1.6
-    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_api_enabled'); // Ver 2.1.6
-    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_model_choice'); // Ver 2.1.8
-    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_max_tokens'); // Ver 2.1.9
-    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_build_schedule'); // Ver 2.1.6
-    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_length'); // Ver 2.1.6
-    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_next_phrase_length'); // Ver 2.1.6
-    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_max_sentences'); // Ver 2.2.0
-    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_off_topic_max'); // Ver 2.2.0
-    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_force_rebuild'); // Ver 2.2.0
+    register_setting(
+        'chatbot_markov_chain_api_model',
+        'chatbot_markov_chain_api_enabled',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_markov_chain_api_model',
+        'chatbot_markov_chain_model_choice',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_markov_chain_api_model',
+        'chatbot_markov_chain_max_tokens',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+        )
+    );
+    register_setting(
+        'chatbot_markov_chain_api_model',
+        'chatbot_markov_chain_build_schedule',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_markov_chain_api_model',
+        'chatbot_markov_chain_length',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+        )
+    );
+    register_setting(
+        'chatbot_markov_chain_api_model',
+        'chatbot_markov_chain_next_phrase_length',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+        )
+    );
+    register_setting(
+        'chatbot_markov_chain_api_model',
+        'chatbot_markov_chain_max_sentences',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+        )
+    );
+    register_setting(
+        'chatbot_markov_chain_api_model',
+        'chatbot_markov_chain_off_topic_max',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+        )
+    );
+    register_setting(
+        'chatbot_markov_chain_api_model',
+        'chatbot_markov_chain_force_rebuild',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
 
     add_settings_section(
         'chatbot_markov_chain_api_model_general_section',

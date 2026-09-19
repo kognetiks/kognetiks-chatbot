@@ -14,6 +14,11 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+function chatbot_chatgpt_sanitize_yes_no( $value ) {
+    $value = sanitize_text_field( $value );
+    return ( $value === 'Yes' ) ? 'Yes' : 'No';
+}
+
 global $chatbot_chatgpt_plugin_dir_path;
 global $chatbot_chatgpt_plugin_dir_url;
 
@@ -208,7 +213,12 @@ function chatbot_chatgpt_kn_register_settings() {
         // Register the setting
         register_setting(
             'chatbot_chatgpt_knowledge_navigator',
-            $option_name
+            $option_name,
+            array(
+                'type'              => 'string',
+                'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+                'default'           => 'No',
+            )
         );
         
         // Add the settings field
@@ -228,7 +238,12 @@ function chatbot_chatgpt_kn_register_settings() {
     // Register comments setting
     register_setting(
         'chatbot_chatgpt_knowledge_navigator',
-        'chatbot_chatgpt_kn_include_comments'
+        'chatbot_chatgpt_kn_include_comments',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'No',
+        )
     );
     
     add_settings_field(

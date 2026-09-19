@@ -1,4 +1,4 @@
-# Kognetiks Chatbot for WordPress
+# Kognetiks Chatbot
 
 ### Turn chatbot conversations into insight, not just answers.
 
@@ -148,11 +148,21 @@ By using this plugin, you agree to abide by each service's terms of service and 
 | **Google** | [Terms of Use](https://ai.google.dev/gemini-api/terms) | [Privacy Policy](https://policies.google.com/privacy) | [API Keys](https://aistudio.google.com/api-keys)
 | **JAN.AI** | [About](https://jan.ai/about) | [Privacy Policy](https://jan.ai/docs/privacy-policy) | [API Keys](https://www.jan.ai/docs/desktop/api-server)
 
+**Freemius** is used for optional account connection, licensing, checkout, the 7-day Premium trial, and premium updates. It is not an AI provider.
+
+Free chatbot features work without a Freemius account. Freemius is contacted when you start a trial, activate a license, open checkout or the pricing/account screens, or opt in to diagnostics.
+
+When that happens, Freemius may receive the site URL, WordPress version, PHP version, plugin version, and the administrator email used for the account. Visitor queries and chatbot messages are never sent to Freemius.
+
+| Provider | Terms | Privacy |
+|--|--|--|
+| **Freemius** | [Terms of Service](https://freemius.com/terms/) | [Privacy Policy](https://freemius.com/privacy/) |
+
 **Note:** You are responsible for any fees associated with the use of third-party APIs.
 
 ## License
 
-- **License:** GPLv3 or latet
+- **License:** GPLv3 or later
 
 - **License URI:** [https://www.gnu.org/licenses/gpl-3.0.html](https://www.gnu.org/licenses/gpl-3.0.html)
 

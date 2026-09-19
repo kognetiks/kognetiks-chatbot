@@ -3,13 +3,19 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.4.7
+ * Version:     2.4.8
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
+ * Text Domain: chatbot-chatgpt
+ * Domain Path: /languages
+ * Network: true
+ * Requires at least: 6.0
+ * Requires PHP: 7.0
  * License:     GPLv3 or later
  * License URI: https://www.gnu.org/licenses/gpl-30.html
  * 
- * Copyright (c) 2023-2025 Stephen Howell
+ * @copyright Copyright (C) 2023-2026 Stephen Howell
+ * @license http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License, version 3 or higher
  *  
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU
  * General Public License version 3, as published by the Free Software Foundation. You may NOT assume
@@ -22,7 +28,7 @@
  * along with Kognetiks Chatbot. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  * 
  * @package chatbot-chatgpt
- * @version 2.4.7
+ * @version 2.4.8
  * @author Kognetiks.com
  */
 
@@ -89,7 +95,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.4.7';
+$chatbot_chatgpt_plugin_version = '2.4.8';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -103,6 +109,22 @@ $chatbot_chatgpt_plugin_dir_url = plugins_url( '/', __FILE__ );
 if ( ! defined( 'CHATBOT_CHATGPT_PLUGIN_FILE' ) ) {
     define( 'CHATBOT_CHATGPT_PLUGIN_FILE', __FILE__ );
 }
+
+/**
+ * Load plugin translations from /languages.
+ *
+ * WordPress.org language packs still apply; this also loads bundled .mo files.
+ *
+ * @since 2.4.8
+ */
+function chatbot_chatgpt_load_textdomain() {
+    load_plugin_textdomain(
+        'chatbot-chatgpt',
+        false,
+        dirname( plugin_basename( CHATBOT_CHATGPT_PLUGIN_FILE ) ) . '/languages'
+    );
+}
+add_action( 'init', 'chatbot_chatgpt_load_textdomain', 0 );
 
 // Declare Globals
 global $wpdb;
@@ -369,33 +391,11 @@ function chatbot_chatgpt_insights_period_filter_handler() {
     }
 }
 
-// Include Insights library - Premium Only (at plugin init)
-// Check for premium access including trial status (trial users should have premium access)
+// Insights load in the premium build only. chatbot_chatgpt_is_premium() requires
+// is__premium_only() then can_use_premium_code(). Paying users on the free ZIP
+// must install the premium plugin — do not load Insights PHP as a fallback.
 if ( function_exists( 'chatbot_chatgpt_is_premium' ) && chatbot_chatgpt_is_premium() ) {
     chatbot_chatgpt_load_insights_files();
-} elseif ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
-    // Fallback: use same logic as chatbot_chatgpt_is_premium()
-    $fs = chatbot_chatgpt_freemius();
-    if ( is_object( $fs ) ) {
-        // Detect whether we are running inside the premium build
-        $running_premium_build = false;
-        if ( method_exists( $fs, 'is__premium_only' ) ) {
-            $running_premium_build = $fs->is__premium_only();
-        }
-        
-        // Check if paying
-        if ( method_exists( $fs, 'is_paying' ) && $fs->is_paying() ) {
-            chatbot_chatgpt_load_insights_files();
-        }
-        // Check if has active valid license
-        elseif ( method_exists( $fs, 'has_active_valid_license' ) && $fs->has_active_valid_license() ) {
-            chatbot_chatgpt_load_insights_files();
-        }
-        // Check if in trial (only grant access if running premium build)
-        elseif ( method_exists( $fs, 'is_trial' ) && $fs->is_trial() && $running_premium_build ) {
-            chatbot_chatgpt_load_insights_files();
-        }
-    }
 }
 
 // Handle plan changes and premium activation - Ver 2.4.2
@@ -420,6 +420,8 @@ if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
 }
 
 // Include necessary files - Widgets - Ver 2.1.3
+require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-widget-logging.php';
+require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-remote-widget.php'; // Signed remote widget - Ver 2.4.8
 require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-manage-widget-logs.php';
 
 // Log the User ID and Session ID - Ver 2.0.6 - 2024 07 11
@@ -443,566 +445,89 @@ $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 
 // DIAG - Diagnostics - Ver 2.4.5
 // back_trace( 'NOTICE', 'AI Platform: ' . $chatbot_ai_platform_choice);
 
-switch ($chatbot_ai_platform_choice) {
-
-    case 'OpenAI':
-
-        update_option('chatbot_ai_platform_choice', 'OpenAI');
-
-        $chatbot_chatgpt_api_enabled = 'Yes';
-        update_option('chatbot_chatgpt_api_enabled', 'Yes');
-    
-        $chatbot_azure_api_enabled = 'No';
-        update_option('chatbot_azure_api_enabled', 'No');
-    
-        $chatbot_nvidia_api_enabled = 'No';
-        update_option('chatbot_nvidia_api_enabled', 'No');
-    
-        $chatbot_anthropic_api_enabled = 'No';
-        update_option('chatbot_anthropic_api_enabled', 'No');
-
-        $chatbot_deepseek_api_enabled = 'No';
-        update_option('chatbot_deepseek_api_enabled', 'No');
-
-        $chatbot_markov_chain_api_enabled = 'No';
-        update_option('chatbot_markov_chain_api_enabled', 'No');
-    
-        $chatbot_transformer_model_api_enabled = 'No';
-        update_option('chatbot_transformer_model_api_enabled', 'No');
-
-        $chatbot_local_api_enabled = 'No';
-        update_option('chatbot_local_api_enabled', 'No');
-
-        $chatbot_mistral_api_enabled = 'No';
-        update_option('chatbot_mistral_api_enabled', 'No');
-
-        $chatbot_google_api_enabled = 'No';
-        update_option('chatbot_google_api_enabled', 'No');
-        
-        // Model choice - Ver 1.9.4
-        if (esc_attr(get_option('chatbot_chatgpt_model_choice')) === null) {
-            $model = 'gpt-4-1106-preview';
-            update_option('chatbot_chatgpt_model_choice', $model);
-        } elseif (empty($model)) {
-            $model = 'gpt-4-1106-preview';
-        }
-    
-        // Voice choice - Ver 1.9.5
-        if (esc_attr(get_option('chatbot_chatgpt_voice_option')) === null) {
-            $voice = 'alloy';
-            update_option('chatbot_chatgpt_voice_option', $voice);
-        }
-
-        break;
-
-    case 'Azure OpenAI':
-
-        update_option('chatbot_ai_platform_choice', 'Azure OpenAI');
-
-        $chatbot_chatgpt_api_enabled = 'No';
-        update_option('chatbot_chatgpt_api_enabled', 'No');
-
-        $chatbot_azure_api_enabled = 'Yes';
-        update_option('chatbot_azure_api_enabled', 'Yes');
-    
-        $chatbot_nvidia_api_enabled = 'No';
-        update_option('chatbot_nvidia_api_enabled', 'No');
-    
-        $chatbot_anthropic_api_enabled = 'No';
-        update_option('chatbot_anthropic_api_enabled', 'No');
-
-        $chatbot_deepseek_api_enabled = 'No';
-        update_option('chatbot_deepseek_api_enabled', 'No');
-
-        $chatbot_markov_chain_api_enabled = 'No';
-        update_option('chatbot_markov_chain_api_enabled', 'No');
-    
-        $chatbot_transformer_model_api_enabled = 'No';
-        update_option('chatbot_transformer_model_api_enabled', 'No');
-
-        $chatbot_local_api_enabled = 'No';
-        update_option('chatbot_local_api_enabled', 'No');
-
-        $chatbot_mistral_api_enabled = 'No';
-        update_option('chatbot_mistral_api_enabled', 'No');
-
-        $chatbot_google_api_enabled = 'No';
-        update_option('chatbot_google_api_enabled', 'No');
-        
-        // Model choice - Ver 1.9.4
-        if (esc_attr(get_option('chatbot_azure_model_choice')) === null) {
-            $model = 'gpt-4-1106-preview';
-            update_option('chatbot_azure_model_choice', $model);
-        } elseif (empty($model)) {
-            $model = 'gpt-4-1106-preview';
-        }
-    
-        // FIXME - TEMPORARILY DISABLED - 2025-03-07
-        // Disable Read Aloud - Ver 2.2.6
-        update_option('chatbot_chatgpt_read_aloud_option', 'no');
-        // Voice choice - Ver 1.9.5
-        // if (esc_attr(get_option('chatbot_azure_voice_option')) === null) {
-        //     $voice = 'alloy';
-        //     update_option('chatbot_azure_voice_option', $voice);
-        // }
-
-        break;
-
-    case 'NVIDIA':
-
-        update_option('chatbot_ai_platform_choice', 'NVIDIA');
-        
-        $chatbot_chatgpt_api_enabled = 'No';
-        update_option('chatbot_chatgpt_api_enabled', 'No');
-
-        $chatbot_azure_api_enabled = 'No';
-        update_option('chatbot_azure_api_enabled', 'No');
-   
-        $chatbot_nvidia_api_enabled = 'Yes';
-        update_option('chatbot_nvidia_api_enabled', 'Yes');
-    
-        $chatbot_anthropic_api_enabled = 'No';
-        update_option('chatbot_anthropic_api_enabled', 'No');
-
-        $chatbot_deepseek_api_enabled = 'No';
-        update_option('chatbot_deepseek_api_enabled', 'No');
-
-        $chatbot_markov_chain_api_enabled = 'No';
-        update_option('chatbot_markov_chain_api_enabled', 'No');
-
-        $chatbot_transformer_model_api_enabled = 'No';
-        update_option('chatbot_transformer_model_api_enabled', 'No');
-
-        $chatbot_local_api_enabled = 'No';
-        update_option('chatbot_local_api_enabled', 'No');
-
-        $chatbot_mistral_api_enabled = 'No';
-        update_option('chatbot_mistral_api_enabled', 'No');
-
-        $chatbot_google_api_enabled = 'No';
-        update_option('chatbot_google_api_enabled', 'No');
-
-        // Model choice - Ver 2.1.8
-        if (esc_attr(get_option('chatbot_nvidia_model_choice')) === null) {
-            $model = 'nvidia/llama-3.1-nemotron-51b-instruct';
-            update_option('chatbot_nvidia_model_choice', $model);
-        } elseif (empty($model)) {
-            $model = 'nvidia/llama-3.1-nemotron-51b-instruct';
-        }
-
-        // Disable Read Aloud - Ver 2.2.1
-        update_option('chatbot_chatgpt_read_aloud_option', 'no');
-        // Disable File Uploads - Ver 2.2.1
-        update_option('chatbot_chatgpt_allow_file_uploads', 'No');
-        // Disable MP3 Uploads - Ver 2.2.1
-        update_option('chatbot_chatgpt_allow_mp3_uploads', 'No');
-
-        break;
-
-    case 'Anthropic':
-
-        update_option('chatbot_ai_platform_choice', 'Anthropic');
-
-        $chatbot_chatgpt_api_enabled = 'No';
-        update_option('chatbot_chatgpt_api_enabled', 'No');
-
-        $chatbot_azure_api_enabled = 'No';
-        update_option('chatbot_azure_api_enabled', 'No');
-
-        $chatbot_nvidia_api_enabled = 'No';
-        update_option('chatbot_nvidia_api_enabled', 'No');
-
-        $chatbot_anthropic_api_enabled = 'Yes';
-        update_option('chatbot_anthropic_api_enabled', 'Yes');
-
-        $chatbot_deepseek_api_enabled = 'No';
-        update_option('chatbot_deepseek_api_enabled', 'No');
-
-        $chatbot_markov_chain_api_enabled = 'No';
-        update_option('chatbot_markov_chain_api_enabled', 'No');
-
-        $chatbot_transformer_model_api_enabled = 'No';
-        update_option('chatbot_transformer_model_api_enabled', 'No');
-
-        $chatbot_local_api_enabled = 'No';
-        update_option('chatbot_local_api_enabled', 'No');
-
-        $chatbot_mistral_api_enabled = 'No';
-        update_option('chatbot_mistral_api_enabled', 'No');
-
-        $chatbot_google_api_enabled = 'No';
-        update_option('chatbot_google_api_enabled', 'No');
-        
-        // Model choice - Ver 2.2.1
-        if (esc_attr(get_option('chatbot_anthropic_model_choice')) === null) {
-            $model = 'claude-3-5-sonnet-latest';
-            update_option('chatbot_anthropic_model_choice', $model);
-        } elseif (empty($model)) {
-            $model = 'claude-3-5-sonnet-latest';
-        }
-
-        // Disable Read Aloud - Ver 2.2.1
-        update_option('chatbot_chatgpt_read_aloud_option', 'no');
-        // Disable File Uploads - Ver 2.2.1
-        update_option('chatbot_chatgpt_allow_file_uploads', 'No');
-        // Disable MP3 Uploads - Ver 2.2.1
-        update_option('chatbot_chatgpt_allow_mp3_uploads', 'No');
-
-        break;
-
-    case 'DeepSeek':
-
-        update_option('chatbot_ai_platform_choice', 'DeepSeek');
-
-        $chatbot_chatgpt_api_enabled = 'No';
-        update_option('chatbot_chatgpt_api_enabled', 'No');
-
-        $chatbot_azure_api_enabled = 'No';
-        update_option('chatbot_azure_api_enabled', 'No');
-
-        $chatbot_nvidia_api_enabled = 'No';
-        update_option('chatbot_nvidia_api_enabled', 'No');
-
-        $chatbot_anthropic_api_enabled = 'No';
-        update_option('chatbot_anthropic_api_enabled', 'No');
-
-        $chatbot_deepseek_api_enabled = 'Yes';
-        update_option('chatbot_deepseek_api_enabled', 'Yes');
-
-        $chatbot_markov_chain_api_enabled = 'No';
-        update_option('chatbot_markov_chain_api_enabled', 'No');
-
-        $chatbot_transformer_model_api_enabled = 'No';
-        update_option('chatbot_transformer_model_api_enabled', 'No');
-        
-        $chatbot_local_api_enabled = 'No';
-        update_option('chatbot_local_api_enabled', 'No');
-
-        $chatbot_mistral_api_enabled = 'No';
-        update_option('chatbot_mistral_api_enabled', 'No');
-
-        $chatbot_google_api_enabled = 'No';
-        update_option('chatbot_google_api_enabled', 'No');
-        
-        // Model choice - Ver 2.2.1
-        if (esc_attr(get_option('chatbot_deepseek_model_choice')) === null) {
-            $model = 'deepseek-chat';
-            update_option('chatbot_deepseek_model_choice', $model);
-        } elseif (empty($model)) {
-            $model = 'deepseek-chat';
-        }
-
-        // Disable Read Aloud - Ver 2.2.1
-        update_option('chatbot_chatgpt_read_aloud_option', 'no');
-        // Disable File Uploads - Ver 2.2.1
-        update_option('chatbot_chatgpt_allow_file_uploads', 'No');
-        // Disable MP3 Uploads - Ver 2.2.1
-        update_option('chatbot_chatgpt_allow_mp3_uploads', 'No');
-
-        break;
-
-    case 'Mistral':
-
-        update_option('chatbot_ai_platform_choice', 'Mistral');
-
-        $chatbot_chatgpt_api_enabled = 'No';
-        update_option('chatbot_chatgpt_api_enabled', 'No');
-
-        $chatbot_azure_api_enabled = 'No';
-        update_option('chatbot_azure_api_enabled', 'No');
-
-        $chatbot_nvidia_api_enabled = 'No';
-        update_option('chatbot_nvidia_api_enabled', 'No');
-
-        $chatbot_anthropic_api_enabled = 'No';
-        update_option('chatbot_anthropic_api_enabled', 'No');
-
-        $chatbot_deepseek_api_enabled = 'No';
-        update_option('chatbot_deepseek_api_enabled', 'No');
-
-        $chatbot_markov_chain_api_enabled = 'No';
-        update_option('chatbot_markov_chain_api_enabled', 'No');
-
-        $chatbot_transformer_model_api_enabled = 'No';
-        update_option('chatbot_transformer_model_api_enabled', 'No');
-
-        $chatbot_local_api_enabled = 'No';
-        update_option('chatbot_local_api_enabled', 'No');
-
-        $chatbot_mistral_api_enabled = 'Yes';
-        update_option('chatbot_mistral_api_enabled', 'Yes');
-
-        $chatbot_google_api_enabled = 'No';
-        update_option('chatbot_google_api_enabled', 'No');
-
-        // Model choice - Ver 2.2.1
-        if (esc_attr(get_option('chatbot_mistral_model_choice')) === null) {
-            $model = 'mistral-small-latest';
-            update_option('chatbot_mistral_model_choice', $model);
-        } elseif (empty($model)) {
-            $model = 'mistral-small-latest';
-        }
-
-        // Disable Read Aloud - Ver 2.2.1
-        update_option('chatbot_chatgpt_read_aloud_option', 'no');
-        // Disable File Uploads - Ver 2.2.1
-        update_option('chatbot_chatgpt_allow_file_uploads', 'No');
-        // Disable MP3 Uploads - Ver 2.2.1
-        update_option('chatbot_chatgpt_allow_mp3_uploads', 'No');
-
-        break;
-
-    case 'Google':
-
-        update_option('chatbot_ai_platform_choice', 'Google');
-
-        $chatbot_chatgpt_api_enabled = 'No';
-        update_option('chatbot_chatgpt_api_enabled', 'No');
-
-        $chatbot_azure_api_enabled = 'No';
-        update_option('chatbot_azure_api_enabled', 'No');
-
-        $chatbot_nvidia_api_enabled = 'No';
-        update_option('chatbot_nvidia_api_enabled', 'No');
-
-        $chatbot_anthropic_api_enabled = 'No';
-        update_option('chatbot_anthropic_api_enabled', 'No');
-
-        $chatbot_deepseek_api_enabled = 'No';
-        update_option('chatbot_deepseek_api_enabled', 'No');
-
-        $chatbot_markov_chain_api_enabled = 'No';
-        update_option('chatbot_markov_chain_api_enabled', 'No');
-
-        $chatbot_transformer_model_api_enabled = 'No';
-        update_option('chatbot_transformer_model_api_enabled', 'No');
-
-        $chatbot_local_api_enabled = 'No';
-        update_option('chatbot_local_api_enabled', 'No');
-
-        $chatbot_mistral_api_enabled = 'No';
-        update_option('chatbot_mistral_api_enabled', 'No');
-
-        $chatbot_google_api_enabled = 'Yes';
-        update_option('chatbot_google_api_enabled', 'Yes');
-        
-        // Model choice - Ver 2.3.9
-        if (esc_attr(get_option('chatbot_google_model_choice')) === null) {
-            $model = 'gemini-2.0-flash';
-            update_option('chatbot_google_model_choice', $model);
-        } elseif (empty($model)) {
-            $model = 'gemini-2.0-flash';
-        }
-
-        // Disable Read Aloud - Ver 2.3.9
-        update_option('chatbot_chatgpt_read_aloud_option', 'no');
-        // Disable File Uploads - Ver 2.3.9
-        update_option('chatbot_chatgpt_allow_file_uploads', 'No');
-        // Disable MP3 Uploads - Ver 2.3.9
-        update_option('chatbot_chatgpt_allow_mp3_uploads', 'No');
-
-        break;
-
-    case 'Markov Chain':
-
-        update_option('chatbot_ai_platform_choice', 'Markov Chain');
-        
-        $chatbot_chatgpt_api_enabled = 'No';
-        update_option('chatbot_chatgpt_api_enabled', 'No');
-
-        $chatbot_azure_api_enabled = 'No';
-        update_option('chatbot_azure_api_enabled', 'No');
-
-        $chatbot_nvidia_api_enabled = 'No';
-        update_option('chatbot_nvidia_api_enabled', 'No');
-
-        $chatbot_anthropic_api_enabled = 'No';
-        update_option('chatbot_anthropic_api_enabled', 'No');
-
-        $chatbot_deepseek_api_enabled = 'No';
-        update_option('chatbot_deepseek_api_enabled', 'No');
-
-        $chatbot_markov_chain_api_enabled = 'Yes';
-        update_option('chatbot_markov_chain_api_enabled', 'Yes');
-
-        $chatbot_transformer_model_api_enabled = 'No';
-        update_option('chatbot_transformer_model_api_enabled', 'No');
-        
-        $chatbot_local_api_enabled = 'No';
-        update_option('chatbot_local_api_enabled', 'No');
-
-        $chatbot_mistral_api_enabled = 'No';
-        update_option('chatbot_mistral_api_enabled', 'No');
-
-        $chatbot_google_api_enabled = 'No';
-        update_option('chatbot_google_api_enabled', 'No');
-                 	
-        // Model choice - Ver 2.1.8
-        if (esc_attr(get_option('chatbot_markov_chain_model_choice')) === null) {
-            $model = 'markov-chain-flask';
-            update_option('chatbot_markov_chain_model_choice', $model);
-        } elseif (empty($model)) {
-            $model = 'markov-chain-flask';
-        }
-
-        // Disable Read Aloud - Ver 2.2.1
-        update_option('chatbot_chatgpt_read_aloud_option', 'no');
-        // Disable File Uploads - Ver 2.2.1
-        update_option('chatbot_chatgpt_allow_file_uploads', 'No');
-        // Disable MP3 Uploads - Ver 2.2.1
-        update_option('chatbot_chatgpt_allow_mp3_uploads', 'No');
-
-        break;
-
-    case 'Transformer':
-
-        update_option('chatbot_ai_platform_choice', 'Transformer');
-
-        $chatbot_chatgpt_api_enabled = 'No';
-        update_option('chatbot_chatgpt_api_enabled', 'No');
-
-        $chatbot_azure_api_enabled = 'No';
-        update_option('chatbot_azure_api_enabled', 'No');
-    
-        $chatbot_nvidia_api_enabled = 'No';
-        update_option('chatbot_nvidia_api_enabled', 'No');
-
-        $chatbot_anthropic_api_enabled = 'No';
-        update_option('chatbot_anthropic_api_enabled', 'No');
-
-        $chatbot_deepseek_api_enabled = 'No';
-        update_option('chatbot_deepseek_api_enabled', 'No');
-   
-        $chatbot_markov_chain_api_enabled = 'No';
-        update_option('chatbot_markov_chain_api_enabled', 'No');
-
-        $chatbot_transformer_model_api_enabled = 'Yes';
-        update_option('chatbot_transformer_model_api_enabled', 'Yes');
-        
-        $chatbot_local_api_enabled = 'No';
-        update_option('chatbot_local_api_enabled', 'No');
-        
-        $chatbot_mistral_api_enabled = 'No';
-        update_option('chatbot_mistral_api_enabled', 'No');
-
-        $chatbot_google_api_enabled = 'No';
-        update_option('chatbot_google_api_enabled', 'No');
-    
-        // Model choice - Ver 2.2.0
-        if (esc_attr(get_option('chatbot_transformer_model_choice')) === null) {
-            $model = 'sentential-context-model';
-            update_option('chatbot_transformer_model_choice', $model);
-        } elseif (empty($model)) {
-            $model = 'sentential-context-model';
-        }
-
-        // Disable Read Aloud - Ver 2.2.1
-        update_option('chatbot_chatgpt_read_aloud_option', 'no');
-        // Disable File Uploads - Ver 2.2.1
-        update_option('chatbot_chatgpt_allow_file_uploads', 'No');
-        // Disable MP3 Uploads - Ver 2.2.1
-        update_option('chatbot_chatgpt_allow_mp3_uploads', 'No');
-
-        break;
-
-    case 'Local Server':
-
-        update_option('chatbot_ai_platform_choice', 'Local Server');
-
-        $chatbot_chatgpt_api_enabled = 'No';
-        update_option('chatbot_chatgpt_api_enabled', 'No');
-
-        $chatbot_azure_api_enabled = 'No';
-        update_option('chatbot_azure_api_enabled', 'No');
-
-        $chatbot_nvidia_api_enabled = 'No';
-        update_option('chatbot_nvidia_api_enabled', 'No');
-
-        $chatbot_anthropic_api_enabled = 'No';
-        update_option('chatbot_anthropic_api_enabled', 'No');
-
-        $chatbot_deepseek_api_enabled = 'No';
-        update_option('chatbot_deepseek_api_enabled', 'No');
-    
-        $chatbot_markov_chain_api_enabled = 'No';
-        update_option('chatbot_markov_chain_api_enabled', 'No');
-
-        $chatbot_transformer_model_api_enabled = 'No';
-        update_option('chatbot_transformer_model_api_enabled', 'No');
-        
-        $chatbot_local_api_enabled = 'Yes';
-        update_option('chatbot_local_api_enabled', 'Yes');
-
-        $chatbot_mistral_api_enabled = 'No';
-        update_option('chatbot_mistral_api_enabled', 'No');
-
-        $chatbot_google_api_enabled = 'No';
-        update_option('chatbot_google_api_enabled', 'No');
-    
-        // Model choice - Ver 2.2.0
-        if (esc_attr(get_option('chatbot_local_model_choice')) === null) {
-            $model = 'llama3.2-3b-instruct';
-            update_option('chatbot_local_model_choice', $model);
-        } elseif (empty($model)) {
-            $model = 'llama3.2-3b-instruct';
-        }
-
-        // Disable Read Aloud - Ver 2.2.1
-        update_option('chatbot_chatgpt_read_aloud_option', 'no');
-        // Disable File Uploads - Ver 2.2.1
-        update_option('chatbot_chatgpt_allow_file_uploads', 'No');
-        // Disable MP3 Uploads - Ver 2.2.1
-        update_option('chatbot_chatgpt_allow_mp3_uploads', 'No');
-
-        break;
-
-    default:
-
-        update_option('chatbot_ai_platform_choice', 'OpenAI');
-
-        $chatbot_chatgpt_api_enabled = 'Yes';
-        update_option('chatbot_chatgpt_api_enabled', 'Yes');
-
-        $chatbot_azure_api_enabled = 'No';
-        update_option('chatbot_azure_api_enabled', 'No');
-
-        $chatbot_nvidia_api_enabled = 'No';
-        update_option('chatbot_nvidia_api_enabled', 'No');
-
-        $chatbot_anthropic_api_enabled = 'No';
-        update_option('chatbot_anthropic_api_enabled', 'No');
-
-        $chatbot_deepseek_api_enabled = 'No';
-        update_option('chatbot_deepseek_api_enabled', 'No');
-
-        $chatbot_markov_chain_api_enabled = 'No';
-        update_option('chatbot_markov_chain_api_enabled', 'No');
-
-        $chatbot_transformer_model_api_enabled = 'No';
-        update_option('chatbot_transformer_model_api_enabled', 'No');
-
-        $chatbot_mistral_api_enabled = 'No';
-        update_option('chatbot_mistral_api_enabled', 'No');
-
-        $chatbot_google_api_enabled = 'No';
-        update_option('chatbot_google_api_enabled', 'No');
-
-        // Model choice - Ver 1.9.4
-        if (esc_attr(get_option('chatbot_chatgpt_model_choice')) === null) {
-            $model = 'gpt-4-1106-preview';
-            update_option('chatbot_chatgpt_model_choice', $model);
-        } elseif (empty($model)) {
-            $model = 'gpt-4-1106-preview';
-        }
-
-        // Voice choice - Ver 1.9.5
-        if (esc_attr(get_option('chatbot_chatgpt_voice_option')) === null) {
-            $voice = 'alloy';
-            update_option('chatbot_chatgpt_voice_option', $voice);
-        }
-
-        break;
-
+$chatbot_platforms = array(
+    'OpenAI'       => array(
+        'option'        => 'chatbot_chatgpt_api_enabled',
+        'model_option'  => 'chatbot_chatgpt_model_choice',
+        'default_model' => 'gpt-4-1106-preview',
+    ),
+    'Azure OpenAI' => array(
+        'option'        => 'chatbot_azure_api_enabled',
+        'model_option'  => 'chatbot_azure_model_choice',
+        'default_model' => 'gpt-4-1106-preview',
+    ),
+    'NVIDIA'       => array(
+        'option'        => 'chatbot_nvidia_api_enabled',
+        'model_option'  => 'chatbot_nvidia_model_choice',
+        'default_model' => 'nvidia/llama-3.1-nemotron-51b-instruct',
+    ),
+    'Anthropic'    => array(
+        'option'        => 'chatbot_anthropic_api_enabled',
+        'model_option'  => 'chatbot_anthropic_model_choice',
+        'default_model' => 'claude-3-5-sonnet-latest',
+    ),
+    'DeepSeek'     => array(
+        'option'        => 'chatbot_deepseek_api_enabled',
+        'model_option'  => 'chatbot_deepseek_model_choice',
+        'default_model' => 'deepseek-chat',
+    ),
+    'Mistral'      => array(
+        'option'        => 'chatbot_mistral_api_enabled',
+        'model_option'  => 'chatbot_mistral_model_choice',
+        'default_model' => 'mistral-small-latest',
+    ),
+    'Google'       => array(
+        'option'        => 'chatbot_google_api_enabled',
+        'model_option'  => 'chatbot_google_model_choice',
+        'default_model' => 'gemini-2.0-flash',
+    ),
+    'Markov Chain' => array(
+        'option'        => 'chatbot_markov_chain_api_enabled',
+        'model_option'  => 'chatbot_markov_chain_model_choice',
+        'default_model' => 'markov-chain-flask',
+    ),
+    'Transformer'  => array(
+        'option'        => 'chatbot_transformer_model_api_enabled',
+        'model_option'  => 'chatbot_transformer_model_choice',
+        'default_model' => 'sentential-context-model',
+    ),
+    'Local Server' => array(
+        'option'        => 'chatbot_local_api_enabled',
+        'model_option'  => 'chatbot_local_model_choice',
+        'default_model' => 'llama3.2-3b-instruct',
+    ),
+);
+
+// Fall back to OpenAI for anything unrecognized (mirrors the old `default:` case).
+if ( ! isset( $chatbot_platforms[ $chatbot_ai_platform_choice ] ) ) {
+    $chatbot_ai_platform_choice = 'OpenAI';
+}
+
+update_option( 'chatbot_ai_platform_choice', $chatbot_ai_platform_choice );
+
+// One loop replaces every "disable all the others" block.
+foreach ( $chatbot_platforms as $platform_name => $config ) {
+    update_option(
+        $config['option'],
+        ( $platform_name === $chatbot_ai_platform_choice ) ? 'Yes' : 'No'
+    );
+}
+
+$active = $chatbot_platforms[ $chatbot_ai_platform_choice ];
+
+if ( get_option( $active['model_option'] ) === null ) {
+    update_option( $active['model_option'], $active['default_model'] );
+}
+
+// Shared feature defaults: OpenAI keeps read-aloud/voice/uploads, everything else disables them.
+if ( 'OpenAI' === $chatbot_ai_platform_choice ) {
+    if ( get_option( 'chatbot_chatgpt_voice_option' ) === null ) {
+        update_option( 'chatbot_chatgpt_voice_option', 'alloy' );
+    }
+} else {
+    update_option( 'chatbot_chatgpt_read_aloud_option', 'no' );
+    update_option( 'chatbot_chatgpt_allow_file_uploads', 'No' );
+    update_option( 'chatbot_chatgpt_allow_mp3_uploads', 'No' );
 }
 
 // Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5
@@ -1117,18 +642,8 @@ function chatbot_chatgpt_enqueue_scripts() {
         'additional_instructions' => $additional_instructions,
         'model' => $model,
         'voice' => $voice,
-        // Security: Generate nonces for AJAX requests
-        'chatbot_message_nonce' => wp_create_nonce('chatbot_message_nonce'),
-        'chatbot_upload_nonce' => wp_create_nonce('chatbot_upload_nonce'),
-        'chatbot_erase_nonce' => wp_create_nonce('chatbot_erase_nonce'),
-        'chatbot_unlock_nonce' => wp_create_nonce('chatbot_unlock_nonce'),
-        'chatbot_reset_nonce' => wp_create_nonce('chatbot_reset_nonce'),
-        'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
-        'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
-        'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
-        'chatbot_log_error_nonce' => wp_create_nonce('chatbot_log_error_nonce'),
         'nonce_timestamp' => time() * 1000, // JavaScript timestamp format
-    ));
+    ), chatbot_chatgpt_get_ajax_nonces());
     
     // Set visitor and logged in user limits - Ver 2.0.1
     if (is_user_logged_in()) {
@@ -1236,6 +751,7 @@ if (!wp_next_scheduled('chatbot_chatgpt_cleanup_event')) {
     wp_schedule_event(time(), 'daily', 'chatbot_chatgpt_cleanup_event');
 }
 add_action('chatbot_chatgpt_cleanup_event', 'clean_specific_expired_transients');
+add_action('chatbot_chatgpt_cleanup_event', 'chatbot_chatgpt_clear_stuck_visitor_locks');
 
 // Schedule Conversation Log Cleanup - Ver 1.6.7
 if (!wp_next_scheduled('chatbot_chatgpt_conversation_log_cleanup_event')) {
@@ -1614,6 +1130,12 @@ function chatbot_chatgpt_process_queued_message($message_data) {
     $chatbot_chatgpt_assistant_alias = $assistant_resolution['assistant_alias'];
     $use_assistant_id = $assistant_resolution['use_assistant_id'];
 
+    // Assistants / prompts / agents are only implemented for OpenAI, Azure, and Mistral.
+    if ($use_assistant_id === 'Yes'
+        && !in_array($chatbot_ai_platform_choice, array('OpenAI', 'Azure OpenAI', 'Mistral'), true)) {
+        $use_assistant_id = 'No';
+    }
+
     // Persist resolved ids so conversation log and later requests stay in sync
     if ( ! empty( $assistant_id ) && $assistant_id !== 'original' ) {
         set_chatbot_chatgpt_transients( 'assistant_id', $assistant_id, $user_id, $page_id, $session_id, null );
@@ -1626,24 +1148,14 @@ function chatbot_chatgpt_process_queued_message($message_data) {
 
     // Process the message based on platform and use_assistant_id - Ver 2.3.6   
     // Check if we should use assistant_id or regular API
-    if ($use_assistant_id == 'Yes' && $chatbot_ai_platform_choice == 'OpenAI' && str_starts_with($assistant_id, 'asst_')) {
+    if ($use_assistant_id == 'Yes' && $chatbot_ai_platform_choice == 'OpenAI' && (str_starts_with($assistant_id, 'asst_') || str_starts_with($assistant_id, 'pmpt_'))) {
         
         // DIAG - Diagnostics - Ver 2.4.5
-        // back_trace('NOTICE', 'Using Assistant ID - Ver 2.4.5');
+        // back_trace('NOTICE', 'Using Responses API for Assistant/Prompt ID - Ver 2.4.8');
         // back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
         // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
         // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
 
-        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
-
-    } elseif ($use_assistant_id == 'Yes' && $chatbot_ai_platform_choice == 'OpenAI' && str_starts_with($assistant_id, 'pmpt_')) {
-        
-        // DIAG - Diagnostics - Ver 2.4.5
-        // back_trace('NOTICE', 'Using Prompt ID - Ver 2.4.5');
-        // back_trace('NOTICE', 'Prompt ID: ' . $assistant_id);
-        // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
-        // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
-        
         $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
 
     } elseif ($use_assistant_id == 'Yes' && $chatbot_ai_platform_choice == 'Azure OpenAI') {
@@ -1681,12 +1193,12 @@ function chatbot_chatgpt_process_queued_message($message_data) {
             case 'OpenAI':
 
                 // Determine which OpenAI API to call based on model
-                if (str_starts_with($model, 'gpt-4o')) {
+                if (chatbot_chatgpt_is_openai_image_model($model)) {
+                    $response = chatbot_chatgpt_call_image_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
+                } elseif (str_starts_with($model, 'gpt-4o')) {
                     $response = chatbot_chatgpt_call_omni($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
                 } elseif (str_starts_with($model, 'gpt')) {
                     $response = chatbot_chatgpt_call_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
-                } elseif (str_starts_with($model, 'dall')) {
-                    $response = chatbot_chatgpt_call_image_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
                 } elseif (str_starts_with($model, 'tts')) {
                     $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
                 } elseif (str_starts_with($model, 'whisper')) {
@@ -2147,6 +1659,13 @@ function chatbot_chatgpt_send_message() {
     $chatbot_chatgpt_assistant_alias = $assistant_resolution['assistant_alias'];
     $use_assistant_id = $assistant_resolution['use_assistant_id'];
 
+    // Assistants / prompts / agents are only implemented for OpenAI, Azure, and Mistral.
+    // Ignore asst_/pmpt_/ag: on Transformer and other chat-only platforms.
+    if ($use_assistant_id === 'Yes'
+        && !in_array($chatbot_ai_platform_choice, array('OpenAI', 'Azure OpenAI', 'Mistral'), true)) {
+        $use_assistant_id = 'No';
+    }
+
     if ( ! empty( $assistant_id ) && $assistant_id !== 'original' ) {
         set_chatbot_chatgpt_transients( 'assistant_id', $assistant_id, $user_id, $page_id, $session_id, null );
         set_chatbot_chatgpt_transients( 'assistant_alias', $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
@@ -2265,18 +1784,16 @@ function chatbot_chatgpt_send_message() {
         // Route based on chatbot_ai_platform_choice setting - Ver 2.3.6
         if ($chatbot_ai_platform_choice == 'OpenAI') {
 
-            // Original Assistant or Prompt
-            if (str_starts_with($assistant_id, 'asst_')) {
-
-                $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
-
-            } elseif (str_starts_with($assistant_id, 'pmpt_')) {
+            // Former Assistants (asst_) and hosted Prompts (pmpt_) both use Responses.
+            if (str_starts_with($assistant_id, 'asst_') || str_starts_with($assistant_id, 'pmpt_')) {
 
                 $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
 
             } else {
 
-                return 'ERROR: Invalid Assistant ID';
+                delete_transient($conv_lock);
+                wp_send_json_error('ERROR: Invalid Assistant ID');
+                return;
 
             }
 
@@ -2291,7 +1808,9 @@ function chatbot_chatgpt_send_message() {
             $response = chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
         } else {
 
-            return 'ERROR: Invalid AI Platform';
+            delete_transient($conv_lock);
+            wp_send_json_error('ERROR: Invalid AI Platform');
+            return;
 
         }
 
@@ -2374,6 +1893,16 @@ function chatbot_chatgpt_send_message() {
 
                 switch ($model) {
 
+                    case str_starts_with($model, 'gpt-image'):
+                    case str_starts_with($model, 'dall'):
+
+                        // Reload the model - BELT & SUSPENDERS
+                        $kchat_settings['model'] = $model;
+                        // Send message to Image API - Ver 1.9.4
+                        $response = chatbot_chatgpt_call_image_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
+
+                        break;
+
                     case str_starts_with($model, 'gpt-4o'):
 
                         // The string 'gpt-4o' is found in $model
@@ -2390,15 +1919,6 @@ function chatbot_chatgpt_send_message() {
                         $kchat_settings['model'] = $model;
                         // Send message to ChatGPT API - Ver 1.6.7
                         $response = chatbot_chatgpt_call_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
-
-                        break;
-
-                    case str_starts_with($model, 'dall'):
-
-                        // Reload the model - BELT & SUSPENDERS
-                        $kchat_settings['model'] = $model;
-                        // Send message to Image API - Ver 1.9.4
-                        $response = chatbot_chatgpt_call_image_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
 
                         break;
 
@@ -2562,56 +2082,87 @@ function chatbot_chatgpt_send_message() {
 
 }
 
-// Handle nonce refresh requests - Ver 2.3.6
-function chatbot_chatgpt_refresh_nonce() {
+// AJAX nonces for the chatbot UI. Unlock/reset only for manage_options. - Ver 2.4.8
+function chatbot_chatgpt_get_ajax_nonces() {
 
-    // Generate fresh nonces
     $nonces = array(
         'chatbot_message_nonce' => wp_create_nonce('chatbot_message_nonce'),
         'chatbot_upload_nonce' => wp_create_nonce('chatbot_upload_nonce'),
         'chatbot_erase_nonce' => wp_create_nonce('chatbot_erase_nonce'),
-        'chatbot_unlock_nonce' => wp_create_nonce('chatbot_unlock_nonce'),
-        'chatbot_reset_nonce' => wp_create_nonce('chatbot_reset_nonce'),
         'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
         'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
         'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
         'chatbot_log_error_nonce' => wp_create_nonce('chatbot_log_error_nonce'),
     );
-    
-    wp_send_json_success($nonces);
+
+    if (is_user_logged_in() && current_user_can('manage_options')) {
+        $nonces['chatbot_unlock_nonce'] = wp_create_nonce('chatbot_unlock_nonce');
+        $nonces['chatbot_reset_nonce'] = wp_create_nonce('chatbot_reset_nonce');
+    }
+
+    return $nonces;
 
 }
 
-// Function to clear stuck visitor locks - Ver 2.3.6
+// Handle nonce refresh requests - Ver 2.3.6
+function chatbot_chatgpt_refresh_nonce() {
+
+    $incoming = isset($_POST['chatbot_nonce']) ? sanitize_text_field(wp_unslash($_POST['chatbot_nonce'])) : '';
+
+    if ($incoming === '' || !wp_verify_nonce($incoming, 'chatbot_message_nonce')) {
+        wp_send_json_error(array(
+            'message' => 'Security check failed. Please refresh the page and try again.',
+            'code' => 'nonce_failed',
+        ), 403);
+        return;
+    }
+
+    if (!is_user_logged_in()) {
+        $client_ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : 'unknown';
+        $rate_limit_key = 'chatbot_refresh_nonce_rl_' . (function_exists('wp_fast_hash') ? wp_fast_hash($client_ip) : hash('sha256', $client_ip));
+        $current_count = (int) get_transient($rate_limit_key);
+        if ($current_count >= 10) {
+            wp_send_json_error(array(
+                'message' => 'Too many requests. Please try again later.',
+                'code' => 'rate_limited',
+            ), 429);
+            return;
+        }
+        set_transient($rate_limit_key, $current_count + 1, MINUTE_IN_SECONDS);
+    }
+
+    wp_send_json_success(chatbot_chatgpt_get_ajax_nonces());
+
+}
+
+// Clear expired conversation locks from wp_options. Run from daily cleanup cron
+// and the admin tool — never on front-end init (table scan/write on every
+// anonymous request). Active requests still expire a lock on contention in
+// chatbot_chatgpt_send_message(). - Ver 2.3.6
 function chatbot_chatgpt_clear_stuck_visitor_locks() {
 
     global $wpdb;
-    
-    // Only run for visitors (not logged in users)
-    if (is_user_logged_in()) {
+
+    // Timeout rows hold a unix expiry. Lock value rows hold 1/true — never
+    // compare those to a timestamp (that would delete in-flight locks).
+    $expired_time = time() - 120;
+
+    $timeout_names = $wpdb->get_col($wpdb->prepare(
+        "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
+        $wpdb->esc_like('_transient_timeout_chatgpt_conv_lock_') . '%',
+        $expired_time
+    ));
+
+    if (empty($timeout_names) || !is_array($timeout_names)) {
         return;
     }
-    
-    // Clear locks older than 2 minutes
-    $expired_time = time() - 120; // 2 minutes ago
-    
-    $lock_patterns = [
-        '_transient_chatgpt_conv_lock_%',
-        '_transient_timeout_chatgpt_conv_lock_%',
-    ];
-    
-    foreach ($lock_patterns as $pattern) {
-        $wpdb->query($wpdb->prepare(
-            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
-            $pattern,
-            $expired_time
-        ));
+
+    foreach ($timeout_names as $timeout_name) {
+        $transient_name = str_replace('_transient_timeout_', '', $timeout_name);
+        delete_transient($transient_name);
     }
 
 }
-
-// Hook to clear stuck locks on init for visitors
-add_action('init', 'chatbot_chatgpt_clear_stuck_visitor_locks', 5);
 
 // Add admin menu for visitor lock clearing tool - Ver 2.3.6
 function chatbot_chatgpt_add_visitor_lock_tool_menu() {
@@ -2854,14 +2405,6 @@ function chatbot_chatgpt_reset_cache_locks_handler() {
             $cleared_count += $result;
         }
         
-        // Clear expired transients
-        $expired_result = $wpdb->query($wpdb->prepare(
-            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
-            '_transient_timeout_%',
-            time()
-        ));
-        $cleared_count += $expired_result;
-        
         // Clear WordPress object cache if available
         if (function_exists('wp_cache_flush')) {
             wp_cache_flush();
@@ -2882,7 +2425,7 @@ function chatbot_chatgpt_reset_cache_locks_handler() {
                 $files = glob($cache_dir . '*');
                 foreach ($files as $file) {
                     if (is_file($file) && filemtime($file) < (time() - 3600)) { // Older than 1 hour
-                        @unlink($file);
+                        wp_delete_file($file);
                         $cleared_count++;
                     }
                 }
@@ -2890,13 +2433,13 @@ function chatbot_chatgpt_reset_cache_locks_handler() {
         }
         
         // Log the action
-        $log_message = '[' . date('Y-m-d H:i:s') . '] [Chatbot] [Advanced Reset] Cache and locks reset by admin user ID: ' . get_current_user_id() . ' - Cleared ' . $cleared_count . ' entries';
+        $log_message = '[' . gmdate('Y-m-d H:i:s') . '] [Chatbot] [Advanced Reset] Cache and locks reset by admin user ID: ' . get_current_user_id() . ' - Cleared ' . $cleared_count . ' entries';
         chatbot_error_log($log_message);
         
         wp_send_json_success('Cache and locks reset successfully. Cleared ' . $cleared_count . ' entries.');
         
     } catch (Exception $e) {
-        $log_message = '[' . date('Y-m-d H:i:s') . '] [Chatbot] [Advanced Reset] Error: ' . $e->getMessage();
+        $log_message = '[' . gmdate('Y-m-d H:i:s') . '] [Chatbot] [Advanced Reset] Error: ' . $e->getMessage();
         chatbot_error_log($log_message);
         wp_send_json_error('Error resetting cache and locks: ' . $e->getMessage());
     }

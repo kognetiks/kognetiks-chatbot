@@ -1,0 +1,55 @@
+# Files and folders excluded from the Freemius / WordPress.org plugin zip.
+# Kept in git on purpose; do not copy this list into .gitignore.
+# Do not ignore vendor/freemius — the SDK must ship.
+
+# WordFence vendor-ownership challenge (git only; never ship)
+wordfence-vendor.txt
+
+# VCS and local tooling
+.git
+.github
+.idea
+.vscode
+.cursor
+/debug/
+/test-harness/
+.DS_Store
+Thumbs.db
+.snyk
+.snykignore
+.dcignore
+composer.json
+package.json
+
+# Internal notes (not part of the product)
+z-internal
+
+# Runtime / generated content (keep index.php in each directory)
+results/*
+!results/index.php
+uploads/*
+!uploads/index.php
+audio/*
+!audio/index.php
+transcripts/*
+!transcripts/index.php
+downloads/*
+!downloads/index.php
+chatbot-logs/*
+!chatbot-logs/index.php
+widget-logs/*
+!widget-logs/index.php
+includes/transformers/sentential_embeddings_cache/*
+!includes/transformers/sentential_embeddings_cache/index.php
+includes/transformers/lexical_embeddings_cache/*
+!includes/transformers/lexical_embeddings_cache/index.php
+
+# Dev-only copies and generated caches
+includes/transformers/sentential_embeddings_cache.php
+includes/transformers/lexical_embeddings_cache.php
+includes/tools/test-jan-ai.php
+includes/insights/DEFINITIONS.md
+includes/chatbot-call-local-api.copy
+*.gz
+*.ser
+*.old

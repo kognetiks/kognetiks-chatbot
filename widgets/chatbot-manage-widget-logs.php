@@ -57,8 +57,8 @@ function chatbot_manage_widget_logs() {
         return;
     }
 
-    // Start HTML output with styling
-    $output = '<style>
+    // CSS is echoed separately. wp_kses_post() strips <style> and leaves the rules as visible text.
+    $css = '
         .widget-log-templates-display {
             overflow-x: auto; /* Add horizontal scroll if needed */
         }
@@ -77,9 +77,9 @@ function chatbot_manage_widget_logs() {
         .widget-log-templates-display th {
             background-color: #f2f2f2;
         }
-    </style>';
+    ';
 
-    $output .= '<div class="wrap widget-log-templates-display">';
+    $output = '<div class="wrap widget-log-templates-display">';
 
     $output .= '<form method="post" action="">';
     $output .= '<table>';
@@ -108,7 +108,21 @@ function chatbot_manage_widget_logs() {
     $output .= '</form>';
     $output .= '</div>';
 
-    echo wp_kses_post( $output ); // Output the generated HTML
+    $allowed_html = array(
+        'div'   => array( 'class' => true ),
+        'p'     => array(),
+        'form'  => array( 'method' => true, 'action' => true ),
+        'table' => array(),
+        'thead' => array(),
+        'tbody' => array(),
+        'tr'    => array(),
+        'th'    => array(),
+        'td'    => array(),
+        'a'     => array( 'href' => true, 'class' => true ),
+    );
+
+    echo '<style>' . wp_kses( $css, array() ) . '</style>';
+    echo wp_kses( $output, $allowed_html );
 
     return;
 }
@@ -163,7 +177,7 @@ function handle_widget_log_actions() {
             $file_path = $chatbot_logs_dir . $file;
 
             if (file_exists($file_path)) {
-                unlink($file_path);
+                wp_delete_file($file_path);
                 wp_redirect(admin_url('admin.php?page=chatbot-chatgpt&tab=tools')); // Redirect to plugin page
                 exit;
             } else {
@@ -181,7 +195,7 @@ function handle_widget_log_actions() {
             foreach ($files as $file) {
                 $file_path = $chatbot_logs_dir . $file;
                 if (file_exists($file_path)) {
-                    unlink($file_path);
+                    wp_delete_file($file_path);
                 }
             }
 

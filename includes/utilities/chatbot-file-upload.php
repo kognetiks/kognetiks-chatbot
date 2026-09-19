@@ -97,7 +97,16 @@ function chatbot_chatgpt_upload_files() {
             file_put_contents($index_file_path, $file_content);
         }
     }
-    chmod($uploads_dir, 0700);
+    global $wp_filesystem;
+    if (!function_exists('WP_Filesystem')) {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+    }
+    if (empty($wp_filesystem)) {
+        WP_Filesystem();
+    }
+    if ($wp_filesystem) {
+        $wp_filesystem->chmod($uploads_dir, 0700);
+    }
 
     // Which API key to use?
     $ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice'), 'OpenAI');
@@ -213,7 +222,7 @@ function chatbot_chatgpt_upload_files() {
                 ];
                 $error_flag = true;
                 if ( file_exists( $file_path ) ) {
-                    unlink( $file_path );
+                    wp_delete_file( $file_path );
                 }
                 continue;
             }
@@ -265,14 +274,14 @@ function chatbot_chatgpt_upload_files() {
                         'message' => 'Upload failed: server does not support cURL.',
                     ];
                     $error_flag = true;
-                    unlink( $file_path );
+                    wp_delete_file( $file_path );
                     continue;
                 }
                 $ch = curl_init( $api_url );
                 if ( $ch === false ) {
                     $responses[] = [ 'status' => 'error', 'message' => 'Upload failed: could not initialize request.' ];
                     $error_flag = true;
-                    unlink( $file_path );
+                    wp_delete_file( $file_path );
                     continue;
                 }
                 $headers = [
@@ -300,7 +309,7 @@ function chatbot_chatgpt_upload_files() {
                         'message' => 'API Error: ' . $curl_err,
                     ];
                     $error_flag = true;
-                    unlink( $file_path );
+                    wp_delete_file( $file_path );
                     chatbot_file_upload_debug_log( $api_url, 0, $response_body, $payload_keys_log, $file_path, $file_size, $file_mime_type );
                     continue;
                 }
@@ -310,7 +319,7 @@ function chatbot_chatgpt_upload_files() {
                     'message' => 'Unsupported AI platform for file uploads.',
                 ];
                 $error_flag = true;
-                unlink( $file_path );
+                wp_delete_file( $file_path );
                 continue;
             }
 
@@ -335,7 +344,7 @@ function chatbot_chatgpt_upload_files() {
                     'message'     => $errorMessage,
                 ];
                 $error_flag = true;
-                unlink( $file_path );
+                wp_delete_file( $file_path );
                 continue;
             }
 
@@ -362,7 +371,7 @@ function chatbot_chatgpt_upload_files() {
                 'id'         => $responseData['id'],
                 'message'    => 'File ' . $newFileName . ' uploaded successfully.',
             ];
-            unlink( $file_path );
+            wp_delete_file( $file_path );
 
         }
 
@@ -540,7 +549,16 @@ function chatbot_chatgpt_upload_mp3() {
         }
     }
     // Protect the directory - Ver 2.0.0
-    chmod($uploads_dir, 0700);
+    global $wp_filesystem;
+    if (!function_exists('WP_Filesystem')) {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+    }
+    if (empty($wp_filesystem)) {
+        WP_Filesystem();
+    }
+    if ($wp_filesystem) {
+        $wp_filesystem->chmod($uploads_dir, 0700);
+    }
 
     $responses = [];
     $error_flag = false;
@@ -658,7 +676,7 @@ function chatbot_chatgpt_cleanup_uploads_directory() {
     foreach (glob($uploads_dir . '*') as $file) {
         // Delete files older than 1 hour
         if (filemtime($file) < time() - 60 * 60 * 1) {
-            unlink($file);
+            wp_delete_file($file);
         }
     }
     // Create the index.php file if it does not exist
@@ -672,7 +690,7 @@ function create_index_file($directory) {
 
     // Check if the directory exists, if not, create it
     if (!is_dir($directory)) {
-        if (!mkdir($directory, 0755, true)) {
+        if (!create_directory_and_index_file($directory)) {
             // If the directory could not be created, log an error and exit the function
             prod_trace('ERROR', 'Failed to create directory: ' . $directory);
             return;

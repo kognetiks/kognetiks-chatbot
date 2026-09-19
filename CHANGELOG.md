@@ -6,6 +6,22 @@
 
 ---
 
+= 2.4.8 - Released 2026-09-17 =
+
+### New Features
+* **Signed remote widget**: Embed the chatbot on allowlisted remote sites via `/kognetiks-chatbot-widget/` using HMAC tokens bound to each domain + assistant pair. Supporting browsers are limited with CSP `frame-ancestors`. Referer is logged for audit only and is not used for authorization. Remote access stays off until you enable it.
+
+### Improvements
+* **OpenAI Responses migration**: OpenAI `asst_` IDs now chat through the Responses API (Assistants API sunset). Local Common Name and Additional Instructions are sent with each call. Hosted `pmpt_` prompt objects remain a temporary bridge until 30 November 2026.
+* **Vector stores (file search)**: GPT Assistants rows can store an OpenAI Vector Store ID (`vs_…`). Responses calls then send `file_search` so large PDFs stay searchable without pasting them into Additional Instructions.
+* **AJAX nonce refresh**: Chat sessions can refresh expired nonces. Refresh requires a valid message nonce, is rate-limited for guests, and only returns admin unlock/reset tokens to users with `manage_options`.
+* **Internationalization**: Plugin header now declares Text Domain and Domain Path; translations load from `/languages`. A `chatbot-chatgpt.pot` template is bundled.
+
+### Bug Fixes
+* **Legacy widget bootstrap**: `widgets/chatbot-widget-endpoint.php` no longer walks parent directories to load WordPress; it only redirects to the signed WordPress endpoint.
+* **Uninstall**: Delete-on-uninstall now runs after Freemius uninstall as well as a native WordPress uninstall.
+* **KFlow conversation lookup**: Visitor answers are now fetched with `$wpdb->prepare()` so session, user, page, and assistant IDs cannot alter the conversation-log query.
+
 = 2.4.7 - Released 2026-08-12 =
 
 ### Improvements

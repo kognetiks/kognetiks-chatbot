@@ -33,6 +33,7 @@ function create_chatbot_chatgpt_assistants_table() {
     $sql = "CREATE TABLE $table_name (
         id BIGINT(20) UNSIGNED AUTO_INCREMENT,
         assistant_id VARCHAR(255) NOT NULL,
+        vector_store_id VARCHAR(255) NOT NULL,
         common_name VARCHAR(255) NOT NULL,
         style ENUM('embedded', 'floating') NOT NULL,
         audience ENUM('all', 'visitors', 'logged-in') NOT NULL,
@@ -63,6 +64,7 @@ function create_chatbot_chatgpt_assistants_table() {
 
     // Call the upgrade function after creating the table
     upgrade_chatbot_chatgpt_assistants_table();
+    chatbot_chatgpt_ensure_assistants_vector_store_column();
 
     // Keep the chatbot_chatgpt_number_of_shortcodes option updated - Ver 2.0.6
     // REMOVED - Ver 2.2.7
@@ -142,6 +144,89 @@ function get_chatbot_chatgpt_assistant_by_key($id) {
 
 }
 
+/**
+ * Retrieve a row from the chatbot assistants table using the remote ID (asst_ / pmpt_).
+ *
+ * @param string $assistant_id Remote assistant or prompt ID.
+ * @return array Associative row, or empty array when not found.
+ */
+function get_chatbot_chatgpt_assistant_by_assistant_id( $assistant_id ) {
+
+    global $wpdb;
+
+    $assistant_id = sanitize_text_field( (string) $assistant_id );
+    if ( $assistant_id === '' ) {
+        return array();
+    }
+
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+
+    $assistant_details = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT * FROM $table_name WHERE assistant_id = %s LIMIT 1",
+            $assistant_id
+        ),
+        ARRAY_A
+    );
+
+    if ( empty( $assistant_details ) || ! is_array( $assistant_details ) ) {
+        return array();
+    }
+
+    return $assistant_details;
+
+}
+
+/**
+ * Ensure the assistants table has vector_store_id (existing installs).
+ */
+function chatbot_chatgpt_ensure_assistants_vector_store_column() {
+
+    global $wpdb;
+
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) {
+        return;
+    }
+
+    $columns = $wpdb->get_col( "SHOW COLUMNS FROM `{$table_name}`" );
+    if ( is_array( $columns ) && in_array( 'vector_store_id', $columns, true ) ) {
+        return;
+    }
+
+    $wpdb->query( "ALTER TABLE `{$table_name}` ADD `vector_store_id` VARCHAR(255) NOT NULL DEFAULT ''" );
+
+}
+add_action( 'admin_init', 'chatbot_chatgpt_ensure_assistants_vector_store_column' );
+
+/**
+ * Parse vs_ IDs from a table field (comma or space separated).
+ *
+ * @param string $raw
+ * @return string[]
+ */
+function chatbot_chatgpt_parse_vector_store_ids( $raw ) {
+
+    $ids = array();
+    $parts = preg_split( '/[\s,]+/', (string) $raw );
+    if ( ! is_array( $parts ) ) {
+        return array();
+    }
+
+    foreach ( $parts as $part ) {
+        $part = trim( $part );
+        if ( $part === '' ) {
+            continue;
+        }
+        if ( preg_match( '/^vs_[A-Za-z0-9]+$/', $part ) ) {
+            $ids[] = $part;
+        }
+    }
+
+    return array_values( array_unique( $ids ) );
+
+}
+
 // Keep the chatbot_chatgpt_number_of_shortcodes option updated - Ver 2.0.6
 function update_chatbot_chatgpt_number_of_shortcodes() {
 
@@ -180,6 +265,7 @@ function display_chatbot_chatgpt_assistants_table() {
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    chatbot_chatgpt_ensure_assistants_vector_store_column();
     $assistants = $wpdb->get_results("SELECT * FROM $table_name");
 
     // Update the number of shortcodes - Ver 2.0.6
@@ -210,6 +296,15 @@ function display_chatbot_chatgpt_assistants_table() {
     echo '<h1>Manage Assistants</h1>';
     echo '<p>Click the <code>Update</code> button to save changes to an Assistant, or the <code>Delete</code> button to remove an Assistant.</p>';
     echo '<p>Click the <code>Add New Assistant</code> button to create a new Assistant.</p>';
+    echo '<p>' . wp_kses(
+        sprintf(
+            /* translators: 1: Vector Store ID label, 2: vs_ ID prefix example */
+            __( 'Greetings, placeholder, and Additional Instructions are unchanged. Scroll right if needed. %1$s is an extra column at the end (%2$s) for large PDFs — it does not replace Additional Instructions.', 'chatbot-chatgpt' ),
+            '<code>' . esc_html__( 'Vector Store ID', 'chatbot-chatgpt' ) . '</code>',
+            '<code>vs_…</code>'
+        ),
+        array( 'code' => array() )
+    ) . '</p>';
     echo '<table>';
     echo '<thead>';
     echo '<tr>';
@@ -227,6 +322,7 @@ function display_chatbot_chatgpt_assistants_table() {
     echo '<th>Subsequent Greeting</th>';
     echo '<th>Placeholder Prompt</th>';
     echo '<th>Additional Instructions</th>';
+    echo '<th>' . esc_html__( 'Vector Store ID', 'chatbot-chatgpt' ) . '</th>';
     echo '</tr>';
     echo '</thead>';
     echo '<tbody>';
@@ -249,53 +345,55 @@ function display_chatbot_chatgpt_assistants_table() {
         echo '<tr>';
         echo '<td>';  // Actions column for each assistant row
         // Update button to trigger the updateAssistant function
-        echo '<button type="button" class="button button-primary button-small" onclick="updateAssistant(' . $assistant->id . ')">Update</button>&nbsp';
+        echo '<button type="button" class="button button-primary button-small" onclick="updateChatgptAssistant(' . absint( $assistant->id ) . ')">Update</button>&nbsp';
         // Delete button to trigger the deleteAssistant function
-        echo '<button type="button" class="button button-primary button-small" onclick="deleteAssistant(' . $assistant->id . ')">Delete</button>';
+        echo '<button type="button" class="button button-primary button-small" onclick="deleteChatgptAssistant(' . absint( $assistant->id ) . ')">Delete</button>';
         echo '</td>';
-        echo '<td onclick="copyToClipboard(\'[chatbot-' . $assistant->id . ']\')"><b>' . '&#91;chatbot-' . $assistant->id . '&#93;' . '</b></td>';
-        echo '<td><input type="text" name="assistant_id_' . $assistant->id . '" value="' . $assistant->assistant_id . '"></td>';
-        echo '<td><input type="text" name="common_name_' . $assistant->id . '" value="' . $assistant->common_name . '"></td>';
-        echo '<td><select name="style_' . $assistant->id . '">';
-        echo '<option value="embedded"' . ($assistant->style == 'embedded' ? ' selected' : '') . '>Embedded</option>';
-        echo '<option value="floating"' . ($assistant->style == 'floating' ? ' selected' : '') . '>Floating</option>';
+        echo '<td onclick="copyToClipboard(\'[chatbot-' . esc_js( $assistant->id ) . ']\')"><b>&#91;chatbot-' . esc_html( $assistant->id ) . '&#93;</b></td>';
+        echo '<td><input type="text" name="assistant_id_' . absint( $assistant->id ) . '" value="' . esc_attr( $assistant->assistant_id ) . '"></td>';
+        echo '<td><input type="text" name="common_name_' . absint( $assistant->id ) . '" value="' . esc_attr( $assistant->common_name ) . '"></td>';
+        echo '<td><select name="style_' . absint( $assistant->id ) . '">';
+        echo '<option value="embedded"' . selected( $assistant->style, 'embedded', false ) . '>Embedded</option>';
+        echo '<option value="floating"' . selected( $assistant->style, 'floating', false ) . '>Floating</option>';
         echo '</select></td>';
-        echo '<td><select name="audience_' . $assistant->id . '">';
-        echo '<option value="all"' . ($assistant->audience == 'all' ? ' selected' : '') . '>All</option>';
-        echo '<option value="visitors"' . ($assistant->audience == 'visitors' ? ' selected' : '') . '>Visitors</option>';
-        echo '<option value="logged-in"' . ($assistant->audience == 'logged-in' ? ' selected' : '') . '>Logged-in</option>';
+        echo '<td><select name="audience_' . absint( $assistant->id ) . '">';
+        echo '<option value="all"' . selected( $assistant->audience, 'all', false ) . '>All</option>';
+        echo '<option value="visitors"' . selected( $assistant->audience, 'visitors', false ) . '>Visitors</option>';
+        echo '<option value="logged-in"' . selected( $assistant->audience, 'logged-in', false ) . '>Logged-in</option>';
         echo '</select></td>';
-        echo '<td><select name="voice_' . $assistant->id . '">';
-        echo '<option value="alloy"' . ($assistant->voice == 'alloy' ? ' selected' : '') . '>Alloy</option>';
-        echo '<option value="echo"' . ($assistant->voice == 'echo' ? ' selected' : '') . '>Echo</option>';
-        echo '<option value="fable"' . ($assistant->voice == 'fable' ? ' selected' : '') . '>Fable</option>';
-        echo '<option value="onyx"' . ($assistant->voice == 'onyx' ? ' selected' : '') . '>Onyx</option>';
-        echo '<option value="nova"' . ($assistant->voice == 'nova' ? ' selected' : '') . '>Nova</option>';
-        echo '<option value="shimmer"' . ($assistant->voice == 'shimmer' ? ' selected' : '') . '>Shimmer</option>';
-        echo '<option value="none"' . ($assistant->voice == 'none' ? ' selected' : '') . '>None</option>';
+        echo '<td><select name="voice_' . absint( $assistant->id ) . '">';
+        echo '<option value="alloy"' . selected( $assistant->voice, 'alloy', false ) . '>Alloy</option>';
+        echo '<option value="echo"' . selected( $assistant->voice, 'echo', false ) . '>Echo</option>';
+        echo '<option value="fable"' . selected( $assistant->voice, 'fable', false ) . '>Fable</option>';
+        echo '<option value="onyx"' . selected( $assistant->voice, 'onyx', false ) . '>Onyx</option>';
+        echo '<option value="nova"' . selected( $assistant->voice, 'nova', false ) . '>Nova</option>';
+        echo '<option value="shimmer"' . selected( $assistant->voice, 'shimmer', false ) . '>Shimmer</option>';
+        echo '<option value="none"' . selected( $assistant->voice, 'none', false ) . '>None</option>';
         echo '</select></td>';
-        echo '<td><select name="allow_file_uploads_' . $assistant->id . '">';
-        echo '<option value="Yes"' . ($assistant->allow_file_uploads == 'Yes' ? ' selected' : '') . '>Yes</option>';
-        echo '<option value="No"' . ($assistant->allow_file_uploads == 'No' ? ' selected' : '') . '>No</option>';
+        echo '<td><select name="allow_file_uploads_' . absint( $assistant->id ) . '">';
+        echo '<option value="Yes"' . selected( $assistant->allow_file_uploads, 'Yes', false ) . '>Yes</option>';
+        echo '<option value="No"' . selected( $assistant->allow_file_uploads, 'No', false ) . '>No</option>';
         echo '</select></td>';
-        echo '<td><select name="allow_transcript_downloads_' . $assistant->id . '">';
-        echo '<option value="Yes"' . ($assistant->allow_transcript_downloads == 'Yes' ? ' selected' : '') . '>Yes</option>';
-        echo '<option value="No"' . ($assistant->allow_transcript_downloads == 'No' ? ' selected' : '') . '>No</option>';
+        echo '<td><select name="allow_transcript_downloads_' . absint( $assistant->id ) . '">';
+        echo '<option value="Yes"' . selected( $assistant->allow_transcript_downloads, 'Yes', false ) . '>Yes</option>';
+        echo '<option value="No"' . selected( $assistant->allow_transcript_downloads, 'No', false ) . '>No</option>';
         echo '</select></td>';
-        echo '<td><select name="show_assistant_name_' . $assistant->id . '">';
-        echo '<option value="Yes"' . ($assistant->show_assistant_name == 'Yes' ? ' selected' : '') . '>Yes</option>';
-        echo '<option value="No"' . ($assistant->show_assistant_name == 'No' ? ' selected' : '') . '>No</option>';
+        echo '<td><select name="show_assistant_name_' . absint( $assistant->id ) . '">';
+        echo '<option value="Yes"' . selected( $assistant->show_assistant_name, 'Yes', false ) . '>Yes</option>';
+        echo '<option value="No"' . selected( $assistant->show_assistant_name, 'No', false ) . '>No</option>';
         echo '</select></td>';
-        echo '<td><textarea name="initial_greeting_' . $assistant->id . '">' . $assistant->initial_greeting . '</textarea></td>';
-        echo '<td><textarea name="subsequent_greeting_' . $assistant->id . '">' . $assistant->subsequent_greeting . '</textarea></td>';
-        echo '<td><textarea name="placeholder_prompt_' . $assistant->id . '">' . $assistant->placeholder_prompt . '</textarea></td>';
-        echo '<td><textarea name="additional_instructions_' . $assistant->id . '">' . $assistant->additional_instructions . '</textarea></td>';
+        echo '<td><textarea name="initial_greeting_' . absint( $assistant->id ) . '">' . esc_textarea( $assistant->initial_greeting ) . '</textarea></td>';
+        echo '<td><textarea name="subsequent_greeting_' . absint( $assistant->id ) . '">' . esc_textarea( $assistant->subsequent_greeting ) . '</textarea></td>';
+        echo '<td><textarea name="placeholder_prompt_' . absint( $assistant->id ) . '">' . esc_textarea( $assistant->placeholder_prompt ) . '</textarea></td>';
+        echo '<td><textarea name="additional_instructions_' . absint( $assistant->id ) . '">' . esc_textarea( $assistant->additional_instructions ) . '</textarea></td>';
+        $vector_store_id = isset( $assistant->vector_store_id ) ? $assistant->vector_store_id : '';
+        echo '<td><input type="text" name="vector_store_id_' . absint( $assistant->id ) . '" value="' . esc_attr( $vector_store_id ) . '" placeholder="vs_xxxxxxxx"></td>';
         echo '</tr>';
     }
 
     // Row for adding a new assistant
     echo '<tr>';
-    echo '<td><button type="button" class="button button-primary button-small" onclick="addNewAssistant()">Add New Assistant</button></td>';  // Actions column for adding new assistant
+    echo '<td><button type="button" class="button button-primary button-small" onclick="addNewChatgptAssistant()">Add New Assistant</button></td>';  // Actions column for adding new assistant
     echo '<td>New</td>';
     echo '<td><input type="text" name="new_assistant_id" placeholder="Please provide the GPT Assistant Id."></td>';
     echo '<td><input type="text" name="new_common_name" placeholder="Common Name"></td>';
@@ -333,6 +431,7 @@ function display_chatbot_chatgpt_assistants_table() {
     echo '<td><textarea name="new_subsequent_greeting" placeholder="Hello again! How can I help you?"></textarea></td>';
     echo '<td><textarea name="new_placeholder_prompt" placeholder="Enter your question ..."></textarea></td>';
     echo '<td><textarea name="new_additional_instructions" placeholder="Added instructions to assistant if needed ...."></textarea></td>';
+    echo '<td><input type="text" name="new_vector_store_id" placeholder="vs_xxxxxxxx"></td>';
     echo '</tr>';
     echo '</tbody>';
     echo '</table>';
@@ -343,9 +442,17 @@ function display_chatbot_chatgpt_assistants_table() {
 // Scripts for the chatbot assistants table
 function chatbot_chatgpt_assistants_scripts() {
 
-    if ( current_user_can('manage_options') ) {
+    if ( ! current_user_can('manage_options') ) {
+        return;
+    }
 
-        $nonce = wp_create_nonce('chatbot_nonce_action');
+    $page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+    $tab  = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : '';
+    if ( $page !== 'chatbot-chatgpt' || $tab !== 'gpt_assistants' ) {
+        return;
+    }
+
+    $nonce = wp_create_nonce('chatbot_nonce_action');
 
         ?>
         <script type="text/javascript">
@@ -353,11 +460,13 @@ function chatbot_chatgpt_assistants_scripts() {
             var chatbot_nonce = "<?php echo esc_js($nonce); ?>";
 
             // Function to update an assistant's details
-            function updateAssistant(id) {
+            function updateChatgptAssistant(id) {
+                var vectorStoreField = document.getElementsByName('vector_store_id_' + id)[0];
                 var data = {
                     action: 'update_assistant',
                     id: id,
                     assistant_id: document.getElementsByName('assistant_id_' + id)[0].value,
+                    vector_store_id: vectorStoreField ? vectorStoreField.value : '',
                     common_name: document.getElementsByName('common_name_' + id)[0].value,
                     style: document.getElementsByName('style_' + id)[0].value,
                     audience: document.getElementsByName('audience_' + id)[0].value,
@@ -382,7 +491,7 @@ function chatbot_chatgpt_assistants_scripts() {
             }
 
             // Function to delete an assistant
-            function deleteAssistant(id) {
+            function deleteChatgptAssistant(id) {
                 var data = {
                     action: 'delete_assistant',
                     id: id
@@ -399,10 +508,12 @@ function chatbot_chatgpt_assistants_scripts() {
             }
 
             // Function to add a new assistant
-            function addNewAssistant() {
+            function addNewChatgptAssistant() {
+                var newVectorStoreField = document.getElementsByName('new_vector_store_id')[0];
                 var data = {
                     action: 'add_new_assistant',
                     assistant_id: document.getElementsByName('new_assistant_id')[0].value,
+                    vector_store_id: newVectorStoreField ? newVectorStoreField.value : '',
                     common_name: document.getElementsByName('new_common_name')[0].value,
                     style: document.getElementsByName('new_style')[0].value,
                     audience: document.getElementsByName('new_audience')[0].value,
@@ -429,8 +540,6 @@ function chatbot_chatgpt_assistants_scripts() {
         </script>
         <?php
 
-    }
-
 }
 add_action('admin_footer', 'chatbot_chatgpt_assistants_scripts');
 
@@ -448,8 +557,11 @@ function update_assistant() {
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
 
+    chatbot_chatgpt_ensure_assistants_vector_store_column();
+
     $id = intval($_POST['id']);
     $assistant_id = sanitize_text_field($_POST['assistant_id']);
+    $vector_store_id = isset( $_POST['vector_store_id'] ) ? sanitize_text_field( wp_unslash( $_POST['vector_store_id'] ) ) : '';
     $common_name = sanitize_text_field($_POST['common_name']);
     $style = sanitize_text_field($_POST['style']);
     $audience = sanitize_text_field($_POST['audience']);
@@ -466,6 +578,7 @@ function update_assistant() {
         $table_name,
         array(
             'assistant_id' => $assistant_id,
+            'vector_store_id' => $vector_store_id,
             'common_name' => $common_name,
             'style' => $style,
             'audience' => $audience,
@@ -541,7 +654,10 @@ function add_new_assistant() {
         create_chatbot_chatgpt_assistants_table();
     }
 
+    chatbot_chatgpt_ensure_assistants_vector_store_column();
+
     $assistant_id = sanitize_text_field($_POST['assistant_id']);
+    $vector_store_id = isset( $_POST['vector_store_id'] ) ? sanitize_text_field( wp_unslash( $_POST['vector_store_id'] ) ) : '';
     $common_name = sanitize_text_field($_POST['common_name']);
     $style = sanitize_text_field($_POST['style']);
     $audience = sanitize_text_field($_POST['audience']);
@@ -558,6 +674,7 @@ function add_new_assistant() {
         $table_name,
         array(
             'assistant_id' => $assistant_id,
+            'vector_store_id' => $vector_store_id,
             'common_name' => $common_name,
             'style' => $style,
             'audience' => $audience,

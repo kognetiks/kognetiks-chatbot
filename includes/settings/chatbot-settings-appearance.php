@@ -18,21 +18,119 @@ if ( ! defined( 'WPINC' ) ) {
 
 function chatbot_chatgpt_appearance_settings_init() {
     
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_background_color');
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_header_background_color');
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_bubble_background_color');
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_text_color');
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_header_text_color');
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_user_text_background_color');
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_bot_text_background_color');
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_greeting_text_color');
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_width_wide');
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_width_narrow');
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_image_width_setting');
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_width_setting');
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_reset');
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_user_css_setting');
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_enable_mathjax');
+    register_setting(
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_background_color',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_header_background_color',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_bubble_background_color',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_text_color',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_header_text_color',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_user_text_background_color',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_bot_text_background_color',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_greeting_text_color',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_width_wide',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_width_narrow',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_image_width_setting',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_width_setting',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_reset',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'No',
+        )
+    );
+    register_setting(
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_user_css_setting',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
 
     // Enable MathJax
     register_setting(
@@ -40,7 +138,8 @@ function chatbot_chatgpt_appearance_settings_init() {
         'chatbot_chatgpt_enable_mathjax',
         array(
             'type'              => 'string',
-            'sanitize_callback' => 'sanitize_text_field',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_yes_no',
+            'default'           => 'Yes',
         )
     );
 
@@ -461,10 +560,10 @@ function chatbot_chatgpt_appearance_inject_custom_css_settings() {
     ?>
     <style>
         <?php
-        echo "\t\t" . $chatbot_chatgpt_appearance_user_css_setting . "\n"; // Put user CSS settings at the top
+        echo "\t\t" . wp_kses( $chatbot_chatgpt_appearance_user_css_setting, array() ) . "\n"; // Put user CSS settings at the top
         // Loop through each CSS rule and output it with indentation
         foreach ($GLOBALS['chatbotChatGPTAppearanceCSS'] as $cssRule) {
-            echo "\t\t" . $cssRule . "\n"; // Add spaces before each rule for indentation
+            echo "\t\t" . wp_kses( $cssRule, array() ) . "\n"; // Add spaces before each rule for indentation
         }
         ?>
     </style>
@@ -507,8 +606,8 @@ function chatbot_chatgpt_appearance_icons_overview_section_callback(){
 function chatbot_chatgpt_appearance_open_icon_callback() {
     $chatbot_chatgpt_appearance_open_icon = esc_attr(get_option('chatbot_chatgpt_appearance_open_icon', ''));
     ?>
-    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('open_icon'); ?>" alt="Open Icon" style="width: 20px; height: 20px;" />
-    <input type="text" id="chatbot_chatgpt_appearance_open_icon" name="chatbot_chatgpt_appearance_open_icon" value="<?php echo $chatbot_chatgpt_appearance_open_icon; ?>" size="50" />
+    <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('open_icon') ); ?>" alt="Open Icon" style="width: 20px; height: 20px;" />
+    <input type="text" id="chatbot_chatgpt_appearance_open_icon" name="chatbot_chatgpt_appearance_open_icon" value="<?php echo esc_attr( $chatbot_chatgpt_appearance_open_icon ); ?>" size="50" />
     <?php
 }
 
@@ -516,8 +615,8 @@ function chatbot_chatgpt_appearance_open_icon_callback() {
 function chatbot_chatgpt_appearance_collapse_icon_callback() {
     $chatbot_chatgpt_appearance_collapse_icon = esc_attr(get_option('chatbot_chatgpt_appearance_collapse_icon', ''));
     ?>
-    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('collapse_icon'); ?>" alt="Collapse Icon" style="width: 20px; height: 20px;" />
-    <input type="text" id="chatbot_chatgpt_appearance_collapse_icon" name="chatbot_chatgpt_appearance_collapse_icon" value="<?php echo $chatbot_chatgpt_appearance_collapse_icon; ?>" size="50" />
+    <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('collapse_icon') ); ?>" alt="Collapse Icon" style="width: 20px; height: 20px;" />
+    <input type="text" id="chatbot_chatgpt_appearance_collapse_icon" name="chatbot_chatgpt_appearance_collapse_icon" value="<?php echo esc_attr( $chatbot_chatgpt_appearance_collapse_icon ); ?>" size="50" />
     <?php
 }
 
@@ -525,8 +624,8 @@ function chatbot_chatgpt_appearance_collapse_icon_callback() {
 function chatbot_chatgpt_appearance_erase_icon_callback() {
     $chatbot_chatgpt_appearance_erase_icon = esc_attr(get_option('chatbot_chatgpt_appearance_erase_icon', ''));
     ?>
-    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('erase_icon'); ?>" alt="Erase Icon" style="width: 20px; height: 20px;" />
-    <input type="text" id="chatbot_chatgpt_appearance_erase_icon" name="chatbot_chatgpt_appearance_erase_icon" value="<?php echo $chatbot_chatgpt_appearance_erase_icon; ?>" size="50" />
+    <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('erase_icon') ); ?>" alt="Erase Icon" style="width: 20px; height: 20px;" />
+    <input type="text" id="chatbot_chatgpt_appearance_erase_icon" name="chatbot_chatgpt_appearance_erase_icon" value="<?php echo esc_attr( $chatbot_chatgpt_appearance_erase_icon ); ?>" size="50" />
     <?php
 }
 
@@ -534,8 +633,8 @@ function chatbot_chatgpt_appearance_erase_icon_callback() {
 function chatbot_chatgpt_appearance_mic_enabled_icon_callback() {
     $chatbot_chatgpt_appearance_mic_enabled_icon = esc_attr(get_option('chatbot_chatgpt_appearance_mic_enabled_icon', ''));
     ?>
-    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('mic_enabled_icon'); ?>"  alt="Mic Enabled Icon" style="width: 20px; height: 20px;" />
-    <input type="text" id="chatbot_chatgpt_mic_appearance_enabled_icon" name="chatbot_chatgpt_appearance_mic_enabled_icon" value="<?php echo $chatbot_chatgpt_appearance_mic_enabled_icon; ?>" size="50" />
+    <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('mic_enabled_icon') ); ?>"  alt="Mic Enabled Icon" style="width: 20px; height: 20px;" />
+    <input type="text" id="chatbot_chatgpt_mic_appearance_enabled_icon" name="chatbot_chatgpt_appearance_mic_enabled_icon" value="<?php echo esc_attr( $chatbot_chatgpt_appearance_mic_enabled_icon ); ?>" size="50" />
     <?php
 }
 
@@ -543,8 +642,8 @@ function chatbot_chatgpt_appearance_mic_enabled_icon_callback() {
 function chatbot_chatgpt_appearance_mic_disabled_icon_callback() {
     $chatbot_chatgpt_appearance_mic_disabled_icon = esc_attr(get_option('chatbot_chatgpt_appearance_mic_disabled_icon', ''));
     ?>
-    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('mic_disabled_icon'); ?>" lt="Mic Disabled Icon" style="width: 20px; height: 20px;" />
-    <input type="text" id="chatbot_chatgpt_appearance_mic_disabled_icon" name="chatbot_chatgpt_appearance_mic_disabled_icon" value="<?php echo $chatbot_chatgpt_appearance_mic_disabled_icon; ?>" size="50" />
+    <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('mic_disabled_icon') ); ?>" alt="Mic Disabled Icon" style="width: 20px; height: 20px;" />
+    <input type="text" id="chatbot_chatgpt_appearance_mic_disabled_icon" name="chatbot_chatgpt_appearance_mic_disabled_icon" value="<?php echo esc_attr( $chatbot_chatgpt_appearance_mic_disabled_icon ); ?>" size="50" />
     <?php
 }
 
@@ -552,8 +651,8 @@ function chatbot_chatgpt_appearance_mic_disabled_icon_callback() {
 function chatbot_chatgpt_appearance_send_icon_callback() {
     $chatbot_chatgpt_appearance_send_icon = esc_attr(get_option('chatbot_chatgpt_appearance_send_icon', ''));
     ?>
-    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('send_icon'); ?>" alt="Send Icon" style="width: 20px; height: 20px;" />
-    <input type="text" id="chatbot_chatgpt_appearance_send_icon" name="chatbot_chatgpt_appearance_send_icon" value="<?php echo $chatbot_chatgpt_appearance_send_icon; ?>" size="50" />
+    <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('send_icon') ); ?>" alt="Send Icon" style="width: 20px; height: 20px;" />
+    <input type="text" id="chatbot_chatgpt_appearance_send_icon" name="chatbot_chatgpt_appearance_send_icon" value="<?php echo esc_attr( $chatbot_chatgpt_appearance_send_icon ); ?>" size="50" />
     <?php
 }
 
@@ -561,8 +660,8 @@ function chatbot_chatgpt_appearance_send_icon_callback() {
 function chatbot_chatgpt_appearance_attach_icon_callback() {
     $chatbot_chatgpt_appearance_attach_icon = esc_attr(get_option('chatbot_chatgpt_appearance_attach_icon', ''));
     ?>
-    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Attach Icon" style="width: 20px; height: 20px;" />
-    <input type="text" id="chatbot_chatgpt_appearance_attach_icon" name="chatbot_chatgpt_appearance_attach_icon" value="<?php echo $chatbot_chatgpt_appearance_attach_icon; ?>" size="50" />
+    <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('attach_icon') ); ?>" alt="Attach Icon" style="width: 20px; height: 20px;" />
+    <input type="text" id="chatbot_chatgpt_appearance_attach_icon" name="chatbot_chatgpt_appearance_attach_icon" value="<?php echo esc_attr( $chatbot_chatgpt_appearance_attach_icon ); ?>" size="50" />
     <?php
 }
 
@@ -570,8 +669,8 @@ function chatbot_chatgpt_appearance_attach_icon_callback() {
 function chatbot_chatgpt_appearance_read_aloud_icon_callback() {
     $chatbot_chatgpt_appearance_read_aloud_icon = esc_attr(get_option('chatbot_chatgpt_appearance_read_aloud_icon', ''));
     ?>
-    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('read_aloud_icon'); ?>" alt="Read Aloud Icon" style="width: 20px; height: 20px;" />
-    <input type="text" id="chatbot_chatgpt_appearance_read_aloud_icon" name="chatbot_chatgpt_appearance_read_aloud_icon" value="<?php echo $chatbot_chatgpt_appearance_read_aloud_icon; ?>" size="50" />
+    <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('read_aloud_icon') ); ?>" alt="Read Aloud Icon" style="width: 20px; height: 20px;" />
+    <input type="text" id="chatbot_chatgpt_appearance_read_aloud_icon" name="chatbot_chatgpt_appearance_read_aloud_icon" value="<?php echo esc_attr( $chatbot_chatgpt_appearance_read_aloud_icon ); ?>" size="50" />
     <?php
 }
 
@@ -579,8 +678,8 @@ function chatbot_chatgpt_appearance_read_aloud_icon_callback() {
 function chatbot_chatgpt_appearance_download_icon_callback() {
     $chatbot_chatgpt_appearance_download_icon = esc_attr(get_option('chatbot_chatgpt_appearance_download_icon', ''));
     ?>
-    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('download_icon'); ?>" alt="Download Icon" style="width: 20px; height: 20px;" />
-    <input type="text" id="chatbot_chatgpt_appearance_download_icon" name="chatbot_chatgpt_appearance_download_icon" value="<?php echo $chatbot_chatgpt_appearance_download_icon; ?>" size="50" />
+    <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('download_icon') ); ?>" alt="Download Icon" style="width: 20px; height: 20px;" />
+    <input type="text" id="chatbot_chatgpt_appearance_download_icon" name="chatbot_chatgpt_appearance_download_icon" value="<?php echo esc_attr( $chatbot_chatgpt_appearance_download_icon ); ?>" size="50" />
     <?php
 }
 

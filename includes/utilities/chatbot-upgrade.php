@@ -24,6 +24,12 @@ function chatbot_chatgpt_activate() {
     // Logic to run during activation
     chatbot_chatgpt_upgrade();
 
+    if ( function_exists( 'chatbot_chatgpt_register_remote_widget_rewrites' ) ) {
+        chatbot_chatgpt_register_remote_widget_rewrites();
+        flush_rewrite_rules( false );
+        update_option( 'chatbot_chatgpt_widget_rewrite_version', '1' );
+    }
+
     // Handle unexpect output during activation - Ver 2.0.6 - 2024 07 10
     $unexpected_output = ob_get_clean();
     if (!empty($unexpected_output)) {
@@ -46,8 +52,10 @@ function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
     if ($options['action'] == 'update' && $options['type'] == 'plugin') {
         if (isset($options['plugins']) && is_array($options['plugins'])) {
             foreach($options['plugins'] as $plugin) {
-                if (plugin_basename(__FILE__) === $plugin) {
-                    // Logic to run during upgrade
+                $this_plugin = defined( 'CHATBOT_CHATGPT_PLUGIN_FILE' )
+                    ? plugin_basename( CHATBOT_CHATGPT_PLUGIN_FILE )
+                    : 'chatbot-chatgpt/chatbot-chatgpt.php';
+                if ( $this_plugin === $plugin ) {
                     chatbot_chatgpt_upgrade();
                     break;
                 }

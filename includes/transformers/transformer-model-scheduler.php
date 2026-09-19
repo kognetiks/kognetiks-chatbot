@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Transformer Model - Scheduler - Ver 2.2.1
+ * Kognetiks Chatbot - Transformer Model - Scheduler - Ver 2.2.1
  *
  * This is the file that schedules the building of the Transformer Model.
  * Scheduling can be set to now, daily, weekly, etc.
@@ -81,7 +81,7 @@ function transformer_model_sentential_context_reset_cache() {
         $files = glob($cacheDir . '*.php'); // Get all PHP files in the directory
         foreach ($files as $file) {
             if (is_file($file)) {
-                unlink($file); // Delete the file
+                wp_delete_file($file); // Delete the file
             }
         }
         // Optionally, delete the folder itself if required
@@ -159,8 +159,8 @@ function transformer_model_sentential_context_cache_embeddings($corpus, $windowS
     $cacheDir = __DIR__ . '/sentential_embeddings_cache/';
 
     // Ensure the cache directory exists
-    if (!is_dir($cacheDir)) {
-        mkdir($cacheDir, 0755, true);
+    if (!create_directory_and_index_file($cacheDir)) {
+        return;
     }
 
     $cacheUpdates = []; // To group updates by file
@@ -168,7 +168,7 @@ function transformer_model_sentential_context_cache_embeddings($corpus, $windowS
     // Process the content to build embeddings
     foreach ($corpus as $row) {
 
-        $postContent = strip_tags(html_entity_decode($row['post_content'], ENT_QUOTES | ENT_HTML5));
+        $postContent = wp_strip_all_tags(strip_shortcodes(html_entity_decode($row['post_content'], ENT_QUOTES | ENT_HTML5)));
         $postEmbeddings = transformer_model_sentential_context_build_cooccurrence_matrix($postContent, $windowSize);
 
         // Group embeddings by their cache file

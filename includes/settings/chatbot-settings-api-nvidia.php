@@ -198,12 +198,51 @@ function chatbot_nvidia_api_settings_init() {
     );
 
     // API/NVIDIA settings tab - Ver 2.1.8
-    register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_api_enabled');
+    register_setting(
+        'chatbot_nvidia_api_model',
+        'chatbot_nvidia_api_enabled',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Yes',
+        )
+    );
     register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_api_key', 'chatbot_chatgpt_sanitize_api_key');
-    register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_max_tokens_setting'); // Max Tokens setting options
-    register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_conversation_context'); // Conversation Context
-    register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_temperature'); // Temperature
-    register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_top_p'); // Top P
+    register_setting(
+        'chatbot_nvidia_api_model',
+        'chatbot_nvidia_max_tokens_setting',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 1000,
+        )
+    );
+    register_setting(
+        'chatbot_nvidia_api_model',
+        'chatbot_nvidia_conversation_context',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_nvidia_api_model',
+        'chatbot_nvidia_temperature',
+        array(
+            'type'              => 'number',
+            'sanitize_callback' => 'floatval',
+            'default'           => 0.5,
+        )
+    );
+    register_setting(
+        'chatbot_nvidia_api_model',
+        'chatbot_nvidia_top_p',
+        array(
+            'type'              => 'number',
+            'sanitize_callback' => 'floatval',
+            'default'           => 1.00,
+        )
+    );
 
     add_settings_section(
         'chatbot_nvidia_api_model_general_section',
@@ -289,8 +328,23 @@ function chatbot_nvidia_api_settings_init() {
     );
 
     // Advanced Model Settings - Ver 1.9.5
-    register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_base_url'); // Ver 1.8.1
-    register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_timeout_setting'); // Ver 1.8.8
+    register_setting(
+        'chatbot_nvidia_api_model',
+        'chatbot_nvidia_base_url',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+        )
+    );
+    register_setting(
+        'chatbot_nvidia_api_model',
+        'chatbot_nvidia_timeout_setting',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 240,
+        )
+    );
 
     add_settings_section(
         'chatbot_nvidia_api_model_advanced_section',

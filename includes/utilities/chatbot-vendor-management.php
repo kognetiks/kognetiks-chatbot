@@ -208,8 +208,6 @@ add_action( 'admin_head', function () {
         .fs-trial-notice,
         .fs-promo-notice,
         .fs-trial-promotion,
-        #fs_connect, 
-        #fs_connect_wrapper,
         .fs-plugin-tab-upgrade,
         .fs-upgrade,
         .fs-trial

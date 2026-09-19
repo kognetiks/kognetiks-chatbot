@@ -208,12 +208,51 @@ function chatbot_mistral_api_settings_init() {
     );
 
     // API/Mistral settings tab - Ver 2.1.8
-    register_setting('chatbot_mistral_api_model', 'chatbot_mistral_api_enabled');
+    register_setting(
+        'chatbot_mistral_api_model',
+        'chatbot_mistral_api_enabled',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Yes',
+        )
+    );
     register_setting('chatbot_mistral_api_model', 'chatbot_mistral_api_key', 'chatbot_chatgpt_sanitize_api_key');
-    register_setting('chatbot_mistral_api_model', 'chatbot_mistral_max_tokens_setting'); // Max Tokens setting options
-    register_setting('chatbot_mistral_api_model', 'chatbot_mistral_conversation_context'); // Conversation Context
-    register_setting('chatbot_mistral_api_model', 'chatbot_mistral_temperature'); // Temperature
-    register_setting('chatbot_mistral_api_model', 'chatbot_mistral_top_p'); // Top P
+    register_setting(
+        'chatbot_mistral_api_model',
+        'chatbot_mistral_max_tokens_setting',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 1000,
+        )
+    );
+    register_setting(
+        'chatbot_mistral_api_model',
+        'chatbot_mistral_conversation_context',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        )
+    );
+    register_setting(
+        'chatbot_mistral_api_model',
+        'chatbot_mistral_temperature',
+        array(
+            'type'              => 'number',
+            'sanitize_callback' => 'floatval',
+            'default'           => 0.5,
+        )
+    );
+    register_setting(
+        'chatbot_mistral_api_model',
+        'chatbot_mistral_top_p',
+        array(
+            'type'              => 'number',
+            'sanitize_callback' => 'floatval',
+            'default'           => 1.00,
+        )
+    );
 
     add_settings_section(
         'chatbot_mistral_api_model_general_section',
@@ -300,8 +339,23 @@ function chatbot_mistral_api_settings_init() {
     );
 
     // Advanced Model Settings - Ver 1.9.5
-    register_setting('chatbot_mistral_api_model', 'chatbot_mistral_base_url');
-    register_setting('chatbot_mistral_api_model', 'chatbot_mistral_timeout_setting');
+    register_setting(
+        'chatbot_mistral_api_model',
+        'chatbot_mistral_base_url',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+        )
+    );
+    register_setting(
+        'chatbot_mistral_api_model',
+        'chatbot_mistral_timeout_setting',
+        array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 240,
+        )
+    );
 
     add_settings_section(
         'chatbot_mistral_api_model_advanced_section',

@@ -21,6 +21,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @param string|null $request_ip The IP address of the request
  * @return bool Whether the logging was successful
  */
+if ( ! function_exists( 'chatbot_widget_logging' ) ) {
 function chatbot_widget_logging( $message, $referer = null, $request_ip = null ) {
     try {
         // Plugin directory path
@@ -39,7 +40,7 @@ function chatbot_widget_logging( $message, $referer = null, $request_ip = null )
             return true;
         }
 
-        $date_time = (new DateTime())->format('d-M-Y H:i:s \U\T\C');
+        $date_time = gmdate('d-M-Y H:i:s') . ' UTC';
         $chatbot_widget_logs_dir = $chatbot_plugin_dir_path . '/widget-logs/';
 
         // Ensure the directory and index file exist
@@ -49,7 +50,7 @@ function chatbot_widget_logging( $message, $referer = null, $request_ip = null )
         }
 
         // Get the current date to create a daily log file
-        $current_date = date('Y-m-d');
+        $current_date = gmdate('Y-m-d');
         $log_file = $chatbot_widget_logs_dir . 'chatbot-widget-access-' . $current_date . '.log';
 
         // Sanitize inputs
@@ -71,12 +72,14 @@ function chatbot_widget_logging( $message, $referer = null, $request_ip = null )
         return false;
     }
 }
+}
 
 /**
  * Get the real IP address of the user with proper validation
  *
  * @return string The validated IP address
  */
+if ( ! function_exists( 'getUserIP' ) ) {
 function getUserIP() {
     $ip = '';
 
@@ -106,4 +109,5 @@ function getUserIP() {
     }
 
     return $ip;
+}
 }

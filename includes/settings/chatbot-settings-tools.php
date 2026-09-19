@@ -18,7 +18,14 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_tools_settings_init() {
 
     // Register tools settings
-    register_setting('chatbot_chatgpt_tools', 'chatbot_chatgpt_options_exporter_extension');
+    register_setting(
+        'chatbot_chatgpt_tools',
+        'chatbot_chatgpt_options_exporter_extension',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
 
     // Tools Overview
     add_settings_section(

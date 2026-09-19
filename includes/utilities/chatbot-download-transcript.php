@@ -47,7 +47,7 @@ function chatbot_chatgpt_download_transcript() {
     }
 
     // Create the filename
-    $transcriptFileName = 'transcript_' . generate_random_string() . '_' . date('Y-m-d_H-i-s') . '.txt';
+    $transcriptFileName = 'transcript_' . generate_random_string() . '_' . gmdate('Y-m-d_H-i-s') . '.txt';
     $transcriptFile = $transcript_dir . $transcriptFileName;
 
     // Attempt to write the content to the file
@@ -74,7 +74,7 @@ function chatbot_chatgpt_cleanup_transcripts_directory() {
     foreach (glob($transcripts_dir . '*') as $file) {
         // Delete files older than 1 hour
         if (filemtime($file) < time() - 60 * 60 * 1) {
-            unlink($file);
+            wp_delete_file($file);
         }
     }
     // Create the index.php file if it does not exist
