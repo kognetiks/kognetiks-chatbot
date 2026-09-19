@@ -104,13 +104,128 @@ function chatbot_chatgpt_is_valid_widget_host( $host ) {
  * @return bool
  */
 function chatbot_chatgpt_is_remote_widget_shortcode( $shortcode ) {
+    return '' !== chatbot_chatgpt_remote_widget_safe_shortcode_tag( $shortcode );
+}
+
+/**
+ * Rebuild a remote-widget shortcode tag from literals / integers only.
+ *
+ * Request values are never concatenated into the returned string.
+ *
+ * @since 2.4.8
+ * @param string $shortcode Candidate tag without brackets.
+ * @return string Safe tag or empty string.
+ */
+function chatbot_chatgpt_remote_widget_safe_shortcode_tag( $shortcode ) {
     $shortcode = strtolower( (string) $shortcode );
 
-    if ( in_array( $shortcode, array( 'chatbot', 'chatbot_chatgpt', 'kognetiks_chatbot' ), true ) ) {
-        return true;
+    if ( 'chatbot' === $shortcode ) {
+        return 'chatbot';
+    }
+    if ( 'chatbot_chatgpt' === $shortcode ) {
+        return 'chatbot_chatgpt';
+    }
+    if ( 'kognetiks_chatbot' === $shortcode ) {
+        return 'kognetiks_chatbot';
     }
 
-    return (bool) preg_match( '/^(chatbot|assistant|agent)-\d+$/', $shortcode );
+    if ( preg_match( '/^(chatbot|assistant|agent)-(\d+)$/', $shortcode, $match ) ) {
+        $number = absint( $match[2] );
+        if ( $number < 1 ) {
+            return '';
+        }
+        if ( 'chatbot' === $match[1] ) {
+            return 'chatbot-' . $number;
+        }
+        if ( 'assistant' === $match[1] ) {
+            return 'assistant-' . $number;
+        }
+        if ( 'agent' === $match[1] ) {
+            return 'agent-' . $number;
+        }
+    }
+
+    return '';
+}
+
+/**
+ * Allowed HTML for the remote widget shortcode markup.
+ *
+ * Inline scripts from this plugin's shortcode are required. Event-handler
+ * attributes are not allowed.
+ *
+ * @since 2.4.8
+ * @return array
+ */
+function chatbot_chatgpt_remote_widget_kses_allowed_html() {
+    $common = array(
+        'id'    => true,
+        'class' => true,
+        'style' => true,
+        'title' => true,
+    );
+
+    return array(
+        'div'      => array_merge(
+            $common,
+            array(
+                'data-cache-buster' => true,
+            )
+        ),
+        'span'     => $common,
+        'p'        => $common,
+        'a'        => array_merge(
+            $common,
+            array(
+                'href'   => true,
+                'target' => true,
+                'rel'    => true,
+            )
+        ),
+        'button'   => array_merge(
+            $common,
+            array(
+                'type' => true,
+            )
+        ),
+        'img'      => array(
+            'src'      => true,
+            'alt'      => true,
+            'class'    => true,
+            'style'    => true,
+            'decoding' => true,
+            'width'    => true,
+            'height'   => true,
+        ),
+        'input'    => array(
+            'type'     => true,
+            'id'       => true,
+            'class'    => true,
+            'name'     => true,
+            'value'    => true,
+            'style'    => true,
+            'multiple' => true,
+        ),
+        'textarea' => array(
+            'id'          => true,
+            'class'       => true,
+            'rows'        => true,
+            'placeholder' => true,
+            'style'       => true,
+        ),
+        'label'    => array(
+            'for'   => true,
+            'class' => true,
+        ),
+        'center'   => array(),
+        'i'        => array(
+            'class' => true,
+        ),
+        'br'       => array(),
+        'script'   => array(
+            'type' => true,
+        ),
+    );
 }
 
 /**
@@ -417,7 +532,6 @@ function chatbot_chatgpt_render_remote_widget() {
 
     $shortcode_param = isset( $_GET['assistant'] ) ? sanitize_text_field( wp_unslash( $_GET['assistant'] ) ) : '';
     $token           = isset( $_GET['token'] ) ? strtolower( sanitize_text_field( wp_unslash( $_GET['token'] ) ) ) : '';
-    $chatbot_prompt  = isset( $_GET['chatbot_prompt'] ) ? sanitize_text_field( wp_unslash( $_GET['chatbot_prompt'] ) ) : '';
 
     $allowlist_raw = get_option( $keys['domains'], '' );
     $allowlist_raw = is_string( $allowlist_raw ) ? $allowlist_raw : '';
@@ -428,6 +542,7 @@ function chatbot_chatgpt_render_remote_widget() {
     }
 
     $matched_host = '';
+    $matched_tag  = '';
     $is_allowed   = false;
 
     if (
@@ -445,6 +560,7 @@ function chatbot_chatgpt_render_remote_widget() {
             if ( hash_equals( $expected, $token ) ) {
                 $is_allowed   = true;
                 $matched_host = $pair['host'];
+                $matched_tag  = $pair['shortcode'];
                 if ( function_exists( 'chatbot_widget_logging' ) ) {
                     chatbot_widget_logging( 'Allowed Pair', $referer, $shortcode_param );
                 }
@@ -457,22 +573,27 @@ function chatbot_chatgpt_render_remote_widget() {
         chatbot_chatgpt_deny_remote_widget( 'Unauthorized Access', $referer, $shortcode_param );
     }
 
+    $safe_tag = chatbot_chatgpt_remote_widget_safe_shortcode_tag( $matched_tag );
+
     if (
-        ! chatbot_chatgpt_is_remote_widget_shortcode( $shortcode_param )
+        '' === $safe_tag
+        || $safe_tag !== chatbot_chatgpt_remote_widget_safe_shortcode_tag( $shortcode_param )
         || ! is_array( $shortcode_tags )
-        || ! array_key_exists( $shortcode_param, $shortcode_tags )
+        || ! array_key_exists( $safe_tag, $shortcode_tags )
     ) {
         chatbot_chatgpt_deny_remote_widget( 'Invalid shortcode: ' . $shortcode_param, $referer, $request_ip );
     }
 
     if ( function_exists( 'chatbot_widget_logging' ) ) {
-        chatbot_widget_logging( 'Valid shortcode: ' . $shortcode_param, $referer, $request_ip );
+        chatbot_widget_logging( 'Valid shortcode: ' . $safe_tag, $referer, $request_ip );
     }
 
-    if ( '' !== $chatbot_prompt ) {
-        $chatbot_html = do_shortcode( '[' . $shortcode_param . ' chatbot_prompt="' . esc_attr( $chatbot_prompt ) . '"]' );
-    } else {
-        $chatbot_html = do_shortcode( '[' . $shortcode_param . ']' );
+    // Call the registered callback with a rebuilt tag. Do not concatenate GET
+    // values into a shortcode string (CWE-79). Optional chatbot_prompt stays in
+    // the query string and is sanitized inside chatbot_chatgpt_shortcode().
+    $chatbot_html = chatbot_chatgpt_shortcode( array(), null, $safe_tag );
+    if ( ! is_string( $chatbot_html ) ) {
+        $chatbot_html = '';
     }
 
     if ( ! is_array( $kchat_settings ) ) {
@@ -527,6 +648,11 @@ function chatbot_chatgpt_render_remote_widget() {
 
     $ancestors = chatbot_chatgpt_widget_frame_ancestors( $matched_host );
 
+    // Widget document is an embed surface, not a WP frontend page. Hide the
+    // toolbar even when the tester is logged in on this origin (e.g. Chrome).
+    show_admin_bar( false );
+    add_filter( 'show_admin_bar', '__return_false', 999 );
+
     status_header( 200 );
     nocache_headers();
     header( 'Content-Type: text/html; charset=' . get_bloginfo( 'charset' ), true );
@@ -568,11 +694,7 @@ function chatbot_chatgpt_render_remote_widget() {
 </head>
 <body>
     <div class="chatbot-wrapper">
-        <?php
-        // Shortcode output includes required inline scripts. wp_kses_post() strips
-        // <script> and leaves the JS as visible text on the page.
-        echo $chatbot_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- trusted do_shortcode() of an allowlisted registered shortcode
-        ?>
+        <?php echo wp_kses( $chatbot_html, chatbot_chatgpt_remote_widget_kses_allowed_html() ); ?>
     </div>
     <?php wp_footer(); ?>
     <script type="text/javascript">

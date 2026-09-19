@@ -8882,7 +8882,11 @@ function transformer_model_lexical_context_lcm_copy_variant_index( $seed, $count
         return (int) wp_rand( 0, $count - 1 );
     }
 
-    return (int) ( hexdec( substr( md5( (string) microtime( true ) ), 0, 8 ) ) % $count );
+    try {
+        return (int) random_int( 0, $count - 1 );
+    } catch ( Exception $e ) {
+        return 0;
+    }
 }
 
 /**

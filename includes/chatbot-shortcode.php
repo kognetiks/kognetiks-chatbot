@@ -602,7 +602,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             } else { 
                 kchat_settings = ' . $kchat_settings_json . '; 
             }
-            document.getElementById("chatbot-chatgpt-message").placeholder = "' . $chatbot_chatgpt_hot_bot_prompt . '";
+            document.getElementById("chatbot-chatgpt-message").placeholder = ' . wp_json_encode( $chatbot_chatgpt_hot_bot_prompt, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . ';
         ', 'before');
     }
 
