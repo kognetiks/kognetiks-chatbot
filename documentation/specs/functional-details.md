@@ -408,8 +408,8 @@ Each AI platform requires specific configuration:
 
 ### WordPress Requirements
 
-- **WordPress Version**: 5.0 or higher
-- **PHP Version**: 7.4 or higher (tested with PHP 8.5.0)
+- **WordPress Version**: 6.0 or higher
+- **PHP Version**: 7.0 or higher (tested with PHP 8.2.12)
 - **MySQL**: 5.6 or higher
 - **Memory**: Minimum 128MB PHP memory limit
 - **Storage**: Varies based on conversation logging settings
