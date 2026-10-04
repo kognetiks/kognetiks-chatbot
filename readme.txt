@@ -5,7 +5,7 @@ Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 2.4.8
+Stable tag: 2.4.9
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -192,6 +192,11 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 5. Chatbot settings and configuration
 
 == Changelog ==
+
+= 2.4.9 - Released 2026-10-04 =
+
+### Bug Fixes
+* **Read aloud cost controls**: The text-to-speech endpoint now stays off when Read Aloud is disabled, rate-limits guests and non-administrators to 5 requests per 10 minutes per IP, and speaks only the latest stored chatbot reply (capped at 2,000 characters, 4,096 hard maximum). Arbitrary visitor text is no longer sent to the paid speech API.
 
 = 2.4.8 - Released 2026-09-17 =
 

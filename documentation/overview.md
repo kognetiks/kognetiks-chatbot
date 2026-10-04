@@ -44,21 +44,10 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
-## What's new in Version 2.4.8
-
-### New Features
-* **Signed remote widget**: Embed the chatbot on allowlisted remote sites via `/kognetiks-chatbot-widget/` using HMAC tokens bound to each domain + assistant pair. Supporting browsers are limited with CSP `frame-ancestors`. Referer is logged for audit only and is not used for authorization. Remote access stays off until you enable it.
-
-### Improvements
-* **OpenAI Responses migration**: OpenAI `asst_` IDs now chat through the Responses API (Assistants API sunset). Local Common Name and Additional Instructions are sent with each call. Hosted `pmpt_` prompt objects remain a temporary bridge until 30 November 2026.
-* **Vector stores (file search)**: GPT Assistants rows can store an OpenAI Vector Store ID (`vs_…`). Responses calls then send `file_search` so large PDFs stay searchable without pasting them into Additional Instructions.
-* **AJAX nonce refresh**: Chat sessions can refresh expired nonces. Refresh requires a valid message nonce, is rate-limited for guests, and only returns admin unlock/reset tokens to users with `manage_options`.
-* **Internationalization**: Plugin header now declares Text Domain and Domain Path; translations load from `/languages`. A `chatbot-chatgpt.pot` template is bundled.
+## What's new in Version 2.4.9
 
 ### Bug Fixes
-* **Legacy widget bootstrap**: `widgets/chatbot-widget-endpoint.php` no longer walks parent directories to load WordPress; it only redirects to the signed WordPress endpoint.
-* **Uninstall**: Delete-on-uninstall now runs after Freemius uninstall as well as a native WordPress uninstall.
-* **KFlow conversation lookup**: Visitor answers are now fetched with `$wpdb->prepare()` so session, user, page, and assistant IDs cannot alter the conversation-log query.
+* **Read aloud cost controls**: The text-to-speech endpoint now stays off when Read Aloud is disabled, rate-limits guests and non-administrators to 5 requests per 10 minutes per IP, and speaks only the latest stored chatbot reply (capped at 2,000 characters, 4,096 hard maximum). Arbitrary visitor text is no longer sent to the paid speech API.
 
 * Information about past updates can be found [here](updates/updates.md).
 

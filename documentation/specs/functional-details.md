@@ -4,7 +4,7 @@
 
 The **Kognetiks Chatbot** is a comprehensive WordPress plugin that integrates advanced AI capabilities into WordPress websites. It provides intelligent conversational experiences through multiple AI platforms, offering both cloud-based and local AI solutions for enhanced visitor engagement, customer support, and interactive assistance.
 
-**Version:** 2.4.8
+**Version:** 2.4.9
 **License:** GPLv3 or later  
 **WordPress Compatibility:** Tested up to WordPress 7.1
 
@@ -564,6 +564,11 @@ Users must agree to terms of service for each AI platform:
 - **JAN.AI**: JAN.AI About and Privacy Policy
 
 ## Version History
+
+## What's new in Version 2.4.9
+
+### Bug Fixes
+* **Read aloud cost controls**: The text-to-speech endpoint now stays off when Read Aloud is disabled, rate-limits guests and non-administrators to 5 requests per 10 minutes per IP, and speaks only the latest stored chatbot reply (capped at 2,000 characters, 4,096 hard maximum). Arbitrary visitor text is no longer sent to the paid speech API.
 
 ## What's new in Version 2.4.8
 

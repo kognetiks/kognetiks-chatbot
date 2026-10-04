@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.4.8
+ * Version:     2.4.9
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * Text Domain: chatbot-chatgpt
@@ -28,7 +28,7 @@
  * along with Kognetiks Chatbot. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  * 
  * @package chatbot-chatgpt
- * @version 2.4.8
+ * @version 2.4.9
  * @author Kognetiks.com
  */
 
@@ -95,7 +95,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.4.8';
+$chatbot_chatgpt_plugin_version = '2.4.9';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -1771,6 +1771,7 @@ function chatbot_chatgpt_send_message() {
 
         delete_transient($conv_lock);
         chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
+        chatbot_chatgpt_remember_last_assistant_message( $session_id, $response );
         wp_send_json_success($response);
 
     } elseif ($use_assistant_id == 'Yes') {
@@ -1863,6 +1864,8 @@ function chatbot_chatgpt_send_message() {
             // Clear conversation lock and process queue BEFORE sending response
             delete_transient($conv_lock);
             chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
+
+            chatbot_chatgpt_remember_last_assistant_message( $session_id, $response );
             
             // Send success response
             wp_send_json_success($response);
@@ -2061,6 +2064,8 @@ function chatbot_chatgpt_send_message() {
         // Clear conversation lock and process queue BEFORE sending response
         delete_transient($conv_lock);
         chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
+
+        chatbot_chatgpt_remember_last_assistant_message( $session_id, $response );
         
         // Return response
         wp_send_json_success($response);
@@ -2229,8 +2234,7 @@ add_action('wp_ajax_chatbot_chatgpt_reset_all_locks', 'chatbot_chatgpt_reset_all
 // Add action to reset cache and locks (Security: Authentication required) - Ver 2.3.6
 add_action('wp_ajax_chatbot_chatgpt_reset_cache_locks', 'chatbot_chatgpt_reset_cache_locks_handler');
 
-// Add action for text-to-speech (Security: Authentication required)
-add_action('wp_ajax_chatbot_chatgpt_read_aloud', 'chatbot_chatgpt_read_aloud');
+// Read-aloud AJAX (guests and logged-in users) is registered in includes/chatbot-call-openai-api-tts.php.
 
 // Add action for transcript download (Security: Authentication required)
 add_action('wp_ajax_chatbot_chatgpt_download_transcript', 'chatbot_chatgpt_download_transcript');
