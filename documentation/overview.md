@@ -46,14 +46,8 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## What's new in Version 2.4.9
 
-### New Features
-* **TBD**
-
-### Improvements
-* **TBD**
-
 ### Bug Fixes
-* **TBD**
+* **Read aloud cost controls**: The text-to-speech endpoint now stays off when Read Aloud is disabled, rate-limits guests and non-administrators to 5 requests per 10 minutes per IP, and speaks only the latest stored chatbot reply (capped at 2,000 characters, 4,096 hard maximum). Arbitrary visitor text is no longer sent to the paid speech API.
 
 * Information about past updates can be found [here](updates/updates.md).
 
