@@ -44,10 +44,16 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
-## What's new in Version 2.4.9
+## What's new in Version 2.5.0
+
+### New Features
+* **TBD**
+
+### Improvements
+* **TBD**
 
 ### Bug Fixes
-* **Read aloud cost controls**: The text-to-speech endpoint now stays off when Read Aloud is disabled, rate-limits guests and non-administrators to 5 requests per 10 minutes per IP, and speaks only the latest stored chatbot reply (capped at 2,000 characters, 4,096 hard maximum). Arbitrary visitor text is no longer sent to the paid speech API.
+* **TBD**
 
 * Information about past updates can be found [here](updates/updates.md).
 

@@ -1,5 +1,16 @@
 # Past Updates
 
+## What's new in Version 2.50
+
+### New Features
+* **TBD**
+
+### Improvements
+* **TBD**
+
+### Bug Fixes
+* **TBD**
+
 ## What's new in Version 2.4.9
 
 ### Bug Fixes

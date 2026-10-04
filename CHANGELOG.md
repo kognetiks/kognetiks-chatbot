@@ -6,6 +6,18 @@
 
 ---
 
+= 2.5.0 - Released TBD =
+
+### New Features
+* **TBD**
+
+### Improvements
+* **TBD**
+
+### Bug Fixes
+* **TBD**
+
+
 = 2.4.9 - Released 2026-10-04 =
 
 ### Bug Fixes
