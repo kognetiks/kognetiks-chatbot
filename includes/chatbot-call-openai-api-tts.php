@@ -136,14 +136,8 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     // API URL for the TTS service
     $api_url = 'https://api.openai.com/v1/audio/speech';
 
-    // Message size limitation
-    if (strlen($message) > 10000) {
-        // Limit the message to 10000 characters
-        $message = substr($message, 0, 10000);
-        $long_message = true;
-    } else {
-        $long_message = false;
-    }
+    // OpenAI speech input ceiling. Read-aloud applies a lower cap before this call.
+    $message = chatbot_chatgpt_tts_cap_text( $message, 4096 );
 
     // Creating the array to be converted to JSON
     $body = [
@@ -247,12 +241,126 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
 }
 
+/**
+ * Cap speech input without splitting a multibyte character when possible.
+ *
+ * @param string $text Text to cap.
+ * @param int    $max  Maximum characters.
+ * @return string
+ */
+function chatbot_chatgpt_tts_cap_text( $text, $max ) {
+
+    $text = (string) $text;
+    $max  = (int) $max;
+    if ( $max < 1 || $text === '' ) {
+        return $text;
+    }
+
+    if ( function_exists( 'mb_strlen' ) && function_exists( 'mb_substr' ) ) {
+        if ( mb_strlen( $text ) > $max ) {
+            return mb_substr( $text, 0, $max );
+        }
+        return $text;
+    }
+
+    if ( strlen( $text ) > $max ) {
+        return substr( $text, 0, $max );
+    }
+
+    return $text;
+
+}
+
+/**
+ * Transient key for the last assistant reply this session may read aloud.
+ *
+ * @param string $session_id Chat session id.
+ * @return string
+ */
+function chatbot_chatgpt_tts_last_reply_key( $session_id ) {
+
+    $session_id = (string) $session_id;
+    $hash       = function_exists( 'wp_fast_hash' ) ? wp_fast_hash( $session_id ) : hash( 'sha256', $session_id );
+
+    return 'chatbot_chatgpt_tts_last_' . $hash;
+
+}
+
+/**
+ * Remember a server-produced assistant reply for a later read-aloud request.
+ * Client-supplied text is never stored here.
+ *
+ * @param string $session_id Chat session id.
+ * @param mixed  $message    Assistant reply.
+ * @return void
+ */
+function chatbot_chatgpt_remember_last_assistant_message( $session_id, $message ) {
+
+    $session_id = is_string( $session_id ) ? sanitize_text_field( $session_id ) : '';
+    if ( $session_id === '' || ! is_string( $message ) ) {
+        return;
+    }
+
+    $trim = ltrim( $message );
+    if ( str_starts_with( $trim, 'Error:' ) || str_starts_with( $trim, 'Failed:' ) ) {
+        return;
+    }
+
+    $text = trim( wp_strip_all_tags( $message ) );
+    if ( $text === '' ) {
+        return;
+    }
+
+    set_transient( chatbot_chatgpt_tts_last_reply_key( $session_id ), chatbot_chatgpt_tts_cap_text( $text, 4096 ), 12 * HOUR_IN_SECONDS );
+
+}
+
+/**
+ * Latest assistant text this session is allowed to spend speech credits on.
+ *
+ * @param string $session_id Chat session id.
+ * @return string
+ */
+function chatbot_chatgpt_get_last_assistant_message_for_read_aloud( $session_id ) {
+
+    $stored = get_transient( chatbot_chatgpt_tts_last_reply_key( $session_id ) );
+    if ( is_string( $stored ) && trim( $stored ) !== '' ) {
+        return $stored;
+    }
+
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+    $found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) );
+    if ( $found !== $table ) {
+        return '';
+    }
+
+    $text = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT message_text FROM {$table} WHERE session_id = %s AND user_type = %s ORDER BY id DESC LIMIT 1",
+            $session_id,
+            'Chatbot'
+        )
+    );
+
+    return is_string( $text ) ? $text : '';
+
+}
+
 // Call the Text-to-Speech API
 function chatbot_chatgpt_read_aloud($message) {
 
     // Security: Verify nonce for CSRF protection
     if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_tts_nonce')) {
         wp_send_json_error('Security check failed. Please refresh the page and try again.', 403);
+        return;
+    }
+
+    // The button is hidden when this is off. The endpoint must follow the same switch.
+    $read_aloud_option = strtolower( sanitize_text_field( (string) get_option( 'chatbot_chatgpt_read_aloud_option', 'yes' ) ) );
+    if ( $read_aloud_option !== 'yes' ) {
+        wp_send_json_error( 'Read aloud is turned off.', 403 );
         return;
     }
 
@@ -266,17 +374,40 @@ function chatbot_chatgpt_read_aloud($message) {
     global $model;
     global $voice;
 
+    $session_id = isset( $_POST['session_id'] ) ? sanitize_text_field( wp_unslash( $_POST['session_id'] ) ) : '';
+    if ( ! function_exists( 'verify_session_ownership' ) || ! verify_session_ownership( $session_id ) ) {
+        wp_send_json_error( 'Session ID required.', 403 );
+        return;
+    }
+
+    // Speak the last server-produced reply for this session. Ignore posted text.
+    $message = sanitize_textarea_field( wp_unslash( (string) chatbot_chatgpt_get_last_assistant_message_for_read_aloud( $session_id ) ) );
+    $message = trim( $message );
+    if ( $message === '' ) {
+        wp_send_json_error( 'There is no chatbot reply to read aloud yet.', 403 );
+        return;
+    }
+    $message = chatbot_chatgpt_tts_cap_text( $message, 2000 );
+
+    // A few paid speech calls per 10 minutes. Administrators are not limited.
+    if ( ! ( is_user_logged_in() && current_user_can( 'manage_options' ) ) ) {
+        $client_ip      = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
+        $rate_limit_key = 'chatbot_chatgpt_tts_rl_' . ( function_exists( 'wp_fast_hash' ) ? wp_fast_hash( $client_ip ) : hash( 'sha256', $client_ip ) );
+        $current_count  = (int) get_transient( $rate_limit_key );
+        if ( $current_count >= 5 ) {
+            wp_send_json_error( 'Rate limit exceeded. Please wait before reading another message aloud.', 429 );
+            return;
+        }
+        set_transient( $rate_limit_key, $current_count + 1, 10 * MINUTE_IN_SECONDS );
+    }
+
     // FIXME - GET THE DEFAULT TEXT-TO-SPEECH API KEY
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     // Decrypt the API key - Ver 2.2.6
     $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
 
-    // Get the text to be read aloud
-    $message = $_POST['message'];
-    $voice = $_POST['voice'];
-    $user_id = $_POST['user_id'];
-    $page_id = $_POST['page_id'];
-    $session_id = $_POST['session_id'];
+    $user_id = isset( $_POST['user_id'] ) ? sanitize_text_field( wp_unslash( $_POST['user_id'] ) ) : '';
+    $page_id = isset( $_POST['page_id'] ) ? sanitize_text_field( wp_unslash( $_POST['page_id'] ) ) : '';
 
     // FIXME - DON'T OVERRIDE THE MODEL
 
@@ -321,7 +452,7 @@ function chatbot_chatgpt_read_aloud($message) {
     wp_die();
 
 }
-// Add action to read text aloud - Ver 1.9.5
+// Guests may use read aloud when the setting is on. Limits live in the handler. - Ver 2.4.9
 add_action('wp_ajax_chatbot_chatgpt_read_aloud', 'chatbot_chatgpt_read_aloud');
 add_action('wp_ajax_nopriv_chatbot_chatgpt_read_aloud', 'chatbot_chatgpt_read_aloud');
 

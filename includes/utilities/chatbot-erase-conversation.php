@@ -96,6 +96,9 @@ function chatbot_chatgpt_erase_conversation_handler() {
     }
 
     delete_transient( 'chatbot_chatgpt_context_history' );
+    if ( $session_id !== '' && function_exists( 'chatbot_chatgpt_tts_last_reply_key' ) ) {
+        delete_transient( chatbot_chatgpt_tts_last_reply_key( $session_id ) );
+    }
 
     $thread_id = ''; // Nullify the thread_id
     // Wipe the Context
