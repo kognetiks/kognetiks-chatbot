@@ -48,6 +48,8 @@ function create_directory_and_index_file($dir_path) {
         file_put_contents($index_file_path, $file_content);
     }
 
+    chatbot_chatgpt_write_no_script_htaccess($dir_path);
+
     // Set directory permissions
     global $wp_filesystem;
     if (!function_exists('WP_Filesystem')) {
@@ -62,6 +64,149 @@ function create_directory_and_index_file($dir_path) {
 
     return true;
 
+}
+
+/**
+ * Directories that must stay web-readable for downloads and audio, and must not run scripts.
+ *
+ * @return string[]
+ */
+function chatbot_chatgpt_static_directory_names() {
+    return array( 'uploads', 'downloads', 'audio', 'transcripts' );
+}
+
+/**
+ * index.php and .htaccess must survive hourly cleanup.
+ *
+ * @param string $path File path.
+ * @return bool
+ */
+function chatbot_chatgpt_is_static_guard_file( $path ) {
+    $base = strtolower( wp_basename( (string) $path ) );
+    return ( 'index.php' === $base || '.htaccess' === $base );
+}
+
+/**
+ * Apache rules that deny script execution. Nginx does not read .htaccess; the comment states the equivalent.
+ *
+ * @return string
+ */
+function chatbot_chatgpt_no_script_htaccess_rules() {
+    return <<<'HTA'
+# chatbot-static-deny v1
+# Do not execute scripts in this directory. index.php remains so listings stay blocked.
+# nginx does not read this file. Equivalent location:
+# location ~* /wp-content/plugins/chatbot-chatgpt/(uploads|downloads|audio|transcripts)/.*\.(php|phtml|pht|phar|phps|cgi|pl|asp|aspx|shtml)$ { deny all; }
+Options -Indexes -ExecCGI
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)\.(php|php\d+|phtml|pht|phar|phps|cgi|pl|asp|aspx|shtml)$">
+        SetHandler default-handler
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+<IfModule php_module>
+    php_flag engine off
+</IfModule>
+<IfModule php7_module>
+    php_flag engine off
+</IfModule>
+<IfModule php8_module>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+<IfModule mod_mime.c>
+    RemoveHandler .php .php3 .php4 .php5 .php7 .php8 .phtml .pht .phar .phps
+    RemoveType .php .php3 .php4 .php5 .php7 .php8 .phtml .pht .phar .phps
+</IfModule>
+HTA;
+}
+
+/**
+ * Write the no-script .htaccess into a static directory when it is one of the four public folders.
+ *
+ * @param string $dir_path Directory path.
+ * @return void
+ */
+function chatbot_chatgpt_write_no_script_htaccess( $dir_path ) {
+    $normalized = rtrim( str_replace( '\\', '/', (string) $dir_path ), '/' );
+    $base       = basename( $normalized );
+    if ( ! in_array( $base, chatbot_chatgpt_static_directory_names(), true ) ) {
+        return;
+    }
+
+    $path  = $normalized . '/.htaccess';
+    $rules = chatbot_chatgpt_no_script_htaccess_rules();
+    if ( file_exists( $path ) ) {
+        $current = file_get_contents( $path );
+        if ( is_string( $current ) && false !== strpos( $current, 'chatbot-static-deny v1' ) ) {
+            return;
+        }
+    }
+
+    file_put_contents( $path, $rules );
+}
+
+/**
+ * Ensure the four public directories exist, block listings, and refuse script execution.
+ *
+ * @return void
+ */
+function chatbot_chatgpt_harden_static_directories() {
+    global $chatbot_chatgpt_plugin_dir_path;
+
+    if ( empty( $chatbot_chatgpt_plugin_dir_path ) ) {
+        return;
+    }
+
+    foreach ( chatbot_chatgpt_static_directory_names() as $name ) {
+        create_directory_and_index_file( $chatbot_chatgpt_plugin_dir_path . $name . '/' );
+    }
+}
+add_action( 'init', 'chatbot_chatgpt_harden_static_directories' );
+
+/**
+ * MIME type from file contents.
+ *
+ * @param string $path Absolute path.
+ * @return string Empty when fileinfo cannot read the file.
+ */
+function chatbot_chatgpt_finfo_mime( $path ) {
+    if ( ! is_string( $path ) || ! is_readable( $path ) || ! function_exists( 'finfo_open' ) ) {
+        return '';
+    }
+
+    $finfo = finfo_open( FILEINFO_MIME_TYPE );
+    if ( false === $finfo ) {
+        return '';
+    }
+
+    $mime = finfo_file( $finfo, $path );
+    if ( PHP_VERSION_ID < 80100 ) {
+        finfo_close( $finfo );
+    }
+
+    if ( ! is_string( $mime ) ) {
+        return '';
+    }
+
+    $mime = strtolower( trim( $mime ) );
+    $semi = strpos( $mime, ';' );
+    if ( false !== $semi ) {
+        $mime = trim( substr( $mime, 0, $semi ) );
+    }
+
+    return $mime;
 }
 
 /**

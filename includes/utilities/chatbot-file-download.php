@@ -13,11 +13,56 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+/**
+ * Last extension if it is one of pdf, txt, csv, png, or jpg. jpeg is stored as jpg.
+ *
+ * @param string $filename Remote or local name.
+ * @return string
+ */
+function chatbot_chatgpt_safe_download_extension( $filename ) {
+    $allowed = array( 'pdf', 'txt', 'csv', 'png', 'jpg', 'jpeg' );
+    $name    = wp_basename( str_replace( '\\', '/', (string) $filename ) );
+    $name    = strtolower( $name );
+    if ( ! preg_match( '/\.([a-z0-9]+)$/', $name, $matches ) ) {
+        return '';
+    }
+    if ( ! in_array( $matches[1], $allowed, true ) ) {
+        return '';
+    }
+
+    return ( 'jpeg' === $matches[1] ) ? 'jpg' : $matches[1];
+}
+
+/**
+ * Content types accepted for a downloaded assistant file.
+ *
+ * @param string $ext Allowlisted extension.
+ * @return string[]
+ */
+function chatbot_chatgpt_download_finfo_types( $ext ) {
+    $map = array(
+        'pdf' => array( 'application/pdf' ),
+        'txt' => array( 'text/plain' ),
+        'csv' => array( 'text/plain', 'text/csv', 'application/csv' ),
+        'png' => array( 'image/png' ),
+        'jpg' => array( 'image/jpeg' ),
+    );
+
+    return isset( $map[ $ext ] ) ? $map[ $ext ] : array();
+}
+
 function download_openai_file($file_id, $filename) {
 
     global $chatbot_chatgpt_plugin_dir_path;
 
     global $session_id;
+
+    $file_id = preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $file_id );
+    $ext     = chatbot_chatgpt_safe_download_extension( $filename );
+    if ( '' === $file_id || '' === $ext ) {
+        prod_trace( 'ERROR', 'Rejected assistant file download: missing id or extension is not allowlisted.' );
+        return false;
+    }
 
     $downloads_dir = $chatbot_chatgpt_plugin_dir_path . 'downloads/';
 
@@ -70,22 +115,50 @@ function download_openai_file($file_id, $filename) {
             return false;
         }
 
-        $filename = sanitize_file_name( basename( (string) $filename ) );
-        if ( '' === $filename ) {
-            prod_trace( 'ERROR', 'Error: Invalid download filename.');
+        if ( ! function_exists( 'wp_tempnam' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+        }
+
+        $temp_path = wp_tempnam( 'kchat-download' );
+        if ( ! is_string( $temp_path ) || '' === $temp_path ) {
+            prod_trace( 'ERROR', 'Error: Failed to create a temporary download file.' );
             return false;
         }
 
-        $file_path = trailingslashit( $downloads_dir ) . $filename;
+        $saved_name = '';
+        try {
+            if ( file_put_contents( $temp_path, $file_content ) === false ) {
+                prod_trace( 'ERROR', 'Error: Failed to save file locally.' );
+                return false;
+            }
 
-        // Save the file locally
-        if (file_put_contents($file_path, $file_content) === false) {
-            prod_trace( 'ERROR', 'Error: Failed to save file locally.');
-            return false;
+            $real_mime = chatbot_chatgpt_finfo_mime( $temp_path );
+            $blocked   = array( 'text/x-php', 'application/x-httpd-php', 'application/x-php', 'application/x-httpd-php-source' );
+            if ( '' === $real_mime || in_array( $real_mime, $blocked, true ) || ! in_array( $real_mime, chatbot_chatgpt_download_finfo_types( $ext ), true ) ) {
+                prod_trace( 'ERROR', 'Rejected assistant file download: content type does not match the allowlisted extension.' );
+                return false;
+            }
+
+            if ( in_array( $ext, array( 'txt', 'csv' ), true ) && function_exists( 'chatbot_chatgpt_upload_has_active_content' ) && chatbot_chatgpt_upload_has_active_content( $temp_path ) ) {
+                prod_trace( 'ERROR', 'Rejected assistant file download: active content found.' );
+                return false;
+            }
+
+            $saved_name = 'download-' . generate_random_string( 26 ) . '.' . $ext;
+            $file_path  = trailingslashit( $downloads_dir ) . $saved_name;
+            if ( ! chatbot_chatgpt_move_file( $temp_path, $file_path, true ) ) {
+                if ( ! copy( $temp_path, $file_path ) ) {
+                    prod_trace( 'ERROR', 'Error: Failed to save file locally.' );
+                    return false;
+                }
+            }
+
+            return content_url( 'plugins/' . basename( $chatbot_chatgpt_plugin_dir_path ) . '/downloads/' . $saved_name );
+        } finally {
+            if ( file_exists( $temp_path ) ) {
+                wp_delete_file( $temp_path );
+            }
         }
-
-        // Return the file URL
-        return content_url('plugins/' . basename($chatbot_chatgpt_plugin_dir_path) . '/downloads/' . $filename);
 
     } else {
 
@@ -101,7 +174,14 @@ function chatbot_chatgpt_cleanup_download_directory() {
     global $chatbot_chatgpt_plugin_dir_path;
 
     $download_dir = $chatbot_chatgpt_plugin_dir_path . 'downloads/';
-    foreach (glob($download_dir . '*') as $file) {
+    $download_files = glob($download_dir . '*');
+    if (!is_array($download_files)) {
+        $download_files = array();
+    }
+    foreach ($download_files as $file) {
+        if (chatbot_chatgpt_is_static_guard_file($file)) {
+            continue;
+        }
         // Delete files older than 1 hour
         if (filemtime($file) < time() - 60 * 60 * 1) {
             wp_delete_file($file);

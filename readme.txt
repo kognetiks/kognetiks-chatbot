@@ -5,7 +5,7 @@ Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 2.4.9
+Stable tag: 2.5.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -193,16 +193,10 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.5.0 - Release TBD =
-
-### New Features
-* **TBD**
-
-### Improvements
-* **TBD**
+= 2.5.0 - Released 2026-10-09 =
 
 ### Bug Fixes
-* **TBD**
+* **File upload and download handling**: Uploaded files, and files saved from an assistant reply, were kept with fewer checks than intended and could use a name supplied with the file. Uploads now require a logged-in user who is allowed to upload, and only when file uploads are turned on. Files are checked against an allowed type list, saved under a name the plugin generates, and the upload, download, audio, and transcript folders no longer run scripts.
 
 = 2.4.9 - Released 2026-10-04 =
 

@@ -522,7 +522,14 @@ function chatbot_chatgpt_cleanup_audio_directory() {
     global $chatbot_chatgpt_plugin_dir_path;
     
     $audio_dir = $chatbot_chatgpt_plugin_dir_path . 'audio/';
-    foreach (glob($audio_dir . '*') as $file) {
+    $audio_files = glob($audio_dir . '*');
+    if (!is_array($audio_files)) {
+        $audio_files = array();
+    }
+    foreach ($audio_files as $file) {
+        if (chatbot_chatgpt_is_static_guard_file($file)) {
+            continue;
+        }
         // Delete files older than 1 hour
         if (filemtime($file) < time() - 60 * 60 * 1) {
             wp_delete_file($file);

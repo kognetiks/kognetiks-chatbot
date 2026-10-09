@@ -40,11 +40,359 @@ function chatbot_file_upload_debug_log( $endpoint, $status, $body, $payload_keys
 
 }
 
+/**
+ * Allowlisted upload types. SVG and ZIP are omitted.
+ * Keys are extensions. mime is passed to wp_check_filetype_and_ext(). finfo lists acceptable content types.
+ *
+ * @return array<string, array{mime: string, finfo: string[]}>
+ */
+function chatbot_chatgpt_allowed_upload_types() {
+    return array(
+        'csv'  => array( 'mime' => 'text/csv', 'finfo' => array( 'text/csv', 'text/plain', 'application/csv', 'application/vnd.ms-excel' ) ),
+        'doc'  => array( 'mime' => 'application/msword', 'finfo' => array( 'application/msword', 'application/vnd.ms-office', 'application/octet-stream' ) ),
+        'docx' => array( 'mime' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'finfo' => array( 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip', 'application/octet-stream' ) ),
+        'gif'  => array( 'mime' => 'image/gif', 'finfo' => array( 'image/gif' ) ),
+        'jpeg' => array( 'mime' => 'image/jpeg', 'finfo' => array( 'image/jpeg' ) ),
+        'jpg'  => array( 'mime' => 'image/jpeg', 'finfo' => array( 'image/jpeg' ) ),
+        'mp3'  => array( 'mime' => 'audio/mpeg', 'finfo' => array( 'audio/mpeg', 'audio/mp3' ) ),
+        'mp4'  => array( 'mime' => 'video/mp4', 'finfo' => array( 'video/mp4' ) ),
+        'mpeg' => array( 'mime' => 'video/mpeg', 'finfo' => array( 'video/mpeg' ) ),
+        'mpga' => array( 'mime' => 'audio/mpeg', 'finfo' => array( 'audio/mpeg', 'audio/mp3' ) ),
+        'm4a'  => array( 'mime' => 'audio/mp4', 'finfo' => array( 'audio/mp4', 'audio/x-m4a', 'audio/m4a' ) ),
+        'pdf'  => array( 'mime' => 'application/pdf', 'finfo' => array( 'application/pdf' ) ),
+        'png'  => array( 'mime' => 'image/png', 'finfo' => array( 'image/png' ) ),
+        'ppt'  => array( 'mime' => 'application/vnd.ms-powerpoint', 'finfo' => array( 'application/vnd.ms-powerpoint', 'application/vnd.ms-office', 'application/octet-stream' ) ),
+        'pptx' => array( 'mime' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'finfo' => array( 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/zip', 'application/octet-stream' ) ),
+        'rtf'  => array( 'mime' => 'application/rtf', 'finfo' => array( 'application/rtf', 'text/rtf', 'text/plain' ) ),
+        'txt'  => array( 'mime' => 'text/plain', 'finfo' => array( 'text/plain' ) ),
+        'wav'  => array( 'mime' => 'audio/wav', 'finfo' => array( 'audio/wav', 'audio/x-wav' ) ),
+        'webm' => array( 'mime' => 'video/webm', 'finfo' => array( 'video/webm', 'audio/webm' ) ),
+        'webp' => array( 'mime' => 'image/webp', 'finfo' => array( 'image/webp' ) ),
+        'xls'  => array( 'mime' => 'application/vnd.ms-excel', 'finfo' => array( 'application/vnd.ms-excel', 'application/vnd.ms-office', 'application/octet-stream' ) ),
+        'xlsx' => array( 'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'finfo' => array( 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/zip', 'application/octet-stream' ) ),
+        'xml'  => array( 'mime' => 'application/xml', 'finfo' => array( 'application/xml', 'text/xml' ) ),
+        'json' => array( 'mime' => 'application/json', 'finfo' => array( 'application/json', 'text/plain', 'text/json' ) ),
+        'md'   => array( 'mime' => 'text/plain', 'finfo' => array( 'text/plain', 'text/markdown' ) ),
+    );
+}
+
+/**
+ * Final extension, lowercased and limited to [a-z0-9]. Rejects dangerous earlier extensions.
+ *
+ * @param string $filename Client filename.
+ * @return string
+ */
+function chatbot_chatgpt_upload_extension( $filename ) {
+    $filename = wp_basename( str_replace( '\\', '/', (string) $filename ) );
+    $filename = strtolower( $filename );
+    if ( '' === $filename || preg_match( '/[\x00-\x1F]/', $filename ) ) {
+        return '';
+    }
+
+    $parts = explode( '.', $filename );
+    if ( count( $parts ) < 2 ) {
+        return '';
+    }
+
+    $ext = array_pop( $parts );
+    if ( ! preg_match( '/^[a-z0-9]+$/', $ext ) ) {
+        return '';
+    }
+
+    $dangerous = array( 'php', 'php3', 'php4', 'php5', 'php7', 'php8', 'phtml', 'pht', 'phar', 'phps', 'cgi', 'pl', 'asp', 'aspx', 'shtml', 'htaccess', 'ini' );
+    if ( in_array( $ext, $dangerous, true ) ) {
+        return '';
+    }
+    foreach ( $parts as $part ) {
+        if ( in_array( $part, $dangerous, true ) ) {
+            return '';
+        }
+    }
+
+    return $ext;
+}
+
+/**
+ * True when the active platform, or an assistant row, allows file uploads.
+ *
+ * @return bool
+ */
+function chatbot_chatgpt_file_uploads_are_enabled() {
+    $platform = get_option( 'chatbot_ai_platform_choice', 'OpenAI' );
+    $option_keys = array(
+        'OpenAI'       => 'chatbot_chatgpt_allow_file_uploads',
+        'Azure OpenAI' => 'chatbot_azure_allow_file_uploads',
+        'Mistral'      => 'chatbot_mistral_allow_file_uploads',
+    );
+    $option_key = isset( $option_keys[ $platform ] ) ? $option_keys[ $platform ] : 'chatbot_chatgpt_allow_file_uploads';
+    if ( 'Yes' === get_option( $option_key, 'No' ) ) {
+        return true;
+    }
+
+    global $wpdb;
+    $table = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    $like  = $wpdb->esc_like( $table );
+    $found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $like ) );
+    if ( $found !== $table ) {
+        return false;
+    }
+
+    $allowed = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT id FROM {$table} WHERE allow_file_uploads = %s LIMIT 1",
+            'Yes'
+        )
+    );
+
+    return ! empty( $allowed );
+}
+
+/**
+ * Logged-in users who can upload files, and only when the feature is turned on.
+ *
+ * @return bool
+ */
+function chatbot_chatgpt_user_may_upload_files() {
+    if ( ! is_user_logged_in() || ! current_user_can( 'upload_files' ) ) {
+        return false;
+    }
+
+    return chatbot_chatgpt_file_uploads_are_enabled();
+}
+
+/**
+ * Reject active content in text-like uploads.
+ *
+ * @param string $path File path.
+ * @return bool
+ */
+function chatbot_chatgpt_upload_has_active_content( $path ) {
+    $handle = fopen( $path, 'rb' );
+    if ( false === $handle ) {
+        return true;
+    }
+
+    $carry = '';
+    $patterns = array(
+        '/<\?php/i',
+        '/<\?=/i',
+        '/<script\b/i',
+        '/<svg\b/i',
+    );
+
+    while ( ! feof( $handle ) ) {
+        $chunk = fread( $handle, 8192 );
+        if ( ! is_string( $chunk ) || '' === $chunk ) {
+            break;
+        }
+        $window = $carry . $chunk;
+        foreach ( $patterns as $pattern ) {
+            if ( preg_match( $pattern, $window ) ) {
+                fclose( $handle );
+                return true;
+            }
+        }
+        $carry = substr( $window, -32 );
+    }
+
+    fclose( $handle );
+    return false;
+}
+
+/**
+ * Validate an uploaded temp file. Returns the allowlisted extension and content MIME.
+ *
+ * @param string   $tmp_name     PHP upload tmp path.
+ * @param string   $original     Client filename.
+ * @param string[] $only_exts    Optional extension subset.
+ * @return array|WP_Error
+ */
+function chatbot_chatgpt_inspect_uploaded_file( $tmp_name, $original, $only_exts = array() ) {
+    if ( ! is_string( $tmp_name ) || ! is_uploaded_file( $tmp_name ) ) {
+        return new WP_Error( 'chatbot_upload', 'Invalid upload.' );
+    }
+
+    $types = chatbot_chatgpt_allowed_upload_types();
+    if ( ! empty( $only_exts ) ) {
+        $types = array_intersect_key( $types, array_flip( $only_exts ) );
+    }
+
+    $ext = chatbot_chatgpt_upload_extension( $original );
+    if ( '' === $ext || ! isset( $types[ $ext ] ) ) {
+        return new WP_Error( 'chatbot_upload', 'Invalid file type or extension.' );
+    }
+
+    if ( ! function_exists( 'wp_check_filetype_and_ext' ) ) {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+    }
+
+    $mime_map = array();
+    foreach ( $types as $type_ext => $info ) {
+        $mime_map[ $type_ext ] = $info['mime'];
+    }
+
+    $named = wp_check_filetype( 'upload.' . $ext, $mime_map );
+    $named_ext = isset( $named['ext'] ) ? strtolower( (string) $named['ext'] ) : '';
+    if ( $named_ext !== $ext ) {
+        return new WP_Error( 'chatbot_upload', 'Invalid file type or extension.' );
+    }
+
+    $checked = wp_check_filetype_and_ext( $tmp_name, 'upload.' . $ext, $mime_map );
+    $checked_ext = isset( $checked['ext'] ) ? strtolower( (string) $checked['ext'] ) : '';
+    if ( '' !== $checked_ext && $checked_ext !== $ext ) {
+        return new WP_Error( 'chatbot_upload', 'Invalid file type or extension.' );
+    }
+
+    $real_mime = chatbot_chatgpt_finfo_mime( $tmp_name );
+    $blocked_mimes = array( 'text/x-php', 'application/x-httpd-php', 'application/x-php', 'application/x-httpd-php-source' );
+    if ( '' === $real_mime || in_array( $real_mime, $blocked_mimes, true ) || ! in_array( $real_mime, $types[ $ext ]['finfo'], true ) ) {
+        return new WP_Error( 'chatbot_upload', 'Invalid file type or extension.' );
+    }
+
+    $text_exts = array( 'csv', 'txt', 'xml', 'json', 'md', 'rtf' );
+    if ( in_array( $ext, $text_exts, true ) && chatbot_chatgpt_upload_has_active_content( $tmp_name ) ) {
+        return new WP_Error( 'chatbot_upload', 'Security error: Potentially dangerous content found.' );
+    }
+
+    return array(
+        'ext'  => $ext,
+        'mime' => $real_mime,
+    );
+}
+
+/**
+ * Copy a validated upload into the system temp directory.
+ *
+ * @param string   $tmp_name  PHP upload tmp path.
+ * @param string   $original  Client filename.
+ * @param string   $prefix    wp_tempnam prefix, kchat-upload or kchat-voice.
+ * @param string[] $only_exts Optional extension subset.
+ * @return array|WP_Error
+ */
+function chatbot_chatgpt_stage_uploaded_file( $tmp_name, $original, $prefix, $only_exts = array() ) {
+    $inspected = chatbot_chatgpt_inspect_uploaded_file( $tmp_name, $original, $only_exts );
+    if ( is_wp_error( $inspected ) ) {
+        return $inspected;
+    }
+
+    if ( ! function_exists( 'wp_tempnam' ) ) {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+    }
+
+    $temp_path = wp_tempnam( $prefix );
+    if ( ! is_string( $temp_path ) || '' === $temp_path ) {
+        return new WP_Error( 'chatbot_upload', 'Upload failed: could not create a temporary file.' );
+    }
+
+    wp_delete_file( $temp_path );
+    if ( ! move_uploaded_file( $tmp_name, $temp_path ) ) {
+        return new WP_Error( 'chatbot_upload', 'Upload failed: could not store the temporary file.' );
+    }
+
+    $inspected['path']     = $temp_path;
+    $inspected['basename'] = wp_basename( $temp_path );
+
+    return $inspected;
+}
+
+/**
+ * Delete a staged temp file only when the basename matches a file this plugin created.
+ *
+ * @param string $basename Temp basename.
+ * @return void
+ */
+function chatbot_chatgpt_delete_staged_temp_file( $basename ) {
+    $path = chatbot_chatgpt_staged_temp_path( $basename );
+    if ( is_string( $path ) ) {
+        wp_delete_file( $path );
+    }
+}
+
+/**
+ * Resolve a staged basename to a real path inside the system temp directory.
+ *
+ * @param string $basename Temp basename.
+ * @return string|null
+ */
+function chatbot_chatgpt_staged_temp_path( $basename ) {
+    $basename = wp_basename( (string) $basename );
+    if ( ! preg_match( '/^kchat-(upload|voice|download)-[A-Za-z0-9]+(?:-[0-9]+)?\.tmp$/', $basename ) ) {
+        return null;
+    }
+
+    if ( ! function_exists( 'get_temp_dir' ) ) {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+    }
+
+    $temp_dir = wp_normalize_path( trailingslashit( get_temp_dir() ) );
+    $candidate = wp_normalize_path( $temp_dir . $basename );
+    if ( ! file_exists( $candidate ) ) {
+        return null;
+    }
+
+    $real = realpath( $candidate );
+    if ( false === $real ) {
+        return null;
+    }
+
+    $real = wp_normalize_path( $real );
+    if ( 0 !== stripos( $real, $temp_dir ) ) {
+        return null;
+    }
+
+    return $real;
+}
+
+/**
+ * Resolve the voice file stored for this session.
+ *
+ * @param string $session_id Session id.
+ * @return string|WP_Error Absolute path.
+ */
+function chatbot_chatgpt_resolve_staged_voice_file( $session_id ) {
+    $stored = get_chatbot_chatgpt_transients_files( 'chatbot_chatgpt_assistant_file_ids', $session_id, 1 );
+    $path   = chatbot_chatgpt_staged_temp_path( $stored );
+    if ( null === $path ) {
+        return new WP_Error( 'chatbot_upload', 'Audio file does not exist.' );
+    }
+
+    return $path;
+}
+
+/**
+ * Remove staged temp files older than one hour.
+ *
+ * @return void
+ */
+function chatbot_chatgpt_cleanup_staged_temp_files() {
+    if ( ! function_exists( 'get_temp_dir' ) ) {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+    }
+
+    $temp_dir = trailingslashit( get_temp_dir() );
+    $matches  = glob( $temp_dir . 'kchat-*.tmp' );
+    if ( ! is_array( $matches ) ) {
+        return;
+    }
+
+    $cutoff = time() - HOUR_IN_SECONDS;
+    foreach ( $matches as $file ) {
+        $basename = wp_basename( $file );
+        if ( null === chatbot_chatgpt_staged_temp_path( $basename ) ) {
+            continue;
+        }
+        $mtime = filemtime( $file );
+        if ( false !== $mtime && $mtime < $cutoff ) {
+            wp_delete_file( $file );
+        }
+    }
+}
+
 // Upload Multiple files to the Assistant
 function chatbot_chatgpt_upload_files() {
 
-    // Security: Check if user has permission to upload files
-    if (!current_user_can('upload_files')) {
+    // Security: logged-in users with upload_files only. Guests have no nopriv hook.
+    if ( ! chatbot_chatgpt_user_may_upload_files() ) {
         wp_send_json_error('Insufficient permissions to upload files.', 403);
         return;
     }
@@ -73,40 +421,6 @@ function chatbot_chatgpt_upload_files() {
     
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
-
-    global $chatbot_chatgpt_plugin_dir_path;
-
-    $uploads_dir = $chatbot_chatgpt_plugin_dir_path . 'uploads/';
-
-    // Ensure the directory exists or attempt to create it
-    if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
-        $default_message = 'Oops! File upload failed.';
-        $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[2]) 
-            ? $chatbot_chatgpt_fixed_literal_messages[2] 
-            : $default_message;
-        $responses[] = array(
-            'status' => 'error',
-            'message' => $error_message
-        );
-        http_response_code(500); // Send a 500 Internal Server Error status code
-        exit;
-    } else {
-        $index_file_path = $uploads_dir . '/index.php';
-        if (!file_exists($index_file_path)) {
-            $file_content = "<?php\n// Silence is golden.\n\n";
-            file_put_contents($index_file_path, $file_content);
-        }
-    }
-    global $wp_filesystem;
-    if (!function_exists('WP_Filesystem')) {
-        require_once ABSPATH . 'wp-admin/includes/file.php';
-    }
-    if (empty($wp_filesystem)) {
-        WP_Filesystem();
-    }
-    if ($wp_filesystem) {
-        $wp_filesystem->chmod($uploads_dir, 0700);
-    }
 
     // Which API key to use?
     $ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice'), 'OpenAI');
@@ -162,13 +476,15 @@ function chatbot_chatgpt_upload_files() {
 
     if (isset($_FILES['file']['name']) && is_array($_FILES['file']['name'])) {
         for ($i = 0; $i < count($_FILES['file']['name']); $i++) {
-            $newFileName = generate_random_string() . '.' . pathinfo($_FILES['file']['name'][$i], PATHINFO_EXTENSION);
-            $file_path = $uploads_dir . $newFileName;
+            $original_name = isset($_FILES['file']['name'][$i]) ? wp_unslash($_FILES['file']['name'][$i]) : '';
+            if (!is_string($original_name)) {
+                $original_name = '';
+            }
 
             if ($_FILES['file']['error'][$i] > 0) {
                 $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[4]) 
                     ? $chatbot_chatgpt_fixed_literal_messages[4] 
-                    : "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later.";
+                    : "Oops! Something went wrong during the upload of {$original_name}. Please try again later.";
 
                 $responses[] = [
                     'status' => 'error',
@@ -179,39 +495,27 @@ function chatbot_chatgpt_upload_files() {
                 wp_send_json_error($responses, 415);
             }
 
-            // Validate file
-            $validation_result = upload_validation([
-                'name' => basename($_FILES['file']['name'][$i]),
-                'tmp_name' => $_FILES['file']['tmp_name'][$i]
-            ]);
-
-            if (is_array($validation_result) && isset($validation_result['error'])) {
+            $staged = chatbot_chatgpt_stage_uploaded_file(
+                isset($_FILES['file']['tmp_name'][$i]) ? $_FILES['file']['tmp_name'][$i] : '',
+                $original_name,
+                'kchat-upload'
+            );
+            if (is_wp_error($staged)) {
                 $responses[] = [
                     'status' => 'error',
-                    'message' => $validation_result['error']
+                    'message' => $staged->get_error_message()
                 ];
                 $error_flag = true;
-                // Send a 415 Unsupported Media Type status code
                 wp_send_json_error($responses, 415);
             }
 
-            // Move file to uploads directory
-            if (!move_uploaded_file($_FILES['file']['tmp_name'][$i], $file_path)) {
-                $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[4]) 
-                    ? $chatbot_chatgpt_fixed_literal_messages[4] 
-                    : "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later.";
+            $file_path = $staged['path'];
+            $validated_ext = $staged['ext'];
+            $newFileName = 'upload-' . generate_random_string() . '.' . $validated_ext;
 
-                $responses[] = [
-                    'status' => 'error',
-                    'message' => $error_message
-                ];
-                $error_flag = true;
-                // Send a 415 Unsupported Media Type status code
-                wp_send_json_error($responses, 415);
-            }
-
-            // Determine file type
-            $file_mime_type = mime_content_type($file_path);
+            try {
+            // Content type was verified with finfo before the file was staged.
+            $file_mime_type = $staged['mime'];
             $purpose = 'assistants';
 
             // Pre-checks before calling OpenAI: file must exist and have size
@@ -227,7 +531,7 @@ function chatbot_chatgpt_upload_files() {
                 continue;
             }
             $file_size = filesize( $file_path );
-            $filename  = basename( $file_path );
+            $filename  = $newFileName;
 
             // Prepare API request
             $api_url = get_files_api_url();
@@ -352,7 +656,7 @@ function chatbot_chatgpt_upload_files() {
             set_chatbot_chatgpt_transients_files( 'chatbot_chatgpt_assistant_file_ids', $responseData['id'], $session_id, $i );
             set_chatbot_chatgpt_transients_files( 'chatbot_chatgpt_assistant_file_types', $purpose, $session_id, $i );
             // Cache text-like file content for Responses API (OpenAI does not allow GET /files/{id}/content for purpose=assistants).
-            $ext = strtolower( pathinfo( $_FILES['file']['name'][ $i ], PATHINFO_EXTENSION ) );
+            $ext = $validated_ext;
             $text_exts = array( 'txt', 'md', 'csv', 'json', 'xml' );
             $is_text_like = in_array( $ext, $text_exts, true )
                 || strpos( $file_mime_type, 'text/' ) === 0
@@ -372,6 +676,12 @@ function chatbot_chatgpt_upload_files() {
                 'message'    => 'File ' . $newFileName . ' uploaded successfully.',
             ];
             wp_delete_file( $file_path );
+
+            } finally {
+                if ( ! empty( $file_path ) && file_exists( $file_path ) ) {
+                    wp_delete_file( $file_path );
+                }
+            }
 
         }
 
@@ -491,8 +801,8 @@ function upload_file_in_chunks($file_path, $api_key, $file_name, $file_type) {
 // Upload files - Ver 2.0.1
 function chatbot_chatgpt_upload_mp3() {
 
-    // Security: Check if user has permission to upload files
-    if (!current_user_can('upload_files')) {
+    // Security: logged-in users with upload_files, and only when file uploads are enabled.
+    if ( ! chatbot_chatgpt_user_may_upload_files() ) {
         wp_send_json_error('Insufficient permissions to upload files.', 403);
         return;
     }
@@ -528,55 +838,30 @@ function chatbot_chatgpt_upload_mp3() {
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
 
-    global $chatbot_chatgpt_plugin_dir_path;
-
-    $uploads_dir = $chatbot_chatgpt_plugin_dir_path . 'uploads/';
-
-    // Ensure the directory exists or attempt to create it
-    if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
-        // Error handling, e.g., log the error or handle the failure appropriately
-        $responses[] = array(
-            'status' => 'error',
-            'message' => 'Oops! File upload failed.'
-        );
-        http_response_code(500); // Send a 500 Internal Server Error status code
-        exit;
-    } else {
-        $index_file_path = $uploads_dir . '/index.php';
-        if (!file_exists($index_file_path)) {
-            $file_content = "<?php\n// Silence is golden.\n?>";
-            file_put_contents($index_file_path, $file_content);
-        }
-    }
-    // Protect the directory - Ver 2.0.0
-    global $wp_filesystem;
-    if (!function_exists('WP_Filesystem')) {
-        require_once ABSPATH . 'wp-admin/includes/file.php';
-    }
-    if (empty($wp_filesystem)) {
-        WP_Filesystem();
-    }
-    if ($wp_filesystem) {
-        $wp_filesystem->chmod($uploads_dir, 0700);
-    }
-
     $responses = [];
     $error_flag = false;
+
+    // Voice files stay in the system temp directory until speech-to-text sends them.
+    // chatbot_chatgpt_call_stt_api() deletes the temp file in a finally block.
+    $voice_extensions = array( 'mp3', 'mp4', 'mpeg', 'mpga', 'm4a', 'wav', 'webm' );
+    $staged_basename = '';
+    $staged = array( 'ext' => 'mp3' );
 
     // Check if files were uploaded
     if (isset($_FILES['file']['name']) && is_array($_FILES['file']['name'])) {
         for ($i = 0; $i < count($_FILES['file']['name']); $i++) {
-            // Generate a random file name
-            $newFileName = generate_random_string() . '.' . pathinfo($_FILES['file']['name'][$i], PATHINFO_EXTENSION);
-            $file_path = $uploads_dir . $newFileName;
+            $original_name = isset($_FILES['file']['name'][$i]) ? wp_unslash($_FILES['file']['name'][$i]) : '';
+            if (!is_string($original_name)) {
+                $original_name = '';
+            }
 
             if ($_FILES['file']['error'][$i] > 0) {
                 global $chatbot_chatgpt_fixed_literal_messages;
-                // Define a default fallback message
-                $default_message = "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later.";
+                $default_message = "Oops! Something went wrong during the upload of {$original_name}. Please try again later.";
                 $error_message = isset($chatbot_chatgpt_fixed_literal_messages[4]) 
                     ? $chatbot_chatgpt_fixed_literal_messages[4] 
                     : $default_message;
+                chatbot_chatgpt_delete_staged_temp_file( $staged_basename );
                 $responses[] = array(
                     'status' => 'error',
                     'message' => $error_message
@@ -586,55 +871,36 @@ function chatbot_chatgpt_upload_mp3() {
                 exit;
             }
 
-            // Check for allow video and audio file types
-            // $video_file_types = array('video/mp4', 'video/ogg', 'video/webm');
-            // $audio_file_types = array('audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/wav');
-
-            // $allowed_file_types = array_merge($audio_file_types, $video_file_types);
-
-            // if (!in_array($_FILES['file']['type'][$i], $allowed_file_types)) {
-            //     $responses[] = array(
-            //         'status' => 'error',
-            //         'message' => 'Invalid file type. Please upload an MP3, WAV, MP4, or WEBM file.'
-            //     );
-            //     $error_flag = true;
-            //     http_response_code(415); // Send a 415 Unsupported Media Type status code
-            //     exit;
-            // }
-
-            // Checked for valid upload file types
-            // $validation_result = upload_validation(array('name' => $_FILES['file']['name'][$i], 'tmp_name' => $_FILES['file']['tmp_name'][$i]));
-            $validation_result = upload_validation(array('name' => basename($_FILES['file']['name'][$i]), 'tmp_name' => $_FILES['file']['tmp_name'][$i]));
-            if (is_array($validation_result) && isset($validation_result['error'])) {
+            $staged = chatbot_chatgpt_stage_uploaded_file(
+                isset($_FILES['file']['tmp_name'][$i]) ? $_FILES['file']['tmp_name'][$i] : '',
+                $original_name,
+                'kchat-voice',
+                $voice_extensions
+            );
+            if (is_wp_error($staged)) {
+                chatbot_chatgpt_delete_staged_temp_file( $staged_basename );
                 $responses[] = array(
                     'status' => 'error',
-                    'message' => $validation_result['error']
+                    'message' => $staged->get_error_message()
                 );
                 $error_flag = true;
                 http_response_code(415); // Send a 415 Unsupported Media Type status code
                 exit;
             }
 
-            if (!move_uploaded_file($_FILES['file']['tmp_name'][$i], $file_path)) {
-                $responses[] = array(
-                    'status' => 'error',
-                    'message' => "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later."
-                );
-                $error_flag = true;
-                http_response_code(415); // Send a 415 Unsupported Media Type status code
-                exit;
-
-            }
+            chatbot_chatgpt_delete_staged_temp_file( $staged_basename );
+            $staged_basename = $staged['basename'];
         }
 
         if ($error_flag == true) {
+            chatbot_chatgpt_delete_staged_temp_file( $staged_basename );
             http_response_code(403); // Send a 403 Forbidden status code
             return $responses;
         }
 
-        // Save the file name for later
-        set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $newFileName, $session_id, $i);
-        set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', 'mp3', $session_id, $i);
+        // Save the temp basename for speech-to-text. The client filename is not stored.
+        set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $staged_basename, $session_id, $i);
+        set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $staged['ext'], $session_id, $i);
         $responses[] = array(
             'status' => 'success',
             'message' => "File uploaded successfully."
@@ -673,7 +939,14 @@ function chatbot_chatgpt_cleanup_uploads_directory() {
     global $chatbot_chatgpt_plugin_dir_path;
     
     $uploads_dir = $chatbot_chatgpt_plugin_dir_path . 'uploads/';
-    foreach (glob($uploads_dir . '*') as $file) {
+    $upload_files = glob($uploads_dir . '*');
+    if (!is_array($upload_files)) {
+        $upload_files = array();
+    }
+    foreach ($upload_files as $file) {
+        if (chatbot_chatgpt_is_static_guard_file($file)) {
+            continue;
+        }
         // Delete files older than 1 hour
         if (filemtime($file) < time() - 60 * 60 * 1) {
             wp_delete_file($file);
@@ -681,6 +954,7 @@ function chatbot_chatgpt_cleanup_uploads_directory() {
     }
     // Create the index.php file if it does not exist
     create_index_file($uploads_dir);
+    chatbot_chatgpt_cleanup_staged_temp_files();
 }
 add_action('chatbot_chatgpt_cleanup_upload_files', 'chatbot_chatgpt_cleanup_uploads_directory');
 
@@ -717,72 +991,18 @@ function create_index_file($directory) {
 }
 
 // File type validation - Ver 2.0.1
+// Delegates to the allowlist, finfo, and extension checks used by the upload handlers.
 function upload_validation($file) {
 
-    // Get the file type from the file name.
-    $file_type = wp_check_filetype($file['name']);
-
-    // Whisper
-    // File uploads are currently limited to 25 MB and the following input file types are supported: 
-    // mp3, mp4, mpeg, mpga, m4a, wav, and webm.
-
-    // Supported file types
-    // https://platform.openai.com/docs/assistants/tools/file-search/supported-files
-
-    // Extended allowed file extensions and MIME types
-    $allowed_types = array(
-        'csv' => 'text/csv',
-        'doc' => 'application/msword',
-        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'gif' => 'image/gif',
-        'jpeg' => 'image/jpeg',
-        'jpg' => 'image/jpeg',
-        'mp3' => 'audio/mpeg',
-        'mp4' => 'video/mp4',
-        'mpeg' => 'video/mpeg',
-        'mpga' => 'audio/mpeg',
-        'm4a' => 'audio/m4a',
-        'pdf' => 'application/pdf',
-        'png' => 'image/png',
-        'ppt' => 'application/vnd.ms-powerpoint',
-        'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-        'rtf' => 'application/rtf',
-        'svg' => 'image/svg+xml',
-        'txt' => 'text/plain',
-        'wav' => 'audio/wav',
-        'webm' => 'video/webm',
-        'webp' => 'image/webp',
-        'xls' => 'application/vnd.ms-excel',
-        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'xml' => 'application/xml',
-        'json' => 'application/json',
-        'md' => 'text/markdown',
-        'zip' => 'application/zip',
-    );
-
-    // Check if the file type and extension are allowed
-    if (!array_key_exists($file_type['ext'], $allowed_types) || $allowed_types[$file_type['ext']] != $file_type['type']) {
-        $file['error'] = 'Invalid file type or extension.';
+    $name = isset($file['name']) ? $file['name'] : '';
+    $tmp  = isset($file['tmp_name']) ? $file['tmp_name'] : '';
+    $inspected = chatbot_chatgpt_inspect_uploaded_file($tmp, $name);
+    if (is_wp_error($inspected)) {
+        $file['error'] = $inspected->get_error_message();
         return $file;
     }
 
-    // Define file types for which to perform a deep content check
-    $deep_check_types = array('text/csv', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'application/xml', 'application/json', 'text/markdown');
-
-    // Only perform deep content check for certain file types
-    // if (in_array($file_type['type'], $deep_check_types)) {
-        // $file_content = file_get_contents($file['tmp_name']);
-        // $content_check_result = deep_content_check($file_path);
-        $content_check_result = deep_content_check($file['tmp_name']);
-        
-        if ($content_check_result !== true) {
-            $file['error'] = $content_check_result;
-            return $file;
-        }
-
-    // If there's no error, return the file without the 'error' key
     unset($file['error']);
-
     return $file;
 
 }

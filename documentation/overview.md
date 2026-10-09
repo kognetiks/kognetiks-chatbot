@@ -44,16 +44,10 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
-## What's new in Version 2.5.0
-
-### New Features
-* **TBD**
-
-### Improvements
-* **TBD**
+## What's new in Version 2.5.0 - Released 2026-10-09
 
 ### Bug Fixes
-* **TBD**
+* **File upload and download handling**: Uploaded files, and files saved from an assistant reply, were kept with fewer checks than intended and could use a name supplied with the file. Uploads now require a logged-in user who is allowed to upload, and only when file uploads are turned on. Files are checked against an allowed type list, saved under a name the plugin generates, and the upload, download, audio, and transcript folders no longer run scripts.
 
 * Information about past updates can be found [here](updates/updates.md).
 

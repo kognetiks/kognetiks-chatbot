@@ -1903,7 +1903,6 @@ window.resetAllLocks = resetAllLocks;
         'application/vnd.ms-powerpoint',
         'application/vnd.openxmlformats-officedocument.presentationml.presentation',
         'application/rtf',
-        'image/svg+xml',
         'text/plain',
         'audio/wav',
         'video/webm',
@@ -1911,14 +1910,13 @@ window.resetAllLocks = resetAllLocks;
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'application/xml',
         'application/json',
-        'text/markdown',
-        'application/zip'
+        'text/markdown'
     ];
     // List of allowed extensions - Ver 2.0.1
     var allowedExtensions = [
         '.csv', '.doc', '.docx', '.gif', '.jpeg', '.jpg', '.mp3', '.mp4', 
-        '.mpeg', '.m4a', '.pdf', '.png', '.ppt', '.pptx', '.rtf', '.svg', 
-        '.txt', '.wav', '.webm', '.xls', '.xlsx', '.xml', '.json', '.md', '.zip'
+        '.mpeg', '.m4a', '.pdf', '.png', '.ppt', '.pptx', '.rtf', 
+        '.txt', '.wav', '.webm', '.xls', '.xlsx', '.xml', '.json', '.md'
     ];
 
     // Function to get file extension - Ver 2.0.1
@@ -1969,6 +1967,10 @@ window.resetAllLocks = resetAllLocks;
             return;
         }
         // console.log('Chatbot: NOTICE: Files selected ' + fileField.files);
+        if (!kchat_settings.chatbot_upload_nonce) {
+            appendMessage('Oops! File upload is not available.', 'error');
+            return;
+        }
         formData.append('action', 'chatbot_chatgpt_upload_files');
         formData.append('user_id', user_id); // Add user_id to FormData
         formData.append('page_id', page_id); // Add page_id to FormData
@@ -2075,6 +2077,10 @@ window.resetAllLocks = resetAllLocks;
 
         }
         // console.log('Chatbot: NOTICE: Files selected ' + fileField.files);
+        if (!kchat_settings.chatbot_upload_nonce) {
+            appendMessage('Oops! File upload is not available.', 'error');
+            return;
+        }
         formData.append('action', 'chatbot_chatgpt_upload_mp3');
         formData.append('chatbot_nonce', kchat_settings.chatbot_upload_nonce); // Security: CSRF protection
     

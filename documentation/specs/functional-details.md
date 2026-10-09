@@ -565,16 +565,10 @@ Users must agree to terms of service for each AI platform:
 
 ## Version History
 
-## What's new in Version 2.50
-
-### New Features
-* **TBD**
-
-### Improvements
-* **TBD**
+## What's new in Version 2.5.0 - Released 2026-10-09
 
 ### Bug Fixes
-* **TBD**
+* **File upload and download handling**: Uploaded files, and files saved from an assistant reply, were kept with fewer checks than intended and could use a name supplied with the file. Uploads now require a logged-in user who is allowed to upload, and only when file uploads are turned on. Files are checked against an allowed type list, saved under a name the plugin generates, and the upload, download, audio, and transcript folders no longer run scripts.
 
 ## What's new in Version 2.4.9
 

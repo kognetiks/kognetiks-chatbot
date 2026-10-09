@@ -2092,13 +2092,16 @@ function chatbot_chatgpt_get_ajax_nonces() {
 
     $nonces = array(
         'chatbot_message_nonce' => wp_create_nonce('chatbot_message_nonce'),
-        'chatbot_upload_nonce' => wp_create_nonce('chatbot_upload_nonce'),
         'chatbot_erase_nonce' => wp_create_nonce('chatbot_erase_nonce'),
         'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
         'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
         'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
         'chatbot_log_error_nonce' => wp_create_nonce('chatbot_log_error_nonce'),
     );
+
+    if ( function_exists( 'chatbot_chatgpt_user_may_upload_files' ) && chatbot_chatgpt_user_may_upload_files() ) {
+        $nonces['chatbot_upload_nonce'] = wp_create_nonce( 'chatbot_upload_nonce' );
+    }
 
     if (is_user_logged_in() && current_user_can('manage_options')) {
         $nonces['chatbot_unlock_nonce'] = wp_create_nonce('chatbot_unlock_nonce');
