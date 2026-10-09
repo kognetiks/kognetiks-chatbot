@@ -71,7 +71,14 @@ function chatbot_chatgpt_cleanup_transcripts_directory() {
     global $chatbot_chatgpt_plugin_dir_path;
 
     $transcripts_dir = $chatbot_chatgpt_plugin_dir_path . 'transcripts/';
-    foreach (glob($transcripts_dir . '*') as $file) {
+    $transcript_files = glob($transcripts_dir . '*');
+    if (!is_array($transcript_files)) {
+        $transcript_files = array();
+    }
+    foreach ($transcript_files as $file) {
+        if (chatbot_chatgpt_is_static_guard_file($file)) {
+            continue;
+        }
         // Delete files older than 1 hour
         if (filemtime($file) < time() - 60 * 60 * 1) {
             wp_delete_file($file);

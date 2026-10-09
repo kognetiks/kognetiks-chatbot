@@ -82,16 +82,13 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
         $api_url = 'https://api.openai.com/v1/audio/translations';
     }
 
-    // Get the audio file name
-    $counter = 1;
-    $audio_file_name = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
-    $audio_file_name = $chatbot_chatgpt_plugin_dir_path . 'uploads/' . $audio_file_name;
-
-    // Ensure the audio file exists
-    if (!file_exists($audio_file_name)) {
-        return 'Audio file does not exist.';
+    // Voice uploads are staged in the system temp directory, not the plugin tree.
+    $audio_file_name = chatbot_chatgpt_resolve_staged_voice_file( $session_id );
+    if ( is_wp_error( $audio_file_name ) ) {
+        return $audio_file_name->get_error_message();
     }
 
+    try {
     // Validate the file type
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mime_type = finfo_file($finfo, $audio_file_name);
@@ -116,7 +113,12 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
     $body .= "Content-Disposition: form-data; name=\"prompt\"\r\n\r\n";
     $body .= "{$message}\r\n";
     $body .= "--{$boundary}\r\n";
-    $body .= "Content-Disposition: form-data; name=\"file\"; filename=\"" . basename($audio_file_name) . "\"\r\n";
+    $voice_ext = get_chatbot_chatgpt_transients_files( 'chatbot_chatgpt_assistant_file_types', $session_id, 1 );
+    $voice_ext = is_string( $voice_ext ) ? strtolower( $voice_ext ) : '';
+    if ( ! preg_match( '/^[a-z0-9]+$/', $voice_ext ) ) {
+        $voice_ext = 'mp3';
+    }
+    $body .= "Content-Disposition: form-data; name=\"file\"; filename=\"audio." . $voice_ext . "\"\r\n";
     $body .= "Content-Type: {$mime_type}\r\n\r\n";
     $body .= $file_data . "\r\n";
     $body .= "--{$boundary}--\r\n";
@@ -147,9 +149,6 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
     $response_body = wp_remote_retrieve_body($response);
     $response_data = json_decode($response_body, true);
 
-    // Delete the uploaded file
-    wp_delete_file($audio_file_name);
-
     // Handle API errors
     if (isset($response_data['error'])) {
         http_response_code(400);
@@ -175,6 +174,10 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
     // Clear locks on success
     delete_transient($conv_lock);
     return $result;
+
+    } finally {
+        wp_delete_file( $audio_file_name );
+    }
 
 }
 

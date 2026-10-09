@@ -706,9 +706,9 @@ function getTheMessage($thread_id, $api_key, $run_id = null) {
 
                         $basename = basename($path);
 
-                        $file_name = 'download_' . generate_random_string() . '_' . basename($annotation['text']); // Extract the filename
+                        $file_name = isset( $annotation['text'] ) ? $annotation['text'] : '';
 
-                        // Call the function to download the file
+                        // Extension is taken from the annotation name. The stored file is download- plus a random id.
                         $file_url = download_openai_file($file_id, $file_name);
 
                         if ($file_url) {
@@ -737,9 +737,9 @@ function getTheMessage($thread_id, $api_key, $run_id = null) {
                         foreach ($content['text']['annotations'] as $annotation) {
                             if (isset($annotation['file_path']['file_id']) && isset($annotation['text'])) {
                                 $file_id = $annotation['file_path']['file_id'];
-                                $file_name = 'download_' . generate_random_string() . '_' . basename($annotation['text']); // Extract the filename
+                                $file_name = $annotation['text'];
 
-                                // Call the function to download the file
+                                // Extension is taken from the annotation name. The stored file is download- plus a random id.
                                 $file_url = download_openai_file($file_id, $file_name);
 
                                 if ($file_url) {
