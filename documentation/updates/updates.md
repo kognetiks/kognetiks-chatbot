@@ -1,5 +1,10 @@
 # Past Updates
 
+## What's new in Version 2.5.2 - TBD
+
+### BUG FIXES
+* **TBD**
+
 ## What's new in Version 2.5.1 - Released 2026-10-19
 
 ### Bug Fixes
