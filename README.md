@@ -166,6 +166,11 @@ When that happens, Freemius may receive the site URL, WordPress version, PHP ver
 
 - **License URI:** [https://www.gnu.org/licenses/gpl-3.0.html](https://www.gnu.org/licenses/gpl-3.0.html)
 
+## What's new in Version 2.5.1 - Released 2026-10-19
+
+### Bug Fixes
+* **Security token on send**: Sending a message could show "Oops! Security token is missing. Please refresh the page." The shortcode replaced the page settings after the security token was created, so Send no longer had a token. The shortcode now keeps that token.
+
 ## Support
 
 Need help? Visit [https://kognetiks.com/plugin-support/](https://kognetiks.com/plugin-support/)

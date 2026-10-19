@@ -4,7 +4,7 @@
 
 The **Kognetiks Chatbot** is a comprehensive WordPress plugin that integrates advanced AI capabilities into WordPress websites. It provides intelligent conversational experiences through multiple AI platforms, offering both cloud-based and local AI solutions for enhanced visitor engagement, customer support, and interactive assistance.
 
-**Version:** 2.5.0
+**Version:** 2.5.1
 **License:** GPLv3 or later  
 **WordPress Compatibility:** Tested up to WordPress 7.1
 
@@ -408,7 +408,7 @@ Each AI platform requires specific configuration:
 
 ### WordPress Requirements
 
-- **WordPress Version**: 6.0 or higher
+- **WordPress Version**: 7.1 or higher
 - **PHP Version**: 7.0 or higher (tested with PHP 8.2.12)
 - **MySQL**: 5.6 or higher
 - **Memory**: Minimum 128MB PHP memory limit
@@ -564,6 +564,11 @@ Users must agree to terms of service for each AI platform:
 - **JAN.AI**: JAN.AI About and Privacy Policy
 
 ## Version History
+
+## What's new in Version 2.5.1 - Released 2026-10-19
+
+### Bug Fixes
+* **Security token on send**: Sending a message could show "Oops! Security token is missing. Please refresh the page." The shortcode replaced the page settings after the security token was created, so Send no longer had a token. The shortcode now keeps that token.
 
 ## What's new in Version 2.5.0 - Released 2026-10-09
 
