@@ -823,6 +823,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // THIS WAS HIGHER UP
     $kchat_settings['chatbot_chatgpt_version'] = $chatbot_chatgpt_plugin_version;
+
+    // The shortcode replaces the enqueue script's kchat_settings. Include the same nonces so Send still has a token. - Ver 2.5.1
+    $kchat_settings = array_merge(
+        $kchat_settings,
+        chatbot_chatgpt_get_ajax_nonces(),
+        array( 'nonce_timestamp' => time() * 1000 )
+    );
+
     $kchat_settings_json = wp_json_encode($kchat_settings);
     wp_add_inline_script('chatbot-chatgpt-local-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
     wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
