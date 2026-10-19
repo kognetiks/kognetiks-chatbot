@@ -1,5 +1,10 @@
 # Past Updates
 
+## What's new in Version 2.5.1 - Released 2026-10-19
+
+### Bug Fixes
+* **Security token on send**: Sending a message could show "Oops! Security token is missing. Please refresh the page." The shortcode replaced the page settings after the security token was created, so Send no longer had a token. The shortcode now keeps that token.
+
 ## What's new in Version 2.5.0 - Released 2026-10-09
 
 ### Bug Fixes
