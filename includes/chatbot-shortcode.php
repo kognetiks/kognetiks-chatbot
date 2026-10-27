@@ -90,7 +90,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_local_voice_option', 'none'));
     } else {
-        $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+        $model_choice = esc_attr( chatbot_chatgpt_resolve_openai_chat_model() );
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));    
     }
@@ -115,8 +115,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     //
     // Model Selection
     //
-    // [chatbot style="floating" model="gpt-4-turbo-preview"] - Floating style using the GPT-4 Turbo Preview model
-    // [chatbot style="embedded" model="dall-e-3"] - Embedded style using the DALL-E 3 model
+    // [chatbot style="floating" model="gpt-5.6-sol"] - Floating style using GPT-5.6 Sol
+    // [chatbot style="embedded" model="gpt-image-2.5-flare"] - Embedded style using GPT Image 2.5 Flare
     // [chatbot style="embedded" model="tts-1"] - Embedded style using the TTS 1 model
     // [chatbot style="embedded" model="tts-1-hd" voice="fable"] - Embedded style using the TTS 1 model with the voice of Fable
 
@@ -312,7 +312,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
         switch ($chatbot_ai_platform_choice) {
             case 'OpenAI':
-                $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+                $model = chatbot_chatgpt_resolve_openai_chat_model();
                 break;
             case 'NVIDIA':
                 $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
@@ -339,7 +339,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
                 break;
             default:
-                $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+                $model = chatbot_chatgpt_resolve_openai_chat_model();
         }
 
         $kchat_settings['model'] = $model;
@@ -352,6 +352,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     } else {
 
         $model = sanitize_text_field($atts['model']);
+        if ( 'OpenAI' === esc_attr( get_option( 'chatbot_ai_platform_choice', 'OpenAI' ) ) ) {
+            if ( chatbot_chatgpt_is_openai_image_model( $model ) ) {
+                $model = chatbot_chatgpt_resolve_openai_image_model( $model );
+            } else {
+                $model = chatbot_chatgpt_resolve_openai_chat_model( $model );
+            }
+        }
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
         $assistant_details['model'] = $model;

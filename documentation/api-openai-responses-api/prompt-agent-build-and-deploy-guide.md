@@ -121,7 +121,7 @@ Prompts use a Responses API ID that starts with ```pmpt_```, for example: ```pmp
 
 <img src="assistant-settings.png" alt="Assistant settings" style="width:auto;height:auto;">
 
-> Note: Both ```asst_...``` and ```pmpt_...``` IDs work on the ```GPT Assistants``` page and in the ```assistant=``` shortcode parameter. Copy important prompt text into **Additional Instructions** in WordPress; hosted prompt objects are scheduled to shut down on 30 November 2026.
+> Note: Both ```asst_...``` and ```pmpt_...``` IDs work on the ```GPT Assistants``` page and in the ```assistant=``` shortcode parameter. Copy important prompt text into **Additional Instructions** in WordPress; hosted prompt objects are scheduled to retirement on 30 November 2026.
 
 ---
 

@@ -56,20 +56,26 @@ function localize_global_stopwords($language_code, $stopWords) {
     );
 
     // Model and Message for testing
-    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+    $model = chatbot_chatgpt_resolve_openai_chat_model();
 
     $stopWords_string = implode(", ", $stopWords);
     $stopWords = "Translate the global variables into " . $language_code . ":\n\n" . $stopWords_string;
 
     $body = array(
         'model' => $model,
-        'max_tokens' => 10000,
-        'temperature' => 0.5,
         'messages' => array(
             array('role' => 'system', 'content' => 'You are a master translator whose job it is to translate word-for-word anything sent to you.  The language code will be provided in the format of [language code]_[COUNTRY CODE], where the language code is a two-letter code based on the ISO 639-1 standard.  Return only the list of translated words without the English.'),
             array('role' => 'user', 'content' => $stopWords)
         ),
     );
+    if ( ! chatbot_openai_doesnt_support_temperature( $model ) ) {
+        $body['temperature'] = 0.5;
+    }
+    if ( chatbot_openai_requires_max_completion_tokens( $model ) ) {
+        $body['max_completion_tokens'] = 10000;
+    } else {
+        $body['max_tokens'] = 10000;
+    }
 
     $args = array(
         'headers' => $headers,
@@ -142,21 +148,26 @@ function localize_global_learningMessages($language_code, $learningMessages) {
     );
 
     // Model and Message for testing
-    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    // FIXME - For now switch gpt-4-turbo back to gpt-4-1106-preview
+    $model = chatbot_chatgpt_resolve_openai_chat_model();
 
     $learningMessages_string = implode("\n", $learningMessages);
     $learningMessages = "Translate the global variables into " . $language_code . ":\n\n" . $learningMessages_string;
 
     $body = array(
         'model' => $model,
-        'max_tokens' => 1000,
-        'temperature' => 0.5,
         'messages' => array(
             array('role' => 'system', 'content' => 'You are a master translator whose job it is to translate the phrases sent to you.  The language code will be provided in the format of [language code]_[COUNTRY CODE], where the language code is a two-letter code based on the ISO 639-1 standard.  Return only the translated phrases without the English.'),
             array('role' => 'user', 'content' => $learningMessages)
         ),
     );
+    if ( ! chatbot_openai_doesnt_support_temperature( $model ) ) {
+        $body['temperature'] = 0.5;
+    }
+    if ( chatbot_openai_requires_max_completion_tokens( $model ) ) {
+        $body['max_completion_tokens'] = 1000;
+    } else {
+        $body['max_tokens'] = 1000;
+    }
 
     $args = array(
         'headers' => $headers,
@@ -234,20 +245,26 @@ function localize_global_errorResponses($language_code, $errorResponses) {
     );
 
     // Model and Message for testing
-    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+    $model = chatbot_chatgpt_resolve_openai_chat_model();
 
     $errorResponses_string = implode("\n", $errorResponses);
     $errorResponses = "Translate the global variables into " . $language_code . ":\n\n" . $errorResponses_string;
 
     $body = array(
         'model' => $model,
-        'max_tokens' => 1000,
-        'temperature' => 0.5,
         'messages' => array(
             array('role' => 'system', 'content' => 'You are a master translator whose job it is to translate the phrases sent to you.  The language code will be provided in the format of [language code]_[COUNTRY CODE], where the language code is a two-letter code based on the ISO 639-1 standard.  Return only the translated phrases without the English.'),
             array('role' => 'user', 'content' => $errorResponses)
         ),
     );
+    if ( ! chatbot_openai_doesnt_support_temperature( $model ) ) {
+        $body['temperature'] = 0.5;
+    }
+    if ( chatbot_openai_requires_max_completion_tokens( $model ) ) {
+        $body['max_completion_tokens'] = 1000;
+    } else {
+        $body['max_tokens'] = 1000;
+    }
 
     $args = array(
         'headers' => $headers,

@@ -41,8 +41,8 @@ function chatbot_chatgpt_api_chatgpt_chat_section_callback($args) {
     <p><b>NOTE:</b> Enter your API key (above), click <code>Save Settings</code> at the bottom of this page, in order to retrieve the full list of available models.</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
         <li><code>&#91;chatbot&#93;</code> - Default chat model, style is floating</li>
-        <li><code>&#91;chatbot style="floating" model="gpt-4"&#93;</code> - Style is floating, specific model</li>
-        <li><code>&#91;chatbot style="embedded" model="gpt-4-1106-preview"&#93;</code> - Style is embedded, default chat model</li>
+        <li><code>&#91;chatbot style="floating" model="gpt-5.6-sol"&#93;</code> - Style is floating, specific model</li>
+        <li><code>&#91;chatbot style="embedded" model="gpt-5.6-terra"&#93;</code> - Style is embedded, default chat model</li>
         <!-- <li><code>&#91;chatbot style=embedded model=chat&#93;</code> - Style is embedded, default chat model</li> -->
     </ul>
     <?php
@@ -54,7 +54,7 @@ function chatbot_chatgpt_api_chatgpt_image_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin when using image models. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-        <li><code>&#91;chatbot style="floating" model="gpt-image-1"&#93;</code> - Style is floating, specific image model</li>
+        <li><code>&#91;chatbot style="floating" model="gpt-image-2.5-flare"&#93;</code> - Style is floating, specific image model</li>
         <li><code>&#91;chatbot style="embedded" model="gpt-image-2"&#93;</code> - Style is embedded, GPT Image model</li>
         <!-- <li><code>&#91;chatbot style=embedded model=image&#93;</code> - Style is embedded, default image model</li> -->
     </ul>
@@ -118,42 +118,38 @@ function chatbot_chatgpt_api_key_callback($args) {
 // https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
 // Model choice
 function chatbot_chatgpt_model_choice_callback($args) {
-  
-    // Get the saved chatbot_chatgpt_model_choice value or default to "gpt-3.5-turbo"
-    $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+
+    $model_choice = chatbot_chatgpt_resolve_openai_chat_model();
 
     // Fetch models from the API
     $models = chatbot_openai_get_models();
 
     // Limit the models to chat models (exclude GPT Image models)
-    $models = array_filter($models, function($model) {
-        return ! empty( $model['id'] )
-            && strpos($model['id'], 'gpt') !== false
-            && strpos($model['id'], 'gpt-image') === false;
-    });
-
-    // Check for errors
-    if (is_string($models) && strpos($models, 'Error:') === 0) {
-        // If there's an error, display the hardcoded list
-        $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-        ?>
-        <select id="chatbot_chatgpt_model_choice" name="chatbot_chatgpt_model_choice">
-            <option value="<?php echo esc_attr( 'gpt-4-1106-preview' ); ?>" <?php selected( $model_choice, 'gpt-4-1106-preview' ); ?>><?php echo esc_html( 'gpt-4-1106-preview' ); ?></option>
-            <option value="<?php echo esc_attr( 'gpt-4' ); ?>" <?php selected( $model_choice, 'gpt-4' ); ?>><?php echo esc_html( 'gpt-4' ); ?></option>
-            <option value="<?php echo esc_attr( 'gpt-3.5-turbo' ); ?>" <?php selected( $model_choice, 'gpt-3.5-turbo' ); ?>><?php echo esc_html( 'gpt-3.5-turbo' ); ?></option>
-        </select>
-        <?php
+    if ( is_array( $models ) ) {
+        $models = array_values( array_filter( $models, function( $model ) {
+            return ! empty( $model['id'] )
+                && strpos( $model['id'], 'gpt' ) !== false
+                && strpos( $model['id'], 'gpt-image' ) === false
+                && ! chatbot_chatgpt_openai_model_is_unavailable( $model );
+        } ) );
     } else {
-        // If models are fetched successfully, display them dynamically
-        ?>
-        <select id="chatbot_chatgpt_model_choice" name="chatbot_chatgpt_model_choice">
-            <?php foreach ($models as $model): ?>
-                <option value="<?php echo esc_attr($model['id']); ?>" <?php selected(esc_attr(get_option('chatbot_chatgpt_model_choice')), $model['id']); ?>><?php echo esc_html($model['id']); ?></option>
-            <?php endforeach; ?>
-            ?>
-        </select>
-        <?php
+        $models = array();
     }
+
+    if ( empty( $models ) ) {
+        $models = array(
+            array( 'id' => 'gpt-5.6-terra' ),
+            array( 'id' => 'gpt-5.6-sol' ),
+        );
+    }
+
+    ?>
+    <select id="chatbot_chatgpt_model_choice" name="chatbot_chatgpt_model_choice">
+        <?php foreach ( $models as $model ): ?>
+            <option value="<?php echo esc_attr( $model['id'] ); ?>" <?php selected( $model_choice, $model['id'] ); ?>><?php echo esc_html( $model['id'] ); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <?php
 
 }
 
@@ -360,9 +356,9 @@ function chatbot_chatgpt_image_model_option_callback($args) {
     // https://platform.openai.com/docs/guides/image-generation
     // DALL·E 2 and DALL·E 3 were removed from the OpenAI API on May 12, 2026.
 
-    $image_model_option = get_option('chatbot_chatgpt_image_model_option', 'gpt-image-1');
-    if ( empty( $image_model_option ) || str_starts_with( (string) $image_model_option, 'dall' ) ) {
-        $image_model_option = 'gpt-image-1';
+    $stored_image_model = get_option( 'chatbot_chatgpt_image_model_option', false );
+    $image_model_option = chatbot_chatgpt_resolve_openai_image_model( ( false === $stored_image_model ) ? '' : $stored_image_model );
+    if ( (string) $stored_image_model !== $image_model_option ) {
         update_option( 'chatbot_chatgpt_image_model_option', $image_model_option );
     }
 
@@ -401,7 +397,7 @@ function chatbot_chatgpt_image_output_size_callback($args) {
     // DALL·E 2: 256x256, 512x512, 1024x1024
     // DALL·E 3: 1024x1024, 1792x1024, 1024x1792
 
-    $model = get_option('chatbot_chatgpt_image_model_option', 'gpt-image-1');
+    $model = chatbot_chatgpt_resolve_openai_image_model();
     $image_output_size = get_option('chatbot_chatgpt_image_output_size', '1024x1024');
 
     $gpt_image_sizes = array( '1024x1024', '1536x1024', '1024x1536', 'auto' );
@@ -444,7 +440,7 @@ function chatbot_chatgpt_image_output_size_callback($args) {
 function chatbot_chatgpt_image_output_quantity_callback($args) {
 
     $image_output_quantity = get_option('chatbot_chatgpt_image_output_quantity', '1');
-    $model = get_option('chatbot_chatgpt_image_model_option', 'gpt-image-1');
+    $model = chatbot_chatgpt_resolve_openai_image_model();
 
     // GPT Image and DALL·E 3 only support n=1.
     $max_quantity = ( $model === 'dall-e-2' ) ? 10 : 1;
@@ -462,7 +458,7 @@ function chatbot_chatgpt_image_output_quantity_callback($args) {
 // Image Output Quality Options Callback - Ver 1.9.5
 function chatbot_chatgpt_image_output_quality_callback($args) {
 
-    $model = get_option('chatbot_chatgpt_image_model_option', 'gpt-image-1');
+    $model = chatbot_chatgpt_resolve_openai_image_model();
     $image_output_quality = get_option('chatbot_chatgpt_image_output_quality', 'auto');
 
     if ( str_starts_with( (string) $model, 'gpt-image' ) ) {

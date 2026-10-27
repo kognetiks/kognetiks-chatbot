@@ -38,7 +38,7 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_display_style' => 'floating',
         'chatbot_chatgpt_enable_custom_buttons' => 'Off',
         'chatbot_chatgpt_initial_greeting' => 'Hello! How can I help you today?',
-        'chatbot_chatgpt_model_choice' => 'gpt-3.5-turbo',
+        'chatbot_chatgpt_model_choice' => 'gpt-5.6-terra',
         'chatbot_chatgpt_start_status' => 'closed',
         'chatbot_chatgpt_start_status_new_visitor' => 'closed',
         'chatbot_chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',

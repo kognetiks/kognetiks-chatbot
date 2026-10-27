@@ -46,8 +46,8 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## What's new in Version 2.5.2 - TBD
 
-### BUG FIXES
-* **TBD**
+### Bug Fixes
+* **Retired OpenAI models**: OpenAI retired `gpt-3.5-turbo` and `gpt-image-1` on 23 October 2026, and the plugin was still sending them when no newer model was saved. Chat now uses `gpt-5.6-terra` (or `gpt-5.6-sol` for the old `gpt-4` ids), and images use `gpt-image-2.5-flare`. A saved model that is still available is left as you set it.
 
 ## What's new in Version 2.5.1 - Released 2026-10-19
 

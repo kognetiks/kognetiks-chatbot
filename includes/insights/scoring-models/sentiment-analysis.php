@@ -418,7 +418,7 @@ function kognetiks_insights_compute_sentiment_score_ai_based($message_text) {
     // Get the AI Model from the options table
     switch ($ai_platform_choice) {  
         case 'OpenAI':
-            $ai_model_choice = get_option('chatbot_chatgpt_model_choice');
+            $ai_model_choice = chatbot_chatgpt_resolve_openai_chat_model();
             break;
         case 'Anthropic':
             $ai_model_choice = get_option('chatbot_anthropic_model_choice');
@@ -442,7 +442,7 @@ function kognetiks_insights_compute_sentiment_score_ai_based($message_text) {
             $ai_model_choice = get_option('chatbot_local_model_choice');
             break;
         default:
-            $ai_model_choice = 'gpt-3.5-turbo';
+            $ai_model_choice = chatbot_chatgpt_resolve_openai_chat_model( '' );
     }
 
     $sentiment_prompt = 'You are a sentiment analysis model. Your task is to analyze the sentiment of the message and return only the (no other text)score between -1.0 and 1.0. -1.0 is negative, 0 is neutral, and 1.0 is positive. Rate this message from -1.0 to 1.0: ';

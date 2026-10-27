@@ -84,8 +84,8 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     );
 
     // Select the OpenAI Model
-    // Get the saved model from the settings or default to "gpt-3.5-turbo"
-    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+    // Select the OpenAI Model. Empty and retired ids map to a model that still answers.
+    $model = chatbot_chatgpt_resolve_openai_chat_model();
  
     // Max tokens - Ver 1.4.2
     $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1000')));

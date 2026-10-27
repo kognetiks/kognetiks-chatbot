@@ -34,7 +34,7 @@ if ( ! defined( 'WPINC' ) ) {
         // Decrypt the API key - Ver 2.2.6
         $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
         // Model and message for testing
-        $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+        $model = chatbot_chatgpt_resolve_openai_chat_model();
         $updated_status = kchat_fetch_api_status($api_key, $model);
         update_option('chatbot_chatgpt_api_status', $updated_status);
     } elseif ($chatbot_chatbot_ai_platform_choice == 'NVIDIA') {
@@ -125,7 +125,7 @@ function kchat_fetch_api_status($api_key, $model) {
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
 
             // Model and message for testing
-            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'chatgpt-4o-latest'));
+            $model = chatbot_chatgpt_resolve_openai_chat_model();
 
             // The current API URL endpoint
             // $api_url = 'https://api.openai.com/v1/chat/completions';

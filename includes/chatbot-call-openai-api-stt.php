@@ -186,7 +186,7 @@ function chatbot_chatgpt_post_process_transcription($api_key, $message, $transcr
 
     // Get API URL for text processing
     $api_url = get_chat_completions_api_url();
-    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+    $model = chatbot_chatgpt_resolve_openai_chat_model();
     $max_tokens = intval(get_option('chatbot_chatgpt_max_tokens_setting', 1000));
 
     // Build conversation context using standardized function - Ver 2.3.9+
