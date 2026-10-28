@@ -3,7 +3,7 @@ Contributors: kognetiks
 Tags: chat, chatgpt, ai, reporting, insights
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 6.0
-Tested up to: 7.1.3
+Tested up to: 7.1.4
 Requires PHP: 7.0
 Stable tag: 2.5.3
 License: GPLv3 or later
@@ -193,10 +193,10 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.5.3 - Released TBD =
+= 2.5.3 - Released 2026-10-29 =
 
 ### Bug Fixes
-* **TBD**: TBD
+* **Transcript download**: Download Transcript now saves a text file in the browser from the conversation shown in that chatbot.
 
 = 2.5.2 - Released 2026-10-28 =
 

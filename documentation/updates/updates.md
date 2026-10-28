@@ -1,9 +1,9 @@
 # Past Updates
 
-## What's new in Version 2.5.3 - Released TBD
+## What's new in Version 2.5.3 - Released 2026-10-29
 
 ### Bug Fixes
-* **TBD**: TBD
+* **Transcript download**: Download Transcript now saves a text file in the browser from the conversation shown in that chatbot.
 
 ## What's new in Version 2.5.2 - Released 2026-10-28
 

@@ -903,7 +903,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // OUTSIDE THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
         // ob_start();
         ?>
-        <div id="chatbot-chatgpt" style="display: flex;" class="chatbot-embedded-style chatbot-full" data-cache-buster="<?php echo esc_attr( (string) time() ); ?>">
+        <div id="chatbot-chatgpt" style="display: flex;" class="chatbot-embedded-style chatbot-full chatbot-chatgpt-root" data-cache-buster="<?php echo esc_attr( (string) time() ); ?>">
         <script>
             jQuery(document).ready(function($) {
                 $('#chatbot-chatgpt').removeClass('chatbot-floating-style').addClass('chatbot-embedded-style');
@@ -921,7 +921,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             echo '</div>';
         // }
         ?>
-        <div id="chatbot-chatgpt-conversation"></div>
+        <div id="chatbot-chatgpt-conversation" class="chatbot-chatgpt-conversation"></div>
         <div id="chatbot-chatgpt-input">
             <div id="chatbot-chatgpt-input-area">
                 <label for="chatbot-chatgpt-message"></label>
@@ -1025,7 +1025,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 </button>
             <?php endif; ?>
             <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
-                <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
+                <button id="chatbot-chatgpt-download-transcript-btn" class="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
                     <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('download_icon') ); ?>" alt="Download Transcript">
                 </button>
             <?php endif; ?>
@@ -1055,11 +1055,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // OUTSIDE THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
         // ob_start();
         ?>
-        <div id="chatbot-chatgpt">
+        <div id="chatbot-chatgpt" class="chatbot-chatgpt-root">
             <div id="chatbot-chatgpt-header" data-cache-buster="<?php echo esc_attr( (string) time() ); ?>">
                 <div id="chatbot-chatgpt-title" class="title"><?php echo esc_html( wp_strip_all_tags( $bot_name ) ); ?></div>
             </div>
-            <div id="chatbot-chatgpt-conversation"></div>
+            <div id="chatbot-chatgpt-conversation" class="chatbot-chatgpt-conversation"></div>
             <div id="chatbot-chatgpt-input">
                 <div id="chatbot-chatgpt-input-area">
                     <label for="chatbot-chatgpt-message"></label>
@@ -1157,7 +1157,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     </button>
                 <?php endif; ?>
                 <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
-                    <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
+                    <button id="chatbot-chatgpt-download-transcript-btn" class="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
                         <img decoding="async" src="<?php echo esc_url( chatbot_chatgpt_appearance_icon_path('download_icon') ); ?>" alt="Download Transcript">
                     </button>
                 <?php endif; ?>

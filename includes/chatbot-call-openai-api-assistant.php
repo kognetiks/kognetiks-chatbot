@@ -925,7 +925,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // Step 2 - Get The Thread ID
         $thread_id = $assistants_response["id"];
         $kchat_settings['thread_id'] = $thread_id; // ADDED FOR VER 2.1.1.1 - 2024-08-26
-        set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id);
+        set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id, $session_id);
         
         // Thread lock check removed - main send function handles locking
         

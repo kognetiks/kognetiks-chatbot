@@ -19,7 +19,6 @@ jQuery(document).ready(function ($) {
             'chatbot_erase_nonce',
             'chatbot_queue_nonce',
             'chatbot_tts_nonce',
-            'chatbot_transcript_nonce',
             'chatbot_log_error_nonce',
             'chatbot_unlock_nonce',
             'chatbot_reset_nonce'
@@ -1564,77 +1563,27 @@ window.resetAllLocks = resetAllLocks;
         }
     });
 
-    // Add the click event listener to the download transcript button - Ver 1.9.9
-    $('#chatbot-chatgpt-download-transcript-btn').on('click', function(e) {
-        e.preventDefault();  // Prevent the default action of the button (if needed)
-        // console.log('Chatbot: NOTICE: Button clicked: Downloading transcript');  // Optional: Log to console
-    
-        let conversationContent = $('#chatbot-chatgpt-conversation').html();  // Get the HTML content
-        let button = $(this);  // Store a reference to the button
-    
-        $.ajax({
-            url: kchat_settings.ajax_url,
-            method: 'POST',
-            data: {
-                action: 'chatbot_chatgpt_download_transcript',
-                user_id: kchat_settings.user_id,
-                page_id: kchat_settings.page_id,
-                conversation_content: conversationContent,  // Send the conversation content
-                chatbot_nonce: kchat_settings.chatbot_transcript_nonce // Security: CSRF protection
-            },
-            beforeSend: function () {
-                // Show typing indicator and disable submit button
-                // Replace these functions with your own
-                showTypingIndicator();
-                $('#submit-button').prop('disabled', true);
-            },
-            success: function(response) {
-                if (response.success && response.data) {
-                    // let link = document.createElement('a');
-                    // link.href = response.data;
-                    // link.download = ''; // Optionally set the filename
-                    // document.body.appendChild(link);
-                    // // Refactored to use MouseEvent - Ver 2.0.5 - 2024 07 06
-                    // // link.click();
-                    // link.dispatchEvent(new MouseEvent('click')); // Use MouseEvent to simulate click
-                    // document.body.removeChild(link);
-
-                    let link = document.createElement('a');
-                    link.href = sanitizeUrl(response.data); // Sanitize the URL
-                    link.download = ''; // Optionally set the filename
-                    document.body.appendChild(link);
-                    // Refactored to use MouseEvent - Ver 2.0.5 - 2024 07 06
-                    // link.click();
-                    link.dispatchEvent(new MouseEvent('click')); // Use MouseEvent to simulate click
-                    document.body.removeChild(link);
-
-                } else {
-                    // console.error('Chatbot: ERROR: Download URL not provided or error in response.');
-                    // console.error(response.data || 'No additional error data.');
-                    appendMessage('Oops! There was a problem downloading the transcript. Please try again later.', 'error');
-                }
-            },
-            error: function(jqXHR, status, error) {
-                // Handle AJAX errors
-                appendMessage('Error: ' + error, 'error');
-                appendMessage('Oops! There was a problem downloading the transcript. Please try again later.', 'error');
-            },
-            complete: function () {
-                // Remove typing indicator and enable submit button
-                // Replace these functions with your own
-                removeTypingIndicator();
-                $('#submit-button').prop('disabled', false);
-                button.trigger('blur');  // Remove focus from the button
-            },
-        });
+    // Download the displayed conversation of the clicked chatbot, including
+    // Knowledge Navigator text shown in that conversation. Nothing is uploaded
+    // and no public file is created.
+    $(document).on('click', '#chatbot-chatgpt-download-transcript-btn, .chatbot-chatgpt-download-transcript-btn', function(e) {
+        e.preventDefault();
+        let button = $(this);
+        let download = window.kognetiksTranscriptDownload;
+        let transcriptText = download && typeof download.transcriptForButton === 'function'
+            ? download.transcriptForButton(this)
+            : null;
+        let filename = download && transcriptText !== null && typeof download.transcriptFilename === 'function'
+            ? download.transcriptFilename(new Date())
+            : '';
+        let started = transcriptText !== null && download && typeof download.startTextDownload === 'function'
+            ? download.startTextDownload(transcriptText, filename)
+            : false;
+        if (!started) {
+            appendMessage('Oops! There was a problem downloading the transcript. Please try again later.', 'error');
+        }
+        button.trigger('blur');
     });
-
-    function sanitizeUrl(url) {
-        // A simple implementation could check for a valid protocol (http or https)
-        // This is a basic example and might need to be expanded based on your requirements
-        const urlPattern = /^https?:\/\/[^ "]+$/;
-        return urlPattern.test(url) ? url : 'about:blank'; // Use 'about:blank' if the URL is invalid
-    }
 
     // Read Out Loud - Ver 1.9.5
     $('#chatbot-chatgpt-text-to-speech-btn').on('click', function(e) {

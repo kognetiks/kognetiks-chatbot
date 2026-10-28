@@ -2,77 +2,126 @@
 /**
  * Kognetiks Chatbot - Threads
  *
- * This file contains the code for managing the threads used
- * to display the Chatbot on the website.
+ * Isolated conversation ids (OpenAI cnv_ values and legacy thread ids) are stored
+ * under a verified actor, page, and assistant. The historical anonymous key
+ * chatbot_chatgpt_thread_id_0_{page_id} is never read.
  *
  * @package chatbot-chatgpt
  */
 
-// If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Set the threads transient
-function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id) {
+/**
+ * Store a conversation id for one verified actor, page, and assistant.
+ * Does not replace an existing different id. Callers must erase first.
+ *
+ * @param string $thread_id Conversation id.
+ * @param string $assistant_id Assistant or prompt id.
+ * @param mixed  $user_id WordPress user id, or 0 for a visitor.
+ * @param mixed  $page_id Page id.
+ * @param mixed  $session_id Verified visitor id. Required for anonymous visitors.
+ * @return bool
+ */
+function set_chatbot_chatgpt_threads( $thread_id, $assistant_id, $user_id, $page_id, $session_id = null ) {
 
-    // Create unique keys for transients
-    $thread_id_thread_key = 'chatbot_chatgpt_thread_id_' . $user_id . '_' . $page_id;
-    $assistant_id_thread_key = 'chatbot_chatgpt_assistant_id_' . $user_id . '_' . $page_id;
-
-    // Retrieve the chatbot_chatgpt_thread_retention_period option
-    $thread_retention_period = (int) esc_attr(get_option('chatbot_chatgpt_thread_retention_period', 36));
-
-    // Store the style and the assistant value with unique keys
-    // Store transients for 1 day 12 hours (60 seconds * 60 minutes * 36 hours)
-    set_transient($thread_id_thread_key, $thread_id, 60*60*$thread_retention_period); // Store for 36 hours
-    set_transient($assistant_id_thread_key, $assistant_id, 60*60*$thread_retention_period); // Store for 36 hours
-
-}
-
-// Get the threads
-function get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id) {
-
-    // Construct the unique keys
-    $thread_id_thread_key = 'chatbot_chatgpt_thread_id_' . $user_id . '_' . $page_id;
-    $assistant_id_thread_key = 'chatbot_chatgpt_assistant_id_' . $user_id . '_' . $page_id;
-
-    // Retrieve the stored values
-    $thread_id = get_transient($thread_id_thread_key);
-    if ($thread_id === false) {
-        $thread_id = '';
-    } else {
+    if ( ! is_string( $thread_id ) || trim( $thread_id ) === '' ) {
+        return false;
     }
-    
-    $assistant_id = get_transient($assistant_id_thread_key);
-    if ($assistant_id === false) {
-        $assistant_id = '';
-    } else {
+    $thread_id = trim( $thread_id );
+    if ( $session_id === null ) {
+        $session_id = '';
     }
 
-    // Initialize $kchat_settings if it is null
-    // if (!is_array($kchat_settings)) {
-    //     $kchat_settings = [];
-    // }
+    $key = chatbot_chatgpt_conversation_storage_key( $user_id, $session_id, $page_id, $assistant_id );
+    if ( $key === '' ) {
+        return false;
+    }
 
-    // Return the values, also handle the case where the transient might have expired
-    // return array(
-    //     'thread_id' => $thread_id,
-    //     'assistant_id' => $assistant_id
-    // );
-    return $thread_id;
+    $existing = get_transient( $key );
+    if ( is_string( $existing ) && $existing !== '' && $existing !== $thread_id ) {
+        return false;
+    }
 
+    set_transient( $key, $thread_id, chatbot_chatgpt_thread_retention_seconds() );
+
+    if ( chatbot_chatgpt_normalize_wp_user_id( $user_id ) <= 0 ) {
+        chatbot_chatgpt_delete_legacy_anonymous_keys_for_page( $page_id );
+    }
+
+    return true;
 }
 
-// Delete the threads
-function delete_chatbot_chatgpt_threads($user_id, $page_id) {
+/**
+ * Read the conversation id for one verified actor, page, and assistant.
+ *
+ * @param mixed $user_id WordPress user id, or 0 for a visitor.
+ * @param mixed $session_id Verified visitor id.
+ * @param mixed $page_id Page id.
+ * @param mixed $assistant_id Assistant or prompt id.
+ * @return string
+ */
+function get_chatbot_chatgpt_threads( $user_id, $session_id, $page_id, $assistant_id ) {
 
-    // Construct the unique keys
-    $thread_id_thread_key = 'chatbot_chatgpt_thread_id_' . $user_id . '_' . $page_id;
-    $assistant_id_thread_key = 'chatbot_chatgpt_assistant_id_' . $user_id . '_' . $page_id;
+    $key = chatbot_chatgpt_conversation_storage_key( $user_id, $session_id, $page_id, $assistant_id );
+    if ( $key === '' ) {
+        return '';
+    }
 
-    // Delete the stored values
-    delete_transient($thread_id_thread_key);
-    delete_transient($assistant_id_thread_key);
-    
+    if ( chatbot_chatgpt_normalize_wp_user_id( $user_id ) <= 0 ) {
+        // Retire the shared anonymous row. Do not read it.
+        chatbot_chatgpt_delete_legacy_anonymous_keys_for_page( $page_id );
+    }
+
+    $thread_id = get_transient( $key );
+    if ( is_string( $thread_id ) && $thread_id !== '' ) {
+        return $thread_id;
+    }
+
+    $uid = chatbot_chatgpt_normalize_wp_user_id( $user_id );
+    if ( $uid > 0 ) {
+        $legacy = chatbot_chatgpt_migrate_legacy_authenticated_thread( $uid, $page_id, $assistant_id );
+        if ( $legacy !== '' ) {
+            $written = set_chatbot_chatgpt_threads( $legacy, $assistant_id, $uid, $page_id, $session_id );
+            if ( $written === true ) {
+                chatbot_chatgpt_delete_matching_legacy_authenticated_thread( $uid, $page_id, $assistant_id );
+                return $legacy;
+            }
+        }
+    }
+
+    return '';
+}
+
+/**
+ * Remove one actor's conversation association for one page and assistant.
+ *
+ * @param mixed $user_id WordPress user id, or 0 for a visitor.
+ * @param mixed $page_id Page id.
+ * @param mixed $session_id Verified visitor id.
+ * @param mixed $assistant_id Assistant or prompt id.
+ * @return bool
+ */
+function delete_chatbot_chatgpt_threads( $user_id, $page_id, $session_id = null, $assistant_id = null ) {
+
+    if ( $session_id === null ) {
+        $session_id = '';
+    }
+
+    $key = chatbot_chatgpt_conversation_storage_key( $user_id, $session_id, $page_id, $assistant_id );
+    if ( $key === '' ) {
+        return false;
+    }
+
+    delete_transient( $key );
+
+    $uid = chatbot_chatgpt_normalize_wp_user_id( $user_id );
+    if ( $uid > 0 ) {
+        chatbot_chatgpt_delete_matching_legacy_authenticated_thread( $uid, $page_id, $assistant_id );
+    } else {
+        chatbot_chatgpt_delete_legacy_anonymous_keys_for_page( $page_id );
+    }
+
+    return true;
 }
