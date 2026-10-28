@@ -44,15 +44,10 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
-## What's new in Version 2.5.2 - TBD
+## What's new in Version 2.5.2 - Released 2026-10-28
 
 ### Bug Fixes
 * **Retired OpenAI models**: OpenAI retired `gpt-3.5-turbo` and `gpt-image-1` on 23 October 2026, and the plugin was still sending them when no newer model was saved. Chat now uses `gpt-5.6-terra` (or `gpt-5.6-sol` for the old `gpt-4` ids), and images use `gpt-image-2.5-flare`. A saved model that is still available is left as you set it.
-
-## What's new in Version 2.5.1 - Released 2026-10-19
-
-### Bug Fixes
-* **Security token on send**: Sending a message could show "Oops! Security token is missing. Please refresh the page." The shortcode replaced the page settings after the security token was created, so Send no longer had a token. The shortcode now keeps that token.
 
 * Information about past updates can be found [here](updates/updates.md).
 
