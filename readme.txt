@@ -5,7 +5,7 @@ Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 2.5.1
+Stable tag: 2.5.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -192,6 +192,11 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 5. Chatbot settings and configuration
 
 == Changelog ==
+
+= 2.5.2 - Released 2026-10-28 =
+
+### Bug Fixes
+* **Retired OpenAI models**: OpenAI retired `gpt-3.5-turbo` and `gpt-image-1` on 23 October 2026, and the plugin was still sending them when no newer model was saved. Chat now uses `gpt-5.6-terra` (or `gpt-5.6-sol` for the old `gpt-4` ids), and images use `gpt-image-2.5-flare`. A saved model that is still available is left as you set it.
 
 = 2.5.1 - Released 2026-10-19 =
 

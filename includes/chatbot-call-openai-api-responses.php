@@ -401,7 +401,9 @@ function chatbot_chatgpt_resolve_responses_model( $user_id, $page_id, $session_i
         $model = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id );
     }
     if ( ! is_string( $model ) || trim( $model ) === '' ) {
-        $model = get_option( 'chatbot_chatgpt_model_choice', 'gpt-3.5-turbo' );
+        $model = chatbot_chatgpt_resolve_openai_chat_model();
+    } else {
+        $model = chatbot_chatgpt_resolve_openai_chat_model( $model );
     }
 
     return sanitize_text_field( (string) $model );

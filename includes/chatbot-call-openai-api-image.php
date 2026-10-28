@@ -92,15 +92,11 @@ function chatbot_chatgpt_call_image_api($api_key, $message, $user_id = null, $pa
     // OpenAI Image API endpoint
     $api_url = 'https://api.openai.com/v1/images/generations';
 
-    // Select the OpenAI image model (GPT Image, or legacy DALL·E if still configured)
+    // Select the OpenAI image model. Empty, DALL·E, and gpt-image-1 map to a model that still answers.
     if ( !empty($kchat_settings['model']) ) {
-        $model = $kchat_settings['model'];
+        $model = chatbot_chatgpt_resolve_openai_image_model( $kchat_settings['model'] );
     } else {
-        $model = get_option('chatbot_chatgpt_image_model_option', 'gpt-image-1');
-    }
-
-    if ( empty( $model ) || str_starts_with( (string) $model, 'dall' ) ) {
-        $model = 'gpt-image-1';
+        $model = chatbot_chatgpt_resolve_openai_image_model();
     }
 
     $is_gpt_image = str_starts_with( (string) $model, 'gpt-image' );

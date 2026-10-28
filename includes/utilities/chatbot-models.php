@@ -13,6 +13,90 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+// Chat model OpenAI names as the substitute for gpt-3.5-turbo (retired 23 October 2026).
+function chatbot_chatgpt_resolve_openai_chat_model( $model = null ) {
+
+    if ( null === $model ) {
+        $stored = get_option( 'chatbot_chatgpt_model_choice', false );
+        $model = ( false === $stored ) ? '' : (string) $stored;
+    } else {
+        $model = (string) $model;
+    }
+
+    $model = trim( $model );
+    $key = strtolower( $model );
+
+    if ( '' === $key ) {
+        return 'gpt-5.6-terra';
+    }
+
+    // gpt-3.5-turbo and its snapshots.
+    if ( 'gpt-3.5-turbo' === $key || str_starts_with( $key, 'gpt-3.5-turbo-' ) ) {
+        return 'gpt-5.6-terra';
+    }
+
+    // gpt-4 ids retired the same day. Leave gpt-4o and gpt-4.1, which still answer.
+    $retired_gpt4 = array(
+        'gpt-4',
+        'gpt-4-0613',
+        'gpt-4-0613-completions',
+        'gpt-4-completions',
+        'gpt-4-1106-preview',
+    );
+    if ( in_array( $key, $retired_gpt4, true ) || str_starts_with( $key, 'gpt-4-turbo' ) ) {
+        return 'gpt-5.6-sol';
+    }
+
+    return $model;
+
+}
+
+// Image model OpenAI names as the substitute for gpt-image-1 and DALL·E (retired).
+function chatbot_chatgpt_resolve_openai_image_model( $model = null ) {
+
+    if ( null === $model ) {
+        $stored = get_option( 'chatbot_chatgpt_image_model_option', false );
+        $model = ( false === $stored ) ? '' : (string) $stored;
+    } else {
+        $model = (string) $model;
+    }
+
+    $model = trim( $model );
+    $key = strtolower( $model );
+
+    // Exact gpt-image-1 only. gpt-image-1-mini and gpt-image-1.5 still answer until 1 December 2026.
+    if ( '' === $key || str_starts_with( $key, 'dall' ) || 'gpt-image-1' === $key ) {
+        return 'gpt-image-2.5-flare';
+    }
+
+    return $model;
+
+}
+
+// Hide models OpenAI has already retired, including ones List models still returns.
+function chatbot_chatgpt_openai_model_is_unavailable( $model ) {
+
+    if ( ! is_array( $model ) || empty( $model['id'] ) || ! is_string( $model['id'] ) ) {
+        return true;
+    }
+
+    if ( ! empty( $model['shutdown_date'] ) && is_string( $model['shutdown_date'] ) ) {
+        $shutdown = strtotime( $model['shutdown_date'] . ' UTC' );
+        if ( false !== $shutdown && $shutdown <= time() ) {
+            return true;
+        }
+    }
+
+    $id = $model['id'];
+    if ( chatbot_chatgpt_is_openai_image_model( $id ) ) {
+        return chatbot_chatgpt_resolve_openai_image_model( $id ) !== $id;
+    }
+
+    $replaced = chatbot_chatgpt_resolve_openai_chat_model( $id );
+    return strtolower( $replaced ) !== strtolower( $id );
+
+}
+
 // Function to get the Model names from OpenAI API
 function chatbot_openai_get_models() {
 
@@ -40,13 +124,25 @@ function chatbot_openai_get_models() {
     $default_model_list = '';
     $default_model_list = array(
         array(
-            'id' => 'gpt-image-1',
+            'id' => 'gpt-image-2.5-flare',
             'object' => 'model',
             'created' => 1743465600,
             'owned_by' => 'system'
         ),
         array(
-            'id' => 'gpt-3.5-turbo',
+            'id' => 'gpt-image-2.5-sunburst',
+            'object' => 'model',
+            'created' => 1743465600,
+            'owned_by' => 'system'
+        ),
+        array(
+            'id' => 'gpt-5.6-terra',
+            'object' => 'model',
+            'created' => 1677610602,
+            'owned_by' => 'system'
+        ),
+        array(
+            'id' => 'gpt-5.6-sol',
             'object' => 'model',
             'created' => 1677610602,
             'owned_by' => 'system'
@@ -65,12 +161,15 @@ function chatbot_openai_get_models() {
         )
     );
 
-    // See if the option exists, if not then create it and set the default
-    if (esc_attr(get_option('chatbot_chatgpt_model_choice')) === false) {
-        update_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo');
+    // See if the option exists, if not then create it and set the default.
+    // get_option() returns false when the option is missing. esc_attr() turns that into a string, so a string-to-false comparison never saved the default.
+    $stored_chat_model = get_option( 'chatbot_chatgpt_model_choice' );
+    if ( false === $stored_chat_model || '' === $stored_chat_model ) {
+        update_option( 'chatbot_chatgpt_model_choice', chatbot_chatgpt_resolve_openai_chat_model( '' ) );
     }
-    if (esc_attr(get_option('chatbot_chatgpt_image_model_option')) === false) {
-        update_option('chatbot_chatgpt_image_model_option', 'gpt-image-1');
+    $stored_image_model = get_option( 'chatbot_chatgpt_image_model_option' );
+    if ( false === $stored_image_model || '' === $stored_image_model ) {
+        update_option( 'chatbot_chatgpt_image_model_option', chatbot_chatgpt_resolve_openai_image_model( '' ) );
     }
     if (esc_attr(get_option('chatbot_chatgpt_voice_model_option')) === false) {
         update_option('chatbot_chatgpt_voice_model_option', 'tts-1-hd');
@@ -133,6 +232,12 @@ function chatbot_openai_get_models() {
         usort($models, function($a, $b) {
             return $a['id'] <=> $b['id'];
         });
+        $models = array_values( array_filter( $models, function( $model ) {
+            return ! chatbot_chatgpt_openai_model_is_unavailable( $model );
+        } ) );
+        if ( empty( $models ) ) {
+            return $default_model_list;
+        }
     }
 
     // Return the list of models
@@ -153,8 +258,8 @@ function chatbot_chatgpt_is_openai_image_model( $model ) {
 function chatbot_chatgpt_get_openai_image_models() {
 
     $fallback_models = array(
-        array( 'id' => 'gpt-image-1' ),
-        array( 'id' => 'gpt-image-1-mini' ),
+        array( 'id' => 'gpt-image-2.5-flare' ),
+        array( 'id' => 'gpt-image-2.5-sunburst' ),
         array( 'id' => 'gpt-image-2' ),
     );
 

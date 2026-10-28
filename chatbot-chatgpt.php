@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.5.1
+ * Version:     2.5.2
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * Text Domain: chatbot-chatgpt
@@ -28,7 +28,7 @@
  * along with Kognetiks Chatbot. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  * 
  * @package chatbot-chatgpt
- * @version 2.5.1
+ * @version 2.5.2
  * @author Kognetiks.com
  */
 
@@ -95,7 +95,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.5.1';
+$chatbot_chatgpt_plugin_version = '2.5.2';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -449,7 +449,7 @@ $chatbot_platforms = array(
     'OpenAI'       => array(
         'option'        => 'chatbot_chatgpt_api_enabled',
         'model_option'  => 'chatbot_chatgpt_model_choice',
-        'default_model' => 'gpt-4-1106-preview',
+        'default_model' => 'gpt-5.6-terra',
     ),
     'Azure OpenAI' => array(
         'option'        => 'chatbot_azure_api_enabled',
@@ -515,7 +515,13 @@ foreach ( $chatbot_platforms as $platform_name => $config ) {
 
 $active = $chatbot_platforms[ $chatbot_ai_platform_choice ];
 
-if ( get_option( $active['model_option'] ) === null ) {
+// A missing option is false, not null. Only OpenAI is written here; Azure values are deployment names.
+if ( 'OpenAI' === $chatbot_ai_platform_choice ) {
+    $stored_openai_model = get_option( 'chatbot_chatgpt_model_choice' );
+    if ( false === $stored_openai_model || '' === $stored_openai_model ) {
+        update_option( 'chatbot_chatgpt_model_choice', chatbot_chatgpt_resolve_openai_chat_model( '' ) );
+    }
+} elseif ( get_option( $active['model_option'] ) === null ) {
     update_option( $active['model_option'], $active['default_model'] );
 }
 
@@ -1027,7 +1033,7 @@ function chatbot_chatgpt_process_queued_message($message_data) {
 
             $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
-            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-4-1106-preview'));
+            $model = chatbot_chatgpt_resolve_openai_chat_model();
             break;
 
         case 'Azure OpenAI':
@@ -1095,7 +1101,7 @@ function chatbot_chatgpt_process_queued_message($message_data) {
 
             $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
-            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+            $model = chatbot_chatgpt_resolve_openai_chat_model();
             break;
 
     }
@@ -1435,7 +1441,7 @@ function chatbot_chatgpt_send_message() {
             $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
             // Decrypt the API key - Ver 2.2.6
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
-            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-4-1106-preview'));
+            $model = chatbot_chatgpt_resolve_openai_chat_model();
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             break;
@@ -1531,7 +1537,7 @@ function chatbot_chatgpt_send_message() {
             $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
             // Decrypt the API key - Ver 2.2.6
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
-            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+            $model = chatbot_chatgpt_resolve_openai_chat_model();
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             break;

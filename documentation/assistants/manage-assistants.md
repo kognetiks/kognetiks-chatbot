@@ -6,7 +6,7 @@ You will no longer need to remember all the Assistant options, as they are all a
 
 Tailor each Assistant to meet the unique needs of your audience, ensuring an engaging and personalized experience for all.
 
-If you have developed an Assistant or Prompt on the OpenAI platform, you will need its ID. Former Assistants usually start with `asst_`. Prompt IDs usually start with `pmpt_`. OpenAI’s Assistants API was sunset on 26 August 2026; this plugin now sends both ID types through the Responses API. Copy important instructions into **Additional Instructions** in the table below so they live in WordPress (hosted prompt objects are scheduled to shut down on 30 November 2026).
+If you have developed an Assistant or Prompt on the OpenAI platform, you will need its ID. Former Assistants usually start with `asst_`. Prompt IDs usually start with `pmpt_`. OpenAI’s Assistants API was sunset on 26 August 2026; this plugin now sends both ID types through the Responses API. Copy important instructions into **Additional Instructions** in the table below so they live in WordPress (hosted prompt objects are scheduled to retirement on 30 November 2026).
 
 More information can be found here:
 
