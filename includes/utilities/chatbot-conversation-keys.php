@@ -79,21 +79,42 @@ function kognetiks_issue_visitor_cookie() {
         return '';
     }
 
-    $token = 'v2.' . $visitor_id . '.' . kognetiks_sign_visitor_id( $visitor_id );
+    $token    = 'v2.' . $visitor_id . '.' . kognetiks_sign_visitor_id( $visitor_id );
+    $lifetime = 86400 * 30;
+    $header   = kognetiks_visitor_cookie_header( $token, time() + $lifetime, $lifetime );
 
-    if ( ! headers_sent() ) {
-        $cookie_args = array(
-            'expires'  => time() + ( 86400 * 30 ),
-            'path'     => '/',
-            'secure'   => true,
-            'httponly' => true,
-            'samesite' => 'Lax',
-        );
-        @setcookie( kognetiks_visitor_cookie_name(), $token, $cookie_args ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+    // setcookie()'s secure argument defaults to false, and its options array is a
+    // separate signature. Send the attributes explicitly so Secure cannot be omitted.
+    if ( $header !== '' && ! headers_sent() ) {
+        header( 'Set-Cookie: ' . $header, false );
     }
 
     $_COOKIE[ kognetiks_visitor_cookie_name() ] = $token;
     return $visitor_id;
+}
+
+/**
+ * Set-Cookie header for a signed visitor token.
+ * The token is restricted to the issued alphabet so it cannot add another header.
+ *
+ * @param string $token    v2 visitor token.
+ * @param int    $expires  Unix expiration time.
+ * @param int    $lifetime Max-Age in seconds.
+ * @return string Header value without the Set-Cookie prefix, or empty when refused.
+ */
+function kognetiks_visitor_cookie_header( $token, $expires, $lifetime ) {
+    if ( ! is_string( $token ) || ! preg_match( '/^v2\.[a-f0-9]{32}\.[a-f0-9]{64}$/', $token ) ) {
+        return '';
+    }
+    if ( ! is_int( $expires ) || ! is_int( $lifetime ) || $lifetime < 1 ) {
+        return '';
+    }
+
+    return kognetiks_visitor_cookie_name()
+        . '=' . $token
+        . '; Expires=' . gmdate( 'D, d-M-Y H:i:s', $expires ) . ' GMT'
+        . '; Max-Age=' . $lifetime
+        . '; Path=/; Secure; HttpOnly; SameSite=Lax';
 }
 
 /**

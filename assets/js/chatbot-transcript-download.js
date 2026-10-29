@@ -18,19 +18,289 @@
 
     var FILENAME_PATTERN = /^transcript_[A-Za-z0-9]{26}_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.txt$/;
 
+    var BLOCK_CLOSING_TAGS = {
+        div: true,
+        p: true,
+        li: true,
+        tr: true,
+        h1: true,
+        h2: true,
+        h3: true,
+        h4: true,
+        h5: true,
+        h6: true,
+        blockquote: true,
+        pre: true
+    };
+
+    // Walk the markup and copy only text. A replace that deletes "<script...></script>"
+    // can be bypassed by "<scrip<script>t>" and misses end tags such as "</script >".
     function transcriptTextFromHtml(html) {
-        var source = String(html || '');
-        source = source.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
-        source = source.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '');
-        source = source.replace(/<div\b[^>]*\bchatbot-typing-indicator\b[^>]*>[\s\S]*?<\/div>/gi, '');
-        source = source.replace(/<br\s*\/?>/gi, '\n');
-        source = source.replace(/<\/(div|p|li|tr|h[1-6]|blockquote|pre)>/gi, '\n');
-        source = source.replace(/<[^>]+>/g, '');
-        source = decodeHtmlEntities(source);
-        source = source.replace(/\r\n?/g, '\n');
-        source = source.replace(/[ \t]+\n/g, '\n');
-        source = source.replace(/\n{3,}/g, '\n\n');
-        return source.trim();
+        var text = textFromTranscriptHtml(String(html || ''));
+        text = text.replace(/\r\n?/g, '\n');
+        text = text.replace(/[ \t]+\n/g, '\n');
+        text = text.replace(/\n{3,}/g, '\n\n');
+        return text.trim();
+    }
+
+    function textFromTranscriptHtml(html) {
+        var out = '';
+        var index = 0;
+        while (index < html.length) {
+            var open = html.indexOf('<', index);
+            if (open === -1) {
+                out += decodeHtmlEntities(html.slice(index));
+                break;
+            }
+            if (open > index) {
+                out += decodeHtmlEntities(html.slice(index, open));
+            }
+            var tag = readTag(html, open);
+            if (!tag || tag.end <= open) {
+                out += '<';
+                index = open + 1;
+                continue;
+            }
+            index = tag.end;
+            if (tag.type !== 'tag') {
+                continue;
+            }
+            if (!tag.closing && (tag.name === 'script' || tag.name === 'style')) {
+                index = skipRawTextElement(html, tag.end, tag.name);
+                continue;
+            }
+            if (!tag.closing && tag.name === 'div' && classListContains(tag.classValue, 'chatbot-typing-indicator')) {
+                index = skipNestedElement(html, tag.end, 'div');
+                continue;
+            }
+            if (!tag.closing && tag.name === 'br') {
+                out += '\n';
+                continue;
+            }
+            if (tag.closing && BLOCK_CLOSING_TAGS[tag.name]) {
+                out += '\n';
+            }
+        }
+        return out;
+    }
+
+    function readTag(html, start) {
+        var length = html.length;
+        var index = start + 1;
+        if (index >= length) {
+            return null;
+        }
+        if (html.slice(index, index + 3) === '!--') {
+            return { type: 'comment', end: endOfComment(html, start) };
+        }
+        if (html.charAt(index) === '!' || html.charAt(index) === '?') {
+            return { type: 'declaration', end: indexAfterCharacter(html, index, '>') };
+        }
+        var closing = false;
+        if (html.charAt(index) === '/') {
+            closing = true;
+            index += 1;
+        }
+        if (!isAsciiAlpha(html.charAt(index))) {
+            return null;
+        }
+        var nameStart = index;
+        index += 1;
+        while (index < length && isAsciiAlphaNumeric(html.charAt(index))) {
+            index += 1;
+        }
+        var name = html.slice(nameStart, index).toLowerCase();
+        var classValue = '';
+        var classSeen = false;
+        while (index < length) {
+            var character = html.charAt(index);
+            if (character === '>') {
+                return {
+                    type: 'tag',
+                    name: name,
+                    closing: closing,
+                    classValue: classValue,
+                    end: index + 1
+                };
+            }
+            if (isHtmlWhitespace(character) || character === '/') {
+                index += 1;
+                continue;
+            }
+            var attributeStart = index;
+            while (index < length) {
+                var attributeCharacter = html.charAt(index);
+                if (isHtmlWhitespace(attributeCharacter) || attributeCharacter === '=' || attributeCharacter === '>' || attributeCharacter === '/' || attributeCharacter === '"' || attributeCharacter === "'") {
+                    break;
+                }
+                index += 1;
+            }
+            var attributeName = html.slice(attributeStart, index).toLowerCase();
+            while (index < length && isHtmlWhitespace(html.charAt(index))) {
+                index += 1;
+            }
+            var attributeValue = '';
+            if (html.charAt(index) === '=') {
+                index += 1;
+                while (index < length && isHtmlWhitespace(html.charAt(index))) {
+                    index += 1;
+                }
+                var quote = html.charAt(index);
+                if (quote === '"' || quote === "'") {
+                    index += 1;
+                    var valueStart = index;
+                    while (index < length && html.charAt(index) !== quote) {
+                        index += 1;
+                    }
+                    attributeValue = html.slice(valueStart, index);
+                    if (index < length) {
+                        index += 1;
+                    }
+                } else {
+                    var unquotedStart = index;
+                    while (index < length && !isHtmlWhitespace(html.charAt(index)) && html.charAt(index) !== '>') {
+                        index += 1;
+                    }
+                    attributeValue = html.slice(unquotedStart, index);
+                }
+            }
+            if (attributeName === 'class' && !classSeen) {
+                classValue = attributeValue;
+                classSeen = true;
+            }
+        }
+        return {
+            type: 'tag',
+            name: name,
+            closing: closing,
+            classValue: classValue,
+            end: length
+        };
+    }
+
+    function endOfComment(html, start) {
+        var from = start + 4;
+        var dashed = html.indexOf('-->', from);
+        var bang = html.indexOf('--!>', from);
+        var end = html.length;
+        if (dashed !== -1) {
+            end = dashed + 3;
+        }
+        if (bang !== -1 && bang + 4 < end) {
+            end = bang + 4;
+        }
+        return end;
+    }
+
+    function indexAfterCharacter(html, start, character) {
+        var found = html.indexOf(character, start);
+        if (found === -1) {
+            return html.length;
+        }
+        return found + character.length;
+    }
+
+    function skipRawTextElement(html, contentStart, name) {
+        var needle = '</' + name;
+        var from = contentStart;
+        while (from < html.length) {
+            var found = indexOfAsciiIgnoreCase(html, needle, from);
+            if (found === -1) {
+                return html.length;
+            }
+            var boundary = found + needle.length;
+            var next = boundary < html.length ? html.charAt(boundary) : '';
+            if (next !== '' && next !== '>' && next !== '/' && !isHtmlWhitespace(next)) {
+                from = found + 1;
+                continue;
+            }
+            var tag = readTag(html, found);
+            if (tag && tag.type === 'tag' && tag.closing && tag.name === name) {
+                return tag.end;
+            }
+            from = found + 1;
+        }
+        return html.length;
+    }
+
+    function skipNestedElement(html, contentStart, name) {
+        var index = contentStart;
+        var depth = 1;
+        while (index < html.length && depth > 0) {
+            var open = html.indexOf('<', index);
+            if (open === -1) {
+                return html.length;
+            }
+            var tag = readTag(html, open);
+            if (!tag || tag.end <= open) {
+                index = open + 1;
+                continue;
+            }
+            if (tag.type === 'tag' && tag.name === name) {
+                depth += tag.closing ? -1 : 1;
+            }
+            index = tag.end;
+        }
+        return index;
+    }
+
+    function classListContains(classValue, expected) {
+        var normalized = '';
+        var pendingSpace = false;
+        var index;
+        for (index = 0; index < classValue.length; index++) {
+            var character = classValue.charAt(index);
+            if (isHtmlWhitespace(character)) {
+                pendingSpace = normalized.length > 0;
+                continue;
+            }
+            if (pendingSpace) {
+                normalized += ' ';
+                pendingSpace = false;
+            }
+            normalized += character;
+        }
+        return (' ' + normalized + ' ').indexOf(' ' + expected + ' ') !== -1;
+    }
+
+    function indexOfAsciiIgnoreCase(html, needle, from) {
+        var last = html.length - needle.length;
+        var index = from;
+        while (index <= last) {
+            var offset = 0;
+            while (offset < needle.length) {
+                if (asciiLowerCode(html.charCodeAt(index + offset)) !== needle.charCodeAt(offset)) {
+                    break;
+                }
+                offset += 1;
+            }
+            if (offset === needle.length) {
+                return index;
+            }
+            index += 1;
+        }
+        return -1;
+    }
+
+    function asciiLowerCode(code) {
+        if (code >= 65 && code <= 90) {
+            return code + 32;
+        }
+        return code;
+    }
+
+    function isHtmlWhitespace(character) {
+        return character === ' ' || character === '\t' || character === '\n' || character === '\r' || character === '\f';
+    }
+
+    function isAsciiAlpha(character) {
+        var code = character.charCodeAt(0);
+        return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+    }
+
+    function isAsciiAlphaNumeric(character) {
+        var code = character.charCodeAt(0);
+        return isAsciiAlpha(character) || (code >= 48 && code <= 57);
     }
 
     function decodeHtmlEntities(text) {
