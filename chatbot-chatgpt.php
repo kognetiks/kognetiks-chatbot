@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.5.2
+ * Version:     2.5.3
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * Text Domain: chatbot-chatgpt
@@ -28,7 +28,7 @@
  * along with Kognetiks Chatbot. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  * 
  * @package chatbot-chatgpt
- * @version 2.5.2
+ * @version 2.5.3
  * @author Kognetiks.com
  */
 
@@ -95,7 +95,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.5.2';
+$chatbot_chatgpt_plugin_version = '2.5.3';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -133,42 +133,17 @@ global $wpdb;
 global $session_id;
 global $user_id;
 
-// Assign a unique ID to the visitor and logged-in users - Ver 2.0.4
-// Ver 2.3.7 - Fixed headers already sent warning by checking if headers can be sent
-// Ver 2.4.0 - Added @ operator to suppress warnings as additional safety measure
-function kognetiks_assign_unique_id() {
-    if (!isset($_COOKIE['kognetiks_unique_id'])) {
-        $unique_id = uniqid('kognetiks_', true);
-        
-        // Check if headers have already been sent before trying to set cookie
-        // Ver 2.3.7 - Prevent "headers already sent" warning
-        // Ver 2.4.0 - Use @ operator to suppress any warnings as additional safety measure
-        if (!headers_sent()) {
-            // Set a cookie using the built-in setcookie function
-            // Using @ operator to suppress warnings in case headers are sent between check and setcookie
-            @setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/", "", true, true); // HttpOnly and Secure flags set to true
-        }
-                
-        // Ensure the cookie is set for the current request (works even if headers were already sent)
-        $_COOKIE['kognetiks_unique_id'] = $unique_id;
-    }
-}
-add_action('init', 'kognetiks_assign_unique_id', 1); // Set higher priority
+// Signed visitor cookies and isolated conversation keys. Loaded before the
+// cookie helpers run at plugin load and on init.
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversation-keys.php';
 
-// Get the unique ID of the visitor or logged-in user - Ver 2.0.4
-function kognetiks_get_unique_id() {
-    if (isset($_COOKIE['kognetiks_unique_id'])) {
-        // back_trace('NOTICE', 'Unique ID found: ' . $_COOKIE['kognetiks_unique_id']);
-        return sanitize_text_field($_COOKIE['kognetiks_unique_id']);
-    }
-    // back_trace('NOTICE', 'Unique ID not found');
-    return null;
-}
+add_action('init', 'kognetiks_assign_unique_id', 1);
+add_action('init', 'chatbot_chatgpt_retire_shared_anonymous_conversation_keys', 20);
 
 // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
 $user_id = get_current_user_id();
-// Fetch the Kognetiks cookie
-$session_id = kognetiks_get_unique_id();
+// wp_salt() is not available while plugins are loading. The init hook publishes the verified id.
+$session_id = function_exists( 'wp_salt' ) ? kognetiks_get_unique_id() : null;
 if (empty($user_id) || $user_id == 0) {
     $user_id = $session_id;
 }
@@ -611,7 +586,8 @@ function chatbot_chatgpt_enqueue_scripts() {
 
     // Enqueue the scripts
     wp_enqueue_script('jquery');
-    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), $chatbot_chatgpt_plugin_version, true);
+    wp_enqueue_script('chatbot-chatgpt-transcript-download', plugins_url('assets/js/chatbot-transcript-download.js', __FILE__), array(), $chatbot_chatgpt_plugin_version, true);
+    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery', 'chatbot-chatgpt-transcript-download'), $chatbot_chatgpt_plugin_version, true);
 
     // Enqueue DOMPurify - Ver 1.8.1
     // https://raw.githubusercontent.com/cure53/DOMPurify/main/dist/purify.min.js
@@ -687,7 +663,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     $kchat_settings_json = wp_json_encode($kchat_settings);
 
     // Enqueue the main chatbot script - CHANGED TO LOAD ORDER IN V2.1.2
-    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array(), $chatbot_chatgpt_plugin_version, true);
+    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('chatbot-chatgpt-transcript-download'), $chatbot_chatgpt_plugin_version, true);
 
     // Add the inline script to define kchat_settings before the main script runs - CHANGED THE LOAD ORDER IN VER 2.1.2
     wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
@@ -765,11 +741,8 @@ if (!wp_next_scheduled('chatbot_chatgpt_conversation_log_cleanup_event')) {
 }
 add_action('chatbot_chatgpt_conversation_log_cleanup_event', 'chatbot_chatgpt_conversation_log_cleanup');
 
-// Schedule the transcript file cleanup event if it's not already scheduled - Ver 1.9.9
-// Schedule the cleanup event if it's not already scheduled
-if (!wp_next_scheduled('chatbot_chatgpt_cleanup_transcript_files')) {
-    wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_transcript_files');
-}
+// Transcript downloads are created in the browser. The hourly public-file cleanup is retired
+// by chatbot_chatgpt_retire_public_transcript_files() on init.
 
 // Deactivate old hooks - Ver 2.0.1
 if(esc_attr(get_option('chatbot_chatgpt_cleanup_old_hooks') !== 'Completed')) {
@@ -805,66 +778,8 @@ if (!wp_next_scheduled('chatbot_chatgpt_cleanup_download_files')) {
 // REMOVED Ver 2.2.7 and MOVED to the activation hook
 // create_chatbot_azure_assistants_table();
 
-// Message Queue Management Functions
-function chatbot_chatgpt_enqueue_message($user_id, $page_id, $session_id, $assistant_id, $message, $client_message_id = null) {
-
-    $queue_key = 'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
-    
-    $queue = get_transient($queue_key);
-    if (!$queue) {
-        $queue = [];
-    }
-    
-    $queue_item = [
-        'message' => $message,
-        'client_message_id' => $client_message_id ?: wp_generate_uuid4(),
-        'timestamp' => time(),
-        'user_id' => $user_id,
-        'page_id' => $page_id,
-        'session_id' => $session_id,
-        'assistant_id' => $assistant_id
-    ];
-    
-    $queue[] = $queue_item;
-    set_transient($queue_key, $queue, 3600); // 1 hour expiry
-    
-    return $queue_item['client_message_id'];
-
-}
-
-function chatbot_chatgpt_dequeue_message($user_id, $page_id, $session_id, $assistant_id) {
-
-    $queue_key = 'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
-    
-    $queue = get_transient($queue_key);
-    if (!$queue || empty($queue)) {
-        return null;
-    }
-    
-    $message = array_shift($queue);
-    
-    if (empty($queue)) {
-        delete_transient($queue_key);
-    } else {
-        set_transient($queue_key, $queue, 3600);
-    }
-    
-    return $message;
-
-}
-
-function chatbot_chatgpt_get_queue_status($user_id, $page_id, $session_id, $assistant_id) {
-
-    $queue_key = 'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
-    $queue = get_transient($queue_key);
-    
-    return [
-        'has_messages' => !empty($queue),
-        'count' => $queue ? count($queue) : 0,
-        'next_message' => $queue ? $queue[0] : null
-    ];
-
-}
+// Message queue storage lives in chatbot-conversation-keys.php so every caller
+// uses the same verified actor key.
 
 function chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id) {
    
@@ -899,13 +814,18 @@ function chatbot_chatgpt_get_queue_status_ajax() {
         return;
     }
 
-    $page_id = sanitize_text_field($_POST['page_id']);
-    $session_id = sanitize_text_field($_POST['session_id']);
-    $assistant_id = sanitize_text_field($_POST['assistant_id']);
+    $page_id = isset($_POST['page_id']) ? sanitize_text_field(wp_unslash($_POST['page_id'])) : '';
+    $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
+    $assistant_id = isset($_POST['assistant_id']) ? sanitize_text_field(wp_unslash($_POST['assistant_id'])) : '';
     $lock_user_id = chatbot_chatgpt_get_conversation_lock_user_id(get_current_user_id());
 
     if (!$page_id || !$session_id || !$assistant_id) {
         wp_send_json_error('Missing required parameters');
+        return;
+    }
+
+    if ($lock_user_id === 0 && !verify_session_ownership($session_id)) {
+        wp_send_json_error('Unauthorized access to conversation.', 403);
         return;
     }
 
@@ -1363,6 +1283,10 @@ function chatbot_chatgpt_send_message() {
     $current_user = wp_get_current_user();
     $current_user_id = $current_user->ID;
     
+    // Kept off the $session_id name until after `global $session_id`. In PHP that
+    // keyword rebinds the name and would drop the value verified just above.
+    $verified_session_id = '';
+
     // For anonymous users, we need to verify they own the session
     if ($current_user_id === 0) {
         // Anonymous user - verify session ownership through session_id
@@ -1370,13 +1294,12 @@ function chatbot_chatgpt_send_message() {
             wp_send_json_error('Session ID required for anonymous users.', 403);
             return;
         }
-        $session_id = sanitize_text_field($_POST['session_id']);
+        $verified_session_id = sanitize_text_field(wp_unslash($_POST['session_id']));
         
-        // Verify the session belongs to the current request
-        if (!verify_session_ownership($session_id)) {
-            // Log the session validation failure for debugging
+        // The posted session must match this browser's signed visitor cookie.
+        if (!verify_session_ownership($verified_session_id)) {
             // DIAG - Diagnostics - Ver 2.4.5
-            prod_trace( 'ERROR', 'Chatbot Session Validation Failed - Session ID: ' . $session_id . ', Length: ' . strlen($session_id));
+            prod_trace( 'ERROR', 'Chatbot Session Validation Failed - Length: ' . strlen($verified_session_id));
             wp_send_json_error('Unauthorized access to conversation.', 403);
             return;
         }
@@ -1401,9 +1324,9 @@ function chatbot_chatgpt_send_message() {
         // Logged-in user - use their actual user ID
         // Get session_id for logged-in users (needed for transient keys) - Ver 2.3.6
         if (!isset($_POST['session_id'])) {
-            $session_id = kognetiks_get_unique_id();
+            $verified_session_id = kognetiks_get_unique_id();
         } else {
-            $session_id = sanitize_text_field($_POST['session_id']);
+            $verified_session_id = sanitize_text_field(wp_unslash($_POST['session_id']));
         }
     }
 
@@ -1413,6 +1336,7 @@ function chatbot_chatgpt_send_message() {
     global $session_id;
     global $user_id;
     global $page_id;
+    $session_id = is_string( $verified_session_id ) ? $verified_session_id : '';
     
     // Set the global $user_id to the correct value (don't let global declaration overwrite it)
     if ($current_user_id === 0) {
@@ -1609,15 +1533,14 @@ function chatbot_chatgpt_send_message() {
     } else {
         // For logged-in users, get session_id from POST but validate it
         if (isset($_POST['session_id'])) {
-            $session_id = sanitize_text_field($_POST['session_id']);
+            $session_id = sanitize_text_field(wp_unslash($_POST['session_id']));
         } else {
-            // Fallback to generating a new session ID
             $session_id = kognetiks_get_unique_id();
         }
     }
 
     // Additional security: Verify the conversation belongs to this user
-    if (!verify_conversation_ownership($user_id, $page_id)) {
+    if (!verify_conversation_ownership($user_id, $page_id, $session_id)) {
         // Log the conversation ownership validation failure for debugging
         // DIAG - Diagnostics - Ver 2.4.5
         prod_trace( 'ERROR', 'Chatbot Conversation Ownership Validation Failed - User ID: ' . $user_id . ', Page ID: ' . $page_id);
@@ -1682,7 +1605,11 @@ function chatbot_chatgpt_send_message() {
     $kchat_settings['thread_id'] = $thread_id;
     
     // Check if there's already a conversation lock (active processing)
-    $conv_lock = 'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $conv_lock = chatbot_chatgpt_conversation_processing_lock_key($user_id, $session_id, $page_id, $assistant_id);
+    if ($conv_lock === '') {
+        wp_send_json_error('Unauthorized access to conversation.', 403);
+        return;
+    }
     $is_processing = get_transient($conv_lock);
     
     // DIAG - Diagnostics - Ver 2.4.5
@@ -1721,8 +1648,10 @@ function chatbot_chatgpt_send_message() {
     }
 
     // Clear any orphaned queue from a previous stuck request
-    $queue_key = 'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
-    delete_transient($queue_key);
+    $queue_key = chatbot_chatgpt_message_queue_key($user_id, $session_id, $page_id, $assistant_id);
+    if ($queue_key !== '') {
+        delete_transient($queue_key);
+    }
 
     // Lock TTL must cover the full API + enhancement time (not 30–60s while AJAX waits up to 240s+)
     $lock_timeout = min(chatbot_chatgpt_get_ajax_timeout_seconds() + 30, 600);
@@ -2101,7 +2030,6 @@ function chatbot_chatgpt_get_ajax_nonces() {
         'chatbot_erase_nonce' => wp_create_nonce('chatbot_erase_nonce'),
         'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
         'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
-        'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
         'chatbot_log_error_nonce' => wp_create_nonce('chatbot_log_error_nonce'),
     );
 
@@ -2245,9 +2173,6 @@ add_action('wp_ajax_chatbot_chatgpt_reset_cache_locks', 'chatbot_chatgpt_reset_c
 
 // Read-aloud AJAX (guests and logged-in users) is registered in includes/chatbot-call-openai-api-tts.php.
 
-// Add action for transcript download (Security: Authentication required)
-add_action('wp_ajax_chatbot_chatgpt_download_transcript', 'chatbot_chatgpt_download_transcript');
-
 // Settings and Deactivation - Ver 1.5.0
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_plugin_action_links');
 
@@ -2272,7 +2197,8 @@ function chatbot_chatgpt_unlock_conversation_handler() {
     $session_id = isset($_POST['session_id']) ? sanitize_text_field($_POST['session_id']) : '';
     $assistant_id = isset($_POST['assistant_id']) ? sanitize_text_field($_POST['assistant_id']) : '';
     
-    if ($user_id && $page_id && $session_id && $assistant_id) {
+    if ($page_id !== '' && $session_id !== '' && $assistant_id !== '' && $user_id !== '') {
+        chatbot_chatgpt_clear_conversation_locks_and_queue( $assistant_id, $user_id, $page_id, $session_id, true );
         // Clear the conversation lock
         $conv_lock = 'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
         $lock_exists = get_transient($conv_lock);
@@ -2331,7 +2257,8 @@ function chatbot_chatgpt_reset_all_locks_handler() {
     
     $cleared_count = 0;
     
-    if ($user_id && $page_id && $session_id && $assistant_id) {
+    if ($page_id !== '' && $session_id !== '' && $assistant_id !== '' && $user_id !== '') {
+        chatbot_chatgpt_clear_conversation_locks_and_queue( $assistant_id, $user_id, $page_id, $session_id, true );
         // Clear all possible lock variations for this conversation
         $possible_locks = [
             'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
@@ -2435,6 +2362,13 @@ function chatbot_chatgpt_reset_cache_locks_handler() {
         
         foreach ($cache_dirs as $cache_dir) {
             if (is_dir($cache_dir)) {
+                if ( basename( rtrim( $cache_dir, '/\\' ) ) === 'transcripts' ) {
+                    $removed_transcripts = chatbot_chatgpt_purge_generated_transcript_files( $cache_dir );
+                    if ( is_int( $removed_transcripts ) ) {
+                        $cleared_count += $removed_transcripts;
+                    }
+                    continue;
+                }
                 $files = glob($cache_dir . '*');
                 foreach ($files as $file) {
                     if (is_file($file) && filemtime($file) < (time() - 3600)) { // Older than 1 hour
@@ -2552,6 +2486,11 @@ register_deactivation_hook(__FILE__, 'chatbot_transformer_model_status_deactivat
 // Function to add a new message and response, keeping only the last five - Ver 1.6.1
 function addEntry($transient_name, $newEntry) {
 
+    if ( function_exists( 'chatbot_chatgpt_is_shared_context_history_name' ) && chatbot_chatgpt_is_shared_context_history_name( $transient_name ) ) {
+        chatbot_chatgpt_append_context_history_entry( $transient_name, $newEntry );
+        return;
+    }
+
     $context_history = get_transient($transient_name);
     if (!$context_history) {
         $context_history = [];
@@ -2592,6 +2531,9 @@ function addEntry($transient_name, $newEntry) {
 
 // Function to return message and response - Ver 1.6.1
 function concatenateHistory($transient_name) {
+    if ( function_exists( 'chatbot_chatgpt_is_shared_context_history_name' ) && chatbot_chatgpt_is_shared_context_history_name( $transient_name ) ) {
+        return implode( ' ', chatbot_chatgpt_read_context_history_entries( $transient_name ) );
+    }
     $context_history = get_transient($transient_name);
     if (!$context_history) {
         return ''; // Return an empty string if the transient does not exist

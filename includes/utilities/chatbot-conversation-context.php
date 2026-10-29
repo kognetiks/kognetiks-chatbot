@@ -34,12 +34,15 @@ function chatbot_chatgpt_build_conversation_context($format = 'standard', $max_p
     global $learningMessages;
     global $errorResponses;
     
-    // Get conversation history array (not concatenated) - Ver 2.3.9+
-    // The context_history transient stores messages in chronological order
+    // Visitor history is stored per verified actor. The legacy site-wide transient is not read.
     // Entries alternate: user message, model response, user message, model response, etc.
-    $context_history_array = get_transient($transient_name);
-    if (!$context_history_array) {
-        $context_history_array = [];
+    if ( function_exists( 'chatbot_chatgpt_is_shared_context_history_name' ) && chatbot_chatgpt_is_shared_context_history_name( $transient_name ) ) {
+        $context_history_array = chatbot_chatgpt_read_context_history_entries( $transient_name, $session_id );
+    } else {
+        $context_history_array = get_transient( $transient_name );
+        if ( ! $context_history_array ) {
+            $context_history_array = array();
+        }
     }
 
     // Build conversation history array

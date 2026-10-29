@@ -661,7 +661,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         // Step 2 - Get The Thread ID
         $thread_id = $assistants_response["id"];
         $kchat_settings['thread_id'] = $thread_id;
-        set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id);
+        set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id, $session_id);
         
     } else {
 

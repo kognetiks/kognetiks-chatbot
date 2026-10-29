@@ -32,6 +32,12 @@ function chatbot_chatgpt_deactivate() {
     // Clean up conversation digest cron job on deactivation
     wp_clear_scheduled_hook('kognetiks_insights_send_conversation_digest_email_hook');
 
+    wp_clear_scheduled_hook('chatbot_chatgpt_cleanup_transcript_files');
+    wp_clear_scheduled_hook('chatbot_chatgpt_cleanup_transcripts');
+    if ( function_exists( 'chatbot_chatgpt_purge_generated_transcript_files' ) ) {
+        chatbot_chatgpt_purge_generated_transcript_files();
+    }
+
     delete_option( 'chatbot_chatgpt_widget_rewrite_version' );
     flush_rewrite_rules( false );
 

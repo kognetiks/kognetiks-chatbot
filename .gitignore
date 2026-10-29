@@ -21,6 +21,7 @@ package.json
 # package.json is now needed for Snyk configuration
 # package.json
 /test-harness/
+/tests/
 
 # Ignore internal folders and files
 /z-internal/

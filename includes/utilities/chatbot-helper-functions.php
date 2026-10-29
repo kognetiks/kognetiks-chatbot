@@ -247,8 +247,8 @@ function chatbot_chatgpt_restore_php_execution_time( $original_time ) {
 }
 
 /**
- * User id segment for conversation lock/queue hashes.
- * Must match chatbot_chatgpt_send_message() (0 for anonymous visitors).
+ * User id segment for legacy lock hashes.
+ * Anonymous visitors are 0 here; isolation comes from the verified session in the new keys.
  *
  * @param int|null $current_user_id WordPress user ID, or null to use get_current_user_id().
  * @return int
@@ -259,32 +259,38 @@ function chatbot_chatgpt_get_conversation_lock_user_id( $current_user_id = null 
         $current_user_id = get_current_user_id();
     }
 
-    return $current_user_id > 0 ? (int) $current_user_id : 0;
+    return chatbot_chatgpt_normalize_wp_user_id( $current_user_id );
 }
 
 /**
- * Clear conversation lock and queued messages for a conversation.
- * Also clears legacy keys where session_id was stored in the user_id slot (pre-2.3.7 erase handler).
+ * Clear conversation locks and the message queue for one actor.
+ * Also clears pre-isolation hashes that included this same session id.
  *
  * @param string $assistant_id Assistant id.
- * @param int    $lock_user_id Canonical lock user id (0 for anonymous).
+ * @param mixed  $lock_user_id WordPress user id, or 0 for a visitor.
  * @param string $page_id Page id.
  * @param string $session_id Session id.
+ * @param bool   $session_already_authorized Privileged admin cleanup only. Conversation reads never set this.
  */
-function chatbot_chatgpt_clear_conversation_locks_and_queue( $assistant_id, $lock_user_id, $page_id, $session_id ) {
+function chatbot_chatgpt_clear_conversation_locks_and_queue( $assistant_id, $lock_user_id, $page_id, $session_id, $session_already_authorized = false ) {
 
-    $lock_user_ids = array( $lock_user_id );
+    chatbot_chatgpt_delete_scoped_locks_and_queue( $lock_user_id, $session_id, $page_id, $assistant_id, $session_already_authorized );
 
-    if ( $lock_user_id === 0 && ! empty( $session_id ) ) {
-        $lock_user_ids[] = $session_id;
+    if ( ! function_exists( 'wp_hash' ) || ! is_string( $session_id ) || $session_id === '' ) {
+        return;
     }
 
-    $lock_user_ids = array_unique( $lock_user_ids, SORT_REGULAR );
+    $uid = chatbot_chatgpt_normalize_wp_user_id( $lock_user_id );
+    $legacy_inputs = array(
+        $assistant_id . '|0|' . $page_id . '|' . $session_id,
+        $assistant_id . '|' . $uid . '|' . $page_id . '|' . $session_id,
+        $assistant_id . '|' . $session_id . '|' . $page_id . '|' . $session_id,
+    );
 
-    foreach ( $lock_user_ids as $uid ) {
-        $hash_input = $assistant_id . '|' . $uid . '|' . $page_id . '|' . $session_id;
+    foreach ( $legacy_inputs as $hash_input ) {
         delete_transient( 'chatgpt_conv_lock_' . wp_hash( $hash_input ) );
         delete_transient( 'chatbot_message_queue_' . wp_hash( $hash_input ) );
+        delete_transient( 'kchat_conv_lock_' . wp_hash( $hash_input ) );
         delete_transient( 'chatbot_local_jan_busy_' . wp_hash( $hash_input ) );
     }
 }

@@ -166,10 +166,7 @@ When that happens, Freemius may receive the site URL, WordPress version, PHP ver
 
 - **License URI:** [https://www.gnu.org/licenses/gpl-3.0.html](https://www.gnu.org/licenses/gpl-3.0.html)
 
-## What's new in Version 2.5.2 - Released 2026-10-28
 
-### Bug Fixes
-* **Retired OpenAI models**: OpenAI retired `gpt-3.5-turbo` and `gpt-image-1` on 23 October 2026, and the plugin was still sending them when no newer model was saved. Chat now uses `gpt-5.6-terra` (or `gpt-5.6-sol` for the old `gpt-4` ids), and images use `gpt-image-2.5-flare`. A saved model that is still available is left as you set it.
 
 ## Support
 

@@ -92,6 +92,13 @@ function kchat_openai_http_post_json( $url, $api_key, $payload, $timeout = 45, $
         'timeout' => $timeout,
     );
 
+    if ( function_exists( 'apply_filters' ) ) {
+        $intercepted = apply_filters( 'chatbot_chatgpt_intercept_openai_http_post', null, $url, $payload, $timeout, $idempotency_key );
+        if ( is_array( $intercepted ) ) {
+            return $intercepted;
+        }
+    }
+
     $resp = wp_remote_post( $url, $args );
 
     if ( is_wp_error( $resp ) ) {
@@ -472,8 +479,13 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
     // Idempotency: reuse client_message_id if provided, else generate UUID.
     $message_uuid = $client_message_id ? (string) $client_message_id : ( function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : uniqid( 'kchat_', true ) );
 
-    // Lock key: prevent double-submit races across concurrent AJAX calls.
-    $conv_lock     = 'kchat_conv_lock_' . wp_hash( $prompt_id . '|' . $user_id . '|' . $page_id . '|' . $session_id );
+    // Lock key: one verified actor, page, and assistant. An empty key is a failed ownership check.
+    $conv_lock = function_exists( 'chatbot_chatgpt_responses_conv_lock_key' )
+        ? chatbot_chatgpt_responses_conv_lock_key( $user_id, $session_id, $page_id, $prompt_id )
+        : '';
+    if ( $conv_lock === '' ) {
+        return __( 'Error: Unauthorized access to conversation.', 'chatbot-chatgpt' );
+    }
     $lock_timeout  = 60;
 
     if ( function_exists( 'get_transient' ) && function_exists( 'set_transient' ) ) {
@@ -501,48 +513,46 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
         // back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
         // back_trace('NOTICE', 'Client Message ID: ' . $client_message_id);
 
-        if ( empty( $thread_id ) ) {
-
-            // If the plugin maintains a stored thread_id/conversation_id, reuse it.
-            if ( function_exists( 'get_chatbot_chatgpt_threads' ) ) {
-                $stored = get_chatbot_chatgpt_threads( $user_id, $session_id, $page_id, $prompt_id );
-                if ( ! empty( $stored ) ) {
-                    $thread_id = $stored;
-                }
-            }
+        if ( ! function_exists( 'chatbot_chatgpt_resolve_or_create_conversation_id' ) ) {
+            return __( 'Error: Conversation isolation is unavailable.', 'chatbot-chatgpt' );
         }
 
-        if ( empty( $thread_id ) ) {
-
-            $meta = array(
-                'session_id' => (string) $session_id,
-                'user_id'    => (string) $user_id,
-                'page_id'    => (string) $page_id,
-                'prompt_id'  => (string) $prompt_id,
-            );
-
-            $conv = kchat_openai_create_conversation( $api_key, $meta, $timeout );
-
-            if ( isset( $conv['error'] ) ) {
-                $msg = is_array( $conv['error'] ) ? ( $conv['error']['message'] ?? __( 'Conversation create failed.', 'chatbot-chatgpt' ) ) : __( 'Conversation create failed.', 'chatbot-chatgpt' );
-                return sprintf(
-                    /* translators: %s: API error message */
-                    __( 'Error: %s', 'chatbot-chatgpt' ),
-                    $msg
+        $resolved_thread = chatbot_chatgpt_resolve_or_create_conversation_id(
+            $user_id,
+            $session_id,
+            $page_id,
+            $prompt_id,
+            $thread_id,
+            function () use ( $api_key, $user_id, $session_id, $page_id, $prompt_id, $timeout ) {
+                $safety_identifier = function_exists( 'chatbot_chatgpt_safety_identifier' )
+                    ? chatbot_chatgpt_safety_identifier( $user_id, $session_id )
+                    : '';
+                $meta = array(
+                    'safety_identifier' => $safety_identifier,
+                    'page_id'           => (string) $page_id,
+                    'prompt_id'         => (string) $prompt_id,
                 );
+                $conv = kchat_openai_create_conversation( $api_key, $meta, $timeout );
+                if ( isset( $conv['error'] ) ) {
+                    $msg = is_array( $conv['error'] ) ? ( $conv['error']['message'] ?? __( 'Conversation create failed.', 'chatbot-chatgpt' ) ) : __( 'Conversation create failed.', 'chatbot-chatgpt' );
+                    return new WP_Error( 'conversation_create_failed', $msg );
+                }
+                $created_id = isset( $conv['id'] ) ? (string) $conv['id'] : '';
+                if ( $created_id === '' ) {
+                    return new WP_Error( 'conversation_create_failed', __( 'Conversation created but missing ID.', 'chatbot-chatgpt' ) );
+                }
+                return $created_id;
             }
+        );
 
-            $thread_id = $conv['id'] ?? '';
-            if ( empty( $thread_id ) ) {
-                return __( 'Error: Conversation created but missing ID.', 'chatbot-chatgpt' );
-            }
-
-            // Persist the new conversation id using existing helper (kept for compatibility).
-            if ( function_exists( 'set_chatbot_chatgpt_threads' ) ) {
-                set_chatbot_chatgpt_threads( $thread_id, $prompt_id, $user_id, $page_id );
-            }
-
+        if ( is_wp_error( $resolved_thread ) ) {
+            return sprintf(
+                /* translators: %s: API error message */
+                __( 'Error: %s', 'chatbot-chatgpt' ),
+                $resolved_thread->get_error_message()
+            );
         }
+        $thread_id = $resolved_thread;
 
         // -----------------------------------------------------------------
         // Step 2: Create the model response (Responses API)
@@ -647,11 +657,16 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
             'conversation'      => $thread_id,
             // The new user input for this turn (text + optional file/image attachments).
             'input'             => $input_payload,
-            // Helpful for abuse detection without sending PII.
-            'safety_identifier' => wp_hash( (string) $user_id ),
             // Let the API auto-truncate old items if context would overflow.
             'truncation'        => 'auto',
         );
+
+        $safety_identifier = function_exists( 'chatbot_chatgpt_safety_identifier' )
+            ? chatbot_chatgpt_safety_identifier( $user_id, $session_id )
+            : '';
+        if ( $safety_identifier !== '' ) {
+            $payload['safety_identifier'] = $safety_identifier;
+        }
 
         if ( $is_prompt ) {
             // Temporary bridge: hosted prompt objects shut down 2026-11-30.

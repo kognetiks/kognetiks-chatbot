@@ -6,6 +6,11 @@
 
 ---
 
+= 2.5.3 - Released 2026-10-29 =
+
+### Bug Fixes
+* **Transcript download**: Download Transcript now saves a text file in the browser from the conversation shown in that chatbot.
+
 = 2.5.2 - Released 2026-10-28 =
 
 ### Bug Fixes
