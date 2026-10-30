@@ -5,7 +5,7 @@ Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.0
-Stable tag: 2.5.3
+Stable tag: 2.5.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 

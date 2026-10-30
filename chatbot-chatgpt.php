@@ -175,6 +175,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-respo
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-tts.php';        // TTS API - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php';                    // Globals - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-shortcode.php';                  // Shortcode - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/compatibility/chatbot-aioseo-shortcode-compat.php'; // AIOSEO shortcode compatibility
 
 // Include necessary files - Appearance - Ver 1.8.1
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-body.php';
