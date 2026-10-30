@@ -189,6 +189,7 @@ function chatbot_lcm_lexical_echo_rebuild_worker_panel() {
             <p style="margin: 4px 0;">
                 <?php
                 printf(
+                    /* translators: 1: heartbeat time, 2: worker step */
                     esc_html__( 'Last heartbeat: %1$s (%2$s)', 'chatbot-chatgpt' ),
                     esc_html( $fmt( $ts ) ),
                     esc_html( isset( $activity['step'] ) ? (string) $activity['step'] : '?' )
@@ -202,7 +203,8 @@ function chatbot_lcm_lexical_echo_rebuild_worker_panel() {
                 <?php
                 echo esc_html(
                     sprintf(
-                        __( 'Pipeline: stage=%s offset=%s N_docs=%s / rows=%s', 'chatbot-chatgpt' ),
+                        /* translators: 1: pipeline stage, 2: offset, 3: document count, 4: row count */
+                        __( 'Pipeline: stage=%1$s offset=%2$s N_docs=%3$s / rows=%4$s', 'chatbot-chatgpt' ),
                         isset( $activity['stage'] ) ? (string) $activity['stage'] : '?',
                         isset( $activity['offset'] ) ? (string) (int) $activity['offset'] : '?',
                         isset( $activity['N_docs'] ) ? (string) (int) $activity['N_docs'] : '?',
