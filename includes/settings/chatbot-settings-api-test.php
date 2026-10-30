@@ -52,7 +52,7 @@ if ( ! defined( 'WPINC' ) ) {
         // Decrypt the API key - Ver 2.2.6
         $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
         // Model and message for testing
-        $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+        $model = esc_attr(get_option('chatbot_anthropic_model_choice', chatbot_anthropic_default_model()));
         $updated_status = kchat_fetch_api_status($api_key, $model);
         update_option('chatbot_anthropic_api_status', $updated_status);
     } elseif ($chatbot_chatbot_ai_platform_choice == 'Mistral') {
@@ -280,12 +280,14 @@ function kchat_fetch_api_status($api_key, $model) {
 
             update_option('chatbot_anthropic_api_status', 'API Error Type: Status Unknown');
             $api_key = esc_attr(get_option('chatbot_anthropic_api_key', 'NOT SET'));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             
             // Model and message for testing
-            $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+            $model = esc_attr(get_option('chatbot_anthropic_model_choice', chatbot_anthropic_default_model()));
+            $model = chatbot_anthropic_resolve_model($model);
             
-            // The current ChatGPT API URL endpoint for chatgpt-4o-latest
-            $api_url = ' https://api.anthropic.com/v1/messages';
+            $api_url = get_chat_completions_api_url();
 
             // Set the headers
             $headers = array(
@@ -311,16 +313,6 @@ function kchat_fetch_api_status($api_key, $model) {
             $body = json_encode($body);
 
             $timeout = esc_attr(get_option('chatbot_anthropic_timeout_setting', 240 ));
-
-            // Call the API
-            $response = wp_remote_post($api_url, array(
-                'headers' => $headers,
-                'body' => $body,
-                'timeout' => $timeout,
-            ));
-
-            // Get the response body
-            // $response_data = json_decode(wp_remote_retrieve_body($response));
 
             // API Call
             $response = wp_remote_post($api_url, array(

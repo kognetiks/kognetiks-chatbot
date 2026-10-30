@@ -10,7 +10,7 @@
  * Domain Path: /languages
  * Network: true
  * Requires at least: 6.0
- * Requires PHP: 7.0
+ * Requires PHP: 8.0
  * License:     GPLv3 or later
  * License URI: https://www.gnu.org/licenses/gpl-30.html
  * 
@@ -440,7 +440,7 @@ $chatbot_platforms = array(
     'Anthropic'    => array(
         'option'        => 'chatbot_anthropic_api_enabled',
         'model_option'  => 'chatbot_anthropic_model_choice',
-        'default_model' => 'claude-3-5-sonnet-latest',
+        'default_model' => chatbot_anthropic_default_model(),
     ),
     'DeepSeek'     => array(
         'option'        => 'chatbot_deepseek_api_enabled',
@@ -975,7 +975,7 @@ function chatbot_chatgpt_process_queued_message($message_data) {
 
             $api_key = esc_attr(get_option('chatbot_anthropic_api_key'));
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
-            $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+            $model = esc_attr(get_option('chatbot_anthropic_model_choice', chatbot_anthropic_default_model()));
             break;
 
         case 'DeepSeek':
@@ -1396,7 +1396,7 @@ function chatbot_chatgpt_send_message() {
             $api_key = esc_attr(get_option('chatbot_anthropic_api_key'));
             // Decrypt the API key - Ver 2.2.6
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
-            $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+            $model = esc_attr(get_option('chatbot_anthropic_model_choice', chatbot_anthropic_default_model()));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             break;
