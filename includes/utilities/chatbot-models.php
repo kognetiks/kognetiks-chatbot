@@ -532,85 +532,327 @@ function chatbot_nvidia_get_models() {
 
 }
 
-// Function to get the Model names from Anthropic API
-function chatbot_anthropic_get_models() {
+// Fallback when no Anthropic model has been saved. Sonnet is the balanced default.
+function chatbot_anthropic_default_model() {
 
-    // https://docs.anthropic.com/en/api/messages-examples
-    // https://docs.anthropic.com/en/docs/models-overview
-    // https://docs.anthropic.com/en/docs/about-claude/models
+    return 'claude-sonnet-5-5';
 
-    // Default model list
-    $default_model_list = '';
-    $default_model_list = array(
-        array(
-            'id' => 'claude-3-5-sonnet-latest',
-            'object' => 'model',
-            'created' => 20241022,
-            'owned_by' => 'anthropic'
-        ),
-        array(
-            'id' => 'claude-3-5-haiku-latest',
-            'object' => 'model',
-            'created' => 20241022,
-            'owned_by' => 'anthropic'
-        ),
-        array(
-            'id' => 'claude-3-opus-latest',
-            'object' => 'model',
-            'created' => 20240229,
-            'owned_by' => 'anthropic'
-        ),
-        array(
-            'id' => 'claude-3-sonnet-20240229',
-            'object' => 'model',
-            'created' => 20240229,
-            'owned_by' => 'anthropic'
-        ),
-        array(
-            'id' => 'claude-3-haiku-20240307',
-            'object' => 'model',
-            'created' => 20240307,
-            'owned_by' => 'anthropic'
-        )
+}
+
+// Shown until an API key can load the live list from GET /v1/models.
+function chatbot_anthropic_fallback_models() {
+
+    $ids = array(
+        'claude-opus-5-5',
+        'claude-sonnet-5-5',
+        'claude-haiku-5-5',
+        'claude-fable-5-1',
+    );
+    $models = array();
+
+    foreach ( $ids as $id ) {
+        $models[] = array(
+            'id'       => $id,
+            'object'   => 'model',
+            'created'  => null,
+            'owned_by' => 'anthropic',
+        );
+    }
+
+    return $models;
+
+}
+
+// Model ids returned by the Anthropic Models API.
+function chatbot_anthropic_model_id_is_valid( $model_id ) {
+
+    return is_string( $model_id ) && preg_match( '/^[A-Za-z0-9._:-]+$/', $model_id );
+
+}
+
+// True after chatbot_anthropic_get_models() loaded ids from the Models API.
+function chatbot_anthropic_models_are_live( $set = null ) {
+
+    static $live = false;
+    if ( null !== $set ) {
+        $live = (bool) $set;
+    }
+    return $live;
+
+}
+
+// Standard base input price, USD per million tokens. Longer names match first.
+function chatbot_anthropic_model_base_input_price( $model_id ) {
+
+    if ( ! chatbot_anthropic_model_id_is_valid( $model_id ) ) {
+        return null;
+    }
+
+    $id = strtolower( $model_id );
+    $prices = array(
+        'haiku-3-5'  => 0.80,
+        'haiku-4-5'  => 1.00,
+        'haiku-5-5'  => 0.10,
+        'haiku-3'    => 0.25,
+        'sonnet-4-5' => 3.00,
+        'sonnet-4-6' => 3.00,
+        'sonnet-5-5' => 2.00,
+        'sonnet-5'   => 2.00,
+        'opus-4-5'   => 5.00,
+        'opus-4-6'   => 5.00,
+        'opus-4-7'   => 5.00,
+        'opus-4-8'   => 5.00,
+        'opus-5-5'   => 4.00,
+        'opus-5'     => 5.00,
+        'fable-5-1'  => 10.00,
+        'fable-5'    => 10.00,
     );
 
-    // FIXME - Anthropic API does not have an endpoint for models
-    // Call the API to get the models
+    uksort(
+        $prices,
+        function( $a, $b ) {
+            return strlen( $b ) <=> strlen( $a );
+        }
+    );
 
-    // Decode the JSON response
-    // $data = json_decode($response, true);
-
-    // FIXME - Force an error since there is no api endpoint for models
-    $data = array('error' => array('message' => 'No models endpoint available'));
-
-    // Check for API errors
-    if (isset($data['error'])) {
-        // return "Error: " . $data['error']['message'];
-        // On 1st install needs an API key
-        // So return a short list of the base models until an API key is entered
-        return $default_model_list;
+    foreach ( $prices as $needle => $price ) {
+        if ( false !== strpos( $id, $needle ) ) {
+            return $price;
+        }
     }
 
-    // Extract the models from the response
-    if (isset($data['data']) && !is_null($data['data'])) {
-        $models = $data['data'];
-    } else {
-        // Handle the case where 'data' is not set or is null
-        $models = []; // Empty array
-        ksum_prod_trace( 'WARNING', 'Data key is not set or is null in the \$data array.');
+    return null;
+
+}
+
+// Cheapest model in a live list. Haiku is the cheap tier; the lowest base input price wins.
+function chatbot_anthropic_cheapest_model_id( $models ) {
+
+    if ( ! is_array( $models ) ) {
+        return '';
     }
 
-    // Ensure $models is an array
-    if (!is_array($models)) {
-        return $default_model_list;
-    } else {
-        // Sort the models by name
-        usort($models, function($a, $b) {
-            return $a['id'] <=> $b['id'];
-        });
+    $chosen = '';
+    $best   = null;
+
+    foreach ( array_values( $models ) as $index => $model ) {
+        if ( ! is_array( $model ) || empty( $model['id'] ) || ! chatbot_anthropic_model_id_is_valid( $model['id'] ) ) {
+            continue;
+        }
+
+        $id       = $model['id'];
+        $is_haiku = false !== stripos( $id, 'haiku' );
+        $price    = chatbot_anthropic_model_base_input_price( $id );
+
+        if ( $is_haiku && null !== $price ) {
+            $rank = array( 0, $price );
+        } elseif ( $is_haiku ) {
+            $rank = array( 1, -1 * $index );
+        } elseif ( null !== $price ) {
+            $rank = array( 2, $price );
+        } else {
+            $rank = array( 3, -1 * $index );
+        }
+
+        if ( null === $best || $rank < $best ) {
+            $best   = $rank;
+            $chosen = $id;
+        }
     }
 
-    // Return the list of models
+    return $chosen;
+
+}
+
+// Use the requested id when the live list includes it. Otherwise use the cheapest model.
+function chatbot_anthropic_resolve_model( $model ) {
+
+    if ( ! is_string( $model ) || '' === $model || ! chatbot_anthropic_model_id_is_valid( $model ) ) {
+        $model = chatbot_anthropic_default_model();
+    }
+
+    $models = chatbot_anthropic_get_models();
+    if ( ! chatbot_anthropic_models_are_live() || ! is_array( $models ) ) {
+        return $model;
+    }
+
+    foreach ( $models as $entry ) {
+        if ( is_array( $entry ) && isset( $entry['id'] ) && $entry['id'] === $model ) {
+            return $model;
+        }
+    }
+
+    $replacement = chatbot_anthropic_cheapest_model_id( $models );
+    if ( chatbot_anthropic_model_id_is_valid( $replacement ) ) {
+        return $replacement;
+    }
+
+    return $model;
+
+}
+
+// Anthropic rejects consecutive messages with the same role.
+function chatbot_anthropic_normalize_messages( $messages ) {
+
+    if ( ! is_array( $messages ) ) {
+        return array();
+    }
+
+    $normalized = array();
+    foreach ( $messages as $message ) {
+        if ( ! is_array( $message ) || empty( $message['role'] ) || ! isset( $message['content'] ) || ! is_string( $message['content'] ) ) {
+            continue;
+        }
+        $role = $message['role'];
+        if ( 'user' !== $role && 'assistant' !== $role ) {
+            continue;
+        }
+        $content = trim( $message['content'] );
+        if ( '' === $content ) {
+            continue;
+        }
+        $last = count( $normalized ) - 1;
+        if ( $last >= 0 && $normalized[ $last ]['role'] === $role ) {
+            $normalized[ $last ]['content'] .= "\n\n" . $content;
+            continue;
+        }
+        $normalized[] = array(
+            'role'    => $role,
+            'content' => $content,
+        );
+    }
+
+    while ( ! empty( $normalized ) && 'user' !== $normalized[0]['role'] ) {
+        array_shift( $normalized );
+    }
+
+    return $normalized;
+
+}
+
+// Function to get the Model names from Anthropic API
+// https://platform.claude.com/docs/en/api/models/list
+function chatbot_anthropic_get_models( $refresh = false ) {
+
+    chatbot_anthropic_models_are_live( false );
+    $fallback = chatbot_anthropic_fallback_models();
+
+    $api_key = get_option( 'chatbot_anthropic_api_key', '' );
+    if ( ! is_string( $api_key ) || '' === $api_key ) {
+        return $fallback;
+    }
+
+    $api_key = chatbot_chatgpt_decrypt_api_key( esc_attr( $api_key ) );
+    if ( ! is_string( $api_key ) || '' === $api_key ) {
+        return $fallback;
+    }
+
+    $base_url = get_option( 'chatbot_anthropic_base_url', 'https://api.anthropic.com/v1' );
+    if ( ! is_string( $base_url ) || '' === $base_url ) {
+        $base_url = 'https://api.anthropic.com/v1';
+    }
+    $base_url = esc_url_raw( untrailingslashit( $base_url ) );
+    if ( '' === $base_url || ! wp_http_validate_url( $base_url ) ) {
+        $base_url = 'https://api.anthropic.com/v1';
+    }
+
+    $cache_key = 'chatbot_anth_models_' . substr( hash( 'sha256', $api_key ), 0, 16 );
+    if ( ! $refresh ) {
+        $cached = get_transient( $cache_key );
+        if ( is_array( $cached ) && ! empty( $cached ) ) {
+            chatbot_anthropic_models_are_live( true );
+            return $cached;
+        }
+    }
+
+    $models   = array();
+    $seen     = array();
+    $after_id = '';
+    $pages    = 0;
+
+    do {
+        $url = $base_url . '/models?limit=1000';
+        if ( '' !== $after_id ) {
+            $url .= '&after_id=' . rawurlencode( $after_id );
+        }
+
+        $response = wp_remote_get(
+            $url,
+            array(
+                'headers' => array(
+                    'x-api-key'         => $api_key,
+                    'anthropic-version' => '2023-06-01',
+                    'content-type'      => 'application/json',
+                ),
+                'timeout' => 15,
+            )
+        );
+
+        if ( is_wp_error( $response ) ) {
+            prod_trace( 'ERROR', 'Error fetching Anthropic models: ' . $response->get_error_message() );
+            if ( empty( $models ) ) {
+                return $fallback;
+            }
+            set_transient( $cache_key, $models, 5 * MINUTE_IN_SECONDS );
+            chatbot_anthropic_models_are_live( true );
+            return $models;
+        }
+
+        $code = (int) wp_remote_retrieve_response_code( $response );
+        $data = json_decode( wp_remote_retrieve_body( $response ), true );
+
+        if ( $code < 200 || $code >= 300 || ! is_array( $data ) || isset( $data['error'] ) || empty( $data['data'] ) || ! is_array( $data['data'] ) ) {
+            $message = ( is_array( $data ) && isset( $data['error']['message'] ) ) ? $data['error']['message'] : 'HTTP ' . $code;
+            prod_trace( 'ERROR', 'Anthropic models request failed: ' . $message );
+            if ( empty( $models ) ) {
+                return $fallback;
+            }
+            set_transient( $cache_key, $models, 5 * MINUTE_IN_SECONDS );
+            chatbot_anthropic_models_are_live( true );
+            return $models;
+        }
+
+        foreach ( $data['data'] as $model ) {
+            if ( ! is_array( $model ) || empty( $model['id'] ) || ! chatbot_anthropic_model_id_is_valid( $model['id'] ) ) {
+                continue;
+            }
+            if ( isset( $seen[ $model['id'] ] ) ) {
+                continue;
+            }
+            $seen[ $model['id'] ] = true;
+
+            $created = null;
+            if ( ! empty( $model['created_at'] ) && is_string( $model['created_at'] ) ) {
+                $timestamp = strtotime( $model['created_at'] );
+                if ( false !== $timestamp ) {
+                    $created = $timestamp;
+                }
+            }
+
+            $models[] = array(
+                'id'       => $model['id'],
+                'object'   => 'model',
+                'created'  => $created,
+                'owned_by' => 'anthropic',
+            );
+        }
+
+        $has_more = ! empty( $data['has_more'] );
+        $next_id  = ( isset( $data['last_id'] ) && is_string( $data['last_id'] ) ) ? $data['last_id'] : '';
+        if ( '' === $next_id || $next_id === $after_id || ! chatbot_anthropic_model_id_is_valid( $next_id ) ) {
+            $has_more = false;
+        }
+        $after_id = $next_id;
+        $pages++;
+    } while ( $has_more && $pages < 10 );
+
+    if ( empty( $models ) ) {
+        return $fallback;
+    }
+
+    // The API already returns the most recently released model first.
+    set_transient( $cache_key, $models, 5 * MINUTE_IN_SECONDS );
+    chatbot_anthropic_models_are_live( true );
     return $models;
 
 }

@@ -3,10 +3,12 @@
  * Kognetiks Chatbot - Retrieves the Name of the Assistant or Prompt
  *
  * This file contains the code to retrieve the display name of an Assistant
- * (asst_) or Prompt (pmpt_) from OpenAI, Azure, or the local assistants table.
+ * (asst_) or Prompt (pmpt_) from the local assistants table or, for Azure,
+ * from the Azure OpenAI resource.
  *
- * OpenAI Assistants API (GET /v1/assistants) was sunset 2026-08-26.
- * Prompt objects (GET /v1/prompts) remain available until 2026-11-30.
+ * OpenAI display names are read from the assistants table. Rendering does not
+ * call GET /v1/prompts/{id} or GET /v1/assistants/{id}. Azure still retrieves
+ * pmpt_ and asst_ names remotely and falls back to the local table.
  *
  * @package chatbot-chatgpt
  */
@@ -35,6 +37,11 @@ function chatbot_chatgpt_id_starts_with( $id, $prefix ) {
 
 /**
  * Look up a display name from the local assistants table by ID.
+ *
+ * When several rows share an assistant_id, this returns one common_name and
+ * does not define which row. The shortcode uses this only when no assistant
+ * row was selected. A numbered alias or Common Name selection displays the
+ * loaded row instead.
  *
  * @param string $assistant_id_lookup
  * @return string|false
@@ -82,7 +89,10 @@ function chatbot_chatgpt_extract_remote_object_name( $data ) {
 }
 
 /**
- * GET a JSON object from OpenAI or Azure and return its name, or false.
+ * GET a JSON object and return its name, or false.
+ *
+ * Azure prompt and assistant name lookups use this. OpenAI shortcode
+ * rendering does not.
  *
  * @param string $url
  * @param array  $args
@@ -154,40 +164,9 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
 
     if ( $chatbot_ai_platform_choice == 'OpenAI' ) {
 
-        // Retrieve the API key
-        $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
-        // Decrypt the API key - Ver 2.2.6
-        $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
-
-        // Ensure API key is set
-        if (empty($api_key)) {
-            return chatbot_chatgpt_get_local_assistant_name( $id_str );
-        }
-
-        if ( $is_prompt ) {
-
-            // Prompt objects: GET /v1/prompts/{pmpt_...} (scheduled shutdown 2026-11-30).
-            $url  = 'https://api.openai.com/v1/prompts/' . rawurlencode( $id_str );
-            $args = array(
-                'method'  => 'GET',
-                'headers' => array(
-                    'Content-Type'  => 'application/json',
-                    'Authorization' => 'Bearer ' . $api_key,
-                ),
-                'timeout' => 15, // Avoid long waits
-            );
-
-        } elseif ( $is_assistant ) {
-
-            // Assistants API was sunset 2026-08-26. Do not call GET /v1/assistants/{asst_...}.
-            // Display name comes from the local assistants table (Common Name).
-            return chatbot_chatgpt_get_local_assistant_name( $id_str );
-
-        } else {
-
-            return chatbot_chatgpt_get_local_assistant_name( $id_str );
-
-        }
+        // OpenAI widget titles use the assistants table for pmpt_, asst_, and
+        // any other stored ID. Do not call GET /v1/prompts/{id} while rendering.
+        return chatbot_chatgpt_get_local_assistant_name( $id_str );
 
     } elseif ( $chatbot_ai_platform_choice == 'Azure OpenAI' ) {
 

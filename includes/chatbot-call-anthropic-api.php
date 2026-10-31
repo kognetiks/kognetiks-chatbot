@@ -57,25 +57,21 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     // Anthropic.com API Documentation
     // https://docs.anthropic.com/en/api/messages
 
-    // The current Anthropic API URL endpoint for claude-3-5-sonnet-latest
     // $api_url = 'https://api.anthropic.com/v1/messages';
     $api_url = get_chat_completions_api_url();
 
-    // Select the Anthropic Model
-    // https://docs.anthropic.com/en/docs/about-claude/models
-    // 
-    // Claude 3.5 Sonnet - claude-3-5-sonnet-20241022 or claude-3-5-sonnet-latest
-    // Claude 3 Opus - claude-3-opus-20240229 or claude-3-opus-latest
-    // Claude 3 Sonnet - claude-3-sonnet-20240229
-    // Claude 3 Haiku - claude-3-haiku-20240307
-    //
-
-    // Get the saved model from the settings or default to "claude-3-5-sonnet-latest"
-    if (!isset($kchat_settings['model'])) { 
-        $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+    // https://platform.claude.com/docs/en/about-claude/models/overview
+    // Get the saved model from the settings or default to the current Sonnet id.
+    if (!isset($kchat_settings['model']) || !is_string($kchat_settings['model']) || '' === $kchat_settings['model']) { 
+        $model = esc_attr(get_option('chatbot_anthropic_model_choice', chatbot_anthropic_default_model()));
     } else {
         $model = $kchat_settings['model'];
     }
+    $model = chatbot_anthropic_resolve_model($model);
+    if ( ! is_array( $kchat_settings ) ) {
+        $kchat_settings = array();
+    }
+    $kchat_settings['model'] = $model;
  
     // Max tokens
     $max_tokens = intval(esc_attr(get_option('chatbot_anthropic_max_tokens_setting', '1000')));
@@ -195,6 +191,7 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
         'role' => 'user',
         'content' => $message
     );
+    $messages = chatbot_anthropic_normalize_messages($messages);
 
     // Define the request body - Ver 2.3.9+
     // Use Anthropic's native 'system' parameter and structured 'messages' array
@@ -238,7 +235,9 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
 
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
-        return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An error occurred.';
+        $error_type = sanitize_text_field( (string) $error_type );
+        $error_message = sanitize_text_field( (string) $error_message );
+        return 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
 
     }
 

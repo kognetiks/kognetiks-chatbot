@@ -3,14 +3,14 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.5.3
+ * Version:     2.5.4
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * Text Domain: chatbot-chatgpt
  * Domain Path: /languages
  * Network: true
  * Requires at least: 6.0
- * Requires PHP: 7.0
+ * Requires PHP: 8.0
  * License:     GPLv3 or later
  * License URI: https://www.gnu.org/licenses/gpl-30.html
  * 
@@ -28,7 +28,7 @@
  * along with Kognetiks Chatbot. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  * 
  * @package chatbot-chatgpt
- * @version 2.5.3
+ * @version 2.5.4
  * @author Kognetiks.com
  */
 
@@ -95,7 +95,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.5.3';
+$chatbot_chatgpt_plugin_version = '2.5.4';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -175,6 +175,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-respo
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-tts.php';        // TTS API - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php';                    // Globals - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-shortcode.php';                  // Shortcode - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/compatibility/chatbot-aioseo-shortcode-compat.php'; // AIOSEO shortcode compatibility
 
 // Include necessary files - Appearance - Ver 1.8.1
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-body.php';
@@ -439,7 +440,7 @@ $chatbot_platforms = array(
     'Anthropic'    => array(
         'option'        => 'chatbot_anthropic_api_enabled',
         'model_option'  => 'chatbot_anthropic_model_choice',
-        'default_model' => 'claude-3-5-sonnet-latest',
+        'default_model' => chatbot_anthropic_default_model(),
     ),
     'DeepSeek'     => array(
         'option'        => 'chatbot_deepseek_api_enabled',
@@ -974,7 +975,7 @@ function chatbot_chatgpt_process_queued_message($message_data) {
 
             $api_key = esc_attr(get_option('chatbot_anthropic_api_key'));
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
-            $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+            $model = esc_attr(get_option('chatbot_anthropic_model_choice', chatbot_anthropic_default_model()));
             break;
 
         case 'DeepSeek':
@@ -1395,7 +1396,7 @@ function chatbot_chatgpt_send_message() {
             $api_key = esc_attr(get_option('chatbot_anthropic_api_key'));
             // Decrypt the API key - Ver 2.2.6
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
-            $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+            $model = esc_attr(get_option('chatbot_anthropic_model_choice', chatbot_anthropic_default_model()));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             break;

@@ -62,7 +62,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_nvidia_voice_option', 'none'));
     } elseif (esc_attr(get_option('chatbot_anthropic_api_enabled', 'No')) == 'Yes') {
-        $model_choice = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+        $model_choice = esc_attr(get_option('chatbot_anthropic_model_choice', chatbot_anthropic_default_model()));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_anthropic_voice_option', 'none'));
     } elseif (esc_attr(get_option('chatbot_google_api_enabled', 'No')) == 'Yes') {
@@ -318,7 +318,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
                 break;
             case 'Anthropic':
-                $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+                $model = esc_attr(get_option('chatbot_anthropic_model_choice', chatbot_anthropic_default_model()));
                 break;
             case 'Google':
                 $model = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
@@ -579,7 +579,15 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // FIXME - $assistant_id is empty - Ver 2.2.6
     if ($use_assistant_name == 'Yes' && !empty($assistant_id) && $assistant_id !== 'original') {
-        $assistant_name = esc_attr(get_chatbot_chatgpt_assistant_name($assistant_id));
+        // A numbered alias or Common Name selection has already loaded one row.
+        // Use that record's name so another row with the same pmpt_ ID cannot replace it.
+        // A raw assistant="pmpt_..." or "asst_..." leaves common_name empty and keeps the ID lookup.
+        // Azure still resolves through get_chatbot_chatgpt_assistant_name().
+        if ( 'OpenAI' === $chatbot_ai_platform_choice && ! empty( $assistant_details['common_name'] ) && is_string( $assistant_details['common_name'] ) ) {
+            $assistant_name = esc_attr( $assistant_details['common_name'] );
+        } else {
+            $assistant_name = esc_attr(get_chatbot_chatgpt_assistant_name($assistant_id));
+        }
         $bot_name = !empty($assistant_name) ? $assistant_name : esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     } else {
         $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));

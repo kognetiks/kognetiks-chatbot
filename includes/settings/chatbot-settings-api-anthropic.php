@@ -46,8 +46,8 @@ function chatbot_anthropic_api_model_chat_settings_section_callback($args) {
     <p><b>NOTE:</b> Enter your API key (above), click <code>Save Settings</code> at the bottom of this page, in order to retrieve the full list of available models.</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
         <li><code>&#91;chatbot&#93;</code> - Default chat model, style is floating</li>
-        <li><code>&#91;chatbot style="floating" model="claude-3-5-sonnet-latest"&#93;</code> - Style is floating, specific model</li>
-        <li><code>&#91;chatbot style="embedded" model="claude-3-5-sonnet-latest"&#93;</code> - Style is embedded, default chat model</li>
+        <li><code>&#91;chatbot style="floating" model="<?php echo esc_attr( chatbot_anthropic_default_model() ); ?>"&#93;</code> - Style is floating, specific model</li>
+        <li><code>&#91;chatbot style="embedded" model="<?php echo esc_attr( chatbot_anthropic_default_model() ); ?>"&#93;</code> - Style is embedded, default chat model</li>
     </ul>
     <?php
 }
@@ -55,37 +55,49 @@ function chatbot_anthropic_api_model_chat_settings_section_callback($args) {
 // Anthropic Model Settings Callback - Ver 2.1.8
 function chatbot_anthropic_chat_model_choice_callback($args) {
 
-    $model_choice = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
-    $anthropic_api_enabled = esc_attr(get_option('chatbot_anthropic_api_enabled', 'Yes'));
-
-    // Fetch models from the API
-    $models = chatbot_anthropic_get_models();
-
-    // Remove the models not owned by Anthropic
-    $models = array_filter($models, function($model) {
-        return $model['owned_by'] === 'anthropic';
-    });
-
-    // Check for errors
-    if (is_string($models) && strpos($models, 'Error:') === 0) {
-        // If there's an error, display the hardcoded list
-        $model_choice = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
-        ?>
-        <select id="chatbot_chatgpt_model_choice" name="chatbot_chatgpt_model_choice">
-            <option value="<?php echo esc_attr( 'claude-3-5-sonnet-latest' ); ?>" <?php selected( $model_choice, 'claude-3-5-sonnet-latest' ); ?>><?php echo esc_html( 'claude-3-5-sonnet-latest' ); ?></option>
-        </select>
-        <?php
-    } else {
-        // If models are fetched successfully, display them dynamically
-        ?>
-        <select id="chatbot_anthropic_model_choice" name="chatbot_anthropic_model_choice">
-            <?php foreach ($models as $model): ?>
-                <option value="<?php echo esc_attr($model['id']); ?>" <?php selected(esc_attr(get_option('chatbot_anthropic_model_choice')), $model['id']); ?>><?php echo esc_html($model['id']); ?></option>
-            <?php endforeach; ?>
-            ?>
-        </select>
-        <?php
+    $model_choice = get_option( 'chatbot_anthropic_model_choice', chatbot_anthropic_default_model() );
+    if ( ! is_string( $model_choice ) || '' === $model_choice ) {
+        $model_choice = chatbot_anthropic_default_model();
     }
+
+    $models = chatbot_anthropic_get_models( true );
+    if ( ! is_array( $models ) ) {
+        $models = array();
+    }
+
+    $models = array_values( array_filter( $models, function( $model ) {
+        return is_array( $model )
+            && ! empty( $model['id'] )
+            && chatbot_anthropic_model_id_is_valid( $model['id'] )
+            && ( empty( $model['owned_by'] ) || 'anthropic' === $model['owned_by'] );
+    } ) );
+
+    $ids = array();
+    foreach ( $models as $model ) {
+        $ids[] = $model['id'];
+    }
+    if ( chatbot_anthropic_model_id_is_valid( $model_choice ) && ! in_array( $model_choice, $ids, true ) ) {
+        if ( chatbot_anthropic_models_are_live() ) {
+            $replacement = sanitize_text_field( chatbot_anthropic_cheapest_model_id( $models ) );
+            if ( chatbot_anthropic_model_id_is_valid( $replacement ) ) {
+                $model_choice = $replacement;
+                update_option( 'chatbot_anthropic_model_choice', $replacement );
+            }
+        } else {
+            array_unshift( $models, array(
+                'id'       => $model_choice,
+                'owned_by' => 'anthropic',
+            ) );
+        }
+    }
+
+    ?>
+    <select id="chatbot_anthropic_model_choice" name="chatbot_anthropic_model_choice">
+        <?php foreach ( $models as $model ) : ?>
+            <option value="<?php echo esc_attr( $model['id'] ); ?>" <?php selected( $model_choice, $model['id'] ); ?>><?php echo esc_html( $model['id'] ); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <?php
 
 }
 
