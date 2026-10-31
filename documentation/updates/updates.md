@@ -1,9 +1,12 @@
 # Past Updates
 
-## What's new in Version 2.5.4 - Released TBD
+## What's new in Version 2.5.5 - Released TBD
+* **TBD**: TBD
+
+## What's new in Version 2.5.4 - Released 2026-10-31
 
 ### Bug Fixes
-* **TBD**: TBD
+* **Anthropic model list**: The Anthropic model list had become stale. It is now refreshed from the API.
 
 ## What's new in Version 2.5.3 - Released 2026-10-29
 

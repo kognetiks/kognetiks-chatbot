@@ -193,10 +193,15 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.5.4 - Released TBD =
+- 2.5.5 - Released TBD =
 
 ### Bug Fixes
 * **TBD**: TBD
+
+= 2.5.4 - Released 2026-10-31 =
+
+### Bug Fixes
+* **Anthropic model list**: The Anthropic model list had become stale. It is now refreshed from the API.
 
 = 2.5.3 - Released 2026-10-29 =
 
