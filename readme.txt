@@ -5,7 +5,7 @@ Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 8.0
-Stable tag: 2.5.4
+Stable tag: 2.5.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -193,10 +193,16 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.5.4 - Released TBD =
+= 2.5.5 - Released 2026-11-01 =
 
 ### Bug Fixes
-* **TBD**: TBD
+* **Anthropic replies**: Current Claude models can return a thinking block before the answer. The plugin read only the first block, so a successful reply was replaced with a generic API error. Replies are now taken from the text blocks. Haiku 5.5, Sonnet 5, and Opus 5 turn thinking off so the token cap is available for the answer. Sonnet 5.5 uses between-tools thinking, which does not spend that cap before a normal chat reply.
+* **Anthropic output limit**: Opus 5.5 and Fable keep thinking on, and those thinking tokens count against the max tokens setting. A setting below 4,000 is sent as 4,000 for those models. If the model still uses the whole cap before it writes a reply, the chatbot names the model and asks you to increase the Anthropic max tokens setting.
+
+= 2.5.4 - Released 2026-10-31 =
+
+### Bug Fixes
+* **Anthropic model list**: The Anthropic model list had become stale. It is now refreshed from the API.
 
 = 2.5.3 - Released 2026-10-29 =
 

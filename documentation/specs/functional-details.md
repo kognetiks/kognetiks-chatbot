@@ -4,7 +4,7 @@
 
 The **Kognetiks Chatbot** is a comprehensive WordPress plugin that integrates advanced AI capabilities into WordPress websites. It provides intelligent conversational experiences through multiple AI platforms, offering both cloud-based and local AI solutions for enhanced visitor engagement, customer support, and interactive assistance.
 
-**Version:** 2.5.4
+**Version:** 2.5.5
 **License:** GPLv3 or later  
 **WordPress Compatibility:** Tested up to WordPress 7.1
 
@@ -565,15 +565,21 @@ Users must agree to terms of service for each AI platform:
 
 ## Version History
 
+## What's new in Version 2.5.5 - Released 2026-11-01
+
+### Bug Fixes
+* **Anthropic replies**: Current Claude models can return a thinking block before the answer. The plugin read only the first block, so a successful reply was replaced with a generic API error. Replies are now taken from the text blocks. Haiku 5.5, Sonnet 5, and Opus 5 turn thinking off so the token cap is available for the answer. Sonnet 5.5 uses between-tools thinking, which does not spend that cap before a normal chat reply.
+* **Anthropic output limit**: Opus 5.5 and Fable keep thinking on, and those thinking tokens count against the max tokens setting. A setting below 4,000 is sent as 4,000 for those models. If the model still uses the whole cap before it writes a reply, the chatbot names the model and asks you to increase the Anthropic max tokens setting.
+
+## What's new in Version 2.5.4 - Released 2026-10-31
+
+### Bug Fixes
+* **Anthropic model list**: The Anthropic model list had become stale. It is now refreshed from the API.
+
 ## What's new in Version 2.5.3 - Released 2026-10-29
 
 ### Bug Fixes
 * **Transcript download**: Download Transcript now saves a text file in the browser from the conversation shown in that chatbot.
-
-## What's new in Version 2.5.4 - Released TBD
-
-### Bug Fixes
-* **TBD**: TBD
 
 ## What's new in Version 2.5.2 - Released 2026-10-28
 

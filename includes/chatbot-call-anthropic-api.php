@@ -73,8 +73,11 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     }
     $kchat_settings['model'] = $model;
  
-    // Max tokens
-    $max_tokens = intval(esc_attr(get_option('chatbot_anthropic_max_tokens_setting', '1000')));
+    // Max tokens. Models that keep thinking on need room for thinking and the reply.
+    $max_tokens = chatbot_anthropic_output_token_cap(
+        $model,
+        intval(esc_attr(get_option('chatbot_anthropic_max_tokens_setting', '1000')))
+    );
 
     // Build conversation context using standardized function - Ver 2.3.9+
     // This function handles conversation history building, message cleaning, and conversation continuity
@@ -194,13 +197,19 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     $messages = chatbot_anthropic_normalize_messages($messages);
 
     // Define the request body - Ver 2.3.9+
-    // Use Anthropic's native 'system' parameter and structured 'messages' array
-    $body = json_encode(array(
+    // Use Anthropic's native 'system' parameter and structured 'messages' array.
+    // max_tokens covers thinking and text, so up-front thinking is turned off for models that support it.
+    $body = array(
         'model' => $model,
         'max_tokens' => $max_tokens,
         'system' => $system_message, // Top-level parameter for system message
         'messages' => $messages,
-    ));
+    );
+    $thinking = chatbot_anthropic_thinking_config($model);
+    if (is_array($thinking)) {
+        $body['thinking'] = $thinking;
+    }
+    $body = json_encode($body);
 
     $timeout = esc_attr(get_option('chatbot_anthropic_timeout_setting', 240 ));
 
@@ -266,14 +275,24 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, null, $total_tokens);
     }
 
-    if (isset($response_body['content'][0]['text']) && !empty($response_body['content'][0]['text'])) {
+    // Current models can return thinking blocks before the reply. Read text blocks by type.
+    // A reply that reaches max_tokens is still the reply, so that text is returned.
+    $reply = chatbot_anthropic_response_text($response_body);
+    if ('' !== $reply) {
         // Handle the response from the chat engine
         // Context History - Ver 1.6.1
-        addEntry('chatbot_chatgpt_context_history', $response_body['content'][0]['text']);
+        addEntry('chatbot_chatgpt_context_history', $reply);
         // Clear locks on success
         // Lock clearing removed - main send function handles locking
-        return $response_body['content'][0]['text'];
+        return $reply;
     } else {
+        $stop_reason = (is_array($response_body) && isset($response_body['stop_reason']) && is_string($response_body['stop_reason'])) ? sanitize_text_field($response_body['stop_reason']) : '';
+        $logged_model = chatbot_anthropic_model_id_is_valid($model) ? $model : 'unknown';
+        prod_trace('ERROR', 'No valid Anthropic text block. model=' . $logged_model . ' max_tokens=' . intval($max_tokens) . ('' !== $stop_reason ? ' stop_reason=' . $stop_reason : ''));
+        $limit_message = chatbot_anthropic_empty_reply_message($model, $stop_reason);
+        if ('' !== $limit_message) {
+            return $limit_message;
+        }
         // FIXME - Decide what to return here - it's an error
         if (get_locale() !== "en_US") {
             $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);

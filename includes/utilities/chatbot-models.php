@@ -730,6 +730,99 @@ function chatbot_anthropic_normalize_messages( $messages ) {
 
 }
 
+// Turn off up-front thinking so the token budget is available for the reply.
+// Sonnet 5.5 rejects "disabled". Haiku 5.5 rejects "between_tools". Other models keep the request unchanged.
+function chatbot_anthropic_thinking_config( $model ) {
+
+    $id = strtolower( (string) $model );
+
+    if ( false !== strpos( $id, 'sonnet-5-5' ) ) {
+        return array( 'type' => 'between_tools' );
+    }
+
+    if ( false !== strpos( $id, 'haiku-5-5' ) || false !== strpos( $id, 'sonnet-5' ) ) {
+        return array( 'type' => 'disabled' );
+    }
+
+    if ( false !== strpos( $id, 'opus-5' ) && false === strpos( $id, 'opus-5-5' ) ) {
+        return array( 'type' => 'disabled' );
+    }
+
+    return null;
+
+}
+
+// Opus 5.5 and Fable keep adaptive thinking, and those tokens count toward max_tokens.
+function chatbot_anthropic_thinking_stays_on( $model ) {
+
+    $id = strtolower( (string) $model );
+
+    return ( false !== strpos( $id, 'opus-5-5' ) || false !== strpos( $id, 'fable-5' ) );
+
+}
+
+// A cap sized for a reply alone can be spent before any text exists on models that keep thinking on.
+function chatbot_anthropic_output_token_cap( $model, $max_tokens ) {
+
+    $cap = intval( $max_tokens );
+    if ( $cap < 1 ) {
+        $cap = 1000;
+    }
+
+    if ( chatbot_anthropic_thinking_stays_on( $model ) && $cap < 4000 ) {
+        return 4000;
+    }
+
+    return $cap;
+
+}
+
+// Shown when thinking uses the whole output cap and no reply text is returned.
+function chatbot_anthropic_empty_reply_message( $model, $stop_reason ) {
+
+    $stop_reason = is_string( $stop_reason ) ? $stop_reason : '';
+    if ( 'max_tokens' !== $stop_reason ) {
+        return '';
+    }
+
+    $name = chatbot_anthropic_model_id_is_valid( $model ) ? $model : 'The selected model';
+
+    return $name . ' used its output limit before it wrote a reply. Increase the Anthropic max tokens setting.';
+
+}
+
+// Join text blocks and skip thinking blocks that precede them.
+function chatbot_anthropic_response_text( $response_body ) {
+
+    if ( ! is_array( $response_body ) || empty( $response_body['content'] ) || ! is_array( $response_body['content'] ) ) {
+        return '';
+    }
+
+    $parts = array();
+
+    foreach ( $response_body['content'] as $block ) {
+
+        if ( ! is_array( $block ) ) {
+            continue;
+        }
+
+        $type = isset( $block['type'] ) ? $block['type'] : 'text';
+        if ( 'text' !== $type || ! isset( $block['text'] ) || ! is_string( $block['text'] ) ) {
+            continue;
+        }
+
+        if ( '' === trim( $block['text'] ) ) {
+            continue;
+        }
+
+        $parts[] = $block['text'];
+
+    }
+
+    return trim( implode( "\n", $parts ) );
+
+}
+
 // Function to get the Model names from Anthropic API
 // https://platform.claude.com/docs/en/api/models/list
 function chatbot_anthropic_get_models( $refresh = false ) {
