@@ -6,6 +6,11 @@
 
 ---
 
+= 2.5.6 - Released TBD =
+
+### Bug Fixes
+* **TBD**: TBD
+
 = 2.5.5 - Released 2026-11-01 =
 
 ### Bug Fixes
