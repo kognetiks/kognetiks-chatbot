@@ -1,7 +1,11 @@
 # Past Updates
 
-## What's new in Version 2.5.5 - Released TBD
-* **TBD**: TBD
+## What's new in Version 2.5.5 - Released 2026-11-01
+
+### Bug Fixes
+* **Anthropic replies**: Current Claude models can return a thinking block before the answer. The plugin read only the first block, so a successful reply was replaced with a generic API error. Replies are now taken from the text blocks. Haiku 5.5, Sonnet 5, and Opus 5 turn thinking off so the token cap is available for the answer. Sonnet 5.5 uses between-tools thinking, which does not spend that cap before a normal chat reply.
+* **Anthropic output limit**: Opus 5.5 and Fable keep thinking on, and those thinking tokens count against the max tokens setting. A setting below 4,000 is sent as 4,000 for those models. If the model still uses the whole cap before it writes a reply, the chatbot names the model and asks you to increase the Anthropic max tokens setting.
+
 
 ## What's new in Version 2.5.4 - Released 2026-10-31
 

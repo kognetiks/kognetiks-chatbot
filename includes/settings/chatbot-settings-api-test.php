@@ -296,10 +296,11 @@ function kchat_fetch_api_status($api_key, $model) {
                 'Content-Type' => 'application/json'
             );
 
-            // Set the body
+            // Set the body. max_tokens covers thinking and text, so up-front thinking is turned off.
+            // Models that keep thinking on use at least 4000 so the test reply is not crowded out.
             $body = array(
                 'model' => $model,
-                'max_tokens' => 100,
+                'max_tokens' => chatbot_anthropic_output_token_cap($model, 100),
                 'system' => 'You are a helpful assistant.',
                 'messages' => array(
                     array(
@@ -308,6 +309,10 @@ function kchat_fetch_api_status($api_key, $model) {
                     )
                 )
             );
+            $thinking = chatbot_anthropic_thinking_config($model);
+            if (is_array($thinking)) {
+                $body['thinking'] = $thinking;
+            }
 
             // Encode the body
             $body = json_encode($body);
@@ -343,19 +348,21 @@ function kchat_fetch_api_status($api_key, $model) {
                 // Handle error response
                 $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
             
-            } elseif (isset($response_data['type']) && $response_data['type'] === 'message') {
+            } elseif (isset($response_data['type']) && $response_data['type'] === 'message' && '' !== chatbot_anthropic_response_text($response_data)) {
 
-                // Handle successful response
-                $content_type = $response_data['content'][0]['type'] ?? 'Unknown Content Type';
-                $content_text = $response_data['content'][0]['text'] ?? 'No content available.';
-            
-                // Handle successful response
+                // Handle successful response. Text may follow a thinking block.
                 $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
 
             } else {
 
-                // Handle unexpected response structure
-                $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
+                $stop_reason = (is_array($response_data) && isset($response_data['stop_reason']) && is_string($response_data['stop_reason'])) ? sanitize_text_field($response_data['stop_reason']) : '';
+                $limit_message = chatbot_anthropic_empty_reply_message($model, $stop_reason);
+                if ('' !== $limit_message) {
+                    $updated_status = $limit_message;
+                } else {
+                    // Handle unexpected response structure
+                    $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
+                }
 
             }
             
