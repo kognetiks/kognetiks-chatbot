@@ -464,25 +464,82 @@ function chatbot_chatgpt_build_responses_instructions( $local_row, $additional_i
 }
 
 /**
- * Model for asst_ Responses calls (prompt objects already include a model).
+ * Nonempty model on the assistants-table row this request already validated.
  *
- * @param mixed $user_id
- * @param mixed $page_id
- * @param mixed $session_id
+ * Row ID 0, a missing ID, and an ID that does not match the loaded row return
+ * an empty string. This never looks up another row by its external ID.
+ *
+ * @param mixed $assistant_row_id Validated row ID.
+ * @param mixed $local_row Row loaded for that ID, when already available.
  * @return string
  */
-function chatbot_chatgpt_resolve_responses_model( $user_id, $page_id, $session_id ) {
+function chatbot_chatgpt_responses_model_from_validated_row( $assistant_row_id, $local_row = null ) {
 
+    if ( ! function_exists( 'chatbot_chatgpt_normalize_assistant_row_id' ) ) {
+        return '';
+    }
+    $normalized = chatbot_chatgpt_normalize_assistant_row_id( $assistant_row_id );
+    if ( 'valid' !== $normalized['state'] || $normalized['id'] < 1 ) {
+        return '';
+    }
+
+    $row = null;
+    if ( is_array( $local_row ) && function_exists( 'chatbot_chatgpt_loaded_row_id' ) && chatbot_chatgpt_loaded_row_id( $local_row ) === $normalized['id'] ) {
+        $row = $local_row;
+    } elseif ( function_exists( 'get_chatbot_chatgpt_assistant_by_key' ) ) {
+        $loaded_row = get_chatbot_chatgpt_assistant_by_key( $normalized['id'] );
+        if ( is_array( $loaded_row ) && function_exists( 'chatbot_chatgpt_loaded_row_id' ) && chatbot_chatgpt_loaded_row_id( $loaded_row ) === $normalized['id'] ) {
+            $row = $loaded_row;
+        }
+    }
+
+    if ( ! is_array( $row ) || ! array_key_exists( 'model', $row ) || ! is_string( $row['model'] ) ) {
+        return '';
+    }
+    return trim( $row['model'] );
+
+}
+
+/**
+ * Model for an asst_ or Local pmpt_ Responses request.
+ *
+ * An explicit shortcode model wins. Otherwise a nonempty model on the
+ * validated assistants-table row wins. A NULL row model uses the model stored
+ * when the shortcode was last resolved, then the current ChatGPT Model Default.
+ * Bridge pmpt_ requests do not call this function.
+ *
+ * @param mixed $user_id User id.
+ * @param mixed $page_id Page id.
+ * @param mixed $session_id Session id.
+ * @param mixed $assistant_row_id Validated row ID. Absent values skip the row model.
+ * @param mixed $local_row Row loaded for that ID.
+ * @return string
+ */
+function chatbot_chatgpt_resolve_responses_model( $user_id, $page_id, $session_id, $assistant_row_id = null, $local_row = null ) {
+
+    $explicit = '';
     $model = '';
     if ( function_exists( 'get_chatbot_chatgpt_transients' ) ) {
+        $explicit = get_chatbot_chatgpt_transients( 'model_explicit', $user_id, $page_id, $session_id );
         $model = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id );
     }
-    if ( ! is_string( $model ) || trim( $model ) === '' ) {
-        $model = chatbot_chatgpt_resolve_openai_chat_model();
-    } else {
+    if ( '1' === $explicit && is_string( $model ) && '' !== trim( $model ) ) {
         $model = chatbot_chatgpt_resolve_openai_chat_model( $model );
+        return sanitize_text_field( (string) $model );
     }
 
+    $row_model = chatbot_chatgpt_responses_model_from_validated_row( $assistant_row_id, $local_row );
+    if ( '' !== $row_model ) {
+        $row_model = chatbot_chatgpt_resolve_openai_chat_model( $row_model );
+        return sanitize_text_field( (string) $row_model );
+    }
+
+    if ( is_string( $model ) && '' !== trim( $model ) ) {
+        $model = chatbot_chatgpt_resolve_openai_chat_model( $model );
+        return sanitize_text_field( (string) $model );
+    }
+
+    $model = chatbot_chatgpt_resolve_openai_chat_model();
     return sanitize_text_field( (string) $model );
 
 }
@@ -747,7 +804,7 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
 
         $model = '';
         if ( ! $is_prompt || 'local' === $request_body ) {
-            $model = chatbot_chatgpt_resolve_responses_model( $user_id, $page_id, $session_id );
+            $model = chatbot_chatgpt_resolve_responses_model( $user_id, $page_id, $session_id, $assistant_row_id, $local_row );
         }
         $payload = chatbot_chatgpt_apply_responses_assistant_fields( $payload, $prompt_id, $local_row, $additional_instructions, $model, $request_body );
         if ( null === $payload ) {

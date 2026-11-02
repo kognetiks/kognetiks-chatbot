@@ -16,8 +16,8 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Copy an assistants-table row onto shortcode attributes.
  *
- * The model column is not copied. Request selection still uses the shortcode
- * model attribute or the global model until per-row selection is enabled.
+ * The model column is not copied. An explicit shortcode model attribute stays
+ * separate from a saved row model.
  *
  * @param array $atts Shortcode attributes.
  * @param array $assistant_details Assistants-table row.
@@ -40,6 +40,28 @@ function chatbot_chatgpt_merge_assistant_row_into_atts( $atts, $assistant_detail
     }
 
     return $atts;
+
+}
+
+/**
+ * Remember whether this page's model came from the shortcode model attribute.
+ *
+ * The model transient still holds the value Chat Completions and other
+ * providers already use. Responses requests treat that value as an override
+ * only when the explicit flag is set. A shortcode without a model attribute
+ * clears the flag so a row model or a later global default can apply.
+ *
+ * @param string $model Model stored for this page and session.
+ * @param bool   $explicit True when the shortcode supplied a model attribute.
+ * @param mixed  $user_id User id.
+ * @param mixed  $page_id Page id.
+ * @param mixed  $session_id Session id.
+ * @return void
+ */
+function chatbot_chatgpt_store_shortcode_model( $model, $explicit, $user_id, $page_id, $session_id ) {
+
+    set_chatbot_chatgpt_transients( 'model', is_string( $model ) ? $model : '', $user_id, $page_id, $session_id, null );
+    set_chatbot_chatgpt_transients( 'model_explicit', ( true === $explicit ) ? '1' : '0', $user_id, $page_id, $session_id, null );
 
 }
 
@@ -335,6 +357,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
     // Validate and sanitize the model parameter - Ver 1.9.9
+    // Only an explicit model attribute overrides a per-assistant model. Ver 2.5.6
+    $chatbot_chatgpt_model_is_explicit = isset( $atts['model'] );
     if (!isset($atts['model'])) {
 
         $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
@@ -936,7 +960,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // Store the style and the assistant value - Ver 1.7.2
         set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, $session_id, null );
         set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
-        set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, $session_id, null);
+        chatbot_chatgpt_store_shortcode_model( $model, $chatbot_chatgpt_model_is_explicit, $user_id, $page_id, $session_id );
         set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, $session_id, null);
         set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, $session_id, null);
         // OUTSIDE THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
@@ -1088,7 +1112,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // Store the style and the assistant value - Ver 1.7.2
         set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, $session_id, null );
         set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
-        set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, $session_id, null);
+        chatbot_chatgpt_store_shortcode_model( $model, $chatbot_chatgpt_model_is_explicit, $user_id, $page_id, $session_id );
         set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, $session_id, null);
         set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, $session_id, null);
         // OUTSIDE THE IF STATEMENT - Ver 2.0.5 - 2024 07 05

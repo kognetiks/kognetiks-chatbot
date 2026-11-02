@@ -454,7 +454,15 @@ function chatbot_chatgpt_render_assistant_model_select( $field_name, $saved_mode
 
     echo '<td>';
     echo '<select name="' . esc_attr( $field_name ) . '">';
-    echo '<option value=""' . selected( $saved, '', false ) . '>' . esc_html__( 'Use global OpenAI model', 'chatbot-chatgpt' ) . '</option>';
+    $global_model = function_exists( 'chatbot_chatgpt_resolve_openai_chat_model' )
+        ? chatbot_chatgpt_resolve_openai_chat_model()
+        : '';
+    $global_label = sprintf(
+        /* translators: %s: current ChatGPT Model Default identifier */
+        __( 'Use ChatGPT Model Default (currently: %s)', 'chatbot-chatgpt' ),
+        $global_model
+    );
+    echo '<option value=""' . selected( $saved, '', false ) . '>' . esc_html( $global_label ) . '</option>';
     if ( '' !== $saved && ! $known ) {
         $label = $live
             ? sprintf(
@@ -480,7 +488,7 @@ function chatbot_chatgpt_render_assistant_model_select( $field_name, $saved_mode
         if ( $live ) {
             echo '<p class="description">' . esc_html__( 'This saved model is not in the current OpenAI model list. It stays selected until you choose a different model.', 'chatbot-chatgpt' ) . '</p>';
         } else {
-            echo '<p class="description">' . esc_html__( 'This saved model could not be verified because the OpenAI model list is unavailable. It stays selected until you choose Use global OpenAI model.', 'chatbot-chatgpt' ) . '</p>';
+            echo '<p class="description">' . esc_html__( 'This saved model could not be verified because the OpenAI model list is unavailable. It stays selected until you choose Use ChatGPT Model Default.', 'chatbot-chatgpt' ) . '</p>';
         }
     }
     echo '</td>';
@@ -554,7 +562,7 @@ function display_chatbot_chatgpt_assistants_table() {
         ),
         array( 'code' => array() )
     ) . '</p>';
-    echo '<p>' . esc_html__( 'Choose Use global OpenAI model to store no model on this row. Bridge mode uses the hosted prompt\'s model and does not send this saved model. The per-row model will affect Local and asst_ requests only after Step 5C. Saving a model does not change Local or Bridge mode.', 'chatbot-chatgpt' ) . '</p>';
+    echo '<p>' . esc_html__( 'Choose Use ChatGPT Model Default to store no model on this row. That choice follows the ChatGPT Model Default setting. A selected model is used for Local and asst_ requests. Bridge mode uses the hosted prompt\'s model and does not send this saved model. Saving a model does not change Local or Bridge mode.', 'chatbot-chatgpt' ) . '</p>';
     echo '<p>' . esc_html__( 'A model in this list was returned by the OpenAI models endpoint. That does not prove it supports the Responses API or file search.', 'chatbot-chatgpt' ) . '</p>';
     if ( ! empty( $model_inventory['notice'] ) ) {
         echo '<p class="description">' . esc_html( $model_inventory['notice'] ) . '</p>';

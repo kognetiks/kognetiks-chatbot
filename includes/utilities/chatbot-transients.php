@@ -127,6 +127,8 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $u
         $transient_key = 'chatbot_chatgpt_assistant_file_id_' . $session_id;
     } elseif ( $transient_type == 'model' ) {
         $transient_key = 'chatbot_chatgpt_model_' . $page_id . '_' . $session_id;
+    } elseif ( $transient_type == 'model_explicit' ) {
+        $transient_key = 'chatbot_chatgpt_model_explicit_' . $page_id . '_' . $session_id;
     } elseif ( $transient_type == 'voice') {
         $transient_key = 'chatbot_chatgpt_voice_' . $page_id . '_' . $session_id;
     } elseif ( $transient_type == 'kflow_sequence' ) {
@@ -182,6 +184,8 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
         $transient_key = 'chatbot_chatgpt_assistant_file_id_' . $session_id;
     } elseif ($transient_type == 'model') {
         $transient_key = 'chatbot_chatgpt_model_' . $page_id . '_' . $session_id;
+    } elseif ($transient_type == 'model_explicit') {
+        $transient_key = 'chatbot_chatgpt_model_explicit_' . $page_id . '_' . $session_id;
     } elseif ($transient_type == 'voice') {
         $transient_key = 'chatbot_chatgpt_voice_' . $page_id . '_' . $session_id;
     } elseif ($transient_type == 'kflow_sequence') {
