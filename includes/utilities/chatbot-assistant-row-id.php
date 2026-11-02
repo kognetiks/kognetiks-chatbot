@@ -404,6 +404,51 @@ function chatbot_chatgpt_responses_row_id_from_decision( $decision ) {
 }
 
 /**
+ * Apply a browser-supplied assistant ID without replacing a stored selection.
+ *
+ * An empty server assistant may be filled by a specialized posted ID. A stored
+ * value, including explicit "original", stays when the posted value differs.
+ * The caller must validate the row and only then persist the result.
+ *
+ * @param string $server_assistant_id Assistant ID already stored for this page.
+ * @param string $server_alias Alias already stored for this page.
+ * @param bool   $posted_present Whether the request included assistant_id.
+ * @param string $posted_assistant_id Sanitized posted assistant ID.
+ * @return array{assistant_id:string,assistant_alias:string}
+ */
+function chatbot_chatgpt_merge_posted_assistant_selection( $server_assistant_id, $server_alias, $posted_present, $posted_assistant_id ) {
+
+    $assistant_id = is_string( $server_assistant_id ) ? $server_assistant_id : '';
+    $alias        = is_string( $server_alias ) ? $server_alias : '';
+    $posted       = is_string( $posted_assistant_id ) ? $posted_assistant_id : '';
+
+    $specialized = false;
+    if ( $posted_present && '' !== $posted ) {
+        if ( function_exists( 'chatbot_chatgpt_is_specialized_assistant_id' ) ) {
+            $specialized = chatbot_chatgpt_is_specialized_assistant_id( $posted );
+        } else {
+            $specialized = chatbot_chatgpt_id_starts_with( $posted, 'asst_' )
+                || chatbot_chatgpt_id_starts_with( $posted, 'pmpt_' )
+                || chatbot_chatgpt_id_starts_with( $posted, 'ag:' )
+                || chatbot_chatgpt_id_starts_with( $posted, 'websearch' );
+        }
+    }
+
+    if ( $specialized && '' === $assistant_id ) {
+        $assistant_id = $posted;
+        if ( '' === $alias || 'original' === $alias ) {
+            $alias = $posted;
+        }
+    }
+
+    return array(
+        'assistant_id'    => $assistant_id,
+        'assistant_alias' => $alias,
+    );
+
+}
+
+/**
  * Assistant APIs are implemented for these platforms only.
  *
  * The row ID is not an input. Platform selection stays the existing setting.

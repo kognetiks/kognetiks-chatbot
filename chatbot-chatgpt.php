@@ -1588,19 +1588,21 @@ function chatbot_chatgpt_send_message() {
 
     $voice = isset($kchat_settings['chatbot_chatgpt_voice_option']) ? $kchat_settings['chatbot_chatgpt_voice_option'] : '';
 
-    // Fallback to POST assistant_id when transient is missing/stale (page cache) - Ver 2.3.7
-    if ( isset( $_POST['assistant_id'] ) ) {
-        $posted_assistant_id = sanitize_text_field( wp_unslash( $_POST['assistant_id'] ) );
-        if ( chatbot_chatgpt_is_specialized_assistant_id( $posted_assistant_id )
-            && ( empty( $assistant_id ) || $assistant_id === 'original' ) ) {
-            $assistant_id = $posted_assistant_id;
-            $kchat_settings['assistant_id'] = $posted_assistant_id;
-            if ( empty( $chatbot_chatgpt_assistant_alias ) || $chatbot_chatgpt_assistant_alias === 'original' ) {
-                $chatbot_chatgpt_assistant_alias = $posted_assistant_id;
-                $kchat_settings['chatbot_chatgpt_assistant_alias'] = $posted_assistant_id;
-            }
-        }
-    }
+    // A stored assistant, including explicit "original", is not replaced by POST.
+    // A missing assistant may be filled in memory. Nothing is stored until the
+    // row selection is accepted.
+    $posted_assistant_present = isset( $_POST['assistant_id'] );
+    $posted_assistant_id = $posted_assistant_present ? sanitize_text_field( wp_unslash( $_POST['assistant_id'] ) ) : '';
+    $merged_assistant = chatbot_chatgpt_merge_posted_assistant_selection(
+        $assistant_id,
+        $chatbot_chatgpt_assistant_alias,
+        $posted_assistant_present,
+        $posted_assistant_id
+    );
+    $assistant_id = $merged_assistant['assistant_id'];
+    $chatbot_chatgpt_assistant_alias = $merged_assistant['assistant_alias'];
+    $kchat_settings['assistant_id'] = $assistant_id;
+    $kchat_settings['chatbot_chatgpt_assistant_alias'] = $chatbot_chatgpt_assistant_alias;
 
     // Resolve specialized ids before locking / logging so pmpt_ is not left as "original"
     $assistant_resolution = chatbot_chatgpt_resolve_assistant_identity( $assistant_id, $chatbot_chatgpt_assistant_alias );
@@ -1612,11 +1614,6 @@ function chatbot_chatgpt_send_message() {
     // Ignore asst_/pmpt_/ag: on Transformer and other chat-only platforms.
     // The assistants-table row ID is not part of this decision.
     $use_assistant_id = chatbot_chatgpt_use_assistant_id_for_platform( $chatbot_ai_platform_choice, $use_assistant_id );
-
-    if ( ! empty( $assistant_id ) && $assistant_id !== 'original' ) {
-        set_chatbot_chatgpt_transients( 'assistant_id', $assistant_id, $user_id, $page_id, $session_id, null );
-        set_chatbot_chatgpt_transients( 'assistant_alias', $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
-    }
 
     $posted_row_present = array_key_exists( 'assistant_row_id', $_POST );
     $posted_row_value = $posted_row_present ? wp_unslash( $_POST['assistant_row_id'] ) : null;
@@ -1635,6 +1632,11 @@ function chatbot_chatgpt_send_message() {
         return;
     }
     $responses_row_id = chatbot_chatgpt_responses_row_id_from_decision( $row_decision );
+
+    if ( ! empty( $assistant_id ) && $assistant_id !== 'original' ) {
+        set_chatbot_chatgpt_transients( 'assistant_id', $assistant_id, $user_id, $page_id, $session_id, null );
+        set_chatbot_chatgpt_transients( 'assistant_alias', $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
+    }
 
     // Get the thread information - Ver 2.0.7
     $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
