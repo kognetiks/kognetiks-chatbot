@@ -11,6 +11,7 @@ wordfence-vendor.txt
 .idea
 .vscode
 .cursor
+.cursor/**
 /debug/
 /test-harness/
 /tests/

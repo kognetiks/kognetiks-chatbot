@@ -1044,6 +1044,7 @@ function chatbot_chatgpt_process_queued_message($message_data) {
     $model = $kchat_settings['model'] ?: $model;
     $additional_instructions = $kchat_settings['additional_instructions'];
     $chatbot_chatgpt_assistant_alias = $kchat_settings['chatbot_chatgpt_assistant_alias'];
+    $openai_instruction_alias = is_string( $chatbot_chatgpt_assistant_alias ) ? $chatbot_chatgpt_assistant_alias : '';
 
     // DIAG - Diagnostics - Ver 2.4.5
     // back_trace('NOTICE', '$kchat_settings[\'chatbot_chatgpt_assistant_alias\']: ' . $kchat_settings['chatbot_chatgpt_assistant_alias']);
@@ -1102,7 +1103,7 @@ function chatbot_chatgpt_process_queued_message($message_data) {
         // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
         // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
 
-        $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id, $responses_row_id);
+        $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id, $responses_row_id, $openai_instruction_alias);
 
     } elseif ($use_assistant_id == 'Yes' && $chatbot_ai_platform_choice == 'Azure OpenAI') {
 
@@ -1581,6 +1582,7 @@ function chatbot_chatgpt_send_message() {
     
     $additional_instructions = $kchat_settings['additional_instructions'];
     $chatbot_chatgpt_assistant_alias = $kchat_settings['chatbot_chatgpt_assistant_alias'];
+    $openai_instruction_alias = is_string( $chatbot_chatgpt_assistant_alias ) ? $chatbot_chatgpt_assistant_alias : '';
 
     $assistant_id = isset($kchat_settings['assistant_id']) ? $kchat_settings['assistant_id'] : '';
     $thread_Id = isset($kchat_settings['thread_id']) ? $kchat_settings['thread_id'] : '';
@@ -1761,7 +1763,7 @@ function chatbot_chatgpt_send_message() {
             // Former Assistants (asst_) and hosted Prompts (pmpt_) both use Responses.
             if ( chatbot_chatgpt_routes_openai_responses( $chatbot_ai_platform_choice, $use_assistant_id, $assistant_id ) ) {
 
-                $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id, $responses_row_id);
+                $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id, $responses_row_id, $openai_instruction_alias);
 
             } else {
 

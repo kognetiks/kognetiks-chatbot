@@ -1033,11 +1033,16 @@ function update_assistant() {
     $existing_assistant = function_exists( 'get_chatbot_chatgpt_assistant_by_key' ) ? get_chatbot_chatgpt_assistant_by_key( $id ) : array();
     $previous_assistant_id = ( is_array( $existing_assistant ) && isset( $existing_assistant['assistant_id'] ) ) ? (string) $existing_assistant['assistant_id'] : '';
     $assistant_id = sanitize_text_field($_POST['assistant_id']);
-    $vector_store_write = chatbot_chatgpt_vector_store_write( isset( $_POST['vector_store_id'] ) ? $_POST['vector_store_id'] : '' );
-    if ( 'error' === $vector_store_write['action'] ) {
-        chatbot_chatgpt_reject_assistant_model( $vector_store_write['message'] );
+    // An omitted field is not a request to clear the stored list. An empty
+    // submitted field is an explicit clear. A malformed list rejects the save.
+    $vector_store_present = array_key_exists( 'vector_store_id', $_POST );
+    if ( $vector_store_present ) {
+        $vector_store_write = chatbot_chatgpt_vector_store_write( $_POST['vector_store_id'] );
+        if ( 'error' === $vector_store_write['action'] ) {
+            chatbot_chatgpt_reject_assistant_model( $vector_store_write['message'] );
+        }
+        $vector_store_id = $vector_store_write['value'];
     }
-    $vector_store_id = $vector_store_write['value'];
     $common_name = sanitize_text_field($_POST['common_name']);
     $style = sanitize_text_field($_POST['style']);
     $audience = sanitize_text_field($_POST['audience']);
@@ -1058,7 +1063,6 @@ function update_assistant() {
 
     $update_data = array(
         'assistant_id' => $assistant_id,
-        'vector_store_id' => $vector_store_id,
         'common_name' => $common_name,
         'style' => $style,
         'audience' => $audience,
@@ -1071,6 +1075,9 @@ function update_assistant() {
         'placeholder_prompt' => $placeholder_prompt,
         'additional_instructions' => $additional_instructions
     );
+    if ( $vector_store_present ) {
+        $update_data['vector_store_id'] = $vector_store_id;
+    }
     if ( 'store' === $model_write['action'] ) {
         $update_data['model'] = $model_write['value'];
     }
@@ -1153,11 +1160,18 @@ function add_new_assistant() {
     chatbot_chatgpt_ensure_assistants_model_column();
 
     $assistant_id = sanitize_text_field($_POST['assistant_id']);
-    $vector_store_write = chatbot_chatgpt_vector_store_write( isset( $_POST['vector_store_id'] ) ? $_POST['vector_store_id'] : '' );
-    if ( 'error' === $vector_store_write['action'] ) {
-        chatbot_chatgpt_reject_assistant_model( $vector_store_write['message'] );
+    // A new row has nothing to preserve. An omitted field starts empty. A
+    // submitted empty field is also empty. A malformed list rejects the insert.
+    $vector_store_present = array_key_exists( 'vector_store_id', $_POST );
+    if ( $vector_store_present ) {
+        $vector_store_write = chatbot_chatgpt_vector_store_write( $_POST['vector_store_id'] );
+        if ( 'error' === $vector_store_write['action'] ) {
+            chatbot_chatgpt_reject_assistant_model( $vector_store_write['message'] );
+        }
+        $vector_store_id = $vector_store_write['value'];
+    } else {
+        $vector_store_id = '';
     }
-    $vector_store_id = $vector_store_write['value'];
     $common_name = sanitize_text_field($_POST['common_name']);
     $style = sanitize_text_field($_POST['style']);
     $audience = sanitize_text_field($_POST['audience']);
