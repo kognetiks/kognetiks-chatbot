@@ -384,7 +384,14 @@ function chatbot_chatgpt_render_pmpt_row_mode_row( $assistant ) {
             $store_text
         )
     ) . '</p>';
-    if ( '' !== trim( $preview['raw'] ) && empty( $preview['stores'] ) ) {
+    $invalid_stores = array();
+    if ( function_exists( 'chatbot_chatgpt_classify_vector_store_input' ) ) {
+        $classified_stores = chatbot_chatgpt_classify_vector_store_input( $preview['raw'] );
+        $invalid_stores = isset( $classified_stores['invalid'] ) && is_array( $classified_stores['invalid'] ) ? $classified_stores['invalid'] : array();
+    }
+    if ( ! empty( $invalid_stores ) ) {
+        $html .= '<p>' . esc_html( chatbot_chatgpt_vector_store_error_message( $invalid_stores ) ) . '</p>';
+    } elseif ( '' !== trim( $preview['raw'] ) && empty( $preview['stores'] ) ) {
         $html .= '<p>' . esc_html__( 'The vector store value was not recognized, so Local mode would not attach a file search store.', 'chatbot-chatgpt' ) . '</p>';
     }
     $html .= '<p>' . esc_html__( 'Changing mode reuses this assistant’s existing conversation. Earlier hosted-prompt turns remain in that conversation.', 'chatbot-chatgpt' ) . '</p>';

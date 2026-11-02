@@ -503,10 +503,11 @@ function chatbot_chatgpt_responses_model_from_validated_row( $assistant_row_id, 
 /**
  * Model for an asst_ or Local pmpt_ Responses request.
  *
- * An explicit shortcode model wins. Otherwise a nonempty model on the
- * validated assistants-table row wins. A NULL row model uses the model stored
- * when the shortcode was last resolved, then the current ChatGPT Model Default.
- * Bridge pmpt_ requests do not call this function.
+ * An explicit shortcode model wins only when model_explicit is exactly 1.
+ * Otherwise a nonempty model on the validated assistants-table row wins.
+ * A NULL row model uses the current ChatGPT Model Default. A model transient
+ * left by another platform, or by a shortcode rendered before the explicit
+ * flag existed, is not a fallback. Bridge pmpt_ requests do not call this.
  *
  * @param mixed $user_id User id.
  * @param mixed $page_id Page id.
@@ -532,11 +533,6 @@ function chatbot_chatgpt_resolve_responses_model( $user_id, $page_id, $session_i
     if ( '' !== $row_model ) {
         $row_model = chatbot_chatgpt_resolve_openai_chat_model( $row_model );
         return sanitize_text_field( (string) $row_model );
-    }
-
-    if ( is_string( $model ) && '' !== trim( $model ) ) {
-        $model = chatbot_chatgpt_resolve_openai_chat_model( $model );
-        return sanitize_text_field( (string) $model );
     }
 
     $model = chatbot_chatgpt_resolve_openai_chat_model();

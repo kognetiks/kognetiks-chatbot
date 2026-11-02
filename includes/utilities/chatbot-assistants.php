@@ -71,7 +71,7 @@ function chatbot_chatgpt_assistants_table_schema_sql( $table_name, $charset_coll
     return "CREATE TABLE $table_name (
         id BIGINT(20) UNSIGNED AUTO_INCREMENT,
         assistant_id VARCHAR(255) NOT NULL,
-        vector_store_id VARCHAR(255) NOT NULL,
+        vector_store_id TEXT NOT NULL DEFAULT '',
         common_name VARCHAR(255) NOT NULL,
         style ENUM('embedded', 'floating') NOT NULL,
         audience ENUM('all', 'visitors', 'logged-in') NOT NULL,
@@ -193,23 +193,56 @@ function get_chatbot_chatgpt_assistant_by_assistant_id( $assistant_id ) {
 }
 
 /**
- * Ensure the assistants table has vector_store_id (existing installs).
+ * True when a SHOW COLUMNS type is already a TEXT family column.
+ *
+ * @param string $type Column type from SHOW COLUMNS.
+ * @return bool
  */
-function chatbot_chatgpt_ensure_assistants_vector_store_column() {
+function chatbot_chatgpt_vector_store_column_is_text( $type ) {
+
+    $type = strtolower( trim( (string) $type ) );
+    return 1 === preg_match( '/^(tinytext|text|mediumtext|longtext)\b/', $type );
+
+}
+
+/**
+ * Ensure vector_store_id exists and can hold a list of IDs.
+ *
+ * A missing column is added as TEXT. VARCHAR(255) is widened to TEXT once.
+ * A column that is already TEXT is left alone, including its stored values.
+ * The table name must be this site's assistants table or a same-prefix test table.
+ *
+ * @param string $table_name Optional prefixed assistants table. Defaults to this site's table.
+ * @return void
+ */
+function chatbot_chatgpt_ensure_assistants_vector_store_column( $table_name = '' ) {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    $site_table = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    if ( ! is_string( $table_name ) || ! preg_match( '/^' . preg_quote( $site_table, '/' ) . '(?:_[A-Za-z0-9]+)?$/', $table_name ) ) {
+        $table_name = $site_table;
+    }
     if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) {
         return;
     }
 
-    $columns = $wpdb->get_col( "SHOW COLUMNS FROM `{$table_name}`" );
-    if ( is_array( $columns ) && in_array( 'vector_store_id', $columns, true ) ) {
+    $column = $wpdb->get_row( "SHOW COLUMNS FROM `{$table_name}` WHERE Field = 'vector_store_id'", ARRAY_A );
+    if ( is_array( $column ) && isset( $column['Type'] ) && chatbot_chatgpt_vector_store_column_is_text( $column['Type'] ) ) {
         return;
     }
 
-    $wpdb->query( "ALTER TABLE `{$table_name}` ADD `vector_store_id` VARCHAR(255) NOT NULL DEFAULT ''" );
+    if ( ! is_array( $column ) ) {
+        $wpdb->query( "ALTER TABLE `{$table_name}` ADD `vector_store_id` TEXT NOT NULL DEFAULT ''" );
+        return;
+    }
+
+    $type = strtolower( (string) $column['Type'] );
+    if ( 'varchar(255)' !== $type ) {
+        return;
+    }
+
+    $wpdb->query( "ALTER TABLE `{$table_name}` MODIFY `vector_store_id` TEXT NOT NULL DEFAULT ''" );
 
 }
 add_action( 'admin_init', 'chatbot_chatgpt_ensure_assistants_vector_store_column' );
@@ -381,30 +414,133 @@ function chatbot_chatgpt_assistant_model_write( $post, $stored_model = null ) {
 }
 
 /**
- * Parse vs_ IDs from a table field (comma or space separated).
+ * Split a vector-store field into accepted IDs and rejected tokens.
  *
- * @param string $raw
- * @return string[]
+ * Accepted IDs match vs_ followed by letters or digits. The first occurrence
+ * of each accepted ID is kept. Rejected tokens are reported and are not
+ * rewritten into IDs. This does not contact OpenAI.
+ *
+ * @param string $raw Stored or submitted field.
+ * @return array{valid:string[],invalid:string[]}
  */
-function chatbot_chatgpt_parse_vector_store_ids( $raw ) {
+function chatbot_chatgpt_classify_vector_store_input( $raw ) {
 
-    $ids = array();
+    $valid = array();
+    $invalid = array();
     $parts = preg_split( '/[\s,]+/', (string) $raw );
     if ( ! is_array( $parts ) ) {
-        return array();
+        return array(
+            'valid'   => array(),
+            'invalid' => array(),
+        );
     }
 
     foreach ( $parts as $part ) {
         $part = trim( $part );
-        if ( $part === '' ) {
+        if ( '' === $part ) {
             continue;
         }
         if ( preg_match( '/^vs_[A-Za-z0-9]+$/', $part ) ) {
-            $ids[] = $part;
+            $valid[] = $part;
+        } else {
+            $invalid[] = $part;
         }
     }
 
-    return array_values( array_unique( $ids ) );
+    return array(
+        'valid'   => array_values( array_unique( $valid ) ),
+        'invalid' => array_values( array_unique( $invalid ) ),
+    );
+
+}
+
+/**
+ * Parse vs_ IDs from a table field (comma or space separated).
+ *
+ * Callers that only need the accepted IDs keep this array. Rejected tokens
+ * are available from chatbot_chatgpt_classify_vector_store_input().
+ *
+ * @param string $raw Stored or submitted field.
+ * @return string[]
+ */
+function chatbot_chatgpt_parse_vector_store_ids( $raw ) {
+
+    $classified = chatbot_chatgpt_classify_vector_store_input( $raw );
+    return $classified['valid'];
+
+}
+
+/**
+ * Administrator-facing reason a vector-store list was rejected.
+ *
+ * @param string[] $invalid Rejected tokens.
+ * @return string
+ */
+function chatbot_chatgpt_vector_store_error_message( $invalid ) {
+
+    $tokens = array();
+    foreach ( $invalid as $token ) {
+        if ( is_string( $token ) && '' !== $token ) {
+            $tokens[] = $token;
+        }
+    }
+    $list = implode( ', ', $tokens );
+
+    return sprintf(
+        /* translators: %s: comma-separated tokens that are not vs_ IDs */
+        __( 'These vector store entries are not valid vs_ IDs: %s. The assistant was not changed. Use IDs such as vs_abc123, separated by commas. This check does not confirm that a store exists.', 'chatbot-chatgpt' ),
+        $list
+    );
+
+}
+
+/**
+ * Decide whether a submitted vector-store list can be stored.
+ *
+ * An empty value stores no WordPress vector stores. Any malformed token
+ * rejects the save. The stored text is not rewritten when every token is valid.
+ *
+ * @param mixed $raw Submitted field.
+ * @return array{action:string,value:string,invalid:string[],message:string}
+ */
+function chatbot_chatgpt_vector_store_write( $raw ) {
+
+    if ( ! is_scalar( $raw ) ) {
+        return array(
+            'action'  => 'error',
+            'value'   => '',
+            'invalid' => array(),
+            'message' => __( 'The vector store list is not valid. The assistant was not changed.', 'chatbot-chatgpt' ),
+        );
+    }
+
+    $value = sanitize_text_field( (string) wp_unslash( $raw ) );
+    $value = trim( $value );
+    if ( strlen( $value ) > 65535 ) {
+        return array(
+            'action'  => 'error',
+            'value'   => '',
+            'invalid' => array(),
+            'message' => __( 'The vector store list is too long. The assistant was not changed.', 'chatbot-chatgpt' ),
+        );
+    }
+
+    $classified = chatbot_chatgpt_classify_vector_store_input( $value );
+    if ( ! empty( $classified['invalid'] ) ) {
+        return array(
+            'action'  => 'error',
+            'value'   => '',
+            'invalid' => $classified['invalid'],
+            'message' => chatbot_chatgpt_vector_store_error_message( $classified['invalid'] ),
+        );
+    }
+
+    return array(
+        'action'  => 'store',
+        'value'   => $value,
+        'invalid' => array(),
+        'message' => '',
+    );
 
 }
 
@@ -562,6 +698,7 @@ function display_chatbot_chatgpt_assistants_table() {
         ),
         array( 'code' => array() )
     ) . '</p>';
+    echo '<p>' . esc_html__( 'Enter one or more vector store IDs, separated by commas. An empty field stores no WordPress vector stores. An entry that is not a vs_ ID is shown and the assistant is not saved. Saving does not contact OpenAI and does not confirm that a store exists.', 'chatbot-chatgpt' ) . '</p>';
     echo '<p>' . esc_html__( 'Choose Use ChatGPT Model Default to store no model on this row. That choice follows the ChatGPT Model Default setting. A selected model is used for Local and asst_ requests. Bridge mode uses the hosted prompt\'s model and does not send this saved model. Saving a model does not change Local or Bridge mode.', 'chatbot-chatgpt' ) . '</p>';
     echo '<p>' . esc_html__( 'A model in this list was returned by the OpenAI models endpoint. That does not prove it supports the Responses API or file search.', 'chatbot-chatgpt' ) . '</p>';
     if ( ! empty( $model_inventory['notice'] ) ) {
@@ -662,7 +799,12 @@ function display_chatbot_chatgpt_assistants_table() {
         echo '<td><textarea name="placeholder_prompt_' . absint( $assistant->id ) . '">' . esc_textarea( $assistant->placeholder_prompt ) . '</textarea></td>';
         echo '<td><textarea name="additional_instructions_' . absint( $assistant->id ) . '">' . esc_textarea( $assistant->additional_instructions ) . '</textarea></td>';
         $vector_store_id = isset( $assistant->vector_store_id ) ? $assistant->vector_store_id : '';
-        echo '<td><input type="text" name="vector_store_id_' . absint( $assistant->id ) . '" value="' . esc_attr( $vector_store_id ) . '" placeholder="vs_xxxxxxxx"></td>';
+        echo '<td><input type="text" name="vector_store_id_' . absint( $assistant->id ) . '" value="' . esc_attr( $vector_store_id ) . '" placeholder="vs_aaa, vs_bbb">';
+        $stored_stores = chatbot_chatgpt_classify_vector_store_input( $vector_store_id );
+        if ( ! empty( $stored_stores['invalid'] ) ) {
+            echo '<p class="description">' . esc_html( chatbot_chatgpt_vector_store_error_message( $stored_stores['invalid'] ) ) . '</p>';
+        }
+        echo '</td>';
         chatbot_chatgpt_render_assistant_model_select( 'model_' . absint( $assistant->id ), isset( $assistant->model ) ? $assistant->model : '', $model_inventory );
         echo '</tr>';
         if ( function_exists( 'chatbot_chatgpt_render_pmpt_row_mode_row' ) ) {
@@ -710,7 +852,7 @@ function display_chatbot_chatgpt_assistants_table() {
     echo '<td><textarea name="new_subsequent_greeting" placeholder="Hello again! How can I help you?"></textarea></td>';
     echo '<td><textarea name="new_placeholder_prompt" placeholder="Enter your question ..."></textarea></td>';
     echo '<td><textarea name="new_additional_instructions" placeholder="Added instructions to assistant if needed ...."></textarea></td>';
-    echo '<td><input type="text" name="new_vector_store_id" placeholder="vs_xxxxxxxx"></td>';
+    echo '<td><input type="text" name="new_vector_store_id" placeholder="vs_aaa, vs_bbb"></td>';
     chatbot_chatgpt_render_assistant_model_select( 'new_model', '', $model_inventory );
     echo '</tr>';
     echo '</tbody>';
@@ -891,7 +1033,11 @@ function update_assistant() {
     $existing_assistant = function_exists( 'get_chatbot_chatgpt_assistant_by_key' ) ? get_chatbot_chatgpt_assistant_by_key( $id ) : array();
     $previous_assistant_id = ( is_array( $existing_assistant ) && isset( $existing_assistant['assistant_id'] ) ) ? (string) $existing_assistant['assistant_id'] : '';
     $assistant_id = sanitize_text_field($_POST['assistant_id']);
-    $vector_store_id = isset( $_POST['vector_store_id'] ) ? sanitize_text_field( wp_unslash( $_POST['vector_store_id'] ) ) : '';
+    $vector_store_write = chatbot_chatgpt_vector_store_write( isset( $_POST['vector_store_id'] ) ? $_POST['vector_store_id'] : '' );
+    if ( 'error' === $vector_store_write['action'] ) {
+        chatbot_chatgpt_reject_assistant_model( $vector_store_write['message'] );
+    }
+    $vector_store_id = $vector_store_write['value'];
     $common_name = sanitize_text_field($_POST['common_name']);
     $style = sanitize_text_field($_POST['style']);
     $audience = sanitize_text_field($_POST['audience']);
@@ -1007,7 +1153,11 @@ function add_new_assistant() {
     chatbot_chatgpt_ensure_assistants_model_column();
 
     $assistant_id = sanitize_text_field($_POST['assistant_id']);
-    $vector_store_id = isset( $_POST['vector_store_id'] ) ? sanitize_text_field( wp_unslash( $_POST['vector_store_id'] ) ) : '';
+    $vector_store_write = chatbot_chatgpt_vector_store_write( isset( $_POST['vector_store_id'] ) ? $_POST['vector_store_id'] : '' );
+    if ( 'error' === $vector_store_write['action'] ) {
+        chatbot_chatgpt_reject_assistant_model( $vector_store_write['message'] );
+    }
+    $vector_store_id = $vector_store_write['value'];
     $common_name = sanitize_text_field($_POST['common_name']);
     $style = sanitize_text_field($_POST['style']);
     $audience = sanitize_text_field($_POST['audience']);
