@@ -24,6 +24,8 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+require_once dirname( __FILE__ ) . '/utilities/chatbot-pmpt-response-mode.php';
+
 /* -------------------------------------------------------------------------
  * Timeouts and execution-time helpers (kept for compatibility)
  * ------------------------------------------------------------------------- */
@@ -329,18 +331,19 @@ function chatbot_chatgpt_get_responses_local_row( $assistant_id, $assistant_row_
 /**
  * Add the hosted-prompt or local-assistant fields to a Responses payload.
  *
- * A pmpt_ ID still sends prompt.id. An asst_ ID sends model and instructions.
- * The local row supplies Common Name and vector stores for the asst_ body,
- * and the vector store list for both.
+ * Bridge pmpt_ requests still send prompt.id and omit model and instructions.
+ * Local pmpt_ requests and asst_ requests send model and instructions.
+ * The local row supplies Common Name, instructions, and vector stores.
  *
  * @param array      $payload Payload so far.
  * @param string     $prompt_id External ID.
  * @param array      $local_row Selected or legacy assistants-table row.
  * @param string     $additional_instructions Resolved extra instructions.
- * @param string     $model Model for a non-prompt request. Ignored for pmpt_.
- * @return array|null Null when a non-prompt request has no model.
+ * @param string     $model Model for a local request. Ignored for Bridge pmpt_.
+ * @param string     $request_body bridge or local. Only a pmpt_ ID reads this.
+ * @return array|null Null when a local request has no model.
  */
-function chatbot_chatgpt_apply_responses_assistant_fields( $payload, $prompt_id, $local_row, $additional_instructions, $model ) {
+function chatbot_chatgpt_apply_responses_assistant_fields( $payload, $prompt_id, $local_row, $additional_instructions, $model, $request_body = 'bridge' ) {
 
     if ( ! is_array( $payload ) ) {
         $payload = array();
@@ -352,8 +355,9 @@ function chatbot_chatgpt_apply_responses_assistant_fields( $payload, $prompt_id,
     $is_prompt = function_exists( 'chatbot_chatgpt_id_starts_with' )
         ? chatbot_chatgpt_id_starts_with( $prompt_id, 'pmpt_' )
         : ( strpos( (string) $prompt_id, 'pmpt_' ) === 0 );
+    $send_prompt = $is_prompt && 'local' !== $request_body;
 
-    if ( $is_prompt ) {
+    if ( $send_prompt ) {
         $payload['prompt'] = array(
             'id' => (string) $prompt_id,
         );
@@ -518,9 +522,10 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
     // - $assistant_id => Prompt ID (pmpt_...) or former Assistant ID (asst_...)
     // - $thread_id    => Conversation ID (cnv_...)
     // Variable names preserved for compatibility with the rest of the plugin.
-    // asst_ uses model + local instructions. pmpt_ still references the hosted
-    // prompt object until OpenAI retires v1/prompts (2026-11-30), with local
-    // Additional Instructions added as a developer message.
+    // asst_ uses model + local instructions. A pmpt_ row uses that same body
+    // only after an administrator explicitly selects Local mode. Bridge pmpt_
+    // requests still send prompt.id. Additional Instructions on Bridge are a
+    // developer message. Local mode puts them in instructions only.
 
     // Decrypt the API key if the plugin provides a helper.
     if ( function_exists( 'chatbot_chatgpt_decrypt_api_key' ) ) {
@@ -565,6 +570,13 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
     $timeout = chatbot_chatgpt_get_timeout_responses();
 
     try {
+
+        $local_row = chatbot_chatgpt_get_responses_local_row( $prompt_id, $assistant_row_id );
+        $mode_result = chatbot_chatgpt_resolve_pmpt_responses_mode( $prompt_id, $assistant_row_id, $local_row );
+        if ( isset( $mode_result['result'] ) && 'error' === $mode_result['result'] ) {
+            return $mode_result['error'];
+        }
+        $request_body = ( isset( $mode_result['result'] ) && 'local' === $mode_result['result'] ) ? 'local' : 'bridge';
 
         // -----------------------------------------------------------------
         // Step 1: Resolve or create the conversation (cnv_...)
@@ -701,12 +713,11 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
             ? chatbot_chatgpt_id_starts_with( $prompt_id, 'pmpt_' )
             : ( strpos( $prompt_id, 'pmpt_' ) === 0 );
 
-        $local_row = chatbot_chatgpt_get_responses_local_row( $prompt_id, $assistant_row_id );
         $additional_instructions = chatbot_chatgpt_resolve_local_additional_instructions( $prompt_id, $user_id, $page_id, $session_id, $local_row );
 
-        // Prompt objects already carry dashboard instructions. Extra WordPress
-        // instructions are additive so they do not replace the hosted prompt.
-        if ( $is_prompt && $additional_instructions !== '' ) {
+        // Bridge keeps hosted-prompt instructions and adds WordPress text beside
+        // them. Local mode sends that text once, in the instructions field.
+        if ( chatbot_chatgpt_pmpt_bridge_adds_developer_message( $prompt_id, $request_body, $additional_instructions ) ) {
             array_unshift(
                 $input_payload,
                 array(
@@ -735,12 +746,12 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
         }
 
         $model = '';
-        if ( ! $is_prompt ) {
+        if ( ! $is_prompt || 'local' === $request_body ) {
             $model = chatbot_chatgpt_resolve_responses_model( $user_id, $page_id, $session_id );
         }
-        $payload = chatbot_chatgpt_apply_responses_assistant_fields( $payload, $prompt_id, $local_row, $additional_instructions, $model );
+        $payload = chatbot_chatgpt_apply_responses_assistant_fields( $payload, $prompt_id, $local_row, $additional_instructions, $model, $request_body );
         if ( null === $payload ) {
-            return __( 'Error: Missing model. Set a ChatGPT model in Settings before using an Assistant ID (asst_...).', 'chatbot-chatgpt' );
+            return __( 'Error: Missing model. Set a ChatGPT model in Settings before using Local mode or an Assistant ID (asst_...).', 'chatbot-chatgpt' );
         }
 
         // DIAG - Diagnostics - Ver 2.4.5

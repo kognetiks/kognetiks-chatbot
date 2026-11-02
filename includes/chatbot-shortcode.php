@@ -13,6 +13,36 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+/**
+ * Copy an assistants-table row onto shortcode attributes.
+ *
+ * The model column is not copied. Request selection still uses the shortcode
+ * model attribute or the global model until per-row selection is enabled.
+ *
+ * @param array $atts Shortcode attributes.
+ * @param array $assistant_details Assistants-table row.
+ * @return array
+ */
+function chatbot_chatgpt_merge_assistant_row_into_atts( $atts, $assistant_details ) {
+
+    if ( ! is_array( $atts ) ) {
+        $atts = array();
+    }
+    if ( ! is_array( $assistant_details ) ) {
+        return $atts;
+    }
+
+    foreach ( $assistant_details as $key => $value ) {
+        if ( 'model' === $key ) {
+            continue;
+        }
+        $atts[ $key ] = $value;
+    }
+
+    return $atts;
+
+}
+
 // Main Chatbot Shortcode
 function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
@@ -154,9 +184,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_row_id = $row_decision['row_id'];
         $numbered_external_id = $row_decision['external_id'];
         $assistant_details = $row_decision['row'];
-        foreach ( $assistant_details as $key => $value ) {
-            $atts[ $key ] = $value;
-        }
+        $atts = chatbot_chatgpt_merge_assistant_row_into_atts( $atts, $assistant_details );
         // Keep a real external ID. An empty or unrecognized value stays off the
         // assistant API and must not be rewritten to the original chatbot here.
         if ( '' !== $numbered_external_id ) {
@@ -186,9 +214,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
         } else {
 
-            foreach ($assistant_details as $key => $value) {
-                $atts[$key] = $value;
-            }
+            $atts = chatbot_chatgpt_merge_assistant_row_into_atts( $atts, $assistant_details );
 
             // Set the assistant_id
             $atts['assistant'] = $assistant_details['assistant_id'];

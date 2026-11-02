@@ -97,8 +97,60 @@ function chatbot_chatgpt_openai_model_is_unavailable( $model ) {
 
 }
 
+// True only when chatbot_openai_get_models() returned ids from the Models API or from that response's cache.
+// The built-in fallback list is not a live list.
+function chatbot_openai_models_are_live( $set = null ) {
+
+    static $live = false;
+    if ( null !== $set ) {
+        $live = (bool) $set;
+    }
+    return $live;
+
+}
+
+// Decrypted OpenAI API key. Empty when no key is configured. The key is not logged.
+function chatbot_chatgpt_openai_configured_api_key() {
+
+    $stored = get_option( 'chatbot_chatgpt_api_key' );
+    if ( ! is_string( $stored ) || '' === $stored ) {
+        return '';
+    }
+
+    $api_key = chatbot_chatgpt_decrypt_api_key( esc_attr( $stored ) );
+    if ( ! is_string( $api_key ) || '' === $api_key || empty( $api_key ) ) {
+        return '';
+    }
+
+    return $api_key;
+
+}
+
+// Models endpoint for the configured base URL. The key is not part of the URL.
+function chatbot_chatgpt_openai_models_endpoint() {
+
+    $base = get_option( 'chatbot_chatgpt_base_url' );
+    $base = is_string( $base ) ? esc_attr( $base ) : '';
+    return rtrim( $base, '/' ) . '/models';
+
+}
+
+// Transient name scoped to the API key and base URL. The name is a hash, not the key.
+function chatbot_chatgpt_openai_model_list_cache_key() {
+
+    $api_key = chatbot_chatgpt_openai_configured_api_key();
+    if ( '' === $api_key ) {
+        return '';
+    }
+
+    return 'chatbot_oai_models_' . substr( hash( 'sha256', $api_key . '|' . chatbot_chatgpt_openai_models_endpoint() ), 0, 16 );
+
+}
+
 // Function to get the Model names from OpenAI API
-function chatbot_openai_get_models() {
+function chatbot_openai_get_models( $refresh = false ) {
+
+    chatbot_openai_models_are_live( false );
 
     global $session_id;
     global $user_id;
@@ -112,13 +164,8 @@ function chatbot_openai_get_models() {
 
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
-    
-    $api_key = '';
 
-    // Retrieve the API key
-    $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
-    // Decrypt the API key - Ver 2.2.6
-    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+    $api_key = chatbot_chatgpt_openai_configured_api_key();
 
     // Default model list
     $default_model_list = '';
@@ -178,15 +225,21 @@ function chatbot_openai_get_models() {
         update_option('chatbot_chatgpt_whisper_model_option', 'whisper-1');
     }
 
-    // Check if the API key is empty
+    // Check if the API key is empty. The fallback list below is not a live list and is not cached.
     if (empty($api_key)) {
         return $default_model_list;
     }
 
-    $openai_models_url = esc_attr(get_option('chatbot_chatgpt_base_url'));
-    $openai_models_url = rtrim($openai_models_url, '/') . '/models';
+    $cache_key = chatbot_chatgpt_openai_model_list_cache_key();
+    $cached    = ( '' !== $cache_key ) ? get_transient( $cache_key ) : false;
+    if ( ! $refresh && is_array( $cached ) && ! empty( $cached ) ) {
+        chatbot_openai_models_are_live( true );
+        return $cached;
+    }
 
-    // Set HTTP request arguments
+    $openai_models_url = chatbot_chatgpt_openai_models_endpoint();
+
+    // Set HTTP request arguments. The Authorization header stays in this server-side request.
     $args = array(
         'headers' => array(
             'Content-Type'  => 'application/json',
@@ -198,9 +251,13 @@ function chatbot_openai_get_models() {
     // Make the request using WP HTTP API
     $response = wp_remote_get($openai_models_url, $args);
 
-    // Check for errors
+    // A failed refresh keeps the last live cache. It does not replace that cache with the fallback list.
     if (is_wp_error($response)) {
-        prod_trace( 'ERROR' . 'Error fetching OpenAI models: ' . $response->get_error_message());
+        prod_trace( 'ERROR', 'Error fetching OpenAI models: ' . $response->get_error_message());
+        if ( is_array( $cached ) && ! empty( $cached ) ) {
+            chatbot_openai_models_are_live( true );
+            return $cached;
+        }
         return $default_model_list;
     }
 
@@ -212,6 +269,10 @@ function chatbot_openai_get_models() {
         // return "Error: " . $data['error']['message'];
         // On 1st install needs an API key
         // So return a short list of the base models until an API key is entered
+        if ( is_array( $cached ) && ! empty( $cached ) ) {
+            chatbot_openai_models_are_live( true );
+            return $cached;
+        }
         return $default_model_list;
     }
 
@@ -226,6 +287,10 @@ function chatbot_openai_get_models() {
 
     // Ensure $models is an array
     if (!is_array($models)) {
+        if ( is_array( $cached ) && ! empty( $cached ) ) {
+            chatbot_openai_models_are_live( true );
+            return $cached;
+        }
         return $default_model_list;
     } else {
         // Sort the models by name
@@ -236,12 +301,155 @@ function chatbot_openai_get_models() {
             return ! chatbot_chatgpt_openai_model_is_unavailable( $model );
         } ) );
         if ( empty( $models ) ) {
+            if ( is_array( $cached ) && ! empty( $cached ) ) {
+                chatbot_openai_models_are_live( true );
+                return $cached;
+            }
             return $default_model_list;
         }
     }
 
+    if ( '' !== $cache_key ) {
+        set_transient( $cache_key, $models, 5 * MINUTE_IN_SECONDS );
+    }
+    chatbot_openai_models_are_live( true );
+
     // Return the list of models
     return $models;
+
+}
+
+/**
+ * Models that are clearly not assistant chat models.
+ *
+ * The models endpoint does not say which ids accept the Responses API or file search.
+ * This is an identifier heuristic only. It keeps non-gpt chat ids such as o3-mini.
+ * It is not the Settings screen filter.
+ *
+ * @param string $model_id Model identifier.
+ * @return bool
+ */
+function chatbot_chatgpt_openai_assistant_model_is_unrelated( $model_id ) {
+
+    $id = strtolower( trim( (string) $model_id ) );
+    if ( '' === $id ) {
+        return true;
+    }
+
+    if ( str_starts_with( $id, 'dall' ) ) {
+        return true;
+    }
+
+    $parts = array(
+        'gpt-image',
+        'whisper',
+        'tts-',
+        '-tts',
+        'embedding',
+        'moderation',
+        'realtime',
+        '-audio',
+        'audio-',
+        'transcri',
+        'sora',
+        'babbage',
+        'davinci',
+        'text-ada',
+        'text-curie',
+    );
+    foreach ( $parts as $part ) {
+        if ( false !== strpos( $id, $part ) ) {
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
+/**
+ * Assistant-picker ids from a models-endpoint payload.
+ *
+ * Unavailable retired ids are removed. Image, audio, speech, embedding, and moderation ids are removed.
+ * An id is not required to contain "gpt".
+ *
+ * @param array $models Model rows from chatbot_openai_get_models().
+ * @return string[]
+ */
+function chatbot_chatgpt_openai_assistant_model_ids_from_list( $models ) {
+
+    if ( ! is_array( $models ) ) {
+        return array();
+    }
+
+    $ids = array();
+    foreach ( $models as $model ) {
+        if ( ! is_array( $model ) || empty( $model['id'] ) || ! is_string( $model['id'] ) ) {
+            continue;
+        }
+        if ( chatbot_chatgpt_openai_model_is_unavailable( $model ) ) {
+            continue;
+        }
+        if ( chatbot_chatgpt_openai_assistant_model_is_unrelated( $model['id'] ) ) {
+            continue;
+        }
+        $ids[] = $model['id'];
+    }
+
+    $ids = array_values( array_unique( $ids ) );
+    sort( $ids, SORT_STRING );
+    return $ids;
+
+}
+
+/**
+ * Cached assistant model ids, or null when no verified list is stored.
+ *
+ * This does not call the models endpoint.
+ *
+ * @return string[]|null
+ */
+function chatbot_chatgpt_openai_cached_assistant_model_ids() {
+
+    $cache_key = chatbot_chatgpt_openai_model_list_cache_key();
+    if ( '' === $cache_key ) {
+        return null;
+    }
+
+    $cached = get_transient( $cache_key );
+    if ( ! is_array( $cached ) || empty( $cached ) ) {
+        return null;
+    }
+
+    return chatbot_chatgpt_openai_assistant_model_ids_from_list( $cached );
+
+}
+
+/**
+ * One live model inventory for the Manage Assistants screen.
+ *
+ * An unavailable API returns no choices. The built-in fallback list is not presented as live.
+ *
+ * @param bool $refresh When true, contact the models endpoint even if a cache exists.
+ * @return array{live:bool,ids:string[],notice:string}
+ */
+function chatbot_chatgpt_openai_assistant_model_inventory( $refresh = false ) {
+
+    $models = chatbot_openai_get_models( $refresh );
+    if ( ! chatbot_openai_models_are_live() ) {
+        unset( $models );
+        return array(
+            'live'   => false,
+            'ids'    => array(),
+            'notice' => 'The OpenAI model list is unavailable. Saved models were not changed. The built-in fallback list is not shown as a live list.',
+        );
+    }
+
+    return array(
+        'live'   => true,
+        'ids'    => chatbot_chatgpt_openai_assistant_model_ids_from_list( $models ),
+        'notice' => '',
+    );
 
 }
 

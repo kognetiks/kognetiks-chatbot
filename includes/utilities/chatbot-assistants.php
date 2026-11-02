@@ -30,23 +30,7 @@ function create_chatbot_chatgpt_assistants_table() {
         }
     }
 
-    $sql = "CREATE TABLE $table_name (
-        id BIGINT(20) UNSIGNED AUTO_INCREMENT,
-        assistant_id VARCHAR(255) NOT NULL,
-        vector_store_id VARCHAR(255) NOT NULL,
-        common_name VARCHAR(255) NOT NULL,
-        style ENUM('embedded', 'floating') NOT NULL,
-        audience ENUM('all', 'visitors', 'logged-in') NOT NULL,
-        voice ENUM('alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer', 'none') NOT NULL,
-        allow_file_uploads ENUM('Yes', 'No') NOT NULL,
-        allow_transcript_downloads ENUM('Yes', 'No') NOT NULL,
-        show_assistant_name ENUM('Yes', 'No') NOT NULL,
-        initial_greeting TEXT NOT NULL,
-        subsequent_greeting TEXT NOT NULL,
-        placeholder_prompt TEXT NOT NULL,
-        additional_instructions TEXT NOT NULL,
-        PRIMARY KEY (id)
-    ) $charset_collate;";
+    $sql = chatbot_chatgpt_assistants_table_schema_sql( $table_name, $charset_collate );
 
 
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -65,6 +49,7 @@ function create_chatbot_chatgpt_assistants_table() {
     // Call the upgrade function after creating the table
     upgrade_chatbot_chatgpt_assistants_table();
     chatbot_chatgpt_ensure_assistants_vector_store_column();
+    chatbot_chatgpt_ensure_assistants_model_column();
 
     // Keep the chatbot_chatgpt_number_of_shortcodes option updated - Ver 2.0.6
     // REMOVED - Ver 2.2.7
@@ -73,6 +58,36 @@ function create_chatbot_chatgpt_assistants_table() {
 }
 // REMVOED - Ver 2.2.7
 // register_activation_hook(__FILE__, 'create_chatbot_chatgpt_assistants_table');
+
+/**
+ * CREATE TABLE statement for the assistants table.
+ *
+ * @param string $table_name Prefixed table name.
+ * @param string $charset_collate Charset clause from $wpdb->get_charset_collate().
+ * @return string
+ */
+function chatbot_chatgpt_assistants_table_schema_sql( $table_name, $charset_collate ) {
+
+    return "CREATE TABLE $table_name (
+        id BIGINT(20) UNSIGNED AUTO_INCREMENT,
+        assistant_id VARCHAR(255) NOT NULL,
+        vector_store_id VARCHAR(255) NOT NULL,
+        common_name VARCHAR(255) NOT NULL,
+        style ENUM('embedded', 'floating') NOT NULL,
+        audience ENUM('all', 'visitors', 'logged-in') NOT NULL,
+        voice ENUM('alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer', 'none') NOT NULL,
+        allow_file_uploads ENUM('Yes', 'No') NOT NULL,
+        allow_transcript_downloads ENUM('Yes', 'No') NOT NULL,
+        show_assistant_name ENUM('Yes', 'No') NOT NULL,
+        initial_greeting TEXT NOT NULL,
+        subsequent_greeting TEXT NOT NULL,
+        placeholder_prompt TEXT NOT NULL,
+        additional_instructions TEXT NOT NULL,
+        model VARCHAR(255) NULL DEFAULT NULL,
+        PRIMARY KEY (id)
+    ) $charset_collate;";
+
+}
 
 // Drop the table for the chatbot assistants
 function drop_chatbot_chatgpt_assistants_table() {
@@ -200,6 +215,172 @@ function chatbot_chatgpt_ensure_assistants_vector_store_column() {
 add_action( 'admin_init', 'chatbot_chatgpt_ensure_assistants_vector_store_column' );
 
 /**
+ * Ensure the assistants table has a nullable model column (existing installs).
+ *
+ * Runs once per site because the table name uses $wpdb->prefix. A second call
+ * sees the column and does not issue ALTER TABLE. Existing rows stay NULL.
+ *
+ * @param string $table_name Optional prefixed assistants table. Defaults to this site's table.
+ * @return void
+ */
+function chatbot_chatgpt_ensure_assistants_model_column( $table_name = '' ) {
+
+    global $wpdb;
+
+    $site_table = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    if ( ! is_string( $table_name ) || ! preg_match( '/^' . preg_quote( $site_table, '/' ) . '(?:_[A-Za-z0-9]+)?$/', $table_name ) ) {
+        $table_name = $site_table;
+    }
+    if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) {
+        return;
+    }
+
+    $columns = $wpdb->get_col( "SHOW COLUMNS FROM `{$table_name}`" );
+    if ( is_array( $columns ) && in_array( 'model', $columns, true ) ) {
+        return;
+    }
+
+    $wpdb->query( "ALTER TABLE `{$table_name}` ADD `model` VARCHAR(255) NULL DEFAULT NULL" );
+
+}
+add_action( 'admin_init', 'chatbot_chatgpt_ensure_assistants_model_column' );
+
+/**
+ * Normalize an assistants-table model identifier.
+ *
+ * An empty value is an explicit clear. A non-empty value that is not an
+ * identifier is rejected so the caller can leave the stored value unchanged.
+ * This is not a catalog of models that currently exist.
+ *
+ * @param mixed $raw Submitted model value.
+ * @return string|null|false String to store, null to clear, false to ignore.
+ */
+function chatbot_chatgpt_normalize_assistant_model( $raw ) {
+
+    if ( ! is_scalar( $raw ) ) {
+        return false;
+    }
+    $model = sanitize_text_field( (string) wp_unslash( $raw ) );
+    $model = trim( $model );
+    if ( '' === $model ) {
+        return null;
+    }
+    if ( strlen( $model ) > 255 || ! preg_match( '/^[A-Za-z0-9][A-Za-z0-9._:\/-]{0,254}$/', $model ) ) {
+        return false;
+    }
+
+    return $model;
+
+}
+
+/**
+ * Visible reason a submitted model was rejected.
+ *
+ * @param string $reason invalid, unrelated, or unlisted.
+ * @return string
+ */
+function chatbot_chatgpt_assistant_model_error_message( $reason ) {
+
+    if ( 'unrelated' === $reason ) {
+        return 'Image, audio, speech, embedding, and moderation models cannot be saved for an assistant. The assistant was not changed.';
+    }
+    if ( 'unlisted' === $reason ) {
+        return 'That model is not in the current OpenAI model list. The assistant was not changed.';
+    }
+
+    return 'The model identifier is not valid. The assistant was not changed.';
+
+}
+
+/**
+ * Stop an assistant save and show the model error.
+ *
+ * @param string $message Administrator-facing message. It must not include credentials.
+ * @return void
+ */
+function chatbot_chatgpt_reject_assistant_model( $message ) {
+
+    if ( wp_doing_ajax() ) {
+        wp_send_json_error( $message );
+    }
+    wp_die( $message );
+
+}
+
+/**
+ * Decide whether a request writes the model column.
+ *
+ * A missing model field is not a request to clear the stored value.
+ * An empty value stores NULL. A verified list is consulted only when one is already cached,
+ * so saving does not call the models endpoint.
+ *
+ * @param array       $post          Request fields.
+ * @param string|null $stored_model  Model currently stored for this row.
+ * @return array{action:string,value:?string,message:string} action is omit, store, or error.
+ */
+function chatbot_chatgpt_assistant_model_write( $post, $stored_model = null ) {
+
+    $stored = ( is_string( $stored_model ) && '' !== trim( $stored_model ) ) ? trim( $stored_model ) : null;
+
+    if ( ! is_array( $post ) || ! array_key_exists( 'model', $post ) ) {
+        return array(
+            'action'  => 'omit',
+            'value'   => null,
+            'message' => '',
+        );
+    }
+
+    $normalized = chatbot_chatgpt_normalize_assistant_model( $post['model'] );
+    if ( false === $normalized ) {
+        return array(
+            'action'  => 'error',
+            'value'   => null,
+            'message' => chatbot_chatgpt_assistant_model_error_message( 'invalid' ),
+        );
+    }
+
+    if ( null === $normalized ) {
+        return array(
+            'action'  => 'store',
+            'value'   => null,
+            'message' => '',
+        );
+    }
+
+    if ( null !== $stored && $stored === $normalized ) {
+        return array(
+            'action'  => 'store',
+            'value'   => $normalized,
+            'message' => '',
+        );
+    }
+
+    if ( chatbot_chatgpt_openai_assistant_model_is_unrelated( $normalized ) ) {
+        return array(
+            'action'  => 'error',
+            'value'   => null,
+            'message' => chatbot_chatgpt_assistant_model_error_message( 'unrelated' ),
+        );
+    }
+
+    $listed = function_exists( 'chatbot_chatgpt_openai_cached_assistant_model_ids' ) ? chatbot_chatgpt_openai_cached_assistant_model_ids() : null;
+    if ( is_array( $listed ) && ! in_array( $normalized, $listed, true ) ) {
+        return array(
+            'action'  => 'error',
+            'value'   => null,
+            'message' => chatbot_chatgpt_assistant_model_error_message( 'unlisted' ),
+        );
+    }
+
+    return array(
+        'action'  => 'store',
+        'value'   => $normalized,
+        'message' => '',
+    );
+
+}
+
+/**
  * Parse vs_ IDs from a table field (comma or space separated).
  *
  * @param string $raw
@@ -254,6 +435,58 @@ function update_chatbot_chatgpt_number_of_shortcodes() {
     
 }
 
+/**
+ * Dropdown for one assistant row's optional model.
+ *
+ * An empty option stores NULL. A saved id missing from the inventory stays selected.
+ *
+ * @param string $field_name  Form field name.
+ * @param mixed  $saved_model Stored model, or null.
+ * @param array  $inventory   Result of chatbot_chatgpt_openai_assistant_model_inventory().
+ * @return void
+ */
+function chatbot_chatgpt_render_assistant_model_select( $field_name, $saved_model, $inventory ) {
+
+    $saved = ( is_string( $saved_model ) ) ? $saved_model : '';
+    $ids   = ( isset( $inventory['ids'] ) && is_array( $inventory['ids'] ) ) ? $inventory['ids'] : array();
+    $live  = ! empty( $inventory['live'] );
+    $known = ( '' !== $saved && in_array( $saved, $ids, true ) );
+
+    echo '<td>';
+    echo '<select name="' . esc_attr( $field_name ) . '">';
+    echo '<option value=""' . selected( $saved, '', false ) . '>' . esc_html__( 'Use global OpenAI model', 'chatbot-chatgpt' ) . '</option>';
+    if ( '' !== $saved && ! $known ) {
+        $label = $live
+            ? sprintf(
+                /* translators: %s: saved model identifier */
+                __( '%s (saved model, not in the current list)', 'chatbot-chatgpt' ),
+                $saved
+            )
+            : sprintf(
+                /* translators: %s: saved model identifier */
+                __( '%s (saved model, not verified)', 'chatbot-chatgpt' ),
+                $saved
+            );
+        echo '<option value="' . esc_attr( $saved ) . '" selected="selected">' . esc_html( $label ) . '</option>';
+    }
+    foreach ( $ids as $id ) {
+        if ( ! is_string( $id ) || '' === $id ) {
+            continue;
+        }
+        echo '<option value="' . esc_attr( $id ) . '"' . selected( $saved, $id, false ) . '>' . esc_html( $id ) . '</option>';
+    }
+    echo '</select>';
+    if ( '' !== $saved && ! $known ) {
+        if ( $live ) {
+            echo '<p class="description">' . esc_html__( 'This saved model is not in the current OpenAI model list. It stays selected until you choose a different model.', 'chatbot-chatgpt' ) . '</p>';
+        } else {
+            echo '<p class="description">' . esc_html__( 'This saved model could not be verified because the OpenAI model list is unavailable. It stays selected until you choose Use global OpenAI model.', 'chatbot-chatgpt' ) . '</p>';
+        }
+    }
+    echo '</td>';
+
+}
+
 // Display the chatbot assistants table
 function display_chatbot_chatgpt_assistants_table() {
 
@@ -266,7 +499,23 @@ function display_chatbot_chatgpt_assistants_table() {
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
     chatbot_chatgpt_ensure_assistants_vector_store_column();
+    chatbot_chatgpt_ensure_assistants_model_column();
     $assistants = $wpdb->get_results("SELECT * FROM $table_name");
+
+    $refresh_models = false;
+    if ( isset( $_GET['chatbot_refresh_openai_models'] ) ) {
+        $refresh_nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+        if ( wp_verify_nonce( $refresh_nonce, 'chatbot_refresh_openai_models' ) ) {
+            $refresh_models = true;
+        }
+    }
+    $model_inventory = function_exists( 'chatbot_chatgpt_openai_assistant_model_inventory' )
+        ? chatbot_chatgpt_openai_assistant_model_inventory( $refresh_models )
+        : array(
+            'live'   => false,
+            'ids'    => array(),
+            'notice' => 'The OpenAI model list is unavailable. Saved models were not changed.',
+        );
 
     // Update the number of shortcodes - Ver 2.0.6
     update_chatbot_chatgpt_number_of_shortcodes();
@@ -305,6 +554,23 @@ function display_chatbot_chatgpt_assistants_table() {
         ),
         array( 'code' => array() )
     ) . '</p>';
+    echo '<p>' . esc_html__( 'Choose Use global OpenAI model to store no model on this row. Bridge mode uses the hosted prompt\'s model and does not send this saved model. The per-row model will affect Local and asst_ requests only after Step 5C. Saving a model does not change Local or Bridge mode.', 'chatbot-chatgpt' ) . '</p>';
+    echo '<p>' . esc_html__( 'A model in this list was returned by the OpenAI models endpoint. That does not prove it supports the Responses API or file search.', 'chatbot-chatgpt' ) . '</p>';
+    if ( ! empty( $model_inventory['notice'] ) ) {
+        echo '<p class="description">' . esc_html( $model_inventory['notice'] ) . '</p>';
+    }
+    $refresh_url = wp_nonce_url(
+        add_query_arg(
+            array(
+                'page'                           => 'chatbot-chatgpt',
+                'tab'                            => 'gpt_assistants',
+                'chatbot_refresh_openai_models'  => '1',
+            ),
+            admin_url( 'admin.php' )
+        ),
+        'chatbot_refresh_openai_models'
+    );
+    echo '<p><a class="button" href="' . esc_url( $refresh_url ) . '">' . esc_html__( 'Refresh OpenAI model list', 'chatbot-chatgpt' ) . '</a></p>';
     echo '<table>';
     echo '<thead>';
     echo '<tr>';
@@ -323,6 +589,7 @@ function display_chatbot_chatgpt_assistants_table() {
     echo '<th>Placeholder Prompt</th>';
     echo '<th>Additional Instructions</th>';
     echo '<th>' . esc_html__( 'Vector Store ID', 'chatbot-chatgpt' ) . '</th>';
+    echo '<th>' . esc_html__( 'Model', 'chatbot-chatgpt' ) . '</th>';
     echo '</tr>';
     echo '</thead>';
     echo '<tbody>';
@@ -388,7 +655,11 @@ function display_chatbot_chatgpt_assistants_table() {
         echo '<td><textarea name="additional_instructions_' . absint( $assistant->id ) . '">' . esc_textarea( $assistant->additional_instructions ) . '</textarea></td>';
         $vector_store_id = isset( $assistant->vector_store_id ) ? $assistant->vector_store_id : '';
         echo '<td><input type="text" name="vector_store_id_' . absint( $assistant->id ) . '" value="' . esc_attr( $vector_store_id ) . '" placeholder="vs_xxxxxxxx"></td>';
+        chatbot_chatgpt_render_assistant_model_select( 'model_' . absint( $assistant->id ), isset( $assistant->model ) ? $assistant->model : '', $model_inventory );
         echo '</tr>';
+        if ( function_exists( 'chatbot_chatgpt_render_pmpt_row_mode_row' ) ) {
+            echo chatbot_chatgpt_render_pmpt_row_mode_row( $assistant );
+        }
     }
 
     // Row for adding a new assistant
@@ -432,6 +703,7 @@ function display_chatbot_chatgpt_assistants_table() {
     echo '<td><textarea name="new_placeholder_prompt" placeholder="Enter your question ..."></textarea></td>';
     echo '<td><textarea name="new_additional_instructions" placeholder="Added instructions to assistant if needed ...."></textarea></td>';
     echo '<td><input type="text" name="new_vector_store_id" placeholder="vs_xxxxxxxx"></td>';
+    chatbot_chatgpt_render_assistant_model_select( 'new_model', '', $model_inventory );
     echo '</tr>';
     echo '</tbody>';
     echo '</table>';
@@ -459,9 +731,51 @@ function chatbot_chatgpt_assistants_scripts() {
 
             var chatbot_nonce = "<?php echo esc_js($nonce); ?>";
 
+            function chatbotAssistantSaveFinished(response, successMessage) {
+                if (response && response.success === false) {
+                    var message = 'The assistant was not saved.';
+                    if (typeof response.data === 'string' && response.data !== '') {
+                        message = response.data;
+                    }
+                    alert(message);
+                    return;
+                }
+                alert(successMessage);
+                window.programmaticReload = true;
+                location.reload();
+            }
+
             // Function to update an assistant's details
+            function saveChatgptPromptMode(id) {
+                var modeField = document.getElementsByName('pmpt_response_mode_' + id)[0];
+                var confirmField = document.getElementsByName('pmpt_mode_confirmed_' + id)[0];
+                var data = {
+                    action: 'chatbot_chatgpt_set_pmpt_row_mode',
+                    id: id,
+                    mode: modeField ? modeField.value : 'bridge',
+                    confirmed: confirmField && confirmField.checked ? '1' : '0'
+                };
+
+                data._wpnonce = chatbot_nonce;
+
+                jQuery.post(ajaxurl, data, function(response) {
+                    if (response && response.success) {
+                        alert('Prompt mode saved.');
+                        window.programmaticReload = true;
+                        location.reload();
+                        return;
+                    }
+                    var message = 'Prompt mode was not saved.';
+                    if (response && typeof response.data === 'string' && response.data !== '') {
+                        message = response.data;
+                    }
+                    alert(message);
+                });
+            }
+
             function updateChatgptAssistant(id) {
                 var vectorStoreField = document.getElementsByName('vector_store_id_' + id)[0];
+                var modelField = document.getElementsByName('model_' + id)[0];
                 var data = {
                     action: 'update_assistant',
                     id: id,
@@ -479,14 +793,16 @@ function chatbot_chatgpt_assistants_scripts() {
                     placeholder_prompt: document.getElementsByName('placeholder_prompt_' + id)[0].value,
                     additional_instructions: document.getElementsByName('additional_instructions_' + id)[0].value
                 };
+                if (modelField) {
+                    data.model = modelField.value;
+                }
 
                 data._wpnonce = chatbot_nonce;
 
-                // Send the update request via AJAX
-                jQuery.post(ajaxurl, data, function(response) {
-                    alert('Assistant updated successfully!');
-                    window.programmaticReload = true;
-                    location.reload();  // Reload the page to reflect the deletion
+                jQuery.post(ajaxurl, data).done(function(response) {
+                    chatbotAssistantSaveFinished(response, 'Assistant updated successfully!');
+                }).fail(function() {
+                    alert('The assistant was not saved.');
                 });
             }
 
@@ -510,6 +826,7 @@ function chatbot_chatgpt_assistants_scripts() {
             // Function to add a new assistant
             function addNewChatgptAssistant() {
                 var newVectorStoreField = document.getElementsByName('new_vector_store_id')[0];
+                var newModelField = document.getElementsByName('new_model')[0];
                 var data = {
                     action: 'add_new_assistant',
                     assistant_id: document.getElementsByName('new_assistant_id')[0].value,
@@ -526,14 +843,16 @@ function chatbot_chatgpt_assistants_scripts() {
                     placeholder_prompt: document.getElementsByName('new_placeholder_prompt')[0].value,
                     additional_instructions: document.getElementsByName('new_additional_instructions')[0].value
                 };
+                if (newModelField) {
+                    data.model = newModelField.value;
+                }
 
                 data._wpnonce = chatbot_nonce;
 
-                // Send the add request via AJAX
-                jQuery.post(ajaxurl, data, function(response) {
-                    alert('New assistant added successfully!');
-                    window.programmaticReload = true;
-                    location.reload();  // Reload the page to reflect the addition
+                jQuery.post(ajaxurl, data).done(function(response) {
+                    chatbotAssistantSaveFinished(response, 'New assistant added successfully!');
+                }).fail(function() {
+                    alert('The assistant was not saved.');
                 });
             }
 
@@ -558,8 +877,11 @@ function update_assistant() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
 
     chatbot_chatgpt_ensure_assistants_vector_store_column();
+    chatbot_chatgpt_ensure_assistants_model_column();
 
     $id = intval($_POST['id']);
+    $existing_assistant = function_exists( 'get_chatbot_chatgpt_assistant_by_key' ) ? get_chatbot_chatgpt_assistant_by_key( $id ) : array();
+    $previous_assistant_id = ( is_array( $existing_assistant ) && isset( $existing_assistant['assistant_id'] ) ) ? (string) $existing_assistant['assistant_id'] : '';
     $assistant_id = sanitize_text_field($_POST['assistant_id']);
     $vector_store_id = isset( $_POST['vector_store_id'] ) ? sanitize_text_field( wp_unslash( $_POST['vector_store_id'] ) ) : '';
     $common_name = sanitize_text_field($_POST['common_name']);
@@ -574,23 +896,34 @@ function update_assistant() {
     $placeholder_prompt = sanitize_textarea_field($_POST['placeholder_prompt']);
     $additional_instructions = sanitize_textarea_field($_POST['additional_instructions']);
 
+    $stored_model = ( is_array( $existing_assistant ) && isset( $existing_assistant['model'] ) ) ? $existing_assistant['model'] : null;
+    $model_write = chatbot_chatgpt_assistant_model_write( $_POST, $stored_model );
+    if ( 'error' === $model_write['action'] ) {
+        chatbot_chatgpt_reject_assistant_model( $model_write['message'] );
+    }
+
+    $update_data = array(
+        'assistant_id' => $assistant_id,
+        'vector_store_id' => $vector_store_id,
+        'common_name' => $common_name,
+        'style' => $style,
+        'audience' => $audience,
+        'voice' => $voice,
+        'allow_file_uploads' => $allow_file_uploads,
+        'allow_transcript_downloads' => $allow_transcript_downloads,
+        'show_assistant_name' => $show_assistant_name,
+        'initial_greeting' => $initial_greeting,
+        'subsequent_greeting' => $subsequent_greeting,
+        'placeholder_prompt' => $placeholder_prompt,
+        'additional_instructions' => $additional_instructions
+    );
+    if ( 'store' === $model_write['action'] ) {
+        $update_data['model'] = $model_write['value'];
+    }
+
     $wpdb->update(
         $table_name,
-        array(
-            'assistant_id' => $assistant_id,
-            'vector_store_id' => $vector_store_id,
-            'common_name' => $common_name,
-            'style' => $style,
-            'audience' => $audience,
-            'voice' => $voice,
-            'allow_file_uploads' => $allow_file_uploads,
-            'allow_transcript_downloads' => $allow_transcript_downloads,
-            'show_assistant_name' => $show_assistant_name,
-            'initial_greeting' => $initial_greeting,
-            'subsequent_greeting' => $subsequent_greeting,
-            'placeholder_prompt' => $placeholder_prompt,
-            'additional_instructions' => $additional_instructions
-        ),
+        $update_data,
         array('id' => $id)
     );
 
@@ -599,6 +932,10 @@ function update_assistant() {
         back_trace('ERROR', 'Failed to update row in table: ' . $table_name);
         back_trace('ERROR', 'Error details: ' . $wpdb->last_error);
         return false;  // Row update failed
+    }
+
+    if ( function_exists( 'chatbot_chatgpt_release_pmpt_row_mode_on_identity_change' ) ) {
+        chatbot_chatgpt_release_pmpt_row_mode_on_identity_change( $id, $previous_assistant_id, $assistant_id );
     }
 
     wp_die();
@@ -630,6 +967,10 @@ function delete_assistant() {
         return false;  // Row deletion failed
     }
 
+    if ( function_exists( 'chatbot_chatgpt_remove_pmpt_row_mode' ) ) {
+        chatbot_chatgpt_remove_pmpt_row_mode( $id );
+    }
+
     wp_die();
 
 }
@@ -655,6 +996,7 @@ function add_new_assistant() {
     }
 
     chatbot_chatgpt_ensure_assistants_vector_store_column();
+    chatbot_chatgpt_ensure_assistants_model_column();
 
     $assistant_id = sanitize_text_field($_POST['assistant_id']);
     $vector_store_id = isset( $_POST['vector_store_id'] ) ? sanitize_text_field( wp_unslash( $_POST['vector_store_id'] ) ) : '';
@@ -670,23 +1012,33 @@ function add_new_assistant() {
     $placeholder_prompt = sanitize_textarea_field($_POST['placeholder_prompt']);
     $additional_instructions = sanitize_textarea_field($_POST['additional_instructions']);
 
+    $model_write = chatbot_chatgpt_assistant_model_write( $_POST, null );
+    if ( 'error' === $model_write['action'] ) {
+        chatbot_chatgpt_reject_assistant_model( $model_write['message'] );
+    }
+
+    $insert_data = array(
+        'assistant_id' => $assistant_id,
+        'vector_store_id' => $vector_store_id,
+        'common_name' => $common_name,
+        'style' => $style,
+        'audience' => $audience,
+        'voice' => $voice,
+        'allow_file_uploads' => $allow_file_uploads,
+        'allow_transcript_downloads' => $allow_transcript_downloads,
+        'show_assistant_name' => $show_assistant_name,
+        'initial_greeting' => $initial_greeting,
+        'subsequent_greeting' => $subsequent_greeting,
+        'placeholder_prompt' => $placeholder_prompt,
+        'additional_instructions' => $additional_instructions
+    );
+    if ( 'store' === $model_write['action'] && is_string( $model_write['value'] ) ) {
+        $insert_data['model'] = $model_write['value'];
+    }
+
     $wpdb->insert(
         $table_name,
-        array(
-            'assistant_id' => $assistant_id,
-            'vector_store_id' => $vector_store_id,
-            'common_name' => $common_name,
-            'style' => $style,
-            'audience' => $audience,
-            'voice' => $voice,
-            'allow_file_uploads' => $allow_file_uploads,
-            'allow_transcript_downloads' => $allow_transcript_downloads,
-            'show_assistant_name' => $show_assistant_name,
-            'initial_greeting' => $initial_greeting,
-            'subsequent_greeting' => $subsequent_greeting,
-            'placeholder_prompt' => $placeholder_prompt,
-            'additional_instructions' => $additional_instructions
-        )
+        $insert_data
     );
 
     // Check for errors after insert

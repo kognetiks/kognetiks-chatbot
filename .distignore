@@ -13,6 +13,7 @@ wordfence-vendor.txt
 .cursor
 /debug/
 /test-harness/
+/tests/
 .DS_Store
 Thumbs.db
 .snyk
