@@ -130,58 +130,44 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $atts[$key] = htmlspecialchars(wp_strip_all_tags($atts[$key] ?? ''), ENT_QUOTES, 'UTF-8');
     }
 
-    // Normalize [assistant-#] to [chatbot-#] - Ver 2.2.6 - 2025 03 07
-    if (strpos($tag, 'assistant-') === 0) {
-        $tag = str_replace('assistant-', 'chatbot-', $tag);
-    }
+    // Normalize [assistant-#] and [agent-#] to [chatbot-#].
+    $tag = chatbot_chatgpt_normalize_assistant_shortcode_tag( $tag );
 
-    // Normalize [agent-#] to [chatbot-#] - Ver 2.2.6 - 2025 03 07
-    if (strpos($tag, 'agent-') === 0) {
-        $tag = str_replace('agent-', 'chatbot-', $tag);
-    }
+    // Row 0 means this shortcode did not select an assistants-table row.
+    $assistant_row_id = 0;
+    $numbered_row_selected = false;
+    $numbered_external_id = '';
 
-    // Tag Processing - Ver 2.0.6
-    if (strpos($tag, 'chatbot-') !== false) {
+    $numbered_request = chatbot_chatgpt_numbered_shortcode_row_request( $tag );
+    if ( null !== $numbered_request ) {
 
-        // Extract the Assistant ID from the tag
-        $assistant_key = str_replace('chatbot-', '', $tag);
-
-        // Fetch the common name of the Assistant Common Name from the Assistant table
-        $assistant_details = get_chatbot_chatgpt_assistant_by_key($assistant_key);
-
-        // For each key in $assistant_details, set the $atts value
-        foreach ($assistant_details as $key => $value) {
-            $atts[$key] = $value;
+        $assistant_details = get_chatbot_chatgpt_assistant_by_key( $numbered_request );
+        $row_decision = chatbot_chatgpt_decide_shortcode_row( $tag, null, $assistant_details, null );
+        if ( 'unavailable' === $row_decision['result'] ) {
+            if ( ob_get_level() > 0 ) {
+                ob_end_clean();
+            }
+            return esc_html( chatbot_chatgpt_assistant_row_unavailable_message() );
         }
 
-        // If the assistant_id is null, then set it to original
-        if (empty($assistant_details['assistant_id'])) {
-            $assistant_details['assistant_id'] = 'original';
+        $numbered_row_selected = true;
+        $assistant_row_id = $row_decision['row_id'];
+        $numbered_external_id = $row_decision['external_id'];
+        $assistant_details = $row_decision['row'];
+        foreach ( $assistant_details as $key => $value ) {
+            $atts[ $key ] = $value;
         }
-
-        $atts['assistant'] = $assistant_details['assistant_id'];
-
-        // Ensure $assistant_details is an array before proceeding
-        if (!is_array($assistant_details)) {
-            $assistant_details = []; // Initialize as an empty array if not an array
-        }
-
-        // For each key in $assistant_details, set the $atts value
-        foreach ($assistant_details as $key => $value) {
-            $atts[$key] = $value;
-        }
-
-        // Check if 'assistant_id' exists in $assistant_details before accessing it
-        if (isset($assistant_details['assistant_id'])) {
-            $atts['assistant'] = $assistant_details['assistant_id'];
-        } else {
-            $atts['assistant'] = null; // Or set a default value
+        // Keep a real external ID. An empty or unrecognized value stays off the
+        // assistant API and must not be rewritten to the original chatbot here.
+        if ( '' !== $numbered_external_id ) {
+            $atts['assistant'] = $numbered_external_id;
         }
 
     }
 
-    // If the assistant is not set to 'original', 'primary', or 'alternate' then try to fetch the Assistant details
-    if ( !empty($atts['assistant']) && strpos($atts['assistant'], 'asst_') === false && strpos($atts['assistant'], 'pmpt_') === false && strpos($atts['assistant'], 'ag:') === false && strpos($atts['assistant'], 'websearch') === false) {
+    // If the assistant is not set to 'original', 'primary', or 'alternate' then try to fetch the Assistant details.
+    // A numbered shortcode already selected its row, so a second lookup must not replace it.
+    if ( ! $numbered_row_selected && !empty($atts['assistant']) && strpos($atts['assistant'], 'asst_') === false && strpos($atts['assistant'], 'pmpt_') === false && strpos($atts['assistant'], 'ag:') === false && strpos($atts['assistant'], 'websearch') === false) {
 
         // Initialize the Assistant details
         $assistant_details = [];
@@ -208,6 +194,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             $atts['assistant'] = $assistant_details['assistant_id'];
 
             $chatbot_chatgpt_assistant_alias = $assistant_details['assistant_id'];
+            $common_row_id = chatbot_chatgpt_loaded_row_id( $assistant_details );
+            if ( null !== $common_row_id ) {
+                $assistant_row_id = $common_row_id;
+            }
 
         }
 
@@ -270,6 +260,19 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         }
     }
     $assistant_id = $chatbot_chatgpt_assistant_alias;
+
+    // An unrecognized external ID on a selected row is not an assistant API ID.
+    // Keep the stored value so later validation matches that row. Empty stays "original".
+    if ( $assistant_row_id > 0 && 'original' === $assistant_id ) {
+        $stored_external = $numbered_row_selected ? $numbered_external_id : '';
+        if ( ! $numbered_row_selected && isset( $atts['assistant'] ) && is_string( $atts['assistant'] ) ) {
+            $stored_external = trim( $atts['assistant'] );
+        }
+        if ( '' !== $stored_external ) {
+            $assistant_id = $stored_external;
+            $chatbot_chatgpt_assistant_alias = $stored_external;
+        }
+    }
     
     // Validate and sanitize the audience parameter - Ver 1.9.9
     $valid_audiences = ['all', 'logged-in', 'visitors'];
@@ -518,6 +521,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
     
     set_chatbot_chatgpt_transients( 'assistant_id', $assistant_id, $user_id, $page_id, $session_id, null);
+    set_chatbot_chatgpt_transients( 'assistant_row_id', chatbot_chatgpt_assistant_row_id_storage_string( $assistant_row_id ), $user_id, $page_id, $session_id, null);
     set_chatbot_chatgpt_transients( 'thread_id', $thread_id, $user_id, $page_id, $session_id, null);
 
     set_chatbot_chatgpt_transients( 'additional_instructions', $additional_instructions, $user_id, $page_id, $session_id, null);
@@ -545,6 +549,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
+        'assistant_row_id' => chatbot_chatgpt_assistant_row_id_storage_string( $assistant_row_id ),
         'additional_instructions' => $additional_instructions,
         'model' => $model,
         'voice' => $voice,

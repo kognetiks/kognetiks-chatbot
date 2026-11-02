@@ -780,7 +780,7 @@ function chatbot_chatgpt_delete_scoped_locks_and_queue( $user_id, $session_id, $
  * @param string|null $client_message_id Client idempotency id.
  * @return string|false
  */
-function chatbot_chatgpt_enqueue_message( $user_id, $page_id, $session_id, $assistant_id, $message, $client_message_id = null ) {
+function chatbot_chatgpt_enqueue_message( $user_id, $page_id, $session_id, $assistant_id, $message, $client_message_id = null, $assistant_row_id = null ) {
     $queue_key = chatbot_chatgpt_message_queue_key( $user_id, $session_id, $page_id, $assistant_id, false );
     if ( $queue_key === '' ) {
         return false;
@@ -795,7 +795,7 @@ function chatbot_chatgpt_enqueue_message( $user_id, $page_id, $session_id, $assi
         ? $client_message_id
         : ( function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : uniqid( 'kchat_', true ) );
 
-    $queue[] = array(
+    $queue_item = array(
         'message'           => $message,
         'client_message_id' => $client_message_id,
         'timestamp'         => time(),
@@ -804,6 +804,11 @@ function chatbot_chatgpt_enqueue_message( $user_id, $page_id, $session_id, $assi
         'session_id'        => is_string( $session_id ) ? $session_id : '',
         'assistant_id'      => chatbot_chatgpt_normalize_storage_part( $assistant_id ),
     );
+    $queue_item = chatbot_chatgpt_annotate_queue_item_row_id( $queue_item, $assistant_row_id );
+    if ( ! is_array( $queue_item ) ) {
+        return false;
+    }
+    $queue[] = $queue_item;
 
     set_transient( $queue_key, $queue, 3600 );
     return $client_message_id;

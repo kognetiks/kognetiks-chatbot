@@ -306,7 +306,16 @@ function check_assistant_tool_usage_responses( $response_json ) {
 /* -------------------------------------------------------------------------
  * Local Common Name + Additional Instructions for Responses calls
  * ------------------------------------------------------------------------- */
-function chatbot_chatgpt_get_responses_local_row( $assistant_id ) {
+function chatbot_chatgpt_get_responses_local_row( $assistant_id, $assistant_row_id = null ) {
+
+    $normalized = function_exists( 'chatbot_chatgpt_normalize_assistant_row_id' )
+        ? chatbot_chatgpt_normalize_assistant_row_id( $assistant_row_id )
+        : array( 'state' => 'missing', 'id' => null );
+
+    if ( 'valid' === $normalized['state'] && $normalized['id'] > 0 && function_exists( 'get_chatbot_chatgpt_assistant_by_key' ) ) {
+        $row = get_chatbot_chatgpt_assistant_by_key( $normalized['id'] );
+        return is_array( $row ) ? $row : array();
+    }
 
     if ( ! function_exists( 'get_chatbot_chatgpt_assistant_by_assistant_id' ) ) {
         return array();
@@ -314,6 +323,63 @@ function chatbot_chatgpt_get_responses_local_row( $assistant_id ) {
 
     $row = get_chatbot_chatgpt_assistant_by_assistant_id( $assistant_id );
     return is_array( $row ) ? $row : array();
+
+}
+
+/**
+ * Add the hosted-prompt or local-assistant fields to a Responses payload.
+ *
+ * A pmpt_ ID still sends prompt.id. An asst_ ID sends model and instructions.
+ * The local row supplies Common Name and vector stores for the asst_ body,
+ * and the vector store list for both.
+ *
+ * @param array      $payload Payload so far.
+ * @param string     $prompt_id External ID.
+ * @param array      $local_row Selected or legacy assistants-table row.
+ * @param string     $additional_instructions Resolved extra instructions.
+ * @param string     $model Model for a non-prompt request. Ignored for pmpt_.
+ * @return array|null Null when a non-prompt request has no model.
+ */
+function chatbot_chatgpt_apply_responses_assistant_fields( $payload, $prompt_id, $local_row, $additional_instructions, $model ) {
+
+    if ( ! is_array( $payload ) ) {
+        $payload = array();
+    }
+    if ( ! is_array( $local_row ) ) {
+        $local_row = array();
+    }
+
+    $is_prompt = function_exists( 'chatbot_chatgpt_id_starts_with' )
+        ? chatbot_chatgpt_id_starts_with( $prompt_id, 'pmpt_' )
+        : ( strpos( (string) $prompt_id, 'pmpt_' ) === 0 );
+
+    if ( $is_prompt ) {
+        $payload['prompt'] = array(
+            'id' => (string) $prompt_id,
+        );
+    } else {
+        if ( ! is_string( $model ) || '' === $model ) {
+            return null;
+        }
+        $payload['model'] = $model;
+        $instructions = chatbot_chatgpt_build_responses_instructions( $local_row, $additional_instructions );
+        if ( '' !== $instructions ) {
+            $payload['instructions'] = $instructions;
+        }
+    }
+
+    $vector_store_ids = chatbot_chatgpt_resolve_vector_store_ids( $local_row );
+    if ( ! empty( $vector_store_ids ) ) {
+        $payload['tools'] = array(
+            array(
+                'type'             => 'file_search',
+                'vector_store_ids' => $vector_store_ids,
+                'max_num_results'  => 8,
+            ),
+        );
+    }
+
+    return $payload;
 
 }
 
@@ -441,7 +507,7 @@ function chatbot_chatgpt_resolve_vector_store_ids( $local_row ) {
 /* -------------------------------------------------------------------------
  * Main call used by the plugin (signature preserved)
  * ------------------------------------------------------------------------- */
-function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null ) {
+function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null, $assistant_row_id = null ) {
 
     // DIAG - Diagnostics - Ver 2.4.5
     // back_trace('NOTICE', 'chatbot_chatgpt_custom_pmpt_call_api');
@@ -635,7 +701,7 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
             ? chatbot_chatgpt_id_starts_with( $prompt_id, 'pmpt_' )
             : ( strpos( $prompt_id, 'pmpt_' ) === 0 );
 
-        $local_row = chatbot_chatgpt_get_responses_local_row( $prompt_id );
+        $local_row = chatbot_chatgpt_get_responses_local_row( $prompt_id, $assistant_row_id );
         $additional_instructions = chatbot_chatgpt_resolve_local_additional_instructions( $prompt_id, $user_id, $page_id, $session_id, $local_row );
 
         // Prompt objects already carry dashboard instructions. Extra WordPress
@@ -668,32 +734,13 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
             $payload['safety_identifier'] = $safety_identifier;
         }
 
-        if ( $is_prompt ) {
-            // Temporary bridge: hosted prompt objects shut down 2026-11-30.
-            $payload['prompt'] = array(
-                'id' => $prompt_id,
-            );
-        } else {
+        $model = '';
+        if ( ! $is_prompt ) {
             $model = chatbot_chatgpt_resolve_responses_model( $user_id, $page_id, $session_id );
-            if ( $model === '' ) {
-                return __( 'Error: Missing model. Set a ChatGPT model in Settings before using an Assistant ID (asst_...).', 'chatbot-chatgpt' );
-            }
-            $payload['model'] = $model;
-            $instructions = chatbot_chatgpt_build_responses_instructions( $local_row, $additional_instructions );
-            if ( $instructions !== '' ) {
-                $payload['instructions'] = $instructions;
-            }
         }
-
-        $vector_store_ids = chatbot_chatgpt_resolve_vector_store_ids( $local_row );
-        if ( ! empty( $vector_store_ids ) ) {
-            $payload['tools'] = array(
-                array(
-                    'type'             => 'file_search',
-                    'vector_store_ids' => $vector_store_ids,
-                    'max_num_results'  => 8,
-                ),
-            );
+        $payload = chatbot_chatgpt_apply_responses_assistant_fields( $payload, $prompt_id, $local_row, $additional_instructions, $model );
+        if ( null === $payload ) {
+            return __( 'Error: Missing model. Set a ChatGPT model in Settings before using an Assistant ID (asst_...).', 'chatbot-chatgpt' );
         }
 
         // DIAG - Diagnostics - Ver 2.4.5

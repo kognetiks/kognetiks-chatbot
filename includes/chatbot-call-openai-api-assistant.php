@@ -849,7 +849,7 @@ function cancel_active_run($thread_id, $api_key) {
 }
 
 // CustomGPT - Assistants - Ver 1.7.2
-function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null) {
+function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null, $assistant_row_id = null) {
 
     // Assistants API was sunset 2026-08-26. Route OpenAI asst_/pmpt_ IDs through Responses.
     $assistant_id = trim( (string) $assistant_id );
@@ -861,7 +861,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
             $use_responses = ( strpos( $assistant_id, 'asst_' ) === 0 ) || ( strpos( $assistant_id, 'pmpt_' ) === 0 );
         }
         if ( $use_responses ) {
-            return chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id );
+            return chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id, $assistant_row_id );
         }
     }
 

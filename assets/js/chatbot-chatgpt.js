@@ -1159,11 +1159,7 @@ window.resetAllLocks = resetAllLocks;
                 return;
             }
 
-            $.ajax({
-            url: kchat_settings.ajax_url,
-            method: 'POST',
-            timeout: timeout_setting, // Example: 10,000ms = 10 seconds
-            data: {
+            let requestData = {
                 action: 'chatbot_chatgpt_send_message',
                 message: message,
                 user_id: user_id, // pass the user ID here
@@ -1172,7 +1168,17 @@ window.resetAllLocks = resetAllLocks;
                 assistant_id: assistant_id, // pass the assistant/prompt ID for logging and routing
                 client_message_id: client_message_id, // pass the client message ID for idempotency
                 chatbot_nonce: kchat_settings.chatbot_message_nonce, // Security: CSRF protection
-            },
+            };
+            // Always send an explicit 0. A missing property is a legacy request, not row 0.
+            if (Object.prototype.hasOwnProperty.call(kchat_settings, 'assistant_row_id')) {
+                requestData.assistant_row_id = String(kchat_settings.assistant_row_id);
+            }
+
+            $.ajax({
+            url: kchat_settings.ajax_url,
+            method: 'POST',
+            timeout: timeout_setting, // Example: 10,000ms = 10 seconds
+            data: requestData,
             headers: {  // Adding headers to prevent caching
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
                 'Pragma': 'no-cache',
