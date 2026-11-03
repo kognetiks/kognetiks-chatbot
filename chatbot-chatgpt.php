@@ -1051,26 +1051,41 @@ function chatbot_chatgpt_process_queued_message($message_data) {
     // back_trace('NOTICE', '$kchat_settings[\'chatbot_chatgpt_assistant_alias\']: ' . $kchat_settings['chatbot_chatgpt_assistant_alias']);
     // back_trace('NOTICE', '$kchat_settings[\'assistant_id\']: ' . $kchat_settings['assistant_id']);
     
-    // A queued row ID is authoritative. A later page render must not replace it.
+    // A queued item keeps the assistant and row it was given. A later page
+    // render must not replace either one. An item with no row field is absent,
+    // not the page's current row.
     $responses_row_id = null;
-    $queue_row_locked = false;
+    $queue_identity_locked = false;
+    $queue_v2_scope = null;
     if ( is_array( $message_data ) && array_key_exists( 'assistant_row_id', $message_data ) ) {
         $queue_row_decision = chatbot_chatgpt_validate_queued_assistant_row( $message_data, 'get_chatbot_chatgpt_assistant_by_key' );
         if ( 'rejected' === $queue_row_decision['result'] ) {
             return $queue_row_decision['error'];
         }
-        if ( 'trusted' === $queue_row_decision['result'] ) {
-            $queue_row_locked = true;
-            if ( isset( $message_data['assistant_id'] ) ) {
-                $assistant_id = $message_data['assistant_id'];
-                $chatbot_chatgpt_assistant_alias = $assistant_id;
-            }
-            $responses_row_id = chatbot_chatgpt_responses_row_id_from_decision( $queue_row_decision );
+        if ( 'trusted' !== $queue_row_decision['result'] ) {
+            return chatbot_chatgpt_assistant_row_unavailable_message();
+        }
+        $queue_v2_scope = chatbot_chatgpt_conversation_v2_row_scope( $queue_row_decision );
+        if ( '' === $queue_v2_scope ) {
+            return chatbot_chatgpt_assistant_row_unavailable_message();
+        }
+        $queue_identity_locked = true;
+        if ( isset( $message_data['assistant_id'] ) && is_string( $message_data['assistant_id'] ) ) {
+            $assistant_id = $message_data['assistant_id'];
+            $chatbot_chatgpt_assistant_alias = $assistant_id;
+        }
+        $responses_row_id = chatbot_chatgpt_responses_row_id_from_decision( $queue_row_decision );
+    } elseif ( is_array( $message_data ) ) {
+        $queue_identity_locked = true;
+        $queue_v2_scope = 'absent';
+        if ( isset( $message_data['assistant_id'] ) && is_string( $message_data['assistant_id'] ) && '' !== $message_data['assistant_id'] ) {
+            $assistant_id = $message_data['assistant_id'];
+            $chatbot_chatgpt_assistant_alias = $assistant_id;
         }
     }
 
-    // Override assistant_id from transient if available - Ver 2.3.6
-    if ( ! $queue_row_locked && !empty($kchat_settings['assistant_id'])) {
+    // A locked queue item does not take the page transient's assistant.
+    if ( ! $queue_identity_locked && !empty($kchat_settings['assistant_id'])) {
         $assistant_id = $kchat_settings['assistant_id'];
     }
 
@@ -1084,15 +1099,31 @@ function chatbot_chatgpt_process_queued_message($message_data) {
     // The assistants-table row ID is not part of this decision.
     $use_assistant_id = chatbot_chatgpt_use_assistant_id_for_platform( $chatbot_ai_platform_choice, $use_assistant_id );
 
-    // Persist resolved ids so conversation log and later requests stay in sync
-    if ( ! empty( $assistant_id ) && $assistant_id !== 'original' ) {
+    if ( $queue_identity_locked ) {
+        $openai_instruction_alias = is_string( $chatbot_chatgpt_assistant_alias ) ? $chatbot_chatgpt_assistant_alias : '';
+    }
+
+    // Persist resolved ids so conversation log and later requests stay in sync.
+    // A legacy absent item must not replace a different assistant already stored
+    // for this page.
+    $stored_queue_assistant = ( isset( $kchat_settings['assistant_id'] ) && is_string( $kchat_settings['assistant_id'] ) ) ? $kchat_settings['assistant_id'] : '';
+    $legacy_queue_keeps_page_assistant = ( 'absent' === $queue_v2_scope && '' !== $stored_queue_assistant && $stored_queue_assistant !== $assistant_id );
+    if ( ! $legacy_queue_keeps_page_assistant && ! empty( $assistant_id ) && $assistant_id !== 'original' ) {
         set_chatbot_chatgpt_transients( 'assistant_id', $assistant_id, $user_id, $page_id, $session_id, null );
         set_chatbot_chatgpt_transients( 'assistant_alias', $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
     }
 
-    // Get thread information and log AFTER resolving assistant_id - Ver 2.3.7
-    $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
+    $queue_use_responses_v2 = is_string( $queue_v2_scope )
+        && '' !== $queue_v2_scope
+        && chatbot_chatgpt_routes_openai_responses( $chatbot_ai_platform_choice, $use_assistant_id, $assistant_id );
+
+    // Other providers still log the v1 thread before the call. OpenAI
+    // Responses logs the id acquired for this queued request.
+    $thread_id = '';
+    if ( ! $queue_use_responses_v2 ) {
+        $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
+    }
 
     // Process the message based on platform and use_assistant_id - Ver 2.3.6   
     // Check if we should use assistant_id or regular API
@@ -1104,7 +1135,13 @@ function chatbot_chatgpt_process_queued_message($message_data) {
         // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
         // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
 
-        $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id, $responses_row_id, $openai_instruction_alias);
+        $queued_v2_request = null;
+        $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, '', $session_id, $user_id, $page_id, $client_message_id, $responses_row_id, $openai_instruction_alias, $queue_v2_scope, $queued_v2_request);
+        $thread_id = '';
+        if ( is_array( $queued_v2_request ) && isset( $queued_v2_request['id'] ) && is_string( $queued_v2_request['id'] ) ) {
+            $thread_id = $queued_v2_request['id'];
+        }
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
 
     } elseif ($use_assistant_id == 'Yes' && $chatbot_ai_platform_choice == 'Azure OpenAI') {
 
@@ -1636,21 +1673,30 @@ function chatbot_chatgpt_send_message() {
     }
     $responses_row_id = chatbot_chatgpt_responses_row_id_from_decision( $row_decision );
 
-    // OpenAI Responses uses the validated scope. An omitted posted row is not
-    // treated as absent while the server still has a canonical selection.
-    // Keeping that selection is Increment 4; this request stops instead.
+    // OpenAI Responses keeps a stored canonical row when the posted field is
+    // omitted. The same positive id is passed into instruction, model, and
+    // vector-store resolution. Other platforms do not use this scope.
     $responses_v2_scope = null;
     $responses_v2_generation = '';
     if ( 'OpenAI' === $chatbot_ai_platform_choice
         && 'Yes' === $use_assistant_id
         && function_exists( 'chatbot_chatgpt_routes_openai_responses' )
         && chatbot_chatgpt_routes_openai_responses( $chatbot_ai_platform_choice, $use_assistant_id, $assistant_id ) ) {
-        $v2_scope_decision = chatbot_chatgpt_conversation_v2_request_scope( $row_decision, $server_row_raw, $server_row_present );
+        $v2_scope_decision = chatbot_chatgpt_conversation_v2_request_scope( $row_decision, $server_row_raw, $server_row_present, $assistant_id, 'get_chatbot_chatgpt_assistant_by_key' );
         if ( 'ok' !== $v2_scope_decision['result'] ) {
-            wp_send_json_error( 'Error: The assistant selection could not be confirmed.' );
+            $scope_error = ( isset( $v2_scope_decision['error'] ) && is_string( $v2_scope_decision['error'] ) && '' !== $v2_scope_decision['error'] )
+                ? $v2_scope_decision['error']
+                : 'Error: The assistant selection could not be confirmed.';
+            wp_send_json_error( $scope_error );
             return;
         }
         $responses_v2_scope = $v2_scope_decision['scope'];
+        if ( null === $responses_row_id && is_string( $responses_v2_scope ) ) {
+            $retained_row_id = (int) $responses_v2_scope;
+            if ( $retained_row_id > 0 && (string) $retained_row_id === $responses_v2_scope ) {
+                $responses_row_id = $retained_row_id;
+            }
+        }
     }
 
     if ( ! empty( $assistant_id ) && $assistant_id !== 'original' ) {

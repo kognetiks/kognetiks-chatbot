@@ -1178,18 +1178,62 @@ function chatbot_chatgpt_conversation_v2_read_record( $stored ) {
 }
 
 /**
+ * Revalidate a stored positive row before an omitted field may keep it.
+ *
+ * No loader means the row cannot be checked, so the scope is refused.
+ * A deleted or mismatched row is refused. It is not rewritten as 0 or absent.
+ *
+ * @param string        $scope Canonical positive id.
+ * @param mixed         $resolved_assistant_id Assistant id for this request.
+ * @param callable|null $load_row function( int $row_id ): array|null
+ * @return array{result:string,scope:string,error?:string}
+ */
+function chatbot_chatgpt_conversation_v2_retain_server_row( $scope, $resolved_assistant_id, $load_row ) {
+    $unavailable = function_exists( 'chatbot_chatgpt_assistant_row_unavailable_message' )
+        ? chatbot_chatgpt_assistant_row_unavailable_message()
+        : 'This chatbot configuration is unavailable.';
+    $refused = array(
+        'result' => 'rejected',
+        'scope'  => '',
+        'error'  => $unavailable,
+    );
+    if ( ! is_string( $resolved_assistant_id ) || ! is_callable( $load_row ) ) {
+        return $refused;
+    }
+    $row_id = (int) $scope;
+    if ( $row_id < 1 || (string) $row_id !== $scope ) {
+        return $refused;
+    }
+    $row = call_user_func( $load_row, $row_id );
+    if ( ! function_exists( 'chatbot_chatgpt_loaded_row_id' ) || ! function_exists( 'chatbot_chatgpt_row_external_id_matches' ) ) {
+        return $refused;
+    }
+    if ( chatbot_chatgpt_loaded_row_id( $row ) !== $row_id || ! chatbot_chatgpt_row_external_id_matches( $row, $resolved_assistant_id ) ) {
+        return $refused;
+    }
+    return array(
+        'result' => 'ok',
+        'scope'  => $scope,
+    );
+}
+
+/**
  * Scope for one synchronous Responses request.
  *
- * A trusted decision supplies its row. A legacy decision is absent only when
- * the server has no canonical selection. An omitted field combined with a
- * stored row is blocked here; keeping that stored scope is Increment 4.
+ * A trusted decision supplies its row. An omitted field keeps a stored 0, or
+ * a stored positive row after that row is loaded again and still matches the
+ * assistant. It does not become absent while that selection exists. The Step
+ * 3 validator still returns legacy for a missing field; this function does
+ * not change that contract.
  *
- * @param mixed $decision Validation decision.
- * @param mixed $server_row_raw Stored row string.
- * @param bool  $server_row_present Whether the stored row exists.
- * @return array{result:string,scope:string} result is ok, blocked, or rejected.
+ * @param mixed         $decision Validation decision.
+ * @param mixed         $server_row_raw Stored row string.
+ * @param bool          $server_row_present Whether the stored row exists.
+ * @param mixed         $resolved_assistant_id Assistant id used to recheck a retained row.
+ * @param callable|null $load_row function( int $row_id ): array|null
+ * @return array{result:string,scope:string,error?:string} result is ok, blocked, or rejected.
  */
-function chatbot_chatgpt_conversation_v2_request_scope( $decision, $server_row_raw, $server_row_present ) {
+function chatbot_chatgpt_conversation_v2_request_scope( $decision, $server_row_raw, $server_row_present, $resolved_assistant_id = null, $load_row = null ) {
     if ( ! is_array( $decision ) || ! isset( $decision['result'] ) ) {
         return array(
             'result' => 'blocked',
@@ -1218,11 +1262,14 @@ function chatbot_chatgpt_conversation_v2_request_scope( $decision, $server_row_r
     if ( 'legacy' === $decision['result'] ) {
         if ( $server_row_present ) {
             $server_scope = chatbot_chatgpt_conversation_v2_row_scope( $server_row_raw );
-            if ( $server_scope !== '' && $server_scope !== 'absent' ) {
+            if ( '0' === $server_scope ) {
                 return array(
-                    'result' => 'blocked',
-                    'scope'  => '',
+                    'result' => 'ok',
+                    'scope'  => '0',
                 );
+            }
+            if ( '' !== $server_scope && 'absent' !== $server_scope ) {
+                return chatbot_chatgpt_conversation_v2_retain_server_row( $server_scope, $resolved_assistant_id, $load_row );
             }
         }
         return array(
@@ -1340,6 +1387,7 @@ function chatbot_chatgpt_conversation_v2_delete_option_value( $name, $expected )
             $expected
         )
     );
+    chatbot_chatgpt_conversation_v2_bust_option_cache( $name );
     return 1 === (int) $result;
 }
 
