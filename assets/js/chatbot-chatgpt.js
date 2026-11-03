@@ -144,6 +144,8 @@ window.resetAllLocks = resetAllLocks;
     let chatbot_chatgpt_Elements = $('#chatbot-chatgpt').hide();
     let messageInput = $('#chatbot-chatgpt-message');
     let conversation = $('#chatbot-chatgpt-conversation');
+    let chatbotSkipV2Save = false;
+    var v2RequestEpochs = {};
     let submitButton = $('#chatbot-chatgpt-submit');
     let chatGptOpenButton = $('#chatgpt-open-btn');
 
@@ -520,7 +522,6 @@ window.resetAllLocks = resetAllLocks;
 
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
             localStorage.setItem('chatbot_chatgpt_opened', 'true');
-            sessionStorage.setItem('chatbot_chatgpt_conversation' + '_' + assistant_id, conversation.html());         
 
         } else {
 
@@ -682,6 +683,121 @@ window.resetAllLocks = resetAllLocks;
         chatEl.style.setProperty('height', newHeight + 'px', 'important');
     }
 
+    function v2BrowserApi() {
+        return window.kognetiksConversationBrowser || null;
+    }
+
+    function v2SessionStorage() {
+        try {
+            return window.sessionStorage;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function v2RootForElement(element) {
+        if (!element || typeof element.closest !== 'function') {
+            return null;
+        }
+        var root = element.closest('.chatbot-chatgpt-root');
+        if (!root || !root.hasAttribute('data-row-scope')) {
+            return null;
+        }
+        return root;
+    }
+
+    function v2ActiveRoot() {
+        return v2RootForElement(document.getElementById('chatbot-chatgpt'));
+    }
+
+    function v2RootState(root) {
+        var element = root.querySelector('.chatbot-chatgpt-conversation');
+        return {
+            assistantId: root.getAttribute('data-assistant-id') || '',
+            rowScope: root.getAttribute('data-row-scope') || '',
+            generation: root.getAttribute('data-conversation-generation') || '',
+            html: element ? element.innerHTML : ''
+        };
+    }
+
+    function v2SaveRoot(root, html) {
+        var browser = v2BrowserApi();
+        if (!browser || !root) {
+            return false;
+        }
+        var key = browser.storageKey(root.getAttribute('data-assistant-id'), root.getAttribute('data-row-scope'));
+        var encoded = browser.encodeEnvelope(root.getAttribute('data-conversation-generation') || '', html);
+        return browser.storageSet(v2SessionStorage(), key, encoded);
+    }
+
+    function v2ClearRoot(root) {
+        var browser = v2BrowserApi();
+        if (!browser || !root) {
+            return false;
+        }
+        var key = browser.storageKey(root.getAttribute('data-assistant-id'), root.getAttribute('data-row-scope'));
+        browser.storageRemove(v2SessionStorage(), key);
+        root.setAttribute('data-conversation-generation', '');
+        return true;
+    }
+
+    function v2BeginRequest(root) {
+        var browser = v2BrowserApi();
+        if (!browser || !root || typeof browser.beginRequest !== 'function') {
+            return null;
+        }
+        return browser.beginRequest(v2RequestEpochs, root.getAttribute('data-assistant-id'), root.getAttribute('data-row-scope'));
+    }
+
+    function v2InvalidateRoot(root) {
+        var browser = v2BrowserApi();
+        if (!browser || !root || typeof browser.invalidateScope !== 'function') {
+            return false;
+        }
+        return browser.invalidateScope(v2RequestEpochs, root.getAttribute('data-assistant-id'), root.getAttribute('data-row-scope'));
+    }
+
+    function v2SaveConversationElement(element, html) {
+        var root = v2RootForElement(element);
+        if (!root) {
+            return false;
+        }
+        return v2SaveRoot(root, html);
+    }
+
+    function applyV2Reply(meta, visitorText, replyHtml) {
+        var browser = v2BrowserApi();
+        if (!browser || !meta) {
+            return false;
+        }
+        var nodes = document.querySelectorAll('.chatbot-chatgpt-root[data-row-scope]');
+        var previous = conversation;
+        var applied = false;
+        var index;
+        for (index = 0; index < nodes.length; index++) {
+            var plan = browser.planReply(v2RootState(nodes[index]), meta);
+            if (plan === 'ignore') {
+                continue;
+            }
+            var element = nodes[index].querySelector('.chatbot-chatgpt-conversation');
+            if (!element) {
+                continue;
+            }
+            conversation = jQuery(element);
+            if (plan === 'rotate') {
+                conversation.empty();
+                nodes[index].setAttribute('data-conversation-generation', meta.conversation_generation);
+                appendMessage(visitorText, 'user');
+            } else {
+                nodes[index].setAttribute('data-conversation-generation', meta.conversation_generation);
+            }
+            appendMessage(replyHtml, 'bot');
+            applied = true;
+        }
+        conversation = previous;
+        return applied;
+    }
+
     // Function to append message to the conversation
     function appendMessage(message, sender, cssClass) {
 
@@ -780,13 +896,27 @@ window.resetAllLocks = resetAllLocks;
 
         // Save the conversation locally between bot sessions - Ver 1.2.0
         // if message starts with "Conversation cleared" then clear the conversation - Ver 1.9.3
-        if (message.startsWith('Conversation cleared')) {
-            // Clear the conversation from sessionStorage
-            // console.log('Chatbot: NOTICE: Clearing the conversation');
-            sessionStorage.removeItem('chatbot_chatgpt_conversation' + '_' + assistant_id);
-        } else {
-            // console.log('Chatbot: NOTICE: Saving the conversation');
-            sessionStorage.setItem('chatbot_chatgpt_conversation' + '_' + assistant_id, conversation.html());
+        if (chatbotSkipV2Save) {
+            chatbotSkipV2Save = false;
+        } else if (message.startsWith('Conversation cleared')) {
+            var clearedRoot = v2RootForElement(conversation && conversation[0]);
+            if (!clearedRoot || !v2ClearRoot(clearedRoot)) {
+                if (!clearedRoot) {
+                    try {
+                        sessionStorage.removeItem('chatbot_chatgpt_conversation' + '_' + assistant_id);
+                    } catch (storageError) {
+                        // sessionStorage can be blocked. The visible clear still stands.
+                    }
+                }
+            }
+        } else if (!v2SaveConversationElement(conversation && conversation[0], conversation.html())) {
+            if (!v2RootForElement(conversation && conversation[0])) {
+                try {
+                    sessionStorage.setItem('chatbot_chatgpt_conversation' + '_' + assistant_id, conversation.html());
+                } catch (storageError) {
+                    // sessionStorage can be blocked. The visible message still stands.
+                }
+            }
         }
 
         // MathJax rendering - Ver 2.1.2 - 2024 08 29
@@ -1137,6 +1267,46 @@ window.resetAllLocks = resetAllLocks;
         let assistant_id = kchat_settings.assistant_id;
         let thread_id = kchat_settings.thread_id;
         let chatbot_chatgpt_force_page_reload = kchat_settings['chatbot_chatgpt_force_page_reload'] || 'No';
+        let chatbotPendingV2Meta = null;
+        let chatbotPendingV2Invalid = false;
+        let v2RequestTicket = v2BeginRequest(v2ActiveRoot());
+
+        function v2PendingReplyBlocked() {
+            var browser = v2BrowserApi();
+            if (!browser || !v2RequestTicket || typeof browser.requestIsCurrent !== 'function') {
+                return false;
+            }
+            if (browser.requestIsCurrent(v2RequestEpochs, v2RequestTicket)) {
+                return false;
+            }
+            if (chatbotPendingV2Meta && typeof browser.scopeEpochKey === 'function') {
+                var responseKey = browser.scopeEpochKey(chatbotPendingV2Meta.assistant_id, chatbotPendingV2Meta.row_scope);
+                if (responseKey && responseKey !== v2RequestTicket.key) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function deliverPendingReply() {
+            if (v2PendingReplyBlocked()) {
+                chatbotPendingV2Meta = null;
+                chatbotPendingV2Invalid = false;
+                return false;
+            }
+            if (chatbotPendingV2Meta && applyV2Reply(chatbotPendingV2Meta, message, botResponse)) {
+                chatbotPendingV2Meta = null;
+                chatbotPendingV2Invalid = false;
+                return true;
+            }
+            if (chatbotPendingV2Meta || chatbotPendingV2Invalid) {
+                chatbotPendingV2Meta = null;
+                chatbotPendingV2Invalid = false;
+                return false;
+            }
+            appendMessage(botResponse, 'bot');
+            return true;
+        }
 
         // console.log('Chatbot: NOTICE: user_id: ' + user_id);
         // console.log('Chatbot: NOTICE: page_id: ' + page_id);
@@ -1236,7 +1406,9 @@ window.resetAllLocks = resetAllLocks;
                     // when the actual response comes through
                     // console.log('Chatbot: Queued response detected - botResponse set to null');
                 } else {
-                    botResponse = response.data;
+                    chatbotPendingV2Meta = v2BrowserApi() ? v2BrowserApi().replyMeta(response.data) : null;
+                    chatbotPendingV2Invalid = !chatbotPendingV2Meta && !!response.data && typeof response.data === 'object' && !response.data.queued;
+                    botResponse = chatbotPendingV2Meta ? chatbotPendingV2Meta.message : response.data;
                     // Normalize to string before any string operations
                     botResponse = toSafeString(botResponse);
                     // console.log('Chatbot: Non-queued response - botResponse set to:', botResponse);
@@ -1244,7 +1416,13 @@ window.resetAllLocks = resetAllLocks;
 
                 // Jan/local errors come back as success + "Error: ..." — show immediately and stop
                 if (botResponse && botResponse.startsWith('Error')) {
-                    appendMessage(botResponse, 'error');
+                    if (!v2PendingReplyBlocked() && !chatbotPendingV2Meta && !chatbotPendingV2Invalid) {
+                        appendMessage(botResponse, 'error');
+                    } else if (!v2PendingReplyBlocked() && chatbotPendingV2Meta) {
+                        applyV2Reply(chatbotPendingV2Meta, message, botResponse);
+                    }
+                    chatbotPendingV2Meta = null;
+                    chatbotPendingV2Invalid = false;
                     botResponse = '';
                     removeTypingIndicator();
                     submitButton.prop('disabled', false);
@@ -1386,7 +1564,9 @@ window.resetAllLocks = resetAllLocks;
                                         if (isQueued) {
                                             botResponse = null;
                                         } else {
-                                            botResponse = response.data;
+                                            chatbotPendingV2Meta = v2BrowserApi() ? v2BrowserApi().replyMeta(response.data) : null;
+                                            chatbotPendingV2Invalid = !chatbotPendingV2Meta && !!response.data && typeof response.data === 'object' && !response.data.queued;
+                                            botResponse = chatbotPendingV2Meta ? chatbotPendingV2Meta.message : response.data;
                                             // Normalize to string before string operations
                                             botResponse = toSafeString(botResponse);
                                             if (kchat_settings.chatbot_chatgpt_message_limit_setting === 'Yes') {
@@ -1416,8 +1596,7 @@ window.resetAllLocks = resetAllLocks;
                                         if (!isQueuedResponse) {
                                             removeTypingIndicator();
                                         }
-                                        if (botResponse) {
-                                            appendMessage(botResponse, 'bot');
+                                        if (botResponse && deliverPendingReply()) {
                                             // Execute any custom JavaScript in the response
                                             executeCustomJavaScript();
                                         }
@@ -1478,13 +1657,12 @@ window.resetAllLocks = resetAllLocks;
                 const isQueuedResponse = ajaxResponse && ajaxResponse.data && typeof ajaxResponse.data === 'object' && ajaxResponse.data.queued;
                 removeTypingIndicator();
 
-                if (isQueuedResponse && ajaxResponse.data.message) {
+                if (isQueuedResponse && ajaxResponse.data.message && !v2PendingReplyBlocked()) {
                     appendMessage(toSafeString(ajaxResponse.data.message), 'bot');
                 }
 
-                if (botResponse) {
+                if (botResponse && deliverPendingReply()) {
                     // console.log('Chatbot: Appending botResponse:', botResponse);
-                    appendMessage(botResponse, 'bot');
                     // FIXME - Add custom JS to the bot's response - Ver 2.0.9
                     // Append custom JS to the bot's response - Ver 2.0.9
                     if (typeof appendCustomJsToBotResponse === 'function') {
@@ -2107,7 +2285,17 @@ window.resetAllLocks = resetAllLocks;
                 submitButton.prop('disabled', true);
             },
             success: function(response) {
-                sessionStorage.removeItem('chatbot_chatgpt_conversation' + '_' + assistant_id); // Clear the last response from sessionStorage
+                var clearedRoot = v2ActiveRoot();
+                if (clearedRoot) {
+                    v2ClearRoot(clearedRoot);
+                    v2InvalidateRoot(clearedRoot);
+                } else {
+                    try {
+                        sessionStorage.removeItem('chatbot_chatgpt_conversation' + '_' + assistant_id);
+                    } catch (storageError) {
+                        // sessionStorage can be blocked. The server clear still stands.
+                    }
+                }
                 // DIAG - Diagnostics - Ver 2.4.5
                 // console.log('Chatbot: NOTICE: Removing conversation from sessionStorage');
                 // console.log('Chatbot: SUCCESS:', response.data);
@@ -2344,7 +2532,30 @@ window.resetAllLocks = resetAllLocks;
 
         // If conversation_continuation is enabled, load the conversation from local storage - Ver 2.0.7
         if (kchat_settings.chatbot_chatgpt_conversation_continuation === 'On') {
-            storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation' + '_' + assistant_id);
+            var continuationRoot = v2ActiveRoot();
+            var continuationBrowser = v2BrowserApi();
+            if (continuationRoot && continuationBrowser) {
+                var continuationNodes = document.querySelectorAll('.chatbot-chatgpt-root[data-row-scope]');
+                var continuationIndex;
+                for (continuationIndex = 0; continuationIndex < continuationNodes.length; continuationIndex++) {
+                    var continuationState = v2RootState(continuationNodes[continuationIndex]);
+                    var continuationKey = continuationBrowser.storageKey(continuationState.assistantId, continuationState.rowScope);
+                    var continuationHtml = continuationBrowser.restoredHtml(continuationBrowser.storageGet(v2SessionStorage(), continuationKey), continuationState.generation);
+                    var continuationElement = continuationNodes[continuationIndex].querySelector('.chatbot-chatgpt-conversation');
+                    if (continuationHtml && continuationElement && continuationElement !== conversation[0]) {
+                        continuationElement.innerHTML = (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize(continuationHtml) : continuationHtml;
+                    }
+                    if (continuationNodes[continuationIndex] === continuationRoot) {
+                        storedConversation = continuationHtml;
+                    }
+                }
+            } else {
+                try {
+                    storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation' + '_' + assistant_id);
+                } catch (storageError) {
+                    storedConversation = '';
+                }
+            }
             
             // Check if storedConversation is not null before trying to replace
             if (storedConversation) {

@@ -591,7 +591,8 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Enqueue the scripts
     wp_enqueue_script('jquery');
     wp_enqueue_script('chatbot-chatgpt-transcript-download', plugins_url('assets/js/chatbot-transcript-download.js', __FILE__), array(), $chatbot_chatgpt_plugin_version, true);
-    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery', 'chatbot-chatgpt-transcript-download'), $chatbot_chatgpt_plugin_version, true);
+    wp_enqueue_script('chatbot-chatgpt-conversation-browser', plugins_url('assets/js/chatbot-conversation-browser.js', __FILE__), array(), $chatbot_chatgpt_plugin_version, true);
+    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery', 'chatbot-chatgpt-transcript-download', 'chatbot-chatgpt-conversation-browser'), $chatbot_chatgpt_plugin_version, true);
 
     // Enqueue DOMPurify - Ver 1.8.1
     // https://raw.githubusercontent.com/cure53/DOMPurify/main/dist/purify.min.js
@@ -1639,6 +1640,7 @@ function chatbot_chatgpt_send_message() {
     // treated as absent while the server still has a canonical selection.
     // Keeping that selection is Increment 4; this request stops instead.
     $responses_v2_scope = null;
+    $responses_v2_generation = '';
     if ( 'OpenAI' === $chatbot_ai_platform_choice
         && 'Yes' === $use_assistant_id
         && function_exists( 'chatbot_chatgpt_routes_openai_responses' )
@@ -1782,13 +1784,14 @@ function chatbot_chatgpt_send_message() {
             // Former Assistants (asst_) and hosted Prompts (pmpt_) both use Responses.
             if ( chatbot_chatgpt_routes_openai_responses( $chatbot_ai_platform_choice, $use_assistant_id, $assistant_id ) ) {
 
-                $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, '', $session_id, $user_id, $page_id, $client_message_id, $responses_row_id, $openai_instruction_alias, $responses_v2_scope);
+                $responses_v2_request = null;
+                $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, '', $session_id, $user_id, $page_id, $client_message_id, $responses_row_id, $openai_instruction_alias, $responses_v2_scope, $responses_v2_request);
                 $thread_id = '';
-                if ( function_exists( 'chatbot_chatgpt_conversation_v2_current_record' ) ) {
-                    $v2_record = chatbot_chatgpt_conversation_v2_current_record( $user_id, $session_id, $page_id, $assistant_id, $responses_v2_scope );
-                    if ( is_array( $v2_record ) && isset( $v2_record['id'] ) ) {
-                        $thread_id = $v2_record['id'];
-                    }
+                if ( is_array( $responses_v2_request ) && isset( $responses_v2_request['id'] ) && is_string( $responses_v2_request['id'] ) ) {
+                    $thread_id = $responses_v2_request['id'];
+                }
+                if ( is_array( $responses_v2_request ) && isset( $responses_v2_request['generation'] ) && is_string( $responses_v2_request['generation'] ) ) {
+                    $responses_v2_generation = $responses_v2_request['generation'];
                 }
                 append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
 
@@ -1871,7 +1874,19 @@ function chatbot_chatgpt_send_message() {
 
             chatbot_chatgpt_remember_last_assistant_message( $session_id, $response );
             
-            // Send success response
+            // Send success response. OpenAI Responses keeps the message string and
+            // adds the conversation id and generation this request sent.
+            if ( is_string( $responses_v2_scope ) && chatbot_chatgpt_routes_openai_responses( $chatbot_ai_platform_choice, $use_assistant_id, $assistant_id ) ) {
+                wp_send_json_success(
+                    array(
+                        'message'                  => $response,
+                        'conversation_generation'  => $responses_v2_generation,
+                        'assistant_id'             => (string) $assistant_id,
+                        'row_scope'                => $responses_v2_scope,
+                    )
+                );
+                return;
+            }
             wp_send_json_success($response);
 
         }

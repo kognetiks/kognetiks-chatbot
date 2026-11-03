@@ -952,6 +952,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // Speech Recognition - Ver 2.1.5.1
     $chatbot_chatgpt_speech_recognition = esc_attr(get_option('chatbot_chatgpt_speech_recognition', 'No'));
+    $v2_widget_attributes = function_exists( 'chatbot_chatgpt_conversation_v2_widget_attribute_string' )
+        ? chatbot_chatgpt_conversation_v2_widget_attribute_string( $user_id, $session_id, $page_id, $assistant_id, $assistant_row_id )
+        : '';
 
 
     // Depending on the style, adjust the output - Ver 1.7.1
@@ -966,7 +969,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // OUTSIDE THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
         // ob_start();
         ?>
-        <div id="chatbot-chatgpt" style="display: flex;" class="chatbot-embedded-style chatbot-full chatbot-chatgpt-root" data-cache-buster="<?php echo esc_attr( (string) time() ); ?>">
+        <div id="chatbot-chatgpt" style="display: flex;" class="chatbot-embedded-style chatbot-full chatbot-chatgpt-root"<?php echo $v2_widget_attributes; ?> data-cache-buster="<?php echo esc_attr( (string) time() ); ?>">
         <script>
             jQuery(document).ready(function($) {
                 $('#chatbot-chatgpt').removeClass('chatbot-floating-style').addClass('chatbot-embedded-style');
@@ -1118,7 +1121,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // OUTSIDE THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
         // ob_start();
         ?>
-        <div id="chatbot-chatgpt" class="chatbot-chatgpt-root">
+        <div id="chatbot-chatgpt" class="chatbot-chatgpt-root"<?php echo $v2_widget_attributes; ?>>
             <div id="chatbot-chatgpt-header" data-cache-buster="<?php echo esc_attr( (string) time() ); ?>">
                 <div id="chatbot-chatgpt-title" class="title"><?php echo esc_html( wp_strip_all_tags( $bot_name ) ); ?></div>
             </div>

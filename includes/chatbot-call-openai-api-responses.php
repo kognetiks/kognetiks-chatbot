@@ -693,7 +693,7 @@ function chatbot_chatgpt_resolve_vector_store_ids( $local_row ) {
 /* -------------------------------------------------------------------------
  * Main call used by the plugin
  * ------------------------------------------------------------------------- */
-function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null, $assistant_row_id = null, $assistant_alias = null, $conversation_row_scope = null ) {
+function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null, $assistant_row_id = null, $assistant_alias = null, $conversation_row_scope = null, &$conversation_request = null ) {
 
     // DIAG - Diagnostics - Ver 2.4.5
     // back_trace('NOTICE', 'chatbot_chatgpt_custom_pmpt_call_api');
@@ -974,6 +974,12 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
             }
             $thread_id = $resolved_thread['id'];
             $payload['conversation'] = $thread_id;
+            if ( isset( $resolved_thread['generation'] ) && is_string( $resolved_thread['generation'] ) ) {
+                $conversation_request = array(
+                    'id'         => $thread_id,
+                    'generation' => $resolved_thread['generation'],
+                );
+            }
         }
 
         // DIAG - Diagnostics - Ver 2.4.5

@@ -1703,6 +1703,36 @@ function chatbot_chatgpt_conversation_v2_clear_selected_scope( $user_id, $sessio
 }
 
 /**
+ * Attributes for one OpenAI Responses widget.
+ *
+ * The generation is read from the current record. This does not create a conversation.
+ * Non-OpenAI widgets receive an empty string and keep their existing transcript key.
+ *
+ * @param mixed $user_id User id.
+ * @param mixed $session_id Session id.
+ * @param mixed $page_id Page id.
+ * @param mixed $assistant_id External id.
+ * @param mixed $row_id Validated shortcode row, including 0.
+ * @return string Leading-space attributes, or empty.
+ */
+function chatbot_chatgpt_conversation_v2_widget_attribute_string( $user_id, $session_id, $page_id, $assistant_id, $row_id ) {
+    $platform = function_exists( 'get_option' ) ? get_option( 'chatbot_ai_platform_choice', 'OpenAI' ) : 'OpenAI';
+    if ( ! function_exists( 'chatbot_chatgpt_routes_openai_responses' ) || ! chatbot_chatgpt_routes_openai_responses( $platform, 'Yes', $assistant_id ) ) {
+        return '';
+    }
+    $scope = chatbot_chatgpt_conversation_v2_row_scope( is_int( $row_id ) ? $row_id : (string) $row_id );
+    if ( $scope === '' ) {
+        return '';
+    }
+    $generation = '';
+    $record = chatbot_chatgpt_conversation_v2_current_record( $user_id, $session_id, $page_id, $assistant_id, $scope );
+    if ( is_array( $record ) && isset( $record['generation'] ) && is_string( $record['generation'] ) ) {
+        $generation = $record['generation'];
+    }
+    return ' data-assistant-id="' . esc_attr( (string) $assistant_id ) . '" data-row-scope="' . esc_attr( $scope ) . '" data-conversation-generation="' . esc_attr( $generation ) . '"';
+}
+
+/**
  * Reuse or rotate one v2 record. The callable creates a remote conversation.
  *
  * A supplied conversation id is not an argument. Callers cannot bypass the fingerprint.
