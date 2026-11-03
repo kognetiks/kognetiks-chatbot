@@ -79,7 +79,7 @@ if ( ! defined( 'WPINC' ) ) {
         // Decrypt the API key - Ver 2.2.6
         $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
         // Model and message for testing
-        $model = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
+        $model = esc_attr( chatbot_google_resolve_model() );
         $updated_status = kchat_fetch_api_status($api_key, $model);
         update_option('chatbot_google_api_status', $updated_status);
     } elseif ($chatbot_chatbot_ai_platform_choice == 'Markov Chain') {
@@ -570,7 +570,7 @@ function kchat_fetch_api_status($api_key, $model) {
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             
             // Model and message for testing
-            $model = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
+            $model = esc_attr( chatbot_google_resolve_model() );
             
             // Get the base URL from settings
             $google_base_url = esc_attr(get_option('chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta'));

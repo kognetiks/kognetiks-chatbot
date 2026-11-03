@@ -51,8 +51,8 @@ function chatbot_google_api_model_chat_settings_section_callback($args) {
     <p><b>NOTE:</b> Enter your API key (above), click <code>Save Settings</code> at the bottom of this page, in order to retrieve the full list of available models.</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
         <li><code>&#91;chatbot&#93;</code> - Default chat model, style is floating</li>
-        <li><code>&#91;chatbot style="floating" model="gemini-2.0-flash"&#93;</code> - Style is floating, specific model</li>
-        <li><code>&#91;chatbot style="embedded" model="gemini-2.0-flash"&#93;</code> - Style is embedded, default chat model</li>
+        <li><code>&#91;chatbot style="floating" model="gemini-3.8-flash"&#93;</code> - Style is floating, specific model</li>
+        <li><code>&#91;chatbot style="embedded" model="gemini-3.8-flash"&#93;</code> - Style is embedded, default chat model</li>
     </ul>
     <?php
 
@@ -61,8 +61,8 @@ function chatbot_google_api_model_chat_settings_section_callback($args) {
 // Google Model choice - Ver 2.3.9
 function chatbot_google_chat_model_choice_callback($args) {
   
-    // Get the saved chatbot_google_model_choice value or default to "gemini-2.0-flash"
-    $model_choice = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
+    // Get the saved chatbot_google_model_choice value or default to the current Gemini Flash model.
+    $model_choice = esc_attr( chatbot_google_resolve_model() );
 
     // Fetch models from the API
     $models = chatbot_google_get_models();
@@ -75,11 +75,10 @@ function chatbot_google_chat_model_choice_callback($args) {
     // Check for errors
     if (is_string($models) && strpos($models, 'Error:') === 0) {
         // If there's an error, display the hardcoded list
-        $model_choice = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
+        $model_choice = esc_attr( chatbot_google_resolve_model() );
         ?>
         <select id="chatbot_google_model_choice" name="chatbot_google_model_choice">
-            <option value="<?php echo esc_attr( 'gemini-2.0-flash' ); ?>" <?php selected( $model_choice, 'gemini-2.0-flash' ); ?>><?php echo esc_html( 'gemini-2.0-flash' ); ?></option>
-            <option value="<?php echo esc_attr( 'gemini-2.0-flash-vision' ); ?>" <?php selected( $model_choice, 'gemini-2.0-flash-vision' ); ?>><?php echo esc_html( 'gemini-2.0-flash-vision' ); ?></option>
+            <option value="<?php echo esc_attr( chatbot_google_default_model() ); ?>" <?php selected( $model_choice, chatbot_google_default_model() ); ?>><?php echo esc_html( chatbot_google_default_model() ); ?></option>
             <option value="<?php echo esc_attr( 'gemini-1.5-pro' ); ?>" <?php selected( $model_choice, 'gemini-1.5-pro' ); ?>><?php echo esc_html( 'gemini-1.5-pro' ); ?></option>
             <option value="<?php echo esc_attr( 'gemini-1.5-flash' ); ?>" <?php selected( $model_choice, 'gemini-1.5-flash' ); ?>><?php echo esc_html( 'gemini-1.5-flash' ); ?></option>
             <option value="<?php echo esc_attr( 'gemini-pro' ); ?>" <?php selected( $model_choice, 'gemini-pro' ); ?>><?php echo esc_html( 'gemini-pro' ); ?></option>

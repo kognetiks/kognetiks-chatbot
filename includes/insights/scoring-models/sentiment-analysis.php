@@ -430,7 +430,7 @@ function kognetiks_insights_compute_sentiment_score_ai_based($message_text) {
             $ai_model_choice = get_option('chatbot_deepseek_model_choice');
             break;
         case 'Google':
-            $ai_model_choice = get_option('chatbot_google_model_choice');
+            $ai_model_choice = chatbot_google_resolve_model();
             break;
         case 'Mistral':
             $ai_model_choice = get_option('chatbot_mistral_model_choice');

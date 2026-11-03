@@ -97,6 +97,9 @@ function chatbot_chatgpt_erase_conversation_handler() {
         wp_send_json_error( $erased->get_error_message(), 403 );
         return;
     }
+    if ( function_exists( 'chatbot_chatgpt_conversation_v2_clear_selected_scope' ) ) {
+        chatbot_chatgpt_conversation_v2_clear_selected_scope( $user_id, $session_id, $page_id, $assistant_id );
+    }
     delete_any_file_transients($session_id);
     
     // Clear all duplicate message UUID transients for this conversation - Ver 2.3.7

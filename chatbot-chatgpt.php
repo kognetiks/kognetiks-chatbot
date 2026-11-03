@@ -458,7 +458,7 @@ $chatbot_platforms = array(
     'Google'       => array(
         'option'        => 'chatbot_google_api_enabled',
         'model_option'  => 'chatbot_google_model_choice',
-        'default_model' => 'gemini-2.0-flash',
+        'default_model' => chatbot_google_default_model(),
     ),
     'Markov Chain' => array(
         'option'        => 'chatbot_markov_chain_api_enabled',
@@ -992,7 +992,7 @@ function chatbot_chatgpt_process_queued_message($message_data) {
 
             $api_key = esc_attr(get_option('chatbot_google_api_key'));
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
-            $model = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
+            $model = esc_attr( chatbot_google_resolve_model() );
             break;
 
         case 'Markov Chain':
@@ -1436,7 +1436,7 @@ function chatbot_chatgpt_send_message() {
             $api_key = esc_attr(get_option('chatbot_google_api_key'));
             // Decrypt the API key - Ver 2.3.9
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
-            $model = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
+            $model = esc_attr( chatbot_google_resolve_model() );
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             break;
@@ -1635,6 +1635,22 @@ function chatbot_chatgpt_send_message() {
     }
     $responses_row_id = chatbot_chatgpt_responses_row_id_from_decision( $row_decision );
 
+    // OpenAI Responses uses the validated scope. An omitted posted row is not
+    // treated as absent while the server still has a canonical selection.
+    // Keeping that selection is Increment 4; this request stops instead.
+    $responses_v2_scope = null;
+    if ( 'OpenAI' === $chatbot_ai_platform_choice
+        && 'Yes' === $use_assistant_id
+        && function_exists( 'chatbot_chatgpt_routes_openai_responses' )
+        && chatbot_chatgpt_routes_openai_responses( $chatbot_ai_platform_choice, $use_assistant_id, $assistant_id ) ) {
+        $v2_scope_decision = chatbot_chatgpt_conversation_v2_request_scope( $row_decision, $server_row_raw, $server_row_present );
+        if ( 'ok' !== $v2_scope_decision['result'] ) {
+            wp_send_json_error( 'Error: The assistant selection could not be confirmed.' );
+            return;
+        }
+        $responses_v2_scope = $v2_scope_decision['scope'];
+    }
+
     if ( ! empty( $assistant_id ) && $assistant_id !== 'original' ) {
         set_chatbot_chatgpt_transients( 'assistant_id', $assistant_id, $user_id, $page_id, $session_id, null );
         set_chatbot_chatgpt_transients( 'assistant_alias', $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
@@ -1751,8 +1767,11 @@ function chatbot_chatgpt_send_message() {
 
     } elseif ($use_assistant_id == 'Yes') {
 
-        $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
+        $log_responses_v2 = is_string( $responses_v2_scope );
+        if ( ! $log_responses_v2 ) {
+            $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
+        }
 
         // Send message to Custom GPT API - Ver 1.6.7
         $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
@@ -1763,7 +1782,15 @@ function chatbot_chatgpt_send_message() {
             // Former Assistants (asst_) and hosted Prompts (pmpt_) both use Responses.
             if ( chatbot_chatgpt_routes_openai_responses( $chatbot_ai_platform_choice, $use_assistant_id, $assistant_id ) ) {
 
-                $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id, $responses_row_id, $openai_instruction_alias);
+                $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, '', $session_id, $user_id, $page_id, $client_message_id, $responses_row_id, $openai_instruction_alias, $responses_v2_scope);
+                $thread_id = '';
+                if ( function_exists( 'chatbot_chatgpt_conversation_v2_current_record' ) ) {
+                    $v2_record = chatbot_chatgpt_conversation_v2_current_record( $user_id, $session_id, $page_id, $assistant_id, $responses_v2_scope );
+                    if ( is_array( $v2_record ) && isset( $v2_record['id'] ) ) {
+                        $thread_id = $v2_record['id'];
+                    }
+                }
+                append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
 
             } else {
 
@@ -1799,7 +1826,9 @@ function chatbot_chatgpt_send_message() {
             $response = $response . '<br><br>' . chatbot_chatgpt_enhance_with_tfidf($message);
         }
 
-        $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+        if ( ! is_string( $responses_v2_scope ) ) {
+            $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+        }
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, null, $response);
 
         // Clean (erase) the output buffer - Ver 1.6.8

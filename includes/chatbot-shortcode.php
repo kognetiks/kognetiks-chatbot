@@ -118,7 +118,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_anthropic_voice_option', 'none'));
     } elseif (esc_attr(get_option('chatbot_google_api_enabled', 'No')) == 'Yes') {
-        $model_choice = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
+        $model_choice = esc_attr( chatbot_google_resolve_model() );
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_google_voice_option', 'none'));
     } elseif (esc_attr(get_option('chatbot_deepseek_api_enabled', 'No')) == 'Yes') {
@@ -374,7 +374,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 $model = esc_attr(get_option('chatbot_anthropic_model_choice', chatbot_anthropic_default_model()));
                 break;
             case 'Google':
-                $model = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
+                $model = esc_attr( chatbot_google_resolve_model() );
                 break;
             case 'DeepSeek':
                 $model = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));

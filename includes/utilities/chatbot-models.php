@@ -1317,6 +1317,51 @@ function chatbot_mistral_get_models() {
 }
 
 // Function to get the Model names from Google API
+// Fallback when no Google model has been saved. Gemini 2.0 Flash was shut down.
+function chatbot_google_default_model() {
+
+    return 'gemini-3.8-flash';
+
+}
+
+// Model ids Google no longer serves. Requests to these return NOT_FOUND.
+function chatbot_google_retired_model_ids() {
+
+    return array(
+        'gemini-2.0-flash',
+        'gemini-2.0-flash-vision',
+        'gemini-2.0-flash-exp',
+        'gemini-2.0-flash-lite',
+    );
+
+}
+
+// Saved Google model. A retired id is rewritten to the current default.
+function chatbot_google_resolve_model( $model = null ) {
+
+    $persist = ( null === $model );
+
+    if ( $persist ) {
+        $model = get_option( 'chatbot_google_model_choice', '' );
+    }
+
+    $model = is_string( $model ) ? trim( $model ) : '';
+
+    if ( strpos( $model, 'models/' ) === 0 ) {
+        $model = substr( $model, 7 );
+    }
+
+    if ( '' === $model || in_array( $model, chatbot_google_retired_model_ids(), true ) ) {
+        $model = chatbot_google_default_model();
+        if ( $persist ) {
+            update_option( 'chatbot_google_model_choice', $model );
+        }
+    }
+
+    return $model;
+
+}
+
 function chatbot_google_get_models() {
 
     $api_key = '';
@@ -1354,17 +1399,15 @@ function chatbot_google_get_models() {
             'owned_by' => 'google'
         ),
         array(
-            'id' => 'gemini-2.0-flash',
+            'id' => 'gemini-3.8-flash',
             'object' => 'model',
             'created' => null,
             'owned_by' => 'google'
         ),
     );
 
-    // See if the option exists, if not then create it and set the default
-    if (esc_attr(get_option('chatbot_google_model_choice')) === false) {
-        update_option('chatbot_google_model_choice', 'gemini-2.0-flash');
-    }
+    // Rewrite a missing or retired saved model before the list is built.
+    chatbot_google_resolve_model();
 
     // Check if the API key is empty
     if (empty($api_key)) {

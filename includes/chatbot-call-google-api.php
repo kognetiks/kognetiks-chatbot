@@ -66,11 +66,11 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
         $google_base_url = substr($google_base_url, 0, -7);
     }
 
-    // Get the saved model from the settings or default to "gemini-2.0-flash"
-    if (!isset($kchat_settings['model'])) { 
-        $model = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
+    // Saved model, or the shortcode override. Retired ids such as gemini-2.0-flash are rewritten.
+    if ( ! isset( $kchat_settings['model'] ) || $kchat_settings['model'] === '' ) {
+        $model = chatbot_google_resolve_model();
     } else {
-        $model = $kchat_settings['model'];
+        $model = chatbot_google_resolve_model( $kchat_settings['model'] );
     }
 
     // Detect model version and type for compatibility with Gemini 2.0, 3.0, thinking, and non-thinking models
@@ -174,8 +174,12 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     // BEST PRACTICE: If using a Thinking model, Google often recommends standard or specific temperatures.
     $generationConfig = array(
         'maxOutputTokens' => $max_tokens,
-        'temperature'     => $temperature
     );
+
+    // Gemini 3 and later reject temperature, topP, and topK.
+    if ( ! $is_gemini_3 ) {
+        $generationConfig['temperature'] = $temperature;
+    }
 
     // Optional: Force JSON response if needed (Gemini 1.5+ supports this natively)
     // $generationConfig['responseMimeType'] = 'application/json';

@@ -691,9 +691,9 @@ function chatbot_chatgpt_resolve_vector_store_ids( $local_row ) {
 }
 
 /* -------------------------------------------------------------------------
- * Main call used by the plugin (signature preserved)
+ * Main call used by the plugin
  * ------------------------------------------------------------------------- */
-function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null, $assistant_row_id = null, $assistant_alias = null ) {
+function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null, $assistant_row_id = null, $assistant_alias = null, $conversation_row_scope = null ) {
 
     // DIAG - Diagnostics - Ver 2.4.5
     // back_trace('NOTICE', 'chatbot_chatgpt_custom_pmpt_call_api');
@@ -760,59 +760,66 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
         }
         $request_body = ( isset( $mode_result['result'] ) && 'local' === $mode_result['result'] ) ? 'local' : 'bridge';
 
-        // -----------------------------------------------------------------
-        // Step 1: Resolve or create the conversation (cnv_...)
-        // -----------------------------------------------------------------
-
-        // DIAG - Diagnostics - Ver 2.4.5
-        // back_trace('NOTICE', 'Step 1: Resolve or create the conversation (cnv_...)');
-        // back_trace('NOTICE', 'Message: ' . $message);
-        // back_trace('NOTICE', 'User ID: ' . $user_id);
-        // back_trace('NOTICE', 'Page ID: ' . $page_id);
-        // back_trace('NOTICE', 'Session ID: ' . $session_id);
-        // back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
-        // back_trace('NOTICE', 'Client Message ID: ' . $client_message_id);
-
-        if ( ! function_exists( 'chatbot_chatgpt_resolve_or_create_conversation_id' ) ) {
-            return __( 'Error: Conversation isolation is unavailable.', 'chatbot-chatgpt' );
-        }
-
-        $resolved_thread = chatbot_chatgpt_resolve_or_create_conversation_id(
-            $user_id,
-            $session_id,
-            $page_id,
-            $prompt_id,
-            $thread_id,
-            function () use ( $api_key, $user_id, $session_id, $page_id, $prompt_id, $timeout ) {
-                $safety_identifier = function_exists( 'chatbot_chatgpt_safety_identifier' )
-                    ? chatbot_chatgpt_safety_identifier( $user_id, $session_id )
-                    : '';
-                $meta = array(
-                    'safety_identifier' => $safety_identifier,
-                    'page_id'           => (string) $page_id,
-                    'prompt_id'         => (string) $prompt_id,
-                );
-                $conv = kchat_openai_create_conversation( $api_key, $meta, $timeout );
-                if ( isset( $conv['error'] ) ) {
-                    $msg = is_array( $conv['error'] ) ? ( $conv['error']['message'] ?? __( 'Conversation create failed.', 'chatbot-chatgpt' ) ) : __( 'Conversation create failed.', 'chatbot-chatgpt' );
-                    return new WP_Error( 'conversation_create_failed', $msg );
-                }
-                $created_id = isset( $conv['id'] ) ? (string) $conv['id'] : '';
-                if ( $created_id === '' ) {
-                    return new WP_Error( 'conversation_create_failed', __( 'Conversation created but missing ID.', 'chatbot-chatgpt' ) );
-                }
-                return $created_id;
+        // A null scope keeps the existing v1 conversation path. The queue and
+        // other callers omit this argument. Only a canonical scope string uses v2.
+        $use_conversation_v2 = false;
+        $conversation_v2_scope = '';
+        if ( null !== $conversation_row_scope ) {
+            if ( ! is_string( $conversation_row_scope ) || ! function_exists( 'chatbot_chatgpt_conversation_v2_row_scope' ) ) {
+                return __( 'Error: Unauthorized access to conversation.', 'chatbot-chatgpt' );
             }
-        );
-
-        if ( is_wp_error( $resolved_thread ) ) {
-            return sprintf(
-                /* translators: %s: API error message */
-                __( 'Error: %s', 'chatbot-chatgpt' ),
-                $resolved_thread->get_error_message()
-            );
+            $conversation_v2_scope = chatbot_chatgpt_conversation_v2_row_scope( $conversation_row_scope );
+            if ( '' === $conversation_v2_scope ) {
+                return __( 'Error: Unauthorized access to conversation.', 'chatbot-chatgpt' );
+            }
+            $use_conversation_v2 = true;
         }
-        $thread_id = $resolved_thread;
+
+        $create_conversation = function () use ( $api_key, $user_id, $session_id, $page_id, $prompt_id, $timeout ) {
+            $safety_identifier = function_exists( 'chatbot_chatgpt_safety_identifier' )
+                ? chatbot_chatgpt_safety_identifier( $user_id, $session_id )
+                : '';
+            $meta = array(
+                'safety_identifier' => $safety_identifier,
+                'page_id'           => (string) $page_id,
+                'prompt_id'         => (string) $prompt_id,
+            );
+            $conv = kchat_openai_create_conversation( $api_key, $meta, $timeout );
+            if ( isset( $conv['error'] ) ) {
+                $msg = is_array( $conv['error'] ) ? ( $conv['error']['message'] ?? __( 'Conversation create failed.', 'chatbot-chatgpt' ) ) : __( 'Conversation create failed.', 'chatbot-chatgpt' );
+                return new WP_Error( 'conversation_create_failed', $msg );
+            }
+            $created_id = isset( $conv['id'] ) ? (string) $conv['id'] : '';
+            if ( $created_id === '' ) {
+                return new WP_Error( 'conversation_create_failed', __( 'Conversation created but missing ID.', 'chatbot-chatgpt' ) );
+            }
+            return $created_id;
+        };
+
+        // v1 still honors a caller-supplied conversation id. v2 does not.
+        if ( ! $use_conversation_v2 ) {
+            if ( ! function_exists( 'chatbot_chatgpt_resolve_or_create_conversation_id' ) ) {
+                return __( 'Error: Conversation isolation is unavailable.', 'chatbot-chatgpt' );
+            }
+
+            $resolved_thread = chatbot_chatgpt_resolve_or_create_conversation_id(
+                $user_id,
+                $session_id,
+                $page_id,
+                $prompt_id,
+                $thread_id,
+                $create_conversation
+            );
+
+            if ( is_wp_error( $resolved_thread ) ) {
+                return sprintf(
+                    /* translators: %s: API error message */
+                    __( 'Error: %s', 'chatbot-chatgpt' ),
+                    $resolved_thread->get_error_message()
+                );
+            }
+            $thread_id = $resolved_thread;
+        }
 
         // -----------------------------------------------------------------
         // Step 2: Create the model response (Responses API)
@@ -938,6 +945,35 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
         $payload = chatbot_chatgpt_apply_responses_assistant_fields( $payload, $prompt_id, $local_row, $additional_instructions, $model, $request_body );
         if ( null === $payload ) {
             return __( 'Error: Missing model. Set a ChatGPT model in Settings before using Local mode or an Assistant ID (asst_...).', 'chatbot-chatgpt' );
+        }
+
+        if ( $use_conversation_v2 ) {
+            $fingerprint_mode = 'assistant';
+            if ( $is_prompt ) {
+                $fingerprint_mode = ( 'local' === $request_body ) ? 'local' : 'bridge';
+            }
+            $fingerprint = chatbot_chatgpt_conversation_v2_fingerprint_from_payload( $fingerprint_mode, $payload );
+            if ( '' === $fingerprint ) {
+                return __( 'Error: Conversation could not be stored.', 'chatbot-chatgpt' );
+            }
+            $resolved_thread = chatbot_chatgpt_conversation_v2_acquire(
+                $user_id,
+                $session_id,
+                $page_id,
+                $prompt_id,
+                $conversation_v2_scope,
+                $fingerprint,
+                $create_conversation
+            );
+            if ( is_wp_error( $resolved_thread ) ) {
+                return sprintf(
+                    /* translators: %s: API error message */
+                    __( 'Error: %s', 'chatbot-chatgpt' ),
+                    $resolved_thread->get_error_message()
+                );
+            }
+            $thread_id = $resolved_thread['id'];
+            $payload['conversation'] = $thread_id;
         }
 
         // DIAG - Diagnostics - Ver 2.4.5
