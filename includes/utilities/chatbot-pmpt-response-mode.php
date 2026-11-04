@@ -331,7 +331,7 @@ function chatbot_chatgpt_pmpt_local_request_preview( $row ) {
 }
 
 /**
- * Extra Manage Assistants row for one hosted prompt.
+ * Hosted-prompt controls for one assistant Details section.
  *
  * @param object $assistant Database row object.
  * @return string
@@ -368,7 +368,7 @@ function chatbot_chatgpt_render_pmpt_row_mode_row( $assistant ) {
         $selected_mode = 'bridge';
     }
 
-    $html = '<tr class="kchat-pmpt-mode-row"><td colspan="15" style="text-align:left;">';
+    $html = '<div class="kchat-pmpt-mode-row">';
     $html .= '<p><strong>' . esc_html__( 'Hosted prompt mode', 'chatbot-chatgpt' ) . '</strong> ';
     $html .= esc_html( $status_text ) . '</p>';
     if ( 'error' === $status ) {
@@ -394,14 +394,14 @@ function chatbot_chatgpt_render_pmpt_row_mode_row( $assistant ) {
     } elseif ( '' !== trim( $preview['raw'] ) && empty( $preview['stores'] ) ) {
         $html .= '<p>' . esc_html__( 'The vector store value was not recognized, so Local mode would not attach a file search store.', 'chatbot-chatgpt' ) . '</p>';
     }
-    $html .= '<p>' . esc_html__( 'Changing mode reuses this assistant’s existing conversation. Earlier hosted-prompt turns remain in that conversation.', 'chatbot-chatgpt' ) . '</p>';
+    $html .= '<p>' . esc_html__( 'Changing between Bridge and Local mode starts a new conversation for this assistant on the next message. Previous conversation history is not carried into the new conversation.', 'chatbot-chatgpt' ) . '</p>';
     $html .= '<label>' . esc_html__( 'Mode', 'chatbot-chatgpt' ) . ' <select name="pmpt_response_mode_' . esc_attr( (string) $row_id ) . '">';
     $html .= '<option value="bridge"' . selected( $selected_mode, 'bridge', false ) . '>' . esc_html__( 'Bridge', 'chatbot-chatgpt' ) . '</option>';
     $html .= '<option value="local"' . selected( $selected_mode, 'local', false ) . '>' . esc_html__( 'Local', 'chatbot-chatgpt' ) . '</option>';
     $html .= '</select></label> ';
     $html .= '<label><input type="checkbox" name="pmpt_mode_confirmed_' . esc_attr( (string) $row_id ) . '" value="1"> ';
     $html .= esc_html__( 'I confirm the hosted prompt instructions have been copied into Additional Instructions for this row.', 'chatbot-chatgpt' ) . '</label> ';
-    $html .= '<button type="button" class="button button-secondary button-small" onclick="saveChatgptPromptMode(' . esc_attr( (string) $row_id ) . ')">' . esc_html__( 'Save prompt mode', 'chatbot-chatgpt' ) . '</button>';
-    $html .= '</td></tr>';
+    $html .= '<button type="button" class="button button-secondary button-small" onclick="saveChatgptPromptMode(' . esc_attr( (string) $row_id ) . '); return false;">' . esc_html__( 'Save prompt mode', 'chatbot-chatgpt' ) . '</button>';
+    $html .= '</div>';
     return $html;
 }
