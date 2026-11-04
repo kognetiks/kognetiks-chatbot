@@ -730,13 +730,14 @@ function chatbot_chatgpt_render_assistant_textarea_field( $field_name, $label, $
  * @param string $label   Accessible name.
  * @return void
  */
-function chatbot_chatgpt_render_assistant_details_toggle( $row_key, $label ) {
+function chatbot_chatgpt_render_assistant_details_toggle( $row_key, $label, $expanded = false ) {
 
-    $row_key = (string) $row_key;
-    $js_arg  = ( 'new' === $row_key ) ? "'new'" : (string) absint( $row_key );
+    $row_key  = (string) $row_key;
+    $js_arg   = ( 'new' === $row_key ) ? "'new'" : (string) absint( $row_key );
+    $expanded = (bool) $expanded;
     echo '<button type="button" class="button button-secondary button-small kchat-assistant-details-toggle"';
     echo ' id="kchat-assistant-details-toggle-' . esc_attr( $row_key ) . '"';
-    echo ' aria-expanded="false" aria-controls="kchat-assistant-details-' . esc_attr( $row_key ) . '"';
+    echo ' aria-expanded="' . ( $expanded ? 'true' : 'false' ) . '" aria-controls="kchat-assistant-details-' . esc_attr( $row_key ) . '"';
     echo ' aria-label="' . esc_attr( $label ) . '"';
     echo ' onclick="toggleChatgptAssistantDetails(' . $js_arg . ', event); return false;">';
     echo esc_html__( 'Details', 'chatbot-chatgpt' );
@@ -768,26 +769,33 @@ function chatbot_chatgpt_render_assistant_configuration( $row_key, $assistant, $
     $vector = ( ! $is_new && isset( $assistant->vector_store_id ) ) ? (string) $assistant->vector_store_id : '';
     $model = ( ! $is_new && isset( $assistant->model ) ) ? $assistant->model : '';
 
-    $style_options = $is_new
-        ? array(
-            'Embedded' => 'Embedded',
-            'Floating' => 'Floating',
-        )
-        : array(
-            'embedded' => 'Embedded',
-            'floating' => 'Floating',
-        );
-    $audience_options = $is_new
-        ? array(
-            'All'       => 'All',
-            'Visitors'  => 'Visitors',
-            'Logged-in' => 'Logged-in',
-        )
-        : array(
-            'all'       => 'All',
-            'visitors'  => 'Visitors',
-            'logged-in' => 'Logged-in',
-        );
+    $style_options = array(
+        'embedded' => 'Embedded',
+        'floating' => 'Floating',
+    );
+    $audience_options = array(
+        'all'       => 'All',
+        'visitors'  => 'Visitors',
+        'logged-in' => 'Logged-in',
+    );
+    if ( $is_new && '' === $style ) {
+        $style = 'embedded';
+    }
+    if ( $is_new && '' === $audience ) {
+        $audience = 'all';
+    }
+    if ( $is_new && '' === $voice ) {
+        $voice = 'alloy';
+    }
+    if ( $is_new && '' === $uploads ) {
+        $uploads = 'Yes';
+    }
+    if ( $is_new && '' === $transcripts ) {
+        $transcripts = 'Yes';
+    }
+    if ( $is_new && '' === $show_name ) {
+        $show_name = 'Yes';
+    }
     $voice_options = array(
         'alloy'   => 'Alloy',
         'echo'    => 'Echo',
@@ -823,8 +831,17 @@ function chatbot_chatgpt_render_assistant_configuration( $row_key, $assistant, $
     if ( ! $is_new && function_exists( 'chatbot_chatgpt_render_pmpt_row_mode_row' ) ) {
         echo chatbot_chatgpt_render_pmpt_row_mode_row( $assistant );
     }
-    echo '<div id="kchat-assistant-feedback-' . esc_attr( (string) $row_key ) . '" class="notice notice-error inline kchat-assistant-feedback" hidden><p></p></div>';
-    echo '<p class="description">' . esc_html__( 'Assistant ID and Common Name stay in the overview row. Closing Details keeps unsaved values in this section.', 'chatbot-chatgpt' ) . '</p>';
+    echo '<div id="kchat-assistant-feedback-' . esc_attr( (string) $row_key ) . '" class="notice notice-error inline kchat-assistant-feedback" hidden>';
+    echo '<p></p>';
+    echo '<button type="button" class="notice-dismiss" onclick="dismissChatgptAssistantFeedback(' . esc_attr( wp_json_encode( (string) $row_key ) ) . '); return false;">';
+    echo '<span class="screen-reader-text">' . esc_html__( 'Dismiss this notice.', 'chatbot-chatgpt' ) . '</span>';
+    echo '</button>';
+    echo '</div>';
+    if ( $is_new ) {
+        echo '<p class="description">' . esc_html__( 'Assistant ID and Common Name, in the row above, are required. Fill those in, then review the settings below, before adding the assistant.', 'chatbot-chatgpt' ) . '</p>';
+    } else {
+        echo '<p class="description">' . esc_html__( 'Assistant ID and Common Name stay in the overview row. Closing Details keeps unsaved values in this section.', 'chatbot-chatgpt' ) . '</p>';
+    }
 
     echo '<h4>' . esc_html__( 'Appearance', 'chatbot-chatgpt' ) . '</h4>';
     echo '<div class="kchat-assistant-fields">';
@@ -911,13 +928,13 @@ function chatbot_chatgpt_render_new_manage_assistant_rows( $model_inventory ) {
     echo '<tr class="kchat-assistant-overview-row kchat-assistant-new-row" data-assistant-row="new">';
     echo '<td class="kchat-assistant-actions">';
     echo '<button type="button" class="button button-primary button-small" onclick="addNewChatgptAssistant(); return false;">' . esc_html__( 'Add New Assistant', 'chatbot-chatgpt' ) . '</button>';
-    chatbot_chatgpt_render_assistant_details_toggle( 'new', __( 'Details for a new assistant', 'chatbot-chatgpt' ) );
+    chatbot_chatgpt_render_assistant_details_toggle( 'new', __( 'Details for a new assistant', 'chatbot-chatgpt' ), true );
     echo '</td>';
     echo '<td class="kchat-col-shortcode">' . esc_html__( 'New', 'chatbot-chatgpt' ) . '</td>';
-    echo '<td class="kchat-col-assistant-id"><input type="text" name="new_assistant_id" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'new_assistant_id' ) ) . '" placeholder="' . esc_attr__( 'Please provide the GPT Assistant Id.', 'chatbot-chatgpt' ) . '" aria-label="' . esc_attr__( 'Assistant ID for a new assistant', 'chatbot-chatgpt' ) . '"></td>';
-    echo '<td class="kchat-col-common-name"><input type="text" name="new_common_name" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'new_common_name' ) ) . '" placeholder="' . esc_attr__( 'Common Name', 'chatbot-chatgpt' ) . '" aria-label="' . esc_attr__( 'Common Name for a new assistant', 'chatbot-chatgpt' ) . '"></td>';
+    echo '<td class="kchat-col-assistant-id"><label for="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'new_assistant_id' ) ) . '">' . esc_html__( 'Assistant ID', 'chatbot-chatgpt' ) . ' <span class="kchat-required-mark">' . esc_html__( 'Required', 'chatbot-chatgpt' ) . '</span></label><input type="text" name="new_assistant_id" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'new_assistant_id' ) ) . '" required="required" aria-required="true" placeholder="' . esc_attr__( 'Please provide the GPT Assistant Id.', 'chatbot-chatgpt' ) . '" aria-label="' . esc_attr__( 'Assistant ID for a new assistant', 'chatbot-chatgpt' ) . '"></td>';
+    echo '<td class="kchat-col-common-name"><label for="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'new_common_name' ) ) . '">' . esc_html__( 'Common Name', 'chatbot-chatgpt' ) . ' <span class="kchat-required-mark">' . esc_html__( 'Required', 'chatbot-chatgpt' ) . '</span></label><input type="text" name="new_common_name" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'new_common_name' ) ) . '" required="required" aria-required="true" placeholder="' . esc_attr__( 'Common Name', 'chatbot-chatgpt' ) . '" aria-label="' . esc_attr__( 'Common Name for a new assistant', 'chatbot-chatgpt' ) . '"></td>';
     echo '</tr>';
-    echo '<tr class="kchat-assistant-details-row" id="kchat-assistant-details-row-new" data-assistant-row="new" hidden>';
+    echo '<tr class="kchat-assistant-details-row" id="kchat-assistant-details-row-new" data-assistant-row="new">';
     echo '<td colspan="4">';
     chatbot_chatgpt_render_assistant_configuration( 'new', null, $model_inventory );
     echo '</td>';
@@ -990,6 +1007,23 @@ function display_chatbot_chatgpt_assistants_table() {
         table.kchat-assistants-overview .kchat-assistant-actions .button {
             margin: 0 4px 4px 0;
         }
+        table.kchat-assistants-overview .kchat-assistant-new-row label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .kchat-required-mark {
+            color: #d63638;
+            font-weight: 600;
+        }
+        .kchat-assistant-feedback {
+            position: relative;
+            padding-right: 38px;
+        }
+        table.kchat-assistants-overview input[aria-invalid="true"] {
+            border-color: #d63638;
+            box-shadow: 0 0 0 1px #d63638;
+        }
         table.kchat-assistants-overview tr.kchat-assistant-details-row[hidden] {
             display: none !important;
         }
@@ -1042,7 +1076,7 @@ function display_chatbot_chatgpt_assistants_table() {
     echo '<div class="wrap asst-templates-display">';
     echo '<h1>Manage Assistants</h1>';
     echo '<p>' . esc_html__( 'Click Update to save one assistant, Delete to remove it, or Details to show or hide that assistant\'s settings. Details does not save changes. Closing Details keeps unsaved values.', 'chatbot-chatgpt' ) . '</p>';
-    echo '<p>' . esc_html__( 'Open Details on the new row to set style, greetings, instructions, vector stores, and the model before adding an assistant.', 'chatbot-chatgpt' ) . '</p>';
+    echo '<p>' . esc_html__( 'The new assistant form stays open at the bottom of the table. Assistant ID and Common Name are required. The assistant is not created until both are filled in.', 'chatbot-chatgpt' ) . '</p>';
     echo '<p>' . wp_kses(
         sprintf(
             /* translators: 1: Vector Store ID label, 2: vs_ ID prefix example */
@@ -1162,6 +1196,10 @@ function chatbot_chatgpt_assistants_scripts() {
                 }
             }
 
+            function dismissChatgptAssistantFeedback(id) {
+                clearChatgptAssistantFeedback(id);
+            }
+
             function showChatgptAssistantFeedback(id, message) {
                 var box = document.getElementById('kchat-assistant-feedback-' + id);
                 if (!box) {
@@ -1171,6 +1209,8 @@ function chatbot_chatgpt_assistants_scripts() {
                 if (paragraph) {
                     paragraph.textContent = message;
                 }
+                box.style.opacity = '';
+                box.style.display = '';
                 box.hidden = false;
             }
 
@@ -1298,9 +1338,37 @@ function chatbot_chatgpt_assistants_scripts() {
                 });
             }
 
+            function flagNewAssistantRequiredFields() {
+                var fields = [
+                    document.getElementsByName('new_assistant_id')[0],
+                    document.getElementsByName('new_common_name')[0]
+                ];
+                var missing = [];
+                fields.forEach(function(field) {
+                    if (!field) {
+                        return;
+                    }
+                    var empty = !field.value || field.value.trim() === '';
+                    field.setAttribute('aria-invalid', empty ? 'true' : 'false');
+                    if (empty) {
+                        missing.push(field);
+                    }
+                });
+                return missing;
+            }
+
             // Function to add a new assistant
             function addNewChatgptAssistant() {
                 clearChatgptAssistantFeedback('new');
+                var missing = flagNewAssistantRequiredFields();
+                if (missing.length) {
+                    revealChatgptAssistantDetails('new');
+                    showChatgptAssistantFeedback('new', 'Assistant ID and Common Name are required. The assistant was not created.');
+                    if (missing[0] && missing[0].focus) {
+                        missing[0].focus();
+                    }
+                    return;
+                }
                 var newVectorStoreField = document.getElementsByName('new_vector_store_id')[0];
                 var newModelField = document.getElementsByName('new_model')[0];
                 var data = {
@@ -1500,7 +1568,11 @@ function add_new_assistant() {
     chatbot_chatgpt_ensure_assistants_vector_store_column();
     chatbot_chatgpt_ensure_assistants_model_column();
 
-    $assistant_id = sanitize_text_field($_POST['assistant_id']);
+    $assistant_id = isset( $_POST['assistant_id'] ) ? sanitize_text_field( wp_unslash( $_POST['assistant_id'] ) ) : '';
+    $common_name  = isset( $_POST['common_name'] ) ? sanitize_text_field( wp_unslash( $_POST['common_name'] ) ) : '';
+    if ( '' === $assistant_id || '' === $common_name ) {
+        chatbot_chatgpt_reject_assistant_model( 'Assistant ID and Common Name are required. The assistant was not created.' );
+    }
     // A new row has nothing to preserve. An omitted field starts empty. A
     // submitted empty field is also empty. A malformed list rejects the insert.
     $vector_store_present = array_key_exists( 'vector_store_id', $_POST );
@@ -1513,7 +1585,6 @@ function add_new_assistant() {
     } else {
         $vector_store_id = '';
     }
-    $common_name = sanitize_text_field($_POST['common_name']);
     $style = sanitize_text_field($_POST['style']);
     $audience = sanitize_text_field($_POST['audience']);
     $voice = sanitize_text_field($_POST['voice']);

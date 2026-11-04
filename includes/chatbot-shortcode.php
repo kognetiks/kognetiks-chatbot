@@ -1259,20 +1259,25 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
     // Check if the table exists
     $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name;
 
+    $assistant_ids = array();
     if ($table_exists) {
-        // The table exists, proceed with the original query
-        $number_of_shortcodes = $wpdb->get_var("SELECT MAX(id) FROM $table_name");
-
-        // If the query fails for any other reason, set $number_of_shortcodes to 0
-        if ($number_of_shortcodes === NULL || $number_of_shortcodes === FALSE) {
-            $number_of_shortcodes = 0;
+        // Register one shortcode per saved row. Do not walk every integer up to MAX(id).
+        // A single high id would otherwise register millions of shortcodes and exhaust memory.
+        $assistant_ids = $wpdb->get_col("SELECT id FROM $table_name");
+        if (!is_array($assistant_ids)) {
+            $assistant_ids = array();
         }
-    } else {
-        // The table doesn't exist, set $number_of_shortcodes to 0 directly
-        $number_of_shortcodes = 0;
     }
 
-    // Update the option with the number of shortcodes
+    $number_of_shortcodes = 0;
+    foreach ($assistant_ids as $assistant_row_id) {
+        $assistant_row_id = absint($assistant_row_id);
+        if ($assistant_row_id > $number_of_shortcodes) {
+            $number_of_shortcodes = $assistant_row_id;
+        }
+    }
+
+    // Update the option with the highest saved row id.
     update_option('chatbot_chatgpt_number_of_shortcodes', $number_of_shortcodes);
 
     // Base shortcode names - only register if not already registered
@@ -1289,33 +1294,17 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
         }
     }
 
-    // Register numbered shortcodes dynamically using [chatbot-#] syntax
-    // Only register if not already registered and within the valid range
-    for ($i = 1; $i <= $number_of_shortcodes; $i++) {
-        $shortcode = 'chatbot-' . $i;
-        if (!shortcode_exists($shortcode)) {
-            add_shortcode($shortcode, 'chatbot_chatgpt_shortcode');
-            // error_log('[Chatbot] [chatbot-shortcode.php] Registered shortcode: ' . $shortcode);
+    $numbered_prefixes = array( 'chatbot-', 'assistant-', 'agent-' );
+    foreach ($assistant_ids as $assistant_row_id) {
+        $assistant_row_id = absint($assistant_row_id);
+        if ($assistant_row_id < 1) {
+            continue;
         }
-    }
-
-    // Register numbered shortcodes dynamically using [assistant-#] syntax
-    // Only register if not already registered and within the valid range
-    for ($i = 1; $i <= $number_of_shortcodes; $i++) {
-        $shortcode = 'assistant-' . $i;
-        if (!shortcode_exists($shortcode)) {
-            add_shortcode($shortcode, 'chatbot_chatgpt_shortcode');
-            // error_log('[Chatbot] [chatbot-shortcode.php]Registered shortcode: ' . $shortcode);
-        }
-    }
-
-    // Register numbered shortcodes dynamically using [agent-#] syntax
-    // Only register if not already registered and within the valid range
-    for ($i = 1; $i <= $number_of_shortcodes; $i++) {
-        $shortcode = 'agent-' . $i;
-        if (!shortcode_exists($shortcode)) {
-            add_shortcode($shortcode, 'chatbot_chatgpt_shortcode');
-            // error_log('[Chatbot] [chatbot-shortcode.php]Registered shortcode: ' . $shortcode);
+        foreach ($numbered_prefixes as $prefix) {
+            $shortcode = $prefix . $assistant_row_id;
+            if (!shortcode_exists($shortcode)) {
+                add_shortcode($shortcode, 'chatbot_chatgpt_shortcode');
+            }
         }
     }
     
