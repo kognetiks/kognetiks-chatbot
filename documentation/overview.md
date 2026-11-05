@@ -90,6 +90,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 ## 🧠 Assistants & Knowledge  
 *What the chatbot knows*
 
+- [Assistants Local Mode](assistants-local-mode/assistants-local-mode.md)
 - [Assistants](assistants/manage-assistants.md)
 - [Assistant/Agent Settings](assistants/assistants.md)
 - [OpenAI's Responses API](api-openai-responses-api/prompt-agent-build-and-deploy-guide.md)

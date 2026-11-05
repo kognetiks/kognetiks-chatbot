@@ -1,3 +1,13 @@
+## [!WARNING]
+
+## *Important: OpenAI Prompt Objects retire November 30, 2026.*
+
+## *If your Kognetiks Chatbot uses an OpenAI Prompt ID beginning with `pmpt_`, you must migrate its configuration from **Bridge** to **Local** mode to continue using it after OpenAI retires hosted Prompt Objects.*
+
+## *Switching modes does not automatically copy your hosted prompt's instructions, model, tools, or other settings. Review and migrate these settings before enabling Local mode.*
+
+## *[Read the OpenAI Prompt Object Migration and Local Mode Guide](assistants-local-mode/assistants-local-mode.md) for step-by-step instructions.*
+
 ## Managing Assistants and Agents
 
 Effortlessly manage you chatbot Assistants all in one place using an intuitive interface.
