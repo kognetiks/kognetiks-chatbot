@@ -264,6 +264,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-keyguard.ph
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php';      // Globals - Ver 1.9.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php';                       // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php';                        // Functions - Ver 1.9.4
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-pmpt-retirement-notice.php';       // Prompt Object retirement notice - Ver 2.5.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-options-helper.php';               // Functions - Ver 2.0.5
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-threads.php';                      // Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients-file.php';              // Ver 1.9.2
