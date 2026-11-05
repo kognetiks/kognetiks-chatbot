@@ -1102,7 +1102,8 @@ function chatbot_chatgpt_conversation_v2_record_is_valid( $record ) {
     if ( $keys !== $expected ) {
         return false;
     }
-    if ( ! is_string( $record['id'] ) || ! preg_match( '/^cnv_[A-Za-z0-9]{8,}$/', $record['id'] ) ) {
+    // OpenAI returns conv_. cnv_ remains valid for the existing fixture ids.
+    if ( ! is_string( $record['id'] ) || ! preg_match( '/^c(?:onv|nv)_[A-Za-z0-9]{8,}$/', $record['id'] ) ) {
         return false;
     }
     if ( ! is_string( $record['fp'] ) || ! preg_match( '/^[a-f0-9]{64}$/', $record['fp'] ) ) {

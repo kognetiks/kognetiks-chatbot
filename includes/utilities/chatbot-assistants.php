@@ -1438,10 +1438,10 @@ function update_assistant() {
     chatbot_chatgpt_ensure_assistants_vector_store_column();
     chatbot_chatgpt_ensure_assistants_model_column();
 
-    $id = intval($_POST['id']);
+    $id = intval( wp_unslash( $_POST['id'] ) );
     $existing_assistant = function_exists( 'get_chatbot_chatgpt_assistant_by_key' ) ? get_chatbot_chatgpt_assistant_by_key( $id ) : array();
     $previous_assistant_id = ( is_array( $existing_assistant ) && isset( $existing_assistant['assistant_id'] ) ) ? (string) $existing_assistant['assistant_id'] : '';
-    $assistant_id = sanitize_text_field($_POST['assistant_id']);
+    $assistant_id = sanitize_text_field( wp_unslash( $_POST['assistant_id'] ) );
     // An omitted field is not a request to clear the stored list. An empty
     // submitted field is an explicit clear. A malformed list rejects the save.
     $vector_store_present = array_key_exists( 'vector_store_id', $_POST );
@@ -1452,17 +1452,17 @@ function update_assistant() {
         }
         $vector_store_id = $vector_store_write['value'];
     }
-    $common_name = sanitize_text_field($_POST['common_name']);
-    $style = sanitize_text_field($_POST['style']);
-    $audience = sanitize_text_field($_POST['audience']);
-    $voice = sanitize_text_field($_POST['voice']);
-    $allow_file_uploads = sanitize_text_field($_POST['allow_file_uploads']);
-    $allow_transcript_downloads = sanitize_text_field($_POST['allow_transcript_downloads']);
-    $show_assistant_name = sanitize_text_field($_POST['show_assistant_name']);
-    $initial_greeting = sanitize_textarea_field($_POST['initial_greeting']);
-    $subsequent_greeting = sanitize_textarea_field($_POST['subsequent_greeting']);
-    $placeholder_prompt = sanitize_textarea_field($_POST['placeholder_prompt']);
-    $additional_instructions = sanitize_textarea_field($_POST['additional_instructions']);
+    $common_name = sanitize_text_field( wp_unslash( $_POST['common_name'] ) );
+    $style = sanitize_text_field( wp_unslash( $_POST['style'] ) );
+    $audience = sanitize_text_field( wp_unslash( $_POST['audience'] ) );
+    $voice = sanitize_text_field( wp_unslash( $_POST['voice'] ) );
+    $allow_file_uploads = sanitize_text_field( wp_unslash( $_POST['allow_file_uploads'] ) );
+    $allow_transcript_downloads = sanitize_text_field( wp_unslash( $_POST['allow_transcript_downloads'] ) );
+    $show_assistant_name = sanitize_text_field( wp_unslash( $_POST['show_assistant_name'] ) );
+    $initial_greeting = sanitize_textarea_field( wp_unslash( $_POST['initial_greeting'] ) );
+    $subsequent_greeting = sanitize_textarea_field( wp_unslash( $_POST['subsequent_greeting'] ) );
+    $placeholder_prompt = sanitize_textarea_field( wp_unslash( $_POST['placeholder_prompt'] ) );
+    $additional_instructions = sanitize_textarea_field( wp_unslash( $_POST['additional_instructions'] ) );
 
     $stored_model = ( is_array( $existing_assistant ) && isset( $existing_assistant['model'] ) ) ? $existing_assistant['model'] : null;
     $model_write = chatbot_chatgpt_assistant_model_write( $_POST, $stored_model );
@@ -1585,16 +1585,16 @@ function add_new_assistant() {
     } else {
         $vector_store_id = '';
     }
-    $style = sanitize_text_field($_POST['style']);
-    $audience = sanitize_text_field($_POST['audience']);
-    $voice = sanitize_text_field($_POST['voice']);
-    $allow_file_uploads = sanitize_text_field($_POST['allow_file_uploads']);
-    $allow_transcript_downloads = sanitize_text_field($_POST['allow_transcript_downloads']);
-    $show_assistant_name = sanitize_text_field($_POST['show_assistant_name']);
-    $initial_greeting = sanitize_textarea_field($_POST['initial_greeting']);
-    $subsequent_greeting = sanitize_textarea_field($_POST['subsequent_greeting']);
-    $placeholder_prompt = sanitize_textarea_field($_POST['placeholder_prompt']);
-    $additional_instructions = sanitize_textarea_field($_POST['additional_instructions']);
+    $style = sanitize_text_field( wp_unslash( $_POST['style'] ) );
+    $audience = sanitize_text_field( wp_unslash( $_POST['audience'] ) );
+    $voice = sanitize_text_field( wp_unslash( $_POST['voice'] ) );
+    $allow_file_uploads = sanitize_text_field( wp_unslash( $_POST['allow_file_uploads'] ) );
+    $allow_transcript_downloads = sanitize_text_field( wp_unslash( $_POST['allow_transcript_downloads'] ) );
+    $show_assistant_name = sanitize_text_field( wp_unslash( $_POST['show_assistant_name'] ) );
+    $initial_greeting = sanitize_textarea_field( wp_unslash( $_POST['initial_greeting'] ) );
+    $subsequent_greeting = sanitize_textarea_field( wp_unslash( $_POST['subsequent_greeting'] ) );
+    $placeholder_prompt = sanitize_textarea_field( wp_unslash( $_POST['placeholder_prompt'] ) );
+    $additional_instructions = sanitize_textarea_field( wp_unslash( $_POST['additional_instructions'] ) );
 
     $model_write = chatbot_chatgpt_assistant_model_write( $_POST, null );
     if ( 'error' === $model_write['action'] ) {
