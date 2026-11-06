@@ -40,10 +40,6 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 **NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider's pricing and usage policies before proceeding.
 
-## Introducing the Sentential Context Model - BETA FEATURE OFFERING
-
-The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
-
 ## What's new in Version 2.5.6 - Released 2026-11-07
 
 ### New Features
@@ -180,6 +176,18 @@ Kognetiks Premium is designed to help you **stay aware**, **act with confidence*
 ---
 
 ## Beta Support
+
+The Transformer beta answers from your site's published content on your own server. Turn on beta features, save, then choose **Transformer** on the General tab. Try it on a staging site before a live site.
+
+**Transformer Model Choice** has three models:
+
+- `lexical-context-model` answers from individual words and how they appear together in your pages and posts.
+- `sentential-context-model-lite` matches the visitor's question against sentences in your pages and posts by shared words.
+- `sentential-context-model` compares the question with a saved map of which words appear near each other in your content, then returns the closest sentences.
+
+Window size, sentence count, and similarity for these models are on the API/Transformer tab.
+
+`markov-chain-flask` and `markov-chain-beaker` are planned for a later release. They are not in the Transformer Model Choice list yet.
 
 - [Enabling Beta Features](beta-features/beta-features.md)
 
