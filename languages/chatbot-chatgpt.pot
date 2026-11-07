@@ -2,16 +2,16 @@
 # This file is distributed under the GPLv3 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Kognetiks Chatbot 2.4.8\n"
+"Project-Id-Version: Kognetiks Chatbot 2.5.6\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/chatbot-chatgpt\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-15T23:16:48+00:00\n"
+"POT-Creation-Date: 2026-11-07T01:58:52+01:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: chatbot-chatgpt\n"
 
 #. Plugin Name of the plugin
@@ -39,379 +39,817 @@ msgstr ""
 msgid "https://www.kognetiks.com"
 msgstr ""
 
-#. 1: ID prefixes label, 2: asst_ prefix, 3: Responses API label, 4: pmpt_ prefix, 5: Chat dashboard link
-#: includes/settings/chatbot-settings-api-openai-assistants.php:242
-msgid "%1$s Use %2$s for former Assistants (now served by the %3$s). Use %4$s for dashboard Prompt IDs (%5$s). The plugin detects the type from the ID prefix."
-msgstr ""
-
-#. 1: TIP label, 2: embedded style name
-#: includes/settings/chatbot-settings-api-openai-assistants.php:292
-msgid "%1$s When using the %2$s style, it's best to put the shortcode in a page or post, not in a footer."
-msgstr ""
-
-#. %s: TIP label
-#: includes/settings/chatbot-settings-api-openai-assistants.php:282
-msgid "%s For best results ensure that the shortcode appears only once on the page."
-msgstr ""
-
-#. %s: Save Settings button label
-#: includes/settings/chatbot-settings-api-openai-assistants.php:303
-msgid "<b><i>Don't forget to click </i>%s<i> to save any changes you might make.</i></b>"
-msgstr ""
-
-#. 1: asst_ prefix, 2: pmpt_ prefix, 3: Common Name, 4: Additional Instructions, 5: Vector Store ID, 6: vs_ prefix
-#: includes/settings/chatbot-settings-api-openai-assistants.php:256
-msgid "<b>Note:</b> OpenAI’s Assistants API was sunset on 26 August 2026. This plugin now sends both %1$s and %2$s traffic through the Responses API. Display names and extra instructions come from this table (%3$s and %4$s). For large PDFs and other knowledge bases, paste the OpenAI %5$s (%6$s) on the row — do not paste the document into Additional Instructions. Reusable prompt objects (%2$s) are a temporary bridge until 30 November 2026."
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:217
-msgid "A rebuild appears pending, but activity details are unavailable. Check the plugin error log for [LCM][rebuild] lines."
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:299
-msgid "A rebuild is currently queued/running. The “Success/Failed” status shown above reflects the last completed job, not the current run."
-msgstr ""
-
-#: includes/settings/chatbot-settings-api-openai-assistants.php:260
-msgid "Additional Instructions"
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:225
-msgid "As long as the heartbeat time advances when you refresh this screen, work is progressing."
-msgstr ""
-
-#: includes/settings/chatbot-settings-api-openai-assistants.php:232
-msgid "Assistants"
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:240
-msgid "Automate full PMI + IDF lexical cache rebuilds on a schedule (same rebuild as the button, via WP-Cron). Large sites should rely on this or the button’s background queue instead of waiting on a long browser request."
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:187
-msgid "Background lexical rebuild worker"
-msgstr ""
-
-#: includes/settings/chatbot-settings-api-openai-assistants.php:247
-msgid "Chat"
-msgstr ""
-
-#: includes/settings/chatbot-settings-reporting.php:1354
-msgid "Chatbot No data in the file. Please enable conversation logging if currently off."
-msgstr ""
-
-#: includes/settings/chatbot-settings-api-openai-assistants.php:259
-msgid "Common Name"
-msgstr ""
-
-#: includes/chatbot-call-openai-api-responses.php:525
-msgid "Conversation create failed."
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:323
-msgid "Daily"
-msgstr ""
-
-#: includes/settings/chatbot-settings-links.php:33
-msgid "Deactivate"
-msgstr ""
-
-#: includes/settings/chatbot-settings-reporting.php:1342
-msgid "Error opening file for writing. Please try again."
-msgstr ""
-
-#: includes/settings/chatbot-settings-reporting.php:1391
-msgid "Error reading file"
-msgstr ""
-
-#: includes/settings/chatbot-settings-reporting.php:1317
-msgid "Error reading table: %s"
-msgstr ""
-
-#: tools/chatbot-options-exporter.php:95
-msgid "Error with file permissions"
-msgstr ""
-
-#. %s: API error message
-#: includes/chatbot-call-openai-api-responses.php:528 includes/chatbot-call-openai-api-responses.php:701
-msgid "Error: %s"
-msgstr ""
-
-#: includes/chatbot-call-openai-api-responses.php:535
-msgid "Error: Conversation created but missing ID."
-msgstr ""
-
-#: includes/chatbot-call-openai-api-responses.php:479
-msgid "Error: Conversation is busy. Please retry."
-msgstr ""
-
-#: includes/chatbot-call-openai-api-responses.php:596
-msgid "Error: Could not read the uploaded text content. Please re-upload as PDF or try uploading again."
-msgstr ""
-
-#: includes/chatbot-call-openai-api-responses.php:467
-msgid "Error: Empty message."
-msgstr ""
-
-#: includes/chatbot-call-openai-api-responses.php:741
-msgid "Error: Empty response from OpenAI."
-msgstr ""
-
-#: includes/chatbot-call-openai-api-responses.php:457
-msgid "Error: Missing OpenAI API key."
-msgstr ""
-
-#: includes/chatbot-call-openai-api-responses.php:462
-msgid "Error: Missing OpenAI Prompt ID (pmpt_...) or Assistant ID (asst_...). Store the ID in GPT Assistants and copy important instructions into Additional Instructions."
-msgstr ""
-
-#: includes/chatbot-call-openai-api-responses.php:662
-msgid "Error: Missing model. Set a ChatGPT model in Settings before using an Assistant ID (asst_...)."
-msgstr ""
-
-#: includes/chatbot-call-openai-api-responses.php:738
-msgid "Error: This Prompt triggered tool calls. Update the Prompt to disable tools for this chat endpoint, or implement a tool-call orchestration loop for Responses."
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:275 includes/settings/chatbot-settings-transformers.php:295
-msgid "Failed"
-msgstr ""
-
-#: tools/chatbot-options-exporter.php:42
-msgid "Failed to create debug directory."
-msgstr ""
-
-#: tools/chatbot-options-exporter.php:126
-msgid "Failed to delete options file after download."
-msgstr ""
-
-#. 1: HTTP code, 2: response body snippet
-#: includes/chatbot-call-openai-api-responses.php:198
-msgid "Failed to fetch file content (HTTP %1$s): %2$s"
-msgstr ""
-
-#: tools/chatbot-options-exporter.php:71
-msgid "Failed to open file for writing"
-msgstr ""
-
-#: tools/chatbot-options-exporter.php:103
-msgid "Failed to read options file."
-msgstr ""
-
-#: tools/chatbot-options-exporter.php:60
-msgid "Failed to write options to file."
-msgstr ""
-
-#: includes/settings/chatbot-settings-reporting.php:1374
-msgid "File not found: %s"
-msgstr ""
-
-#. %s: link to Assistant documentation
-#: includes/settings/chatbot-settings-api-openai-assistants.php:323
-msgid "For an explanation of Assistant settings and additional documentation please click <a href=\"%s\">here</a>."
-msgstr ""
-
-#. %s: link to Responses documentation
-#: includes/settings/chatbot-settings-api-openai-assistants.php:313
-msgid "For an explanation of Responses settings and additional documentation please click <a href=\"%s\">here</a>."
-msgstr ""
-
-#. 1: Vector Store ID label, 2: vs_ ID prefix example
-#: includes/utilities/chatbot-assistants.php:302
-msgid "Greetings, placeholder, and Additional Instructions are unchanged. Scroll right if needed. %1$s is an extra column at the end (%2$s) for large PDFs — it does not replace Additional Instructions."
-msgstr ""
-
-#: tools/chatbot-options-exporter.php:34
-msgid "Headers already sent. Cannot proceed with the download."
-msgstr ""
-
 #: includes/chatbot-call-kognetiks-api-tm.php:202
 msgid "I could not generate a response from the site content (empty result). Try a shorter or more specific question. If this persists, increase PHP max_execution_time or reduce corpus size."
 msgstr ""
 
-#: includes/settings/chatbot-settings-api-openai-assistants.php:243
-msgid "ID prefixes:"
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:271
-msgid "In progress"
-msgstr ""
-
-#: tools/chatbot-options-exporter.php:87 tools/chatbot-options-exporter.php:118
-msgid "Invalid output choice."
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:285
-msgid "Last completed rebuild job"
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:296
-msgid "Last failure reason"
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:192
-msgid "Last heartbeat: %1$s (%2$s)"
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:883
-msgid "Lexical Cache Rebuild Schedule"
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:876
-msgid "Lexical Cache Rebuild Schedule (WP-Cron)"
-msgstr ""
-
-#. 1: Assistants label, 2: Responses label
-#: includes/settings/chatbot-settings-api-openai-assistants.php:231
-msgid "Manage your chatbot %1$s and %2$s in one place using the interface below. Both types work with the same shortcodes and settings."
-msgstr ""
-
-#: includes/chatbot-call-openai-api-responses.php:181
+#: includes/chatbot-call-openai-api-responses.php:190
 msgid "Missing API key or file ID."
 msgstr ""
 
-#: includes/settings/chatbot-settings-transformers.php:325
-msgid "Monthly"
+#. translators: 1: HTTP code, 2: response body snippet
+#: includes/chatbot-call-openai-api-responses.php:207
+#, php-format
+msgid "Failed to fetch file content (HTTP %1$s): %2$s"
 msgstr ""
 
-#: includes/settings/chatbot-settings-transformers.php:321
-msgid "Never"
+#: includes/chatbot-call-openai-api-responses.php:719
+msgid "Error: Missing OpenAI API key."
 msgstr ""
 
-#: includes/settings/chatbot-settings-transformers.php:333
-msgid "Never removes only recurring jobs; one-off rebuilds already queued are left intact. Logs use prefix [LCM][rebuild] with context=wp_cron."
+#: includes/chatbot-call-openai-api-responses.php:724
+msgid "Error: Missing OpenAI Prompt ID (pmpt_...) or Assistant ID (asst_...). Store the ID in GPT Assistants and copy important instructions into Additional Instructions."
 msgstr ""
 
-#: includes/settings/chatbot-settings-transformers.php:283
-msgid "Next one-off rebuild (if queued)"
+#: includes/chatbot-call-openai-api-responses.php:729
+msgid "Error: Empty message."
 msgstr ""
 
-#: includes/settings/chatbot-settings-transformers.php:281
-msgid "Next recurring rebuild (WP-Cron)"
+#: includes/chatbot-call-openai-api-responses.php:740
+#: includes/chatbot-call-openai-api-responses.php:769
+#: includes/chatbot-call-openai-api-responses.php:773
+msgid "Error: Unauthorized access to conversation."
 msgstr ""
 
-#: includes/settings/chatbot-settings-transformers.php:291
-msgid "No completed rebuild job recorded yet."
+#: includes/chatbot-call-openai-api-responses.php:746
+msgid "Error: Conversation is busy. Please retry."
 msgstr ""
 
-#: includes/settings/chatbot-settings-reporting.php:1309
-msgid "No data in the file. Please enable conversation and interaction logging if currently off."
+#: includes/chatbot-call-openai-api-responses.php:789
+msgid "Conversation create failed."
 msgstr ""
 
-#: includes/settings/chatbot-settings-transformers.php:221
-msgid "No heartbeat for several minutes — the worker may have been killed by Apache/FastCGI (idle timeout ~30s on MAMP), or PHP ran out of memory. Use “Run One Rebuild Step Now” after waiting for the lock, clear the stalled job if needed, then check Apache / PHP / chatbot error logs."
+#: includes/chatbot-call-openai-api-responses.php:794
+#: includes/utilities/chatbot-conversation-keys.php:726
+#: includes/utilities/chatbot-conversation-keys.php:1840
+msgid "Conversation created but missing ID."
 msgstr ""
 
-#: includes/settings/chatbot-settings-transformers.php:215
-msgid "No worker heartbeat captured yet — the queue may still be waiting for WP-Cron or the first PHP slice."
+#: includes/chatbot-call-openai-api-responses.php:802
+msgid "Error: Conversation isolation is unavailable."
 msgstr ""
 
-#: includes/settings/chatbot-settings-transformers.php:284
-msgid "None"
+#. translators: %s: API error message
+#: includes/chatbot-call-openai-api-responses.php:817
+#: includes/chatbot-call-openai-api-responses.php:971
+#: includes/chatbot-call-openai-api-responses.php:1004
+#, php-format
+msgid "Error: %s"
 msgstr ""
 
-#: includes/settings/chatbot-settings-transformers.php:282
-msgid "Not scheduled"
+#: includes/chatbot-call-openai-api-responses.php:875
+msgid "Error: Could not read the uploaded text content. Please re-upload as PDF or try uploading again."
 msgstr ""
 
-#: includes/settings/chatbot-settings-transformers.php:322
-msgid "Now (one rebuild, then reset to Never)"
+#: includes/chatbot-call-openai-api-responses.php:947
+msgid "Error: Missing model. Set a ChatGPT model in Settings before using Local mode or an Assistant ID (asst_...)."
 msgstr ""
 
-#: includes/insights/automated-emails.php:1095
+#: includes/chatbot-call-openai-api-responses.php:957
+msgid "Error: Conversation could not be stored."
+msgstr ""
+
+#: includes/chatbot-call-openai-api-responses.php:1001
+msgid "OpenAI error."
+msgstr ""
+
+#: includes/chatbot-call-openai-api-responses.php:1041
+msgid "Error: This Prompt triggered tool calls. Update the Prompt to disable tools for this chat endpoint, or implement a tool-call orchestration loop for Responses."
+msgstr ""
+
+#: includes/chatbot-call-openai-api-responses.php:1044
+msgid "Error: Empty response from OpenAI."
+msgstr ""
+
+#: includes/insights/automated-emails.php:1101
 msgid "Once Monthly"
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:37
-msgid "Once Monthly (approx. 30 days)"
 msgstr ""
 
 #: includes/markov-chain/chatbot-markov-chain-scheduler.php:139
 msgid "Once Weekly"
 msgstr ""
 
-#: includes/chatbot-call-openai-api-responses.php:698
-msgid "OpenAI error."
+#. translators: 1: Assistants label, 2: Responses label
+#: includes/settings/chatbot-settings-api-openai-assistants.php:336
+#, php-format
+msgid "Manage your chatbot %1$s and %2$s in one place using the interface below. Both types work with the same shortcodes and settings."
 msgstr ""
 
-#: includes/settings/chatbot-settings-transformers.php:205
-msgid "Pipeline: stage=%s offset=%s N_docs=%s / rows=%s"
+#: includes/settings/chatbot-settings-api-openai-assistants.php:337
+msgid "Assistants"
 msgstr ""
 
-#: includes/settings/chatbot-settings-transformers.php:533
-msgid "Rebuilds the PMI embeddings cache and the optional LCM local IDF file (same corpus version). On large sites the request may schedule a background WP-Cron job instead of finishing in the browser (see notices after clicking). For predictable automation, use Lexical Cache Rebuild Schedule below."
-msgstr ""
-
-#: includes/settings/chatbot-settings-api-openai-assistants.php:233
+#: includes/settings/chatbot-settings-api-openai-assistants.php:338
 msgid "Responses"
 msgstr ""
 
-#: includes/settings/chatbot-settings-api-openai-assistants.php:245
+#. translators: 1: ID prefixes label, 2: asst_ prefix, 3: Responses API label, 4: pmpt_ prefix, 5: Chat dashboard link
+#: includes/settings/chatbot-settings-api-openai-assistants.php:347
+#, php-format
+msgid "%1$s Use %2$s for former Assistants (now served by the %3$s). Use %4$s for dashboard Prompt IDs (%5$s). The plugin detects the type from the ID prefix."
+msgstr ""
+
+#: includes/settings/chatbot-settings-api-openai-assistants.php:348
+msgid "ID prefixes:"
+msgstr ""
+
+#: includes/settings/chatbot-settings-api-openai-assistants.php:350
 msgid "Responses API"
 msgstr ""
 
-#: includes/settings/chatbot-settings-api-openai-assistants.php:304
+#: includes/settings/chatbot-settings-api-openai-assistants.php:352
+msgid "Chat"
+msgstr ""
+
+#. translators: 1: asst_ prefix, 2: pmpt_ prefix, 3: Common Name, 4: Additional Instructions, 5: Vector Store ID, 6: vs_ prefix
+#: includes/settings/chatbot-settings-api-openai-assistants.php:361
+#, php-format
+msgid "<b>Note:</b> OpenAI’s Assistants API was sunset on 26 August 2026. This plugin now sends both %1$s and %2$s traffic through the Responses API. Display names and extra instructions come from this table (%3$s and %4$s). For large PDFs and other knowledge bases, paste the OpenAI %5$s (%6$s) on the row — do not paste the document into Additional Instructions. Reusable prompt objects (%2$s) are a temporary bridge until 30 November 2026."
+msgstr ""
+
+#: includes/settings/chatbot-settings-api-openai-assistants.php:364
+#: includes/utilities/chatbot-assistants.php:935
+#: includes/utilities/chatbot-assistants.php:1119
+msgid "Common Name"
+msgstr ""
+
+#: includes/settings/chatbot-settings-api-openai-assistants.php:365
+#: includes/utilities/chatbot-assistants.php:866
+msgid "Additional Instructions"
+msgstr ""
+
+#: includes/settings/chatbot-settings-api-openai-assistants.php:366
+#: includes/utilities/chatbot-assistants.php:873
+#: includes/utilities/chatbot-assistants.php:1084
+msgid "Vector Store ID"
+msgstr ""
+
+#. translators: 1: chatbot-1 shortcode, 2: chatbot-2 shortcode
+#: includes/settings/chatbot-settings-api-openai-assistants.php:376
+#, php-format
+msgid "Tailor each Assistant or Response to your audience. When you're ready, add a shortcode such as %1$s, %2$s, etc. to your page."
+msgstr ""
+
+#. translators: %s: TIP label
+#: includes/settings/chatbot-settings-api-openai-assistants.php:387
+#, php-format
+msgid "%s For best results ensure that the shortcode appears only once on the page."
+msgstr ""
+
+#: includes/settings/chatbot-settings-api-openai-assistants.php:388
+#: includes/settings/chatbot-settings-api-openai-assistants.php:398
+msgid "TIP:"
+msgstr ""
+
+#. translators: 1: TIP label, 2: embedded style name
+#: includes/settings/chatbot-settings-api-openai-assistants.php:397
+#, php-format
+msgid "%1$s When using the %2$s style, it's best to put the shortcode in a page or post, not in a footer."
+msgstr ""
+
+#. translators: %s: Save Settings button label
+#: includes/settings/chatbot-settings-api-openai-assistants.php:408
+#, php-format
+msgid "<b><i>Don't forget to click </i>%s<i> to save any changes you might make.</i></b>"
+msgstr ""
+
+#: includes/settings/chatbot-settings-api-openai-assistants.php:409
 msgid "Save Settings"
 msgstr ""
 
-#: includes/settings/chatbot-settings-transformers.php:280
-msgid "Saved schedule"
+#. translators: %s: link to Responses documentation
+#: includes/settings/chatbot-settings-api-openai-assistants.php:418
+#, php-format
+msgid "For an explanation of Responses settings and additional documentation please click <a href=\"%s\">here</a>."
 msgstr ""
 
-#: includes/settings/chatbot-settings-reporting.php:1250 includes/settings/chatbot-settings-reporting.php:1267 includes/settings/chatbot-settings-reporting.php:1284 tools/chatbot-options-exporter.php:29
-msgid "Security check failed. Please refresh the page and try again."
+#. translators: %s: link to Assistant documentation
+#: includes/settings/chatbot-settings-api-openai-assistants.php:428
+#, php-format
+msgid "For an explanation of Assistant settings and additional documentation please click <a href=\"%s\">here</a>."
 msgstr ""
 
 #: includes/settings/chatbot-settings-links.php:20
 msgid "Settings"
 msgstr ""
 
-#: includes/settings/chatbot-settings-transformers.php:572
-msgid "Soft time budget (seconds) for one Lexical Context Model request. Increase if long answers are cut short (budget fallback). Default 20. Filter chatbot_lcm_max_runtime_seconds can still override."
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:223
-msgid "Still no first heartbeat — WP-Cron may not be firing locally. Load the front-end once or click “Run One Rebuild Step Now”."
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:273
-msgid "Success"
-msgstr ""
-
 #: includes/settings/chatbot-settings-links.php:21
 msgid "Support"
 msgstr ""
 
-#: includes/settings/chatbot-settings-api-openai-assistants.php:283 includes/settings/chatbot-settings-api-openai-assistants.php:293
-msgid "TIP:"
+#: includes/settings/chatbot-settings-links.php:33
+msgid "Deactivate"
 msgstr ""
 
-#. 1: chatbot-1 shortcode, 2: chatbot-2 shortcode
-#: includes/settings/chatbot-settings-api-openai-assistants.php:271
-msgid "Tailor each Assistant or Response to your audience. When you're ready, add a shortcode such as %1$s, %2$s, etc. to your page."
-msgstr ""
-
-#: includes/utilities/chatbot-assisted-search.php:65 includes/utilities/chatbot-assisted-search.php:73 includes/utilities/chatbot-assisted-search.php:94
-msgid "Unauthorized"
-msgstr ""
-
-#: includes/utilities/chatbot-file-upload.php:328
-msgid "Upload failed: OpenAI did not receive a file."
-msgstr ""
-
-#: includes/settings/chatbot-settings-api-openai-assistants.php:261 includes/utilities/chatbot-assistants.php:303 includes/utilities/chatbot-assistants.php:325
-msgid "Vector Store ID"
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:324
-msgid "Weekly"
-msgstr ""
-
-#: includes/settings/chatbot-settings-transformers.php:1029 includes/settings/chatbot-settings-transformers.php:1087 includes/settings/chatbot-settings-transformers.php:1115
-msgid "You do not have permission to perform this action."
-msgstr ""
-
-#: includes/settings/chatbot-settings-reporting.php:1245 includes/settings/chatbot-settings-reporting.php:1262 includes/settings/chatbot-settings-reporting.php:1279 tools/chatbot-manage-error-logs.php:218 tools/chatbot-options-exporter.php:24 widgets/chatbot-manage-widget-logs.php:123
+#: includes/settings/chatbot-settings-reporting.php:1269
+#: includes/settings/chatbot-settings-reporting.php:1286
+#: includes/settings/chatbot-settings-reporting.php:1303
+#: tools/chatbot-manage-error-logs.php:231
+#: tools/chatbot-options-exporter.php:24
+#: widgets/chatbot-manage-widget-logs.php:137
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
+#: includes/settings/chatbot-settings-reporting.php:1274
+#: includes/settings/chatbot-settings-reporting.php:1291
+#: includes/settings/chatbot-settings-reporting.php:1308
+#: tools/chatbot-options-exporter.php:29
+msgid "Security check failed. Please refresh the page and try again."
+msgstr ""
+
+#: includes/settings/chatbot-settings-reporting.php:1333
+msgid "No data in the file. Please enable conversation and interaction logging if currently off."
+msgstr ""
+
+#. translators: %s: database error message
+#: includes/settings/chatbot-settings-reporting.php:1343
+#, php-format
+msgid "Error reading table: %s"
+msgstr ""
+
+#: includes/settings/chatbot-settings-reporting.php:1370
+msgid "Error opening file for writing. Please try again."
+msgstr ""
+
+#: includes/settings/chatbot-settings-reporting.php:1382
+msgid "Chatbot No data in the file. Please enable conversation logging if currently off."
+msgstr ""
+
+#. translators: %s: file path
+#: includes/settings/chatbot-settings-reporting.php:1404
+#, php-format
+msgid "File not found: %s"
+msgstr ""
+
+#: includes/settings/chatbot-settings-reporting.php:1423
+msgid "Error reading file"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:37
+msgid "Once Monthly (approx. 30 days)"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:187
+msgid "Background lexical rebuild worker"
+msgstr ""
+
+#. translators: 1: heartbeat time, 2: worker step
+#: includes/settings/chatbot-settings-transformers.php:193
+#, php-format
+msgid "Last heartbeat: %1$s (%2$s)"
+msgstr ""
+
+#. translators: 1: pipeline stage, 2: offset, 3: document count, 4: row count
+#: includes/settings/chatbot-settings-transformers.php:207
+#, php-format
+msgid "Pipeline: stage=%1$s offset=%2$s N_docs=%3$s / rows=%4$s"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:217
+msgid "No worker heartbeat captured yet — the queue may still be waiting for WP-Cron or the first PHP slice."
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:219
+msgid "A rebuild appears pending, but activity details are unavailable. Check the plugin error log for [LCM][rebuild] lines."
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:223
+msgid "No heartbeat for several minutes — the worker may have been killed by Apache/FastCGI (idle timeout ~30s on MAMP), or PHP ran out of memory. Use “Run One Rebuild Step Now” after waiting for the lock, clear the stalled job if needed, then check Apache / PHP / chatbot error logs."
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:225
+msgid "Still no first heartbeat — WP-Cron may not be firing locally. Load the front-end once or click “Run One Rebuild Step Now”."
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:227
+msgid "As long as the heartbeat time advances when you refresh this screen, work is progressing."
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:242
+msgid "Automate full PMI + IDF lexical cache rebuilds on a schedule (same rebuild as the button, via WP-Cron). Large sites should rely on this or the button’s background queue instead of waiting on a long browser request."
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:273
+msgid "In progress"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:275
+msgid "Success"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:277
+#: includes/settings/chatbot-settings-transformers.php:297
+msgid "Failed"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:282
+msgid "Saved schedule"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:283
+msgid "Next recurring rebuild (WP-Cron)"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:284
+msgid "Not scheduled"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:285
+msgid "Next one-off rebuild (if queued)"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:286
+msgid "None"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:287
+msgid "Last completed rebuild job"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:293
+msgid "No completed rebuild job recorded yet."
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:298
+msgid "Last failure reason"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:301
+msgid "A rebuild is currently queued/running. The “Success/Failed” status shown above reflects the last completed job, not the current run."
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:323
+msgid "Never"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:324
+msgid "Now (one rebuild, then reset to Never)"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:325
+msgid "Daily"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:326
+msgid "Weekly"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:327
+msgid "Monthly"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:335
+msgid "Never removes only recurring jobs; one-off rebuilds already queued are left intact. Logs use prefix [LCM][rebuild] with context=wp_cron."
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:535
+msgid "Rebuilds the PMI embeddings cache and the optional LCM local IDF file (same corpus version). On large sites the request may schedule a background WP-Cron job instead of finishing in the browser (see notices after clicking). For predictable automation, use Lexical Cache Rebuild Schedule below."
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:574
+msgid "Soft time budget (seconds) for one Lexical Context Model request. Increase if long answers are cut short (budget fallback). Default 20. Filter chatbot_lcm_max_runtime_seconds can still override."
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:948
+msgid "Lexical Cache Rebuild Schedule (WP-Cron)"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:955
+msgid "Lexical Cache Rebuild Schedule"
+msgstr ""
+
+#: includes/settings/chatbot-settings-transformers.php:1101
+#: includes/settings/chatbot-settings-transformers.php:1159
+#: includes/settings/chatbot-settings-transformers.php:1187
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+#: includes/utilities/chatbot-assistant-row-id.php:85
+msgid "This chatbot configuration is unavailable."
+msgstr ""
+
+#. translators: %s: comma-separated tokens that are not vs_ IDs
+#: includes/utilities/chatbot-assistants.php:491
+#, php-format
+msgid "These vector store entries are not valid vs_ IDs: %s. The assistant was not changed. Use IDs such as vs_abc123, separated by commas. This check does not confirm that a store exists."
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:513
+msgid "The vector store list is not valid. The assistant was not changed."
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:524
+msgid "The vector store list is too long. The assistant was not changed."
+msgstr ""
+
+#. translators: %s: current ChatGPT Model Default identifier
+#: includes/utilities/chatbot-assistants.php:634
+#, php-format
+msgid "Use ChatGPT Model Default (currently: %s)"
+msgstr ""
+
+#. translators: %s: saved model identifier
+#: includes/utilities/chatbot-assistants.php:642
+#, php-format
+msgid "%s (saved model, not in the current list)"
+msgstr ""
+
+#. translators: %s: saved model identifier
+#: includes/utilities/chatbot-assistants.php:647
+#, php-format
+msgid "%s (saved model, not verified)"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:661
+msgid "This saved model is not in the current OpenAI model list. It stays selected until you choose a different model."
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:663
+msgid "This saved model could not be verified because the OpenAI model list is unavailable. It stays selected until you choose Use ChatGPT Model Default."
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:743
+msgid "Details"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:816
+#: includes/utilities/chatbot-assistants.php:931
+msgid "Details for a new assistant"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:820
+msgid "(no common name)"
+msgstr ""
+
+#. translators: 1: shortcode such as [chatbot-1], 2: common name
+#: includes/utilities/chatbot-assistants.php:823
+#, php-format
+msgid "Details for %1$s — %2$s"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:837
+msgid "Dismiss this notice."
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:841
+msgid "Assistant ID and Common Name, in the row above, are required. Fill those in, then review the settings below, before adding the assistant."
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:843
+msgid "Assistant ID and Common Name stay in the overview row. Closing Details keeps unsaved values in this section."
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:846
+msgid "Appearance"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:848
+msgid "Style"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:849
+msgid "Audience"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:850
+msgid "Voice"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:851
+msgid "Allow File Uploads"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:852
+msgid "Allow Transcript Downloads"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:853
+msgid "Show Assistant Name"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:856
+msgid "Model"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:861
+msgid "Messages"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:863
+msgid "Initial Greeting"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:864
+msgid "Subsequent Greeting"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:865
+msgid "Placeholder Prompt"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:869
+msgid "Knowledge"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:902
+#, php-format
+msgid "Update %s"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:902
+msgid "Update"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:903
+#, php-format
+msgid "Delete %s"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:903
+msgid "Delete"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:904
+#, php-format
+msgid "Details for %s"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:907
+#, php-format
+msgid "Copy shortcode %s"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:907
+msgid "Copy"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:908
+#, php-format
+msgid "Assistant ID for %s"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:909
+#, php-format
+msgid "Common Name for %s"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:930
+msgid "Add New Assistant"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:933
+msgid "New"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:934
+#: includes/utilities/chatbot-assistants.php:1118
+msgid "Assistant ID"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:934
+#: includes/utilities/chatbot-assistants.php:935
+msgid "Required"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:934
+msgid "Please provide the GPT Assistant Id."
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:934
+msgid "Assistant ID for a new assistant"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:935
+msgid "Common Name for a new assistant"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:1078
+msgid "Click Update to save one assistant, Delete to remove it, or Details to show or hide that assistant's settings. Details does not save changes. Closing Details keeps unsaved values."
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:1079
+msgid "The new assistant form stays open at the bottom of the table. Assistant ID and Common Name are required. The assistant is not created until both are filled in."
+msgstr ""
+
+#. translators: 1: Vector Store ID label, 2: vs_ ID prefix example
+#: includes/utilities/chatbot-assistants.php:1083
+#, php-format
+msgid "Greetings, placeholder, and Additional Instructions are edited in Details. %1$s (%2$s) is there as well. It does not replace Additional Instructions."
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:1089
+msgid "Enter one or more vector store IDs, separated by commas. An empty field stores no WordPress vector stores. An entry that is not a vs_ ID is shown and the assistant is not saved. Saving does not contact OpenAI and does not confirm that a store exists."
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:1090
+msgid "Choose Use ChatGPT Model Default to store no model on this row. That choice follows the ChatGPT Model Default setting. A selected model is used for Local and asst_ requests. Bridge mode uses the hosted prompt's model and does not send this saved model. Saving a model does not change Local or Bridge mode."
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:1091
+msgid "A model in this list was returned by the OpenAI models endpoint. That does not prove it supports the Responses API or file search."
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:1106
+msgid "Refresh OpenAI model list"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:1116
+msgid "Actions"
+msgstr ""
+
+#: includes/utilities/chatbot-assistants.php:1117
+msgid "[Shortcode]"
+msgstr ""
+
+#: includes/utilities/chatbot-assisted-search.php:65
+#: includes/utilities/chatbot-assisted-search.php:73
+#: includes/utilities/chatbot-assisted-search.php:94
+msgid "Unauthorized"
+msgstr ""
+
+#: includes/utilities/chatbot-conversation-keys.php:699
+#: includes/utilities/chatbot-conversation-keys.php:882
+#: includes/utilities/chatbot-conversation-keys.php:885
+#: includes/utilities/chatbot-conversation-keys.php:895
+#: includes/utilities/chatbot-conversation-keys.php:1801
+msgid "Unauthorized access to conversation."
+msgstr ""
+
+#: includes/utilities/chatbot-conversation-keys.php:712
+#: includes/utilities/chatbot-conversation-keys.php:1810
+#: includes/utilities/chatbot-conversation-keys.php:1820
+#: includes/utilities/chatbot-conversation-keys.php:1832
+#: includes/utilities/chatbot-conversation-keys.php:1844
+#: includes/utilities/chatbot-conversation-keys.php:1860
+#: includes/utilities/chatbot-conversation-keys.php:1872
+msgid "Conversation is busy. Please retry."
+msgstr ""
+
+#: includes/utilities/chatbot-conversation-keys.php:736
+#: includes/utilities/chatbot-conversation-keys.php:1828
+#: includes/utilities/chatbot-conversation-keys.php:1852
+#: includes/utilities/chatbot-conversation-keys.php:1857
+#: includes/utilities/chatbot-conversation-keys.php:1868
+#: includes/utilities/chatbot-conversation-keys.php:1878
+msgid "Conversation could not be stored."
+msgstr ""
+
+#: includes/utilities/chatbot-conversation-keys.php:890
+msgid "Page ID is required."
+msgstr ""
+
+#: includes/utilities/chatbot-file-upload.php:641
+msgid "Upload failed: OpenAI did not receive a file."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:151
+msgid "Error: This assistant is set to Local mode, but its copied instructions or hosted prompt ID no longer match the saved row. Restore the instructions in Manage Assistants, or switch the row back to Bridge."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:175
+#: includes/utilities/chatbot-pmpt-response-mode.php:278
+msgid "You are not allowed to change this assistant mode."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:185
+msgid "This assistant row was not found. No mode was saved."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:203
+msgid "Prompt mode was not recognized. The saved mode was left unchanged."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:216
+msgid "Local mode was not enabled. Confirm that this row is a hosted prompt and that its instructions have been copied into Additional Instructions."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:358
+msgid "none"
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:361
+msgid "Current mode: Local."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:364
+msgid "Current mode: Local — Configuration Error."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:367
+msgid "Current mode: Bridge."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:372
+msgid "Hosted prompt mode"
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:376
+msgid "Repair the configuration, or choose Bridge and click Save prompt mode. Opening this page does not change the saved mode."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:378
+msgid "Bridge sends prompt.id to the hosted prompt. OpenAI retires hosted prompts on 30 November 2026. Hosted tools, the hosted model, and other hosted prompt settings are not copied automatically. Additional Instructions do not by themselves prove that the copy is complete."
+msgstr ""
+
+#. translators: 1: model ID, 2: parsed vector store IDs or none
+#: includes/utilities/chatbot-pmpt-response-mode.php:382
+#, php-format
+msgid "Local mode would send model %1$s and parsed WordPress vector stores: %2$s. It would not send the hosted prompt ID."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:383
+msgid "(none resolved)"
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:395
+msgid "The vector store value was not recognized, so Local mode would not attach a file search store."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:397
+msgid "Changing between Bridge and Local mode starts a new conversation for this assistant on the next message. Previous conversation history is not carried into the new conversation."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:398
+msgid "Mode"
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:399
+msgid "Bridge"
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:400
+msgid "Local"
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:403
+msgid "I confirm the hosted prompt instructions have been copied into Additional Instructions for this row."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-response-mode.php:404
+msgid "Save prompt mode"
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-retirement-notice.php:249
+msgid "Kognetiks Chatbot — Action Required"
+msgstr ""
+
+#. translators: %s: retirement date
+#: includes/utilities/chatbot-pmpt-retirement-notice.php:252
+#, php-format
+msgid "OpenAI Prompt Objects retire on %s."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-retirement-notice.php:253
+msgid "November 30, 2026"
+msgstr ""
+
+#. translators: %s: pmpt_ prefix, shown as an example rather than a saved ID
+#: includes/utilities/chatbot-pmpt-retirement-notice.php:257
+#, php-format
+msgid "If your chatbot uses an OpenAI Prompt ID beginning with %s, review its configuration and migrate from Bridge to Local mode before the deadline."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-retirement-notice.php:260
+msgid "Switching modes does not automatically copy your hosted prompt's instructions, model, tools, or other settings."
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-retirement-notice.php:261
+msgid "Read migration guide"
+msgstr ""
+
+#: includes/utilities/chatbot-pmpt-retirement-notice.php:262
+msgid "Dismiss"
+msgstr ""
+
+#: tools/chatbot-options-exporter.php:34
+msgid "Headers already sent. Cannot proceed with the download."
+msgstr ""
+
+#: tools/chatbot-options-exporter.php:41
+msgid "Failed to create debug directory."
+msgstr ""
+
+#: tools/chatbot-options-exporter.php:58
+msgid "Failed to write options to file."
+msgstr ""
+
+#: tools/chatbot-options-exporter.php:69
+msgid "Failed to open file for writing"
+msgstr ""
+
+#: tools/chatbot-options-exporter.php:85
+#: tools/chatbot-options-exporter.php:116
+msgid "Invalid output choice."
+msgstr ""
+
+#: tools/chatbot-options-exporter.php:93
+msgid "Error with file permissions"
+msgstr ""
+
+#: tools/chatbot-options-exporter.php:101
+msgid "Failed to read options file."
+msgstr ""
+
+#: tools/chatbot-options-exporter.php:124
+msgid "Failed to delete options file after download."
+msgstr ""
