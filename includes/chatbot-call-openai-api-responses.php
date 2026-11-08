@@ -998,7 +998,17 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
         // }
 
         if ( isset( $resp['error'] ) ) {
-            $msg = is_array( $resp['error'] ) ? ( $resp['error']['message'] ?? __( 'OpenAI error.', 'chatbot-chatgpt' ) ) : __( 'OpenAI error.', 'chatbot-chatgpt' );
+            $msg = __( 'OpenAI error.', 'chatbot-chatgpt' );
+            $error_type = '';
+            if ( is_array( $resp['error'] ) ) {
+                $msg = $resp['error']['message'] ?? $msg;
+                $error_type = isset( $resp['error']['type'] ) ? (string) $resp['error']['type'] : '';
+            }
+            // Log before the caller replaces Error: replies with the generic visitor message.
+            prod_trace( 'ERROR', 'OpenAI API Error: ' . $msg );
+            if ( '' !== $error_type ) {
+                prod_trace( 'ERROR', 'Error Type: ' . $error_type );
+            }
             return sprintf(
                 /* translators: %s: API error message */
                 __( 'Error: %s', 'chatbot-chatgpt' ),

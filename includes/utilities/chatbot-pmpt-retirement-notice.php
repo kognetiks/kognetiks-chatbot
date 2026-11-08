@@ -240,9 +240,17 @@ function chatbot_chatgpt_pmpt_retirement_notice_html( $rows ) {
     }
 
     $guide = chatbot_chatgpt_pmpt_retirement_guide_url();
+    // Settings screen plus a named nonce, same shape as the other admin dismiss links.
     $dismiss = wp_nonce_url(
-        add_query_arg( 'chatbot_chatgpt_dismiss_pmpt_retirement', '1', admin_url( 'admin.php' ) ),
-        'chatbot_chatgpt_dismiss_pmpt_retirement'
+        add_query_arg(
+            array(
+                'page' => 'chatbot-chatgpt',
+                'chatbot_chatgpt_dismiss_pmpt_retirement' => '1',
+            ),
+            admin_url( 'admin.php' )
+        ),
+        'chatbot_chatgpt_dismiss_pmpt_retirement',
+        '_chatgpt_dismiss_nonce'
     );
 
     $html  = '<div class="notice notice-warning">';
@@ -284,6 +292,9 @@ add_action( 'admin_notices', 'chatbot_chatgpt_pmpt_retirement_admin_notice' );
 /**
  * Handle the nonce-protected Dismiss link.
  *
+ * The request stays on admin.php?page=chatbot-chatgpt with the dismiss flag
+ * and _chatgpt_dismiss_nonce still in the URL.
+ *
  * @return void
  */
 function chatbot_chatgpt_pmpt_retirement_handle_dismiss() {
@@ -293,14 +304,12 @@ function chatbot_chatgpt_pmpt_retirement_handle_dismiss() {
     if ( function_exists( 'is_network_admin' ) && is_network_admin() ) {
         return;
     }
-    $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+    $nonce = isset( $_GET['_chatgpt_dismiss_nonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_chatgpt_dismiss_nonce'] ) ) : '';
     $valid = is_string( $nonce ) && false !== wp_verify_nonce( $nonce, 'chatbot_chatgpt_dismiss_pmpt_retirement' );
     $signature = chatbot_chatgpt_pmpt_retirement_affected_signature( chatbot_chatgpt_pmpt_retirement_prompt_rows() );
     chatbot_chatgpt_pmpt_retirement_dismiss_request( get_current_user_id(), $valid, $signature );
-    if ( 'cli' === PHP_SAPI || headers_sent() ) {
-        return;
-    }
-    wp_safe_redirect( remove_query_arg( array( 'chatbot_chatgpt_dismiss_pmpt_retirement', '_wpnonce' ) ) );
-    exit;
 }
 add_action( 'admin_init', 'chatbot_chatgpt_pmpt_retirement_handle_dismiss' );

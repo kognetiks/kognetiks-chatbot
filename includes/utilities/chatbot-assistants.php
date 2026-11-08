@@ -838,7 +838,7 @@ function chatbot_chatgpt_render_assistant_configuration( $row_key, $assistant, $
     echo '</button>';
     echo '</div>';
     if ( $is_new ) {
-        echo '<p class="description">' . esc_html__( 'Assistant ID and Common Name, in the row above, are required. Fill those in, then review the settings below, before adding the assistant.', 'chatbot-chatgpt' ) . '</p>';
+        echo '<p class="description">' . esc_html__( 'Assistant ID and Common Name, in the row above, are required when you click Add New Assistant. Fill those in, then review the settings below, before adding the assistant.', 'chatbot-chatgpt' ) . '</p>';
     } else {
         echo '<p class="description">' . esc_html__( 'Assistant ID and Common Name stay in the overview row. Closing Details keeps unsaved values in this section.', 'chatbot-chatgpt' ) . '</p>';
     }
@@ -931,8 +931,8 @@ function chatbot_chatgpt_render_new_manage_assistant_rows( $model_inventory ) {
     chatbot_chatgpt_render_assistant_details_toggle( 'new', __( 'Details for a new assistant', 'chatbot-chatgpt' ), true );
     echo '</td>';
     echo '<td class="kchat-col-shortcode">' . esc_html__( 'New', 'chatbot-chatgpt' ) . '</td>';
-    echo '<td class="kchat-col-assistant-id"><label for="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'new_assistant_id' ) ) . '">' . esc_html__( 'Assistant ID', 'chatbot-chatgpt' ) . ' <span class="kchat-required-mark">' . esc_html__( 'Required', 'chatbot-chatgpt' ) . '</span></label><input type="text" name="new_assistant_id" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'new_assistant_id' ) ) . '" required="required" aria-required="true" placeholder="' . esc_attr__( 'Please provide the GPT Assistant Id.', 'chatbot-chatgpt' ) . '" aria-label="' . esc_attr__( 'Assistant ID for a new assistant', 'chatbot-chatgpt' ) . '"></td>';
-    echo '<td class="kchat-col-common-name"><label for="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'new_common_name' ) ) . '">' . esc_html__( 'Common Name', 'chatbot-chatgpt' ) . ' <span class="kchat-required-mark">' . esc_html__( 'Required', 'chatbot-chatgpt' ) . '</span></label><input type="text" name="new_common_name" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'new_common_name' ) ) . '" required="required" aria-required="true" placeholder="' . esc_attr__( 'Common Name', 'chatbot-chatgpt' ) . '" aria-label="' . esc_attr__( 'Common Name for a new assistant', 'chatbot-chatgpt' ) . '"></td>';
+    echo '<td class="kchat-col-assistant-id"><label for="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'new_assistant_id' ) ) . '">' . esc_html__( 'Assistant ID', 'chatbot-chatgpt' ) . ' <span class="kchat-required-mark">' . esc_html__( 'Required', 'chatbot-chatgpt' ) . '</span></label><input type="text" name="new_assistant_id" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'new_assistant_id' ) ) . '" placeholder="' . esc_attr__( 'Please provide the GPT Assistant Id.', 'chatbot-chatgpt' ) . '" aria-label="' . esc_attr__( 'Assistant ID for a new assistant', 'chatbot-chatgpt' ) . '"></td>';
+    echo '<td class="kchat-col-common-name"><label for="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'new_common_name' ) ) . '">' . esc_html__( 'Common Name', 'chatbot-chatgpt' ) . ' <span class="kchat-required-mark">' . esc_html__( 'Required', 'chatbot-chatgpt' ) . '</span></label><input type="text" name="new_common_name" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'new_common_name' ) ) . '" placeholder="' . esc_attr__( 'Common Name', 'chatbot-chatgpt' ) . '" aria-label="' . esc_attr__( 'Common Name for a new assistant', 'chatbot-chatgpt' ) . '"></td>';
     echo '</tr>';
     echo '<tr class="kchat-assistant-details-row" id="kchat-assistant-details-row-new" data-assistant-row="new">';
     echo '<td colspan="4">';
@@ -1076,7 +1076,7 @@ function display_chatbot_chatgpt_assistants_table() {
     echo '<div class="wrap asst-templates-display">';
     echo '<h1>Manage Assistants</h1>';
     echo '<p>' . esc_html__( 'Click Update to save one assistant, Delete to remove it, or Details to show or hide that assistant\'s settings. Details does not save changes. Closing Details keeps unsaved values.', 'chatbot-chatgpt' ) . '</p>';
-    echo '<p>' . esc_html__( 'The new assistant form stays open at the bottom of the table. Assistant ID and Common Name are required. The assistant is not created until both are filled in.', 'chatbot-chatgpt' ) . '</p>';
+    echo '<p>' . esc_html__( 'The new assistant form stays open at the bottom of the table. Assistant ID and Common Name are required when you click Add New Assistant. The assistant is created only after both are filled in.', 'chatbot-chatgpt' ) . '</p>';
     echo '<p>' . wp_kses(
         sprintf(
             /* translators: 1: Vector Store ID label, 2: vs_ ID prefix example */
