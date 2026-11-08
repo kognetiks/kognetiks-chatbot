@@ -6,7 +6,7 @@ The **Kognetiks Chatbot** is a comprehensive WordPress plugin that integrates ad
 
 **Version:** 2.5.6
 **License:** GPLv3 or later  
-**WordPress Compatibility:** Tested up to WordPress 7.1
+**WordPress Compatibility:** Tested up to WordPress 7.1.4
 
 ## Core Functionality
 
