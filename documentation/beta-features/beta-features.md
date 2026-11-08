@@ -1,6 +1,6 @@
 # Configuring Beta Features
 
-The **Kogentiks Chatbot for WordPress** plugin now includes the option to enable beta features that may be released in the future.
+The **Kognetiks Chatbot for WordPress** plugin includes the option to enable beta features that may be released in the future.
 
 Enabling Beta Features in the **Kognetiks Chatbot** plugin is intended for **testing and experimental** purposes only. These features are not fully tested or guaranteed to work as expected and may cause unexpected behavior, errors, or conflicts with your website.
 
@@ -23,17 +23,25 @@ If you're unsure about any of these steps, consult with a web professional or Wo
 
 If you change any settings, be sure to click the `Save Settings` button at the bottom of the settings page.
 
-## Beta Features in Version 2.2.1
+## Current beta features
 
 **Transformer Model**
 
-1. Enable beta features to select `Transformer` as your AI Platform Selection of choice on the `General` tab.  Then click the `Save Settings` button of the bottom of the setting page.
+1. Enable beta features, then select `Transformer` as the AI platform on the `General` tab. Click `Save Settings` at the bottom of the settings page.
 
-2. A new tab called `API/Transformer` will appear in place of the AI Platform Selection you have previously made.  Click this tab to choose your transformer settings.
+2. An `API/Transformer` tab appears for the platform you selected. Open that tab to choose the transformer settings.
 
-3. You can set the `Transformer Model Choice` (currently only choice is `sentential-context-model`, other choices may be available in later releases), `Maximum Tokens Setting`, and various `Transformore Model Advanced Settings`, such as the build scheduled, the window size (commonly referred to a n-gram), sentence reponse count, similarity thresholds, and leading sentence and token ratios.
+3. **Transformer Model Choice** has three models:
 
-4. Refer to this Support Documentation for more details [here](api-transformer-settings/api-transformer-model-settings.md).
+   - `lexical-context-model` answers from individual words and how they appear together in your pages and posts.
+   - `sentential-context-model-lite` matches the visitor's question against sentences in your pages and posts by shared words.
+   - `sentential-context-model` compares the question with a saved map of which words appear near each other in your content, then returns the closest sentences.
+
+   You can also set **Maximum Tokens** and the advanced settings: build schedule, window size (an n-gram), sentence response count, similarity threshold, and the leading sentence and token ratios.
+
+4. `markov-chain-flask` and `markov-chain-beaker` are planned for a later release. They are not in the Transformer Model Choice list yet.
+
+5. More detail is in [API/Transformer Settings](api-transformer-settings/api-transformer-model-settings.md) and [API/Transformer Model Build Status](api-transformer-settings/api-transformer-model-build-status.md).
 
 ---
 

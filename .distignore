@@ -11,8 +11,10 @@ wordfence-vendor.txt
 .idea
 .vscode
 .cursor
+.cursor/**
 /debug/
 /test-harness/
+/tests/
 .DS_Store
 Thumbs.db
 .snyk

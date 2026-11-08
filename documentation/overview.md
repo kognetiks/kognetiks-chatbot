@@ -40,16 +40,22 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 **NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider's pricing and usage policies before proceeding.
 
-## Introducing the Sentential Context Model - BETA FEATURE OFFERING
+## What's new in Version 2.5.6 - Released 2026-11-07
 
-The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
+### New Features
+* **Local mode for hosted prompts**: OpenAI retires hosted Prompt Objects (`pmpt_`) on 30 November 2026. Manage Assistants can keep a prompt on Bridge, which still sends the hosted prompt, or switch it to Local, which sends the model, Additional Instructions, and vector stores saved in WordPress. Existing prompts stay on Bridge until you save Local mode. The update leaves hosted instructions, models, and tools where they are, so copy what you need before you switch.
+* **Prompt retirement notice**: While a `pmpt_` row still needs that migration, administrators see a warning with a link to the Local mode guide. Dismiss applies to the current set of rows. A later return to Bridge shows the warning again.
 
-## What's new in Version 2.5.5 - Released 2026-11-01
+### Improvements
+* **Manage Assistants**: Each saved assistant opens in a Details panel for appearance, messages, knowledge, and Hosted Prompt Mode. One row can store several vector store IDs, separated by commas.
+* **Per-assistant model**: A GPT Assistants row can save its own model, or follow the site ChatGPT Model Default. A `model` attribute on the shortcode overrides the row model. Bridge keeps using the hosted prompt's model.
+* **Shared assistant IDs**: Requests carry the assistants-table row, so two rows that share an assistant ID each keep their own configuration.
+* **OpenAI conversation continuity**: The next message starts a new Responses conversation when the effective mode, model, instructions, or file search changes. The reply is written to the conversation that produced it. Clearing that chatbot drops a reply still in flight, and an older reply is discarded once a newer one is underway.
+* **Gemini models**: Google no longer serves Gemini 2.0 Flash. A saved `gemini-2.0-flash` id is rewritten to `gemini-3.8-flash`. Gemini 3 requests omit temperature, which those models reject.
 
 ### Bug Fixes
-* **Anthropic replies**: Current Claude models can return a thinking block before the answer. The plugin read only the first block, so a successful reply was replaced with a generic API error. Replies are now taken from the text blocks. Haiku 5.5, Sonnet 5, and Opus 5 turn thinking off so the token cap is available for the answer. Sonnet 5.5 uses between-tools thinking, which does not spend that cap before a normal chat reply.
-* **Anthropic output limit**: Opus 5.5 and Fable keep thinking on, and those thinking tokens count against the max tokens setting. A setting below 4,000 is sent as 4,000 for those models. If the model still uses the whole cap before it writes a reply, the chatbot names the model and asks you to increase the Anthropic max tokens setting.
-
+* **Assistant text on save**: Quotes, apostrophes, and intentional backslashes in assistant settings changed on every save because WordPress slashes form data. They now stay as entered.
+* **Numbered shortcodes**: `[chatbot-n]`, `[assistant-n]`, and `[agent-n]` were registered for every number up to the highest row id. One high id could exhaust memory. Only saved rows are registered now.
 
 * Information about past updates can be found [here](updates/updates.md).
 
@@ -92,6 +98,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 ## 🧠 Assistants & Knowledge  
 *What the chatbot knows*
 
+- [Assistants Local Mode](assistants-local-mode/assistants-local-mode.md)
 - [Assistants](assistants/manage-assistants.md)
 - [Assistant/Agent Settings](assistants/assistants.md)
 - [OpenAI's Responses API](api-openai-responses-api/prompt-agent-build-and-deploy-guide.md)
@@ -169,6 +176,18 @@ Kognetiks Premium is designed to help you **stay aware**, **act with confidence*
 ---
 
 ## Beta Support
+
+The Transformer beta answers from your site's published content on your own server. Turn on beta features, save, then choose **Transformer** on the General tab. Try it on a staging site before a live site.
+
+**Transformer Model Choice** has three models:
+
+- `lexical-context-model` answers from individual words and how they appear together in your pages and posts.
+- `sentential-context-model-lite` matches the visitor's question against sentences in your pages and posts by shared words.
+- `sentential-context-model` compares the question with a saved map of which words appear near each other in your content, then returns the closest sentences.
+
+Window size, sentence count, and similarity for these models are on the API/Transformer tab.
+
+`markov-chain-flask` and `markov-chain-beaker` are planned for a later release. They are not in the Transformer Model Choice list yet.
 
 - [Enabling Beta Features](beta-features/beta-features.md)
 

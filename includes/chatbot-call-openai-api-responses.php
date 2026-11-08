@@ -24,6 +24,8 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+require_once dirname( __FILE__ ) . '/utilities/chatbot-pmpt-response-mode.php';
+
 /* -------------------------------------------------------------------------
  * Timeouts and execution-time helpers (kept for compatibility)
  * ------------------------------------------------------------------------- */
@@ -306,7 +308,16 @@ function check_assistant_tool_usage_responses( $response_json ) {
 /* -------------------------------------------------------------------------
  * Local Common Name + Additional Instructions for Responses calls
  * ------------------------------------------------------------------------- */
-function chatbot_chatgpt_get_responses_local_row( $assistant_id ) {
+function chatbot_chatgpt_get_responses_local_row( $assistant_id, $assistant_row_id = null ) {
+
+    $normalized = function_exists( 'chatbot_chatgpt_normalize_assistant_row_id' )
+        ? chatbot_chatgpt_normalize_assistant_row_id( $assistant_row_id )
+        : array( 'state' => 'missing', 'id' => null );
+
+    if ( 'valid' === $normalized['state'] && $normalized['id'] > 0 && function_exists( 'get_chatbot_chatgpt_assistant_by_key' ) ) {
+        $row = get_chatbot_chatgpt_assistant_by_key( $normalized['id'] );
+        return is_array( $row ) ? $row : array();
+    }
 
     if ( ! function_exists( 'get_chatbot_chatgpt_assistant_by_assistant_id' ) ) {
         return array();
@@ -318,7 +329,195 @@ function chatbot_chatgpt_get_responses_local_row( $assistant_id ) {
 }
 
 /**
+ * Add the hosted-prompt or local-assistant fields to a Responses payload.
+ *
+ * Bridge pmpt_ requests still send prompt.id and omit model and instructions.
+ * Local pmpt_ requests and asst_ requests send model and instructions.
+ * The local row supplies Common Name, instructions, and vector stores.
+ *
+ * @param array      $payload Payload so far.
+ * @param string     $prompt_id External ID.
+ * @param array      $local_row Selected or legacy assistants-table row.
+ * @param string     $additional_instructions Resolved extra instructions.
+ * @param string     $model Model for a local request. Ignored for Bridge pmpt_.
+ * @param string     $request_body bridge or local. Only a pmpt_ ID reads this.
+ * @return array|null Null when a local request has no model.
+ */
+function chatbot_chatgpt_apply_responses_assistant_fields( $payload, $prompt_id, $local_row, $additional_instructions, $model, $request_body = 'bridge' ) {
+
+    if ( ! is_array( $payload ) ) {
+        $payload = array();
+    }
+    if ( ! is_array( $local_row ) ) {
+        $local_row = array();
+    }
+
+    $is_prompt = function_exists( 'chatbot_chatgpt_id_starts_with' )
+        ? chatbot_chatgpt_id_starts_with( $prompt_id, 'pmpt_' )
+        : ( strpos( (string) $prompt_id, 'pmpt_' ) === 0 );
+    $send_prompt = $is_prompt && 'local' !== $request_body;
+
+    if ( $send_prompt ) {
+        $payload['prompt'] = array(
+            'id' => (string) $prompt_id,
+        );
+    } else {
+        if ( ! is_string( $model ) || '' === $model ) {
+            return null;
+        }
+        $payload['model'] = $model;
+        $instructions = chatbot_chatgpt_build_responses_instructions( $local_row, $additional_instructions );
+        if ( '' !== $instructions ) {
+            $payload['instructions'] = $instructions;
+        }
+    }
+
+    $vector_store_ids = chatbot_chatgpt_resolve_vector_store_ids( $local_row );
+    if ( ! empty( $vector_store_ids ) ) {
+        $payload['tools'] = array(
+            array(
+                'type'             => 'file_search',
+                'vector_store_ids' => $vector_store_ids,
+                'max_num_results'  => 8,
+            ),
+        );
+    }
+
+    return $payload;
+
+}
+
+/**
+ * Read one instruction option without treating a missing option as an empty save.
+ *
+ * @param string $name Option name.
+ * @return string|null Null when the option has never been saved.
+ */
+function chatbot_chatgpt_saved_instruction_option( $name ) {
+
+    $missing = "\0chatbot_instruction_option_missing";
+    $value = get_option( $name, $missing );
+    if ( $missing === $value ) {
+        return null;
+    }
+    return is_string( $value ) ? $value : '';
+
+}
+
+/**
+ * Primary or alternate instructions from the settings screen, then a legacy name.
+ *
+ * A saved empty canonical value stays empty. The older option is used only when
+ * the canonical option is absent. This does not write either option.
+ *
+ * @param string $alias primary or alternate.
+ * @return string
+ */
+function chatbot_chatgpt_alias_instruction_text( $alias ) {
+
+    if ( 'primary' === $alias ) {
+        $canonical = 'chatbot_chatgpt_assistant_instructions';
+        $legacy = 'chatbot_chatgpt_additional_instructions';
+    } elseif ( 'alternate' === $alias ) {
+        $canonical = 'chatbot_chatgpt_assistant_instructions_alternate';
+        $legacy = 'chatbot_chatgpt_additional_instructions_alternate';
+    } else {
+        return '';
+    }
+
+    $saved = chatbot_chatgpt_saved_instruction_option( $canonical );
+    if ( null === $saved ) {
+        $saved = chatbot_chatgpt_saved_instruction_option( $legacy );
+    }
+    if ( null === $saved ) {
+        return '';
+    }
+
+    return trim( $saved );
+
+}
+
+/**
+ * Additional Instructions on a validated positive assistants-table row.
+ *
+ * Null means this request did not select a positive row. A string, including
+ * an empty string, is that row's own text and must not be replaced.
+ *
+ * @param mixed $assistant_row_id Row ID supplied to the Responses call.
+ * @param mixed $local_row Row already loaded for this request.
+ * @return string|null
+ */
+function chatbot_chatgpt_selected_row_instruction_text( $assistant_row_id, $local_row ) {
+
+    $normalized = function_exists( 'chatbot_chatgpt_normalize_assistant_row_id' )
+        ? chatbot_chatgpt_normalize_assistant_row_id( $assistant_row_id )
+        : array( 'state' => 'missing', 'id' => null );
+    if ( 'valid' !== $normalized['state'] || $normalized['id'] < 1 ) {
+        return null;
+    }
+
+    $row = array();
+    if ( is_array( $local_row ) && function_exists( 'chatbot_chatgpt_loaded_row_id' ) && chatbot_chatgpt_loaded_row_id( $local_row ) === $normalized['id'] ) {
+        $row = $local_row;
+    } elseif ( function_exists( 'get_chatbot_chatgpt_assistant_by_key' ) ) {
+        $loaded = get_chatbot_chatgpt_assistant_by_key( $normalized['id'] );
+        if ( is_array( $loaded ) && function_exists( 'chatbot_chatgpt_loaded_row_id' ) && chatbot_chatgpt_loaded_row_id( $loaded ) === $normalized['id'] ) {
+            $row = $loaded;
+        }
+    }
+    if ( empty( $row ) ) {
+        return '';
+    }
+
+    $text = ( isset( $row['additional_instructions'] ) && is_string( $row['additional_instructions'] ) ) ? $row['additional_instructions'] : '';
+    return trim( $text );
+
+}
+
+/**
+ * Instructions for an OpenAI Local pmpt_ or asst_ request.
+ *
+ * A validated row supplies its own text, including when that text is empty.
+ * Primary and alternate without a row use their saved settings. Any other
+ * request without a row keeps the legacy transient and external-ID lookup.
+ * Bridge pmpt_ requests do not call this function.
+ *
+ * @param string      $assistant_id External ID.
+ * @param mixed       $user_id User id.
+ * @param mixed       $page_id Page id.
+ * @param mixed       $session_id Session id.
+ * @param mixed       $assistant_row_id Validated row ID, or null.
+ * @param array       $local_row Row loaded for this request.
+ * @param string|null $assistant_alias Alias from the page before request routing rewrites it.
+ * @return string
+ */
+function chatbot_chatgpt_resolve_openai_local_instructions( $assistant_id, $user_id, $page_id, $session_id, $assistant_row_id, $local_row, $assistant_alias = null ) {
+
+    $from_row = chatbot_chatgpt_selected_row_instruction_text( $assistant_row_id, $local_row );
+    if ( null !== $from_row ) {
+        return $from_row;
+    }
+
+    $alias = is_string( $assistant_alias ) ? strtolower( trim( $assistant_alias ) ) : '';
+    if ( '' === $alias && function_exists( 'get_chatbot_chatgpt_transients' ) ) {
+        $stored_alias = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id, $session_id );
+        if ( is_string( $stored_alias ) ) {
+            $alias = strtolower( trim( $stored_alias ) );
+        }
+    }
+    if ( 'primary' === $alias || 'alternate' === $alias ) {
+        return chatbot_chatgpt_alias_instruction_text( $alias );
+    }
+
+    return chatbot_chatgpt_resolve_local_additional_instructions( $assistant_id, $user_id, $page_id, $session_id, $local_row );
+
+}
+
+/**
  * Resolve extra instructions: session transient, then kchat_settings, then the assistants table.
+ *
+ * Bridge pmpt_ requests still use this order for the developer message.
+ * OpenAI Local and asst_ requests use chatbot_chatgpt_resolve_openai_local_instructions().
  *
  * @param string $assistant_id
  * @param mixed  $user_id
@@ -394,25 +593,78 @@ function chatbot_chatgpt_build_responses_instructions( $local_row, $additional_i
 }
 
 /**
- * Model for asst_ Responses calls (prompt objects already include a model).
+ * Nonempty model on the assistants-table row this request already validated.
  *
- * @param mixed $user_id
- * @param mixed $page_id
- * @param mixed $session_id
+ * Row ID 0, a missing ID, and an ID that does not match the loaded row return
+ * an empty string. This never looks up another row by its external ID.
+ *
+ * @param mixed $assistant_row_id Validated row ID.
+ * @param mixed $local_row Row loaded for that ID, when already available.
  * @return string
  */
-function chatbot_chatgpt_resolve_responses_model( $user_id, $page_id, $session_id ) {
+function chatbot_chatgpt_responses_model_from_validated_row( $assistant_row_id, $local_row = null ) {
 
+    if ( ! function_exists( 'chatbot_chatgpt_normalize_assistant_row_id' ) ) {
+        return '';
+    }
+    $normalized = chatbot_chatgpt_normalize_assistant_row_id( $assistant_row_id );
+    if ( 'valid' !== $normalized['state'] || $normalized['id'] < 1 ) {
+        return '';
+    }
+
+    $row = null;
+    if ( is_array( $local_row ) && function_exists( 'chatbot_chatgpt_loaded_row_id' ) && chatbot_chatgpt_loaded_row_id( $local_row ) === $normalized['id'] ) {
+        $row = $local_row;
+    } elseif ( function_exists( 'get_chatbot_chatgpt_assistant_by_key' ) ) {
+        $loaded_row = get_chatbot_chatgpt_assistant_by_key( $normalized['id'] );
+        if ( is_array( $loaded_row ) && function_exists( 'chatbot_chatgpt_loaded_row_id' ) && chatbot_chatgpt_loaded_row_id( $loaded_row ) === $normalized['id'] ) {
+            $row = $loaded_row;
+        }
+    }
+
+    if ( ! is_array( $row ) || ! array_key_exists( 'model', $row ) || ! is_string( $row['model'] ) ) {
+        return '';
+    }
+    return trim( $row['model'] );
+
+}
+
+/**
+ * Model for an asst_ or Local pmpt_ Responses request.
+ *
+ * An explicit shortcode model wins only when model_explicit is exactly 1.
+ * Otherwise a nonempty model on the validated assistants-table row wins.
+ * A NULL row model uses the current ChatGPT Model Default. A model transient
+ * left by another platform, or by a shortcode rendered before the explicit
+ * flag existed, is not a fallback. Bridge pmpt_ requests do not call this.
+ *
+ * @param mixed $user_id User id.
+ * @param mixed $page_id Page id.
+ * @param mixed $session_id Session id.
+ * @param mixed $assistant_row_id Validated row ID. Absent values skip the row model.
+ * @param mixed $local_row Row loaded for that ID.
+ * @return string
+ */
+function chatbot_chatgpt_resolve_responses_model( $user_id, $page_id, $session_id, $assistant_row_id = null, $local_row = null ) {
+
+    $explicit = '';
     $model = '';
     if ( function_exists( 'get_chatbot_chatgpt_transients' ) ) {
+        $explicit = get_chatbot_chatgpt_transients( 'model_explicit', $user_id, $page_id, $session_id );
         $model = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id );
     }
-    if ( ! is_string( $model ) || trim( $model ) === '' ) {
-        $model = chatbot_chatgpt_resolve_openai_chat_model();
-    } else {
+    if ( '1' === $explicit && is_string( $model ) && '' !== trim( $model ) ) {
         $model = chatbot_chatgpt_resolve_openai_chat_model( $model );
+        return sanitize_text_field( (string) $model );
     }
 
+    $row_model = chatbot_chatgpt_responses_model_from_validated_row( $assistant_row_id, $local_row );
+    if ( '' !== $row_model ) {
+        $row_model = chatbot_chatgpt_resolve_openai_chat_model( $row_model );
+        return sanitize_text_field( (string) $row_model );
+    }
+
+    $model = chatbot_chatgpt_resolve_openai_chat_model();
     return sanitize_text_field( (string) $model );
 
 }
@@ -439,9 +691,9 @@ function chatbot_chatgpt_resolve_vector_store_ids( $local_row ) {
 }
 
 /* -------------------------------------------------------------------------
- * Main call used by the plugin (signature preserved)
+ * Main call used by the plugin
  * ------------------------------------------------------------------------- */
-function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null ) {
+function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null, $assistant_row_id = null, $assistant_alias = null, $conversation_row_scope = null, &$conversation_request = null ) {
 
     // DIAG - Diagnostics - Ver 2.4.5
     // back_trace('NOTICE', 'chatbot_chatgpt_custom_pmpt_call_api');
@@ -452,9 +704,10 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
     // - $assistant_id => Prompt ID (pmpt_...) or former Assistant ID (asst_...)
     // - $thread_id    => Conversation ID (cnv_...)
     // Variable names preserved for compatibility with the rest of the plugin.
-    // asst_ uses model + local instructions. pmpt_ still references the hosted
-    // prompt object until OpenAI retires v1/prompts (2026-11-30), with local
-    // Additional Instructions added as a developer message.
+    // asst_ uses model + local instructions. A pmpt_ row uses that same body
+    // only after an administrator explicitly selects Local mode. Bridge pmpt_
+    // requests still send prompt.id. Additional Instructions on Bridge are a
+    // developer message. Local mode puts them in instructions only.
 
     // Decrypt the API key if the plugin provides a helper.
     if ( function_exists( 'chatbot_chatgpt_decrypt_api_key' ) ) {
@@ -500,59 +753,73 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
 
     try {
 
-        // -----------------------------------------------------------------
-        // Step 1: Resolve or create the conversation (cnv_...)
-        // -----------------------------------------------------------------
-
-        // DIAG - Diagnostics - Ver 2.4.5
-        // back_trace('NOTICE', 'Step 1: Resolve or create the conversation (cnv_...)');
-        // back_trace('NOTICE', 'Message: ' . $message);
-        // back_trace('NOTICE', 'User ID: ' . $user_id);
-        // back_trace('NOTICE', 'Page ID: ' . $page_id);
-        // back_trace('NOTICE', 'Session ID: ' . $session_id);
-        // back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
-        // back_trace('NOTICE', 'Client Message ID: ' . $client_message_id);
-
-        if ( ! function_exists( 'chatbot_chatgpt_resolve_or_create_conversation_id' ) ) {
-            return __( 'Error: Conversation isolation is unavailable.', 'chatbot-chatgpt' );
+        $local_row = chatbot_chatgpt_get_responses_local_row( $prompt_id, $assistant_row_id );
+        $mode_result = chatbot_chatgpt_resolve_pmpt_responses_mode( $prompt_id, $assistant_row_id, $local_row );
+        if ( isset( $mode_result['result'] ) && 'error' === $mode_result['result'] ) {
+            return $mode_result['error'];
         }
+        $request_body = ( isset( $mode_result['result'] ) && 'local' === $mode_result['result'] ) ? 'local' : 'bridge';
 
-        $resolved_thread = chatbot_chatgpt_resolve_or_create_conversation_id(
-            $user_id,
-            $session_id,
-            $page_id,
-            $prompt_id,
-            $thread_id,
-            function () use ( $api_key, $user_id, $session_id, $page_id, $prompt_id, $timeout ) {
-                $safety_identifier = function_exists( 'chatbot_chatgpt_safety_identifier' )
-                    ? chatbot_chatgpt_safety_identifier( $user_id, $session_id )
-                    : '';
-                $meta = array(
-                    'safety_identifier' => $safety_identifier,
-                    'page_id'           => (string) $page_id,
-                    'prompt_id'         => (string) $prompt_id,
-                );
-                $conv = kchat_openai_create_conversation( $api_key, $meta, $timeout );
-                if ( isset( $conv['error'] ) ) {
-                    $msg = is_array( $conv['error'] ) ? ( $conv['error']['message'] ?? __( 'Conversation create failed.', 'chatbot-chatgpt' ) ) : __( 'Conversation create failed.', 'chatbot-chatgpt' );
-                    return new WP_Error( 'conversation_create_failed', $msg );
-                }
-                $created_id = isset( $conv['id'] ) ? (string) $conv['id'] : '';
-                if ( $created_id === '' ) {
-                    return new WP_Error( 'conversation_create_failed', __( 'Conversation created but missing ID.', 'chatbot-chatgpt' ) );
-                }
-                return $created_id;
+        // A null scope keeps the existing v1 conversation path. The queue and
+        // other callers omit this argument. Only a canonical scope string uses v2.
+        $use_conversation_v2 = false;
+        $conversation_v2_scope = '';
+        if ( null !== $conversation_row_scope ) {
+            if ( ! is_string( $conversation_row_scope ) || ! function_exists( 'chatbot_chatgpt_conversation_v2_row_scope' ) ) {
+                return __( 'Error: Unauthorized access to conversation.', 'chatbot-chatgpt' );
             }
-        );
-
-        if ( is_wp_error( $resolved_thread ) ) {
-            return sprintf(
-                /* translators: %s: API error message */
-                __( 'Error: %s', 'chatbot-chatgpt' ),
-                $resolved_thread->get_error_message()
-            );
+            $conversation_v2_scope = chatbot_chatgpt_conversation_v2_row_scope( $conversation_row_scope );
+            if ( '' === $conversation_v2_scope ) {
+                return __( 'Error: Unauthorized access to conversation.', 'chatbot-chatgpt' );
+            }
+            $use_conversation_v2 = true;
         }
-        $thread_id = $resolved_thread;
+
+        $create_conversation = function () use ( $api_key, $user_id, $session_id, $page_id, $prompt_id, $timeout ) {
+            $safety_identifier = function_exists( 'chatbot_chatgpt_safety_identifier' )
+                ? chatbot_chatgpt_safety_identifier( $user_id, $session_id )
+                : '';
+            $meta = array(
+                'safety_identifier' => $safety_identifier,
+                'page_id'           => (string) $page_id,
+                'prompt_id'         => (string) $prompt_id,
+            );
+            $conv = kchat_openai_create_conversation( $api_key, $meta, $timeout );
+            if ( isset( $conv['error'] ) ) {
+                $msg = is_array( $conv['error'] ) ? ( $conv['error']['message'] ?? __( 'Conversation create failed.', 'chatbot-chatgpt' ) ) : __( 'Conversation create failed.', 'chatbot-chatgpt' );
+                return new WP_Error( 'conversation_create_failed', $msg );
+            }
+            $created_id = isset( $conv['id'] ) ? (string) $conv['id'] : '';
+            if ( $created_id === '' ) {
+                return new WP_Error( 'conversation_create_failed', __( 'Conversation created but missing ID.', 'chatbot-chatgpt' ) );
+            }
+            return $created_id;
+        };
+
+        // v1 still honors a caller-supplied conversation id. v2 does not.
+        if ( ! $use_conversation_v2 ) {
+            if ( ! function_exists( 'chatbot_chatgpt_resolve_or_create_conversation_id' ) ) {
+                return __( 'Error: Conversation isolation is unavailable.', 'chatbot-chatgpt' );
+            }
+
+            $resolved_thread = chatbot_chatgpt_resolve_or_create_conversation_id(
+                $user_id,
+                $session_id,
+                $page_id,
+                $prompt_id,
+                $thread_id,
+                $create_conversation
+            );
+
+            if ( is_wp_error( $resolved_thread ) ) {
+                return sprintf(
+                    /* translators: %s: API error message */
+                    __( 'Error: %s', 'chatbot-chatgpt' ),
+                    $resolved_thread->get_error_message()
+                );
+            }
+            $thread_id = $resolved_thread;
+        }
 
         // -----------------------------------------------------------------
         // Step 2: Create the model response (Responses API)
@@ -635,18 +902,21 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
             ? chatbot_chatgpt_id_starts_with( $prompt_id, 'pmpt_' )
             : ( strpos( $prompt_id, 'pmpt_' ) === 0 );
 
-        $local_row = chatbot_chatgpt_get_responses_local_row( $prompt_id );
-        $additional_instructions = chatbot_chatgpt_resolve_local_additional_instructions( $prompt_id, $user_id, $page_id, $session_id, $local_row );
+        $bridge_instructions = chatbot_chatgpt_resolve_local_additional_instructions( $prompt_id, $user_id, $page_id, $session_id, $local_row );
+        $additional_instructions = $bridge_instructions;
+        if ( ! $is_prompt || 'local' === $request_body ) {
+            $additional_instructions = chatbot_chatgpt_resolve_openai_local_instructions( $prompt_id, $user_id, $page_id, $session_id, $assistant_row_id, $local_row, $assistant_alias );
+        }
 
-        // Prompt objects already carry dashboard instructions. Extra WordPress
-        // instructions are additive so they do not replace the hosted prompt.
-        if ( $is_prompt && $additional_instructions !== '' ) {
+        // Bridge keeps hosted-prompt instructions and adds WordPress text beside
+        // them. Local mode sends that text once, in the instructions field.
+        if ( chatbot_chatgpt_pmpt_bridge_adds_developer_message( $prompt_id, $request_body, $bridge_instructions ) ) {
             array_unshift(
                 $input_payload,
                 array(
                     'type'    => 'message',
                     'role'    => 'developer',
-                    'content' => $additional_instructions,
+                    'content' => $bridge_instructions,
                 )
             );
         }
@@ -668,32 +938,48 @@ function chatbot_chatgpt_custom_pmpt_call_api( $api_key, $message, $assistant_id
             $payload['safety_identifier'] = $safety_identifier;
         }
 
-        if ( $is_prompt ) {
-            // Temporary bridge: hosted prompt objects shut down 2026-11-30.
-            $payload['prompt'] = array(
-                'id' => $prompt_id,
-            );
-        } else {
-            $model = chatbot_chatgpt_resolve_responses_model( $user_id, $page_id, $session_id );
-            if ( $model === '' ) {
-                return __( 'Error: Missing model. Set a ChatGPT model in Settings before using an Assistant ID (asst_...).', 'chatbot-chatgpt' );
-            }
-            $payload['model'] = $model;
-            $instructions = chatbot_chatgpt_build_responses_instructions( $local_row, $additional_instructions );
-            if ( $instructions !== '' ) {
-                $payload['instructions'] = $instructions;
-            }
+        $model = '';
+        if ( ! $is_prompt || 'local' === $request_body ) {
+            $model = chatbot_chatgpt_resolve_responses_model( $user_id, $page_id, $session_id, $assistant_row_id, $local_row );
+        }
+        $payload = chatbot_chatgpt_apply_responses_assistant_fields( $payload, $prompt_id, $local_row, $additional_instructions, $model, $request_body );
+        if ( null === $payload ) {
+            return __( 'Error: Missing model. Set a ChatGPT model in Settings before using Local mode or an Assistant ID (asst_...).', 'chatbot-chatgpt' );
         }
 
-        $vector_store_ids = chatbot_chatgpt_resolve_vector_store_ids( $local_row );
-        if ( ! empty( $vector_store_ids ) ) {
-            $payload['tools'] = array(
-                array(
-                    'type'             => 'file_search',
-                    'vector_store_ids' => $vector_store_ids,
-                    'max_num_results'  => 8,
-                ),
+        if ( $use_conversation_v2 ) {
+            $fingerprint_mode = 'assistant';
+            if ( $is_prompt ) {
+                $fingerprint_mode = ( 'local' === $request_body ) ? 'local' : 'bridge';
+            }
+            $fingerprint = chatbot_chatgpt_conversation_v2_fingerprint_from_payload( $fingerprint_mode, $payload );
+            if ( '' === $fingerprint ) {
+                return __( 'Error: Conversation could not be stored.', 'chatbot-chatgpt' );
+            }
+            $resolved_thread = chatbot_chatgpt_conversation_v2_acquire(
+                $user_id,
+                $session_id,
+                $page_id,
+                $prompt_id,
+                $conversation_v2_scope,
+                $fingerprint,
+                $create_conversation
             );
+            if ( is_wp_error( $resolved_thread ) ) {
+                return sprintf(
+                    /* translators: %s: API error message */
+                    __( 'Error: %s', 'chatbot-chatgpt' ),
+                    $resolved_thread->get_error_message()
+                );
+            }
+            $thread_id = $resolved_thread['id'];
+            $payload['conversation'] = $thread_id;
+            if ( isset( $resolved_thread['generation'] ) && is_string( $resolved_thread['generation'] ) ) {
+                $conversation_request = array(
+                    'id'         => $thread_id,
+                    'generation' => $resolved_thread['generation'],
+                );
+            }
         }
 
         // DIAG - Diagnostics - Ver 2.4.5

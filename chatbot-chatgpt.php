@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.5.5
+ * Version:     2.5.6
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * Text Domain: chatbot-chatgpt
@@ -28,7 +28,7 @@
  * along with Kognetiks Chatbot. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  * 
  * @package chatbot-chatgpt
- * @version 2.5.5
+ * @version 2.5.6
  * @author Kognetiks.com
  */
 
@@ -95,7 +95,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.5.5';
+$chatbot_chatgpt_plugin_version = '2.5.6';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -132,6 +132,9 @@ global $wpdb;
 // Uniquely Identify the Visitor
 global $session_id;
 global $user_id;
+
+// Row 0 and positive assistants-table IDs. Loaded before queue items are built.
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assistant-row-id.php';
 
 // Signed visitor cookies and isolated conversation keys. Loaded before the
 // cookie helpers run at plugin load and on init.
@@ -261,6 +264,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-keyguard.ph
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php';      // Globals - Ver 1.9.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php';                       // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php';                        // Functions - Ver 1.9.4
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-pmpt-retirement-notice.php';       // Prompt Object retirement notice - Ver 2.5.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-options-helper.php';               // Functions - Ver 2.0.5
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-threads.php';                      // Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients-file.php';              // Ver 1.9.2
@@ -455,7 +459,7 @@ $chatbot_platforms = array(
     'Google'       => array(
         'option'        => 'chatbot_google_api_enabled',
         'model_option'  => 'chatbot_google_model_choice',
-        'default_model' => 'gemini-2.0-flash',
+        'default_model' => chatbot_google_default_model(),
     ),
     'Markov Chain' => array(
         'option'        => 'chatbot_markov_chain_api_enabled',
@@ -588,7 +592,8 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Enqueue the scripts
     wp_enqueue_script('jquery');
     wp_enqueue_script('chatbot-chatgpt-transcript-download', plugins_url('assets/js/chatbot-transcript-download.js', __FILE__), array(), $chatbot_chatgpt_plugin_version, true);
-    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery', 'chatbot-chatgpt-transcript-download'), $chatbot_chatgpt_plugin_version, true);
+    wp_enqueue_script('chatbot-chatgpt-conversation-browser', plugins_url('assets/js/chatbot-conversation-browser.js', __FILE__), array(), $chatbot_chatgpt_plugin_version, true);
+    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery', 'chatbot-chatgpt-transcript-download', 'chatbot-chatgpt-conversation-browser'), $chatbot_chatgpt_plugin_version, true);
 
     // Enqueue DOMPurify - Ver 1.8.1
     // https://raw.githubusercontent.com/cure53/DOMPurify/main/dist/purify.min.js
@@ -989,7 +994,7 @@ function chatbot_chatgpt_process_queued_message($message_data) {
 
             $api_key = esc_attr(get_option('chatbot_google_api_key'));
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
-            $model = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
+            $model = esc_attr( chatbot_google_resolve_model() );
             break;
 
         case 'Markov Chain':
@@ -1041,13 +1046,47 @@ function chatbot_chatgpt_process_queued_message($message_data) {
     $model = $kchat_settings['model'] ?: $model;
     $additional_instructions = $kchat_settings['additional_instructions'];
     $chatbot_chatgpt_assistant_alias = $kchat_settings['chatbot_chatgpt_assistant_alias'];
+    $openai_instruction_alias = is_string( $chatbot_chatgpt_assistant_alias ) ? $chatbot_chatgpt_assistant_alias : '';
 
     // DIAG - Diagnostics - Ver 2.4.5
     // back_trace('NOTICE', '$kchat_settings[\'chatbot_chatgpt_assistant_alias\']: ' . $kchat_settings['chatbot_chatgpt_assistant_alias']);
     // back_trace('NOTICE', '$kchat_settings[\'assistant_id\']: ' . $kchat_settings['assistant_id']);
     
-    // Override assistant_id from transient if available - Ver 2.3.6
-    if (!empty($kchat_settings['assistant_id'])) {
+    // A queued item keeps the assistant and row it was given. A later page
+    // render must not replace either one. An item with no row field is absent,
+    // not the page's current row.
+    $responses_row_id = null;
+    $queue_identity_locked = false;
+    $queue_v2_scope = null;
+    if ( is_array( $message_data ) && array_key_exists( 'assistant_row_id', $message_data ) ) {
+        $queue_row_decision = chatbot_chatgpt_validate_queued_assistant_row( $message_data, 'get_chatbot_chatgpt_assistant_by_key' );
+        if ( 'rejected' === $queue_row_decision['result'] ) {
+            return $queue_row_decision['error'];
+        }
+        if ( 'trusted' !== $queue_row_decision['result'] ) {
+            return chatbot_chatgpt_assistant_row_unavailable_message();
+        }
+        $queue_v2_scope = chatbot_chatgpt_conversation_v2_row_scope( $queue_row_decision );
+        if ( '' === $queue_v2_scope ) {
+            return chatbot_chatgpt_assistant_row_unavailable_message();
+        }
+        $queue_identity_locked = true;
+        if ( isset( $message_data['assistant_id'] ) && is_string( $message_data['assistant_id'] ) ) {
+            $assistant_id = $message_data['assistant_id'];
+            $chatbot_chatgpt_assistant_alias = $assistant_id;
+        }
+        $responses_row_id = chatbot_chatgpt_responses_row_id_from_decision( $queue_row_decision );
+    } elseif ( is_array( $message_data ) ) {
+        $queue_identity_locked = true;
+        $queue_v2_scope = 'absent';
+        if ( isset( $message_data['assistant_id'] ) && is_string( $message_data['assistant_id'] ) && '' !== $message_data['assistant_id'] ) {
+            $assistant_id = $message_data['assistant_id'];
+            $chatbot_chatgpt_assistant_alias = $assistant_id;
+        }
+    }
+
+    // A locked queue item does not take the page transient's assistant.
+    if ( ! $queue_identity_locked && !empty($kchat_settings['assistant_id'])) {
         $assistant_id = $kchat_settings['assistant_id'];
     }
 
@@ -1058,24 +1097,38 @@ function chatbot_chatgpt_process_queued_message($message_data) {
     $use_assistant_id = $assistant_resolution['use_assistant_id'];
 
     // Assistants / prompts / agents are only implemented for OpenAI, Azure, and Mistral.
-    if ($use_assistant_id === 'Yes'
-        && !in_array($chatbot_ai_platform_choice, array('OpenAI', 'Azure OpenAI', 'Mistral'), true)) {
-        $use_assistant_id = 'No';
+    // The assistants-table row ID is not part of this decision.
+    $use_assistant_id = chatbot_chatgpt_use_assistant_id_for_platform( $chatbot_ai_platform_choice, $use_assistant_id );
+
+    if ( $queue_identity_locked ) {
+        $openai_instruction_alias = is_string( $chatbot_chatgpt_assistant_alias ) ? $chatbot_chatgpt_assistant_alias : '';
     }
 
-    // Persist resolved ids so conversation log and later requests stay in sync
-    if ( ! empty( $assistant_id ) && $assistant_id !== 'original' ) {
+    // Persist resolved ids so conversation log and later requests stay in sync.
+    // A legacy absent item must not replace a different assistant already stored
+    // for this page.
+    $stored_queue_assistant = ( isset( $kchat_settings['assistant_id'] ) && is_string( $kchat_settings['assistant_id'] ) ) ? $kchat_settings['assistant_id'] : '';
+    $legacy_queue_keeps_page_assistant = ( 'absent' === $queue_v2_scope && '' !== $stored_queue_assistant && $stored_queue_assistant !== $assistant_id );
+    if ( ! $legacy_queue_keeps_page_assistant && ! empty( $assistant_id ) && $assistant_id !== 'original' ) {
         set_chatbot_chatgpt_transients( 'assistant_id', $assistant_id, $user_id, $page_id, $session_id, null );
         set_chatbot_chatgpt_transients( 'assistant_alias', $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
     }
 
-    // Get thread information and log AFTER resolving assistant_id - Ver 2.3.7
-    $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
+    $queue_use_responses_v2 = is_string( $queue_v2_scope )
+        && '' !== $queue_v2_scope
+        && chatbot_chatgpt_routes_openai_responses( $chatbot_ai_platform_choice, $use_assistant_id, $assistant_id );
+
+    // Other providers still log the v1 thread before the call. OpenAI
+    // Responses logs the id acquired for this queued request.
+    $thread_id = '';
+    if ( ! $queue_use_responses_v2 ) {
+        $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
+    }
 
     // Process the message based on platform and use_assistant_id - Ver 2.3.6   
     // Check if we should use assistant_id or regular API
-    if ($use_assistant_id == 'Yes' && $chatbot_ai_platform_choice == 'OpenAI' && (str_starts_with($assistant_id, 'asst_') || str_starts_with($assistant_id, 'pmpt_'))) {
+    if ( chatbot_chatgpt_routes_openai_responses( $chatbot_ai_platform_choice, $use_assistant_id, $assistant_id ) ) {
         
         // DIAG - Diagnostics - Ver 2.4.5
         // back_trace('NOTICE', 'Using Responses API for Assistant/Prompt ID - Ver 2.4.8');
@@ -1083,7 +1136,13 @@ function chatbot_chatgpt_process_queued_message($message_data) {
         // back_trace('NOTICE', 'Use Assistant ID: ' . $use_assistant_id);
         // back_trace('NOTICE', 'Chatbot ChatGPT Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
 
-        $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
+        $queued_v2_request = null;
+        $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, '', $session_id, $user_id, $page_id, $client_message_id, $responses_row_id, $openai_instruction_alias, $queue_v2_scope, $queued_v2_request);
+        $thread_id = '';
+        if ( is_array( $queued_v2_request ) && isset( $queued_v2_request['id'] ) && is_string( $queued_v2_request['id'] ) ) {
+            $thread_id = $queued_v2_request['id'];
+        }
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
 
     } elseif ($use_assistant_id == 'Yes' && $chatbot_ai_platform_choice == 'Azure OpenAI') {
 
@@ -1416,7 +1475,7 @@ function chatbot_chatgpt_send_message() {
             $api_key = esc_attr(get_option('chatbot_google_api_key'));
             // Decrypt the API key - Ver 2.3.9
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
-            $model = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
+            $model = esc_attr( chatbot_google_resolve_model() );
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             break;
@@ -1562,6 +1621,7 @@ function chatbot_chatgpt_send_message() {
     
     $additional_instructions = $kchat_settings['additional_instructions'];
     $chatbot_chatgpt_assistant_alias = $kchat_settings['chatbot_chatgpt_assistant_alias'];
+    $openai_instruction_alias = is_string( $chatbot_chatgpt_assistant_alias ) ? $chatbot_chatgpt_assistant_alias : '';
 
     $assistant_id = isset($kchat_settings['assistant_id']) ? $kchat_settings['assistant_id'] : '';
     $thread_Id = isset($kchat_settings['thread_id']) ? $kchat_settings['thread_id'] : '';
@@ -1569,19 +1629,21 @@ function chatbot_chatgpt_send_message() {
 
     $voice = isset($kchat_settings['chatbot_chatgpt_voice_option']) ? $kchat_settings['chatbot_chatgpt_voice_option'] : '';
 
-    // Fallback to POST assistant_id when transient is missing/stale (page cache) - Ver 2.3.7
-    if ( isset( $_POST['assistant_id'] ) ) {
-        $posted_assistant_id = sanitize_text_field( wp_unslash( $_POST['assistant_id'] ) );
-        if ( chatbot_chatgpt_is_specialized_assistant_id( $posted_assistant_id )
-            && ( empty( $assistant_id ) || $assistant_id === 'original' ) ) {
-            $assistant_id = $posted_assistant_id;
-            $kchat_settings['assistant_id'] = $posted_assistant_id;
-            if ( empty( $chatbot_chatgpt_assistant_alias ) || $chatbot_chatgpt_assistant_alias === 'original' ) {
-                $chatbot_chatgpt_assistant_alias = $posted_assistant_id;
-                $kchat_settings['chatbot_chatgpt_assistant_alias'] = $posted_assistant_id;
-            }
-        }
-    }
+    // A stored assistant, including explicit "original", is not replaced by POST.
+    // A missing assistant may be filled in memory. Nothing is stored until the
+    // row selection is accepted.
+    $posted_assistant_present = isset( $_POST['assistant_id'] );
+    $posted_assistant_id = $posted_assistant_present ? sanitize_text_field( wp_unslash( $_POST['assistant_id'] ) ) : '';
+    $merged_assistant = chatbot_chatgpt_merge_posted_assistant_selection(
+        $assistant_id,
+        $chatbot_chatgpt_assistant_alias,
+        $posted_assistant_present,
+        $posted_assistant_id
+    );
+    $assistant_id = $merged_assistant['assistant_id'];
+    $chatbot_chatgpt_assistant_alias = $merged_assistant['assistant_alias'];
+    $kchat_settings['assistant_id'] = $assistant_id;
+    $kchat_settings['chatbot_chatgpt_assistant_alias'] = $chatbot_chatgpt_assistant_alias;
 
     // Resolve specialized ids before locking / logging so pmpt_ is not left as "original"
     $assistant_resolution = chatbot_chatgpt_resolve_assistant_identity( $assistant_id, $chatbot_chatgpt_assistant_alias );
@@ -1591,9 +1653,51 @@ function chatbot_chatgpt_send_message() {
 
     // Assistants / prompts / agents are only implemented for OpenAI, Azure, and Mistral.
     // Ignore asst_/pmpt_/ag: on Transformer and other chat-only platforms.
-    if ($use_assistant_id === 'Yes'
-        && !in_array($chatbot_ai_platform_choice, array('OpenAI', 'Azure OpenAI', 'Mistral'), true)) {
-        $use_assistant_id = 'No';
+    // The assistants-table row ID is not part of this decision.
+    $use_assistant_id = chatbot_chatgpt_use_assistant_id_for_platform( $chatbot_ai_platform_choice, $use_assistant_id );
+
+    $posted_row_present = array_key_exists( 'assistant_row_id', $_POST );
+    $posted_row_value = $posted_row_present ? wp_unslash( $_POST['assistant_row_id'] ) : null;
+    $server_row_raw = get_chatbot_chatgpt_transients( 'assistant_row_id', $user_id, $page_id, $session_id );
+    $server_row_present = ( '' !== $server_row_raw );
+    $row_decision = chatbot_chatgpt_validate_assistant_row_selection(
+        $posted_row_present,
+        $posted_row_value,
+        $server_row_present,
+        $server_row_present ? $server_row_raw : null,
+        $assistant_id,
+        'get_chatbot_chatgpt_assistant_by_key'
+    );
+    if ( 'rejected' === $row_decision['result'] ) {
+        wp_send_json_error( $row_decision['error'] );
+        return;
+    }
+    $responses_row_id = chatbot_chatgpt_responses_row_id_from_decision( $row_decision );
+
+    // OpenAI Responses keeps a stored canonical row when the posted field is
+    // omitted. The same positive id is passed into instruction, model, and
+    // vector-store resolution. Other platforms do not use this scope.
+    $responses_v2_scope = null;
+    $responses_v2_generation = '';
+    if ( 'OpenAI' === $chatbot_ai_platform_choice
+        && 'Yes' === $use_assistant_id
+        && function_exists( 'chatbot_chatgpt_routes_openai_responses' )
+        && chatbot_chatgpt_routes_openai_responses( $chatbot_ai_platform_choice, $use_assistant_id, $assistant_id ) ) {
+        $v2_scope_decision = chatbot_chatgpt_conversation_v2_request_scope( $row_decision, $server_row_raw, $server_row_present, $assistant_id, 'get_chatbot_chatgpt_assistant_by_key' );
+        if ( 'ok' !== $v2_scope_decision['result'] ) {
+            $scope_error = ( isset( $v2_scope_decision['error'] ) && is_string( $v2_scope_decision['error'] ) && '' !== $v2_scope_decision['error'] )
+                ? $v2_scope_decision['error']
+                : 'Error: The assistant selection could not be confirmed.';
+            wp_send_json_error( $scope_error );
+            return;
+        }
+        $responses_v2_scope = $v2_scope_decision['scope'];
+        if ( null === $responses_row_id && is_string( $responses_v2_scope ) ) {
+            $retained_row_id = (int) $responses_v2_scope;
+            if ( $retained_row_id > 0 && (string) $retained_row_id === $responses_v2_scope ) {
+                $responses_row_id = $retained_row_id;
+            }
+        }
     }
 
     if ( ! empty( $assistant_id ) && $assistant_id !== 'original' ) {
@@ -1703,7 +1807,7 @@ function chatbot_chatgpt_send_message() {
         $thread_id = '';
 
         // Send message to ChatGPT API - Ver 1.6.7
-        $response = chatbot_chatgpt_call_flow_api($api_key, $message);
+        $response = chatbot_chatgpt_call_flow_api($api_key, $message, null, null, null, null, null, $responses_row_id);
 
         delete_transient($conv_lock);
         chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
@@ -1712,8 +1816,11 @@ function chatbot_chatgpt_send_message() {
 
     } elseif ($use_assistant_id == 'Yes') {
 
-        $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
+        $log_responses_v2 = is_string( $responses_v2_scope );
+        if ( ! $log_responses_v2 ) {
+            $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
+        }
 
         // Send message to Custom GPT API - Ver 1.6.7
         $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
@@ -1722,9 +1829,18 @@ function chatbot_chatgpt_send_message() {
         if ($chatbot_ai_platform_choice == 'OpenAI') {
 
             // Former Assistants (asst_) and hosted Prompts (pmpt_) both use Responses.
-            if (str_starts_with($assistant_id, 'asst_') || str_starts_with($assistant_id, 'pmpt_')) {
+            if ( chatbot_chatgpt_routes_openai_responses( $chatbot_ai_platform_choice, $use_assistant_id, $assistant_id ) ) {
 
-                $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
+                $responses_v2_request = null;
+                $response = chatbot_chatgpt_custom_pmpt_call_api($api_key, $message, $assistant_id, '', $session_id, $user_id, $page_id, $client_message_id, $responses_row_id, $openai_instruction_alias, $responses_v2_scope, $responses_v2_request);
+                $thread_id = '';
+                if ( is_array( $responses_v2_request ) && isset( $responses_v2_request['id'] ) && is_string( $responses_v2_request['id'] ) ) {
+                    $thread_id = $responses_v2_request['id'];
+                }
+                if ( is_array( $responses_v2_request ) && isset( $responses_v2_request['generation'] ) && is_string( $responses_v2_request['generation'] ) ) {
+                    $responses_v2_generation = $responses_v2_request['generation'];
+                }
+                append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
 
             } else {
 
@@ -1760,7 +1876,9 @@ function chatbot_chatgpt_send_message() {
             $response = $response . '<br><br>' . chatbot_chatgpt_enhance_with_tfidf($message);
         }
 
-        $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+        if ( ! is_string( $responses_v2_scope ) ) {
+            $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+        }
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, null, $response);
 
         // Clean (erase) the output buffer - Ver 1.6.8
@@ -1803,7 +1921,19 @@ function chatbot_chatgpt_send_message() {
 
             chatbot_chatgpt_remember_last_assistant_message( $session_id, $response );
             
-            // Send success response
+            // Send success response. OpenAI Responses keeps the message string and
+            // adds the conversation id and generation this request sent.
+            if ( is_string( $responses_v2_scope ) && chatbot_chatgpt_routes_openai_responses( $chatbot_ai_platform_choice, $use_assistant_id, $assistant_id ) ) {
+                wp_send_json_success(
+                    array(
+                        'message'                  => $response,
+                        'conversation_generation'  => $responses_v2_generation,
+                        'assistant_id'             => (string) $assistant_id,
+                        'row_scope'                => $responses_v2_scope,
+                    )
+                );
+                return;
+            }
             wp_send_json_success($response);
 
         }

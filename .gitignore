@@ -7,6 +7,7 @@
 
 # Datasource local storage ignored files
 .vscode
+.cursor/
 .snyk
 # .snykignore should be committed to help with Snyk bundle size
 # .snykignore

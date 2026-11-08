@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Call the ChatGPT API
-function chatbot_chatgpt_call_flow_api($api_key, $message, $user_id = null, $page_id = null, $session_id = null, $assistant_id = null, $client_message_id = null) {
+function chatbot_chatgpt_call_flow_api($api_key, $message, $user_id = null, $page_id = null, $session_id = null, $assistant_id = null, $client_message_id = null, $assistant_row_id = null) {
 
     global $wpdb;
 
@@ -93,7 +93,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message, $user_id = null, $pag
         // Call the ChatGPT Assistant API
         $api_key = ''; // Not needed as this is stored in the assistant
         $thread_id = ''; // Not needed as this is the end of the script so no thread_id
-        $message = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id);
+        $message = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, null, $assistant_row_id);
 
     } else {
 
