@@ -4,7 +4,7 @@
 
 The **Kognetiks Chatbot** is a comprehensive WordPress plugin that integrates advanced AI capabilities into WordPress websites. It provides intelligent conversational experiences through multiple AI platforms, offering both cloud-based and local AI solutions for enhanced visitor engagement, customer support, and interactive assistance.
 
-**Version:** 2.5.6
+**Version:** 2.5.7
 **License:** GPLv3 or later  
 **WordPress Compatibility:** Tested up to WordPress 7.1.4
 
@@ -564,6 +564,14 @@ Users must agree to terms of service for each AI platform:
 - **JAN.AI**: JAN.AI About and Privacy Policy
 
 ## Version History
+
+## What's new in Version 2.5.7 - Released 2026-11-09
+
+### Bug Fixes
+
+* **Save Settings on GPT Assistants**: Assistant ID and Common Name on the new-assistant row were marked required for the whole settings form, so the browser blocked Save Settings until both were filled in. Those fields are required only when you click Add New Assistant.
+* **Responses API errors**: An OpenAI error, such as a missing vector store, was saved in the conversation log and then replaced with the generic visitor message. It was not written to the error log. The API message is now recorded with prod_trace before that replacement.
+
 
 ## What's new in Version 2.5.6 - Released 2026-11-07
 

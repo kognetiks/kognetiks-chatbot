@@ -40,22 +40,13 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 **NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider's pricing and usage policies before proceeding.
 
-## What's new in Version 2.5.6 - Released 2026-11-07
-
-### New Features
-* **Local mode for hosted prompts**: OpenAI retires hosted Prompt Objects (`pmpt_`) on 30 November 2026. Manage Assistants can keep a prompt on Bridge, which still sends the hosted prompt, or switch it to Local, which sends the model, Additional Instructions, and vector stores saved in WordPress. Existing prompts stay on Bridge until you save Local mode. The update leaves hosted instructions, models, and tools where they are, so copy what you need before you switch.
-* **Prompt retirement notice**: While a `pmpt_` row still needs that migration, administrators see a warning with a link to the Local mode guide. Dismiss applies to the current set of rows. A later return to Bridge shows the warning again.
-
-### Improvements
-* **Manage Assistants**: Each saved assistant opens in a Details panel for appearance, messages, knowledge, and Hosted Prompt Mode. One row can store several vector store IDs, separated by commas.
-* **Per-assistant model**: A GPT Assistants row can save its own model, or follow the site ChatGPT Model Default. A `model` attribute on the shortcode overrides the row model. Bridge keeps using the hosted prompt's model.
-* **Shared assistant IDs**: Requests carry the assistants-table row, so two rows that share an assistant ID each keep their own configuration.
-* **OpenAI conversation continuity**: The next message starts a new Responses conversation when the effective mode, model, instructions, or file search changes. The reply is written to the conversation that produced it. Clearing that chatbot drops a reply still in flight, and an older reply is discarded once a newer one is underway.
-* **Gemini models**: Google no longer serves Gemini 2.0 Flash. A saved `gemini-2.0-flash` id is rewritten to `gemini-3.8-flash`. Gemini 3 requests omit temperature, which those models reject.
+## What's new in Version 2.5.7 - Released 2026-11-09
 
 ### Bug Fixes
-* **Assistant text on save**: Quotes, apostrophes, and intentional backslashes in assistant settings changed on every save because WordPress slashes form data. They now stay as entered.
-* **Numbered shortcodes**: `[chatbot-n]`, `[assistant-n]`, and `[agent-n]` were registered for every number up to the highest row id. One high id could exhaust memory. Only saved rows are registered now.
+
+* **Save Settings on GPT Assistants**: Assistant ID and Common Name on the new-assistant row were marked required for the whole settings form, so the browser blocked Save Settings until both were filled in. Those fields are required only when you click Add New Assistant.
+* **Responses API errors**: An OpenAI error, such as a missing vector store, was saved in the conversation log and then replaced with the generic visitor message. It was not written to the error log. The API message is now recorded with prod_trace before that replacement.
+
 
 * Information about past updates can be found [here](updates/updates.md).
 

@@ -166,8 +166,6 @@ When that happens, Freemius may receive the site URL, WordPress version, PHP ver
 
 - **License URI:** [https://www.gnu.org/licenses/gpl-3.0.html](https://www.gnu.org/licenses/gpl-3.0.html)
 
-
-
 ## Support
 
 Need help? Visit [https://kognetiks.com/plugin-support/](https://kognetiks.com/plugin-support/)
