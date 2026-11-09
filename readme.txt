@@ -193,7 +193,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.5.7 - Released TBD =
+= 2.5.7 - Released 2026-11-09 =
 
 ### Bug Fixes
 * **Save Settings on GPT Assistants**: Assistant ID and Common Name on the new-assistant row were marked required for the whole settings form, so the browser blocked Save Settings until both were filled in. Those fields are required only when you click Add New Assistant.

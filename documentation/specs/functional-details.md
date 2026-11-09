@@ -565,11 +565,13 @@ Users must agree to terms of service for each AI platform:
 
 ## Version History
 
-## What's nwe in Version 2.5.7 - Released TBD
+## What's new in Version 2.5.7 - Released 2026-11-09
 
 ### Bug Fixes
 
-* **TBD**: TBD
+* **Save Settings on GPT Assistants**: Assistant ID and Common Name on the new-assistant row were marked required for the whole settings form, so the browser blocked Save Settings until both were filled in. Those fields are required only when you click Add New Assistant.
+* **Responses API errors**: An OpenAI error, such as a missing vector store, was saved in the conversation log and then replaced with the generic visitor message. It was not written to the error log. The API message is now recorded with prod_trace before that replacement.
+
 
 ## What's new in Version 2.5.6 - Released 2026-11-07
 

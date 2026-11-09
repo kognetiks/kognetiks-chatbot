@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Kognetiks Chatbot 2.5.6\n"
+"Project-Id-Version: Kognetiks Chatbot 2.5.7\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/chatbot-chatgpt\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-07T01:58:52+01:00\n"
+"POT-Creation-Date: 2026-11-09T15:32:12+01:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: chatbot-chatgpt\n"
@@ -92,7 +92,7 @@ msgstr ""
 #. translators: %s: API error message
 #: includes/chatbot-call-openai-api-responses.php:817
 #: includes/chatbot-call-openai-api-responses.php:971
-#: includes/chatbot-call-openai-api-responses.php:1004
+#: includes/chatbot-call-openai-api-responses.php:1014
 #, php-format
 msgid "Error: %s"
 msgstr ""
@@ -113,11 +113,11 @@ msgstr ""
 msgid "OpenAI error."
 msgstr ""
 
-#: includes/chatbot-call-openai-api-responses.php:1041
+#: includes/chatbot-call-openai-api-responses.php:1051
 msgid "Error: This Prompt triggered tool calls. Update the Prompt to disable tools for this chat endpoint, or implement a tool-call orchestration loop for Responses."
 msgstr ""
 
-#: includes/chatbot-call-openai-api-responses.php:1044
+#: includes/chatbot-call-openai-api-responses.php:1054
 msgid "Error: Empty response from OpenAI."
 msgstr ""
 
@@ -492,7 +492,7 @@ msgid "Dismiss this notice."
 msgstr ""
 
 #: includes/utilities/chatbot-assistants.php:841
-msgid "Assistant ID and Common Name, in the row above, are required. Fill those in, then review the settings below, before adding the assistant."
+msgid "Assistant ID and Common Name, in the row above, are required when you click Add New Assistant. Fill those in, then review the settings below, before adding the assistant."
 msgstr ""
 
 #: includes/utilities/chatbot-assistants.php:843
@@ -628,7 +628,7 @@ msgid "Click Update to save one assistant, Delete to remove it, or Details to sh
 msgstr ""
 
 #: includes/utilities/chatbot-assistants.php:1079
-msgid "The new assistant form stays open at the bottom of the table. Assistant ID and Common Name are required. The assistant is not created until both are filled in."
+msgid "The new assistant form stays open at the bottom of the table. Assistant ID and Common Name are required when you click Add New Assistant. The assistant is created only after both are filled in."
 msgstr ""
 
 #. translators: 1: Vector Store ID label, 2: vs_ ID prefix example
@@ -789,35 +789,35 @@ msgstr ""
 msgid "Save prompt mode"
 msgstr ""
 
-#: includes/utilities/chatbot-pmpt-retirement-notice.php:249
+#: includes/utilities/chatbot-pmpt-retirement-notice.php:257
 msgid "Kognetiks Chatbot — Action Required"
 msgstr ""
 
 #. translators: %s: retirement date
-#: includes/utilities/chatbot-pmpt-retirement-notice.php:252
+#: includes/utilities/chatbot-pmpt-retirement-notice.php:260
 #, php-format
 msgid "OpenAI Prompt Objects retire on %s."
 msgstr ""
 
-#: includes/utilities/chatbot-pmpt-retirement-notice.php:253
+#: includes/utilities/chatbot-pmpt-retirement-notice.php:261
 msgid "November 30, 2026"
 msgstr ""
 
 #. translators: %s: pmpt_ prefix, shown as an example rather than a saved ID
-#: includes/utilities/chatbot-pmpt-retirement-notice.php:257
+#: includes/utilities/chatbot-pmpt-retirement-notice.php:265
 #, php-format
 msgid "If your chatbot uses an OpenAI Prompt ID beginning with %s, review its configuration and migrate from Bridge to Local mode before the deadline."
 msgstr ""
 
-#: includes/utilities/chatbot-pmpt-retirement-notice.php:260
+#: includes/utilities/chatbot-pmpt-retirement-notice.php:268
 msgid "Switching modes does not automatically copy your hosted prompt's instructions, model, tools, or other settings."
 msgstr ""
 
-#: includes/utilities/chatbot-pmpt-retirement-notice.php:261
+#: includes/utilities/chatbot-pmpt-retirement-notice.php:269
 msgid "Read migration guide"
 msgstr ""
 
-#: includes/utilities/chatbot-pmpt-retirement-notice.php:262
+#: includes/utilities/chatbot-pmpt-retirement-notice.php:270
 msgid "Dismiss"
 msgstr ""
 
