@@ -189,8 +189,8 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     $messages[] = array('role' => 'user', 'content' => $message);
     
     // Determine which parameter to use based on model - Ver 2.3.9+
-    // Newer models (gpt-5, o1, o3, etc.) require max_completion_tokens instead of max_tokens
-    // Some models (o1, o3) don't support temperature/top_p parameters
+    // Reasoning models (GPT-5 and later, and the o-series) require max_completion_tokens.
+    // Those models also reject temperature and top_p unless reasoning effort is none.
     $body = array(
         'model' => $model,
         'messages' => $messages,
@@ -445,8 +445,8 @@ function chatbot_chatgpt_call_api_basic($api_key, $message) {
  
     // Added Role, System, Content Static Variable - Ver 1.6.0
     // Determine which parameter to use based on model - Ver 2.3.9+
-    // Newer models (gpt-5, o1, o3, etc.) require max_completion_tokens instead of max_tokens
-    // Some models (o1, o3) don't support temperature/top_p parameters
+    // Reasoning models (GPT-5 and later, and the o-series) require max_completion_tokens.
+    // Those models also reject temperature and top_p unless reasoning effort is none.
     $body = array(
         'model' => $model,
         'messages' => array(

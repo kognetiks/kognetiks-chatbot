@@ -6,6 +6,11 @@
 
 ---
 
+= 2.5.8 - Released 2026-11-11 =
+
+### Bug Fixes
+* **OpenAI reasoning models**: Chat requests for GPT-5 and later, and for the o-series, now send max_completion_tokens and omit temperature and top_p, which those models reject.
+
 = 2.5.7 - Released 2026-11-09 =
 
 ### Bug Fixes
