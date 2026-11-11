@@ -565,6 +565,12 @@ Users must agree to terms of service for each AI platform:
 
 ## Version History
 
+## What's new in Version 2.5.9 - Released TBD
+
+### Bug Fixes
+* **TBD**: TBD
+
+
 ## What's new in Version 2.5.8 - Released 2026-11-11
 
 ### Bug Fixes
