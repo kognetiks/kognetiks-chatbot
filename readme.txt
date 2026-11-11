@@ -29,7 +29,7 @@ Just insight, delivered.
 
 == What Makes This Different ==
 
-Kognetiks is not a novelty chatbot.  It is build for understanding, oversight, and long-term use.
+Kognetiks is not a novelty chatbot.  It is built for understanding, oversight, and long-term value.
 
 It is designed for **visibility, oversight, and measurable outcomes**, so you can understand how AI is actually being used on your site.
 
@@ -193,10 +193,10 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.5.8 - Released TBD =
+= 2.5.8 - Released 2026-11-11 =
 
 ### Bug Fixes
-* **TBD**: TBD
+* **OpenAI reasoning models**: Chat requests for GPT-5 and later, and for the o-series, now send max_completion_tokens and omit temperature and top_p, which those models reject.
 
 = 2.5.7 - Released 2026-11-09 =
 

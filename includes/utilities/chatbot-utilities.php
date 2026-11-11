@@ -238,73 +238,60 @@ function chatbot_chatgpt_move_file( $source, $destination, $overwrite = true ) {
 }
 
 /**
- * Check if a model requires max_completion_tokens instead of max_tokens
- * Newer OpenAI models (gpt-5, o1, o3, etc.) require max_completion_tokens
- * 
- * @param string $model The model name
- * @return bool True if model requires max_completion_tokens, false otherwise
+ * GPT-5 and later, and the o-series, are reasoning chat models.
+ *
+ * Chat Completions deprecates max_tokens in favor of max_completion_tokens and
+ * says max_tokens is not compatible with o-series models. GPT-5, GPT-6, and
+ * later reasoning models reject max_tokens the same way. When reasoning effort
+ * is not none, those models also reject temperature and top_p. These requests
+ * do not set reasoning_effort, so the API default applies.
+ *
+ * GPT-4, GPT-4.1, and GPT-4o still accept max_tokens, temperature, and top_p.
+ *
+ * @param string $model The model name.
+ * @return bool
  */
-function chatbot_openai_requires_max_completion_tokens($model) {
-    // Models that require max_completion_tokens instead of max_tokens
-    $models_requiring_max_completion_tokens = array(
-        'gpt-5',
-        'gpt-5-',
-        'o1',
-        'o1-',
-        'o3',
-        'o3-',
-    );
-    
-    // Use str_starts_with if available (PHP 8.0+), otherwise use substr
-    foreach ($models_requiring_max_completion_tokens as $prefix) {
-        if (function_exists('str_starts_with')) {
-            if (str_starts_with($model, $prefix)) {
-                return true;
-            }
-        } else {
-            // PHP 7.x compatibility
-            if (substr($model, 0, strlen($prefix)) === $prefix) {
-                return true;
-            }
-        }
+function chatbot_openai_is_reasoning_chat_model( $model ) {
+
+    $model = strtolower( trim( (string) $model ) );
+    if ( '' === $model ) {
+        return false;
     }
-    
+
+    // gpt-5, gpt-5.6-terra, gpt-6-luna, gpt-6.1-sol, and later generations.
+    if ( 1 === preg_match( '/^gpt-(?:[5-9]|[1-9]\d)(?:[.]|-|$)/', $model ) ) {
+        return true;
+    }
+
+    // o1, o3, o4-mini, and later o-series ids.
+    if ( 1 === preg_match( '/^o\d+(?:[.]|-|$)/', $model ) ) {
+        return true;
+    }
+
     return false;
+
 }
 
 /**
- * Check if a model doesn't support temperature and top_p parameters
- * Some newer OpenAI models (gpt-5, o1, o3, etc.) use fixed values and don't accept these parameters
- * 
- * @param string $model The model name
- * @return bool True if model doesn't support temperature/top_p, false otherwise
+ * Check if a model requires max_completion_tokens instead of max_tokens.
+ *
+ * @param string $model The model name.
+ * @return bool True if model requires max_completion_tokens, false otherwise.
  */
-function chatbot_openai_doesnt_support_temperature($model) {
-    // Models that don't support temperature/top_p parameters
-    // gpt-5 only supports the default temperature value (1.0), not custom values
-    // o1 and o3 models use fixed values and don't accept these parameters at all
-    $models_without_temperature = array(
-        'gpt-5',
-        'gpt-5-',
-        'o1',
-        'o1-',
-        'o3',
-        'o3-',
-    );
-    
-    // Use str_starts_with if available (PHP 8.0+), otherwise use substr
-    foreach ($models_without_temperature as $prefix) {
-        if (function_exists('str_starts_with')) {
-            if (str_starts_with($model, $prefix)) {
-                return true;
-            }
-        } else {
-            // PHP 7.x compatibility
-            if (substr($model, 0, strlen($prefix)) === $prefix) {
-                return true;
-            }
-        }
-    }
-    
-    return false;
+function chatbot_openai_requires_max_completion_tokens( $model ) {
+
+    return chatbot_openai_is_reasoning_chat_model( $model );
+
+}
+
+/**
+ * Check if a model doesn't support temperature and top_p parameters.
+ *
+ * @param string $model The model name.
+ * @return bool True if model doesn't support temperature/top_p, false otherwise.
+ */
+function chatbot_openai_doesnt_support_temperature( $model ) {
+
+    return chatbot_openai_is_reasoning_chat_model( $model );
+
 }

@@ -40,11 +40,11 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 **NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider's pricing and usage policies before proceeding.
 
-## What's new in Version 2.5.8 - Released TBD
+## What's new in Version 2.5.8 - Released 2026-11-11
 
-### Bug FIxes
+### Bug Fixes
 
-* **TBD**: TBD
+* **OpenAI reasoning models**: Chat requests for GPT-5 and later, and for the o-series, now send max_completion_tokens and omit temperature and top_p, which those models reject.
 
 * Information about past updates can be found [here](updates/updates.md).
 

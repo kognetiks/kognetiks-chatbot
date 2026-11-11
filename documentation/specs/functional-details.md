@@ -565,11 +565,11 @@ Users must agree to terms of service for each AI platform:
 
 ## Version History
 
-## What's new in Version 2.5.8 - Released TBD
+## What's new in Version 2.5.8 - Released 2026-11-11
 
 ### Bug Fixes
 
-* **TBD**: TBD
+* **OpenAI reasoning models**: Chat requests for GPT-5 and later, and for the o-series, now send max_completion_tokens and omit temperature and top_p, which those models reject.
 
 ## What's new in Version 2.5.7 - Released 2026-11-09
 
