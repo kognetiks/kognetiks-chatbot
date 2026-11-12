@@ -342,7 +342,7 @@ function chatbot_anthropic_api_settings_init() {
         'chatbot_anthropic_base_url',
         array(
             'type'              => 'string',
-            'sanitize_callback' => 'esc_url_raw',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_anthropic_base_url',
             'default'           => 'https://api.anthropic.com/v1',
         )
     );

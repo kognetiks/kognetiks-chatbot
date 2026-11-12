@@ -603,7 +603,7 @@ function chatbot_azure_api_settings_init() {
         'chatbot_azure_base_url',
         array(
             'type'              => 'string',
-            'sanitize_callback' => 'esc_url_raw',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_azure_base_url',
         )
     );
     register_setting(

@@ -344,7 +344,7 @@ function chatbot_deepseek_api_settings_init() {
         'chatbot_deepseek_base_url',
         array(
             'type'              => 'string',
-            'sanitize_callback' => 'esc_url_raw',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_deepseek_base_url',
         )
     );
     register_setting(

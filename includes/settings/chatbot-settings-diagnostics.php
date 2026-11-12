@@ -23,6 +23,7 @@ function chatbot_chatgpt_diagnostics_settings_init() {
         array(
             'type'              => 'string',
             'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Off',
         )
     );
     register_setting(
@@ -419,8 +420,9 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     // back_trace( 'NOTICE', 'Some message');
     // back_trace( 'SUCCESS', 'Some message');
 
-    // Check if diagnostics is On
-    $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Error'));
+    // Unset means Off. A missing option must not log; the old default of Error
+    // wrote SQL and query failures to the PHP error log before an admin saved a level.
+    $chatbot_chatgpt_diagnostics = esc_attr( get_option( 'chatbot_chatgpt_diagnostics', 'Off' ) );
     if ('Off' === $chatbot_chatgpt_diagnostics) {
         return;
     }
