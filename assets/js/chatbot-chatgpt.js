@@ -1242,13 +1242,21 @@ window.resetAllLocks = resetAllLocks;
             return;
         }
 
+        if (message.length > 4000) {
+            appendMessage('Message is too long. Please shorten it and try again.', 'error');
+            return;
+        }
+
         // Get current date and time
         let now = new Date();
         let today = now.toISOString().split('T')[0]; // Format as YYYY-MM-DD
         let lastReset = localStorage.getItem('chatbot_chatgpt_last_reset') || today;
 
         // Options: Hourly, Daily, Weekly, Monthly, Quarterly, Yearly, Lifetime
-        let messageLimitPeriod = localStorage.getItem('chatbot_chatgpt_message_limit_period_setting') || 'Daily';
+        // The saved setting is the display cap. The server is the authority.
+        let messageLimitPeriod = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_message_limit_period_setting)
+            || localStorage.getItem('chatbot_chatgpt_message_limit_period_setting')
+            || 'Daily';
 
         if (messageLimitPeriod === 'Hourly') {
             let lastResetHour = localStorage.getItem('chatbot_chatgpt_last_reset_hour') || '';
@@ -1299,7 +1307,10 @@ window.resetAllLocks = resetAllLocks;
         localStorage.setItem('chatbot_chatgpt_message_count', messageCount);
       
         // If messageCount is greater than  messageLimit then don't send the message - Ver 1.9.6
-        let messageLimit = localStorage.getItem('chatbot_chatgpt_message_limit_setting') || 999999;
+        let messageLimit = parseInt((typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_message_limit_setting) || localStorage.getItem('chatbot_chatgpt_message_limit_setting'), 10);
+        if (!messageLimit) {
+            messageLimit = 999;
+        }
         if (messageCount > messageLimit) {
             appendMessage('Oops! You have reached the message limit. Please try again later.', 'error');
             return;
@@ -1683,6 +1694,21 @@ window.resetAllLocks = resetAllLocks;
                             botResponse = '';
                         }
                     });
+                } else if (jqXHR.status === 400 || jqXHR.status === 429) {
+                    let errorMsg = jqXHR.status === 429
+                        ? 'Rate limit exceeded. Please wait before sending another message.'
+                        : 'Message is too long. Please shorten it and try again.';
+                    if (jqXHR.responseText) {
+                        const payload = tryParseJSON(jqXHR.responseText);
+                        if (payload) {
+                            const serverMessage = toSafeString(payload.data?.message || payload.message || payload.data || payload);
+                            if (serverMessage) {
+                                errorMsg = serverMessage;
+                            }
+                        }
+                    }
+                    appendMessage(errorMsg, 'error');
+                    botResponse = '';
                 } else {
                     // Extract error message safely from response
                     let errorMsg = 'Oops! Something went wrong on our end. Please try again later.';

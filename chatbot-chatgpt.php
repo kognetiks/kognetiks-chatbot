@@ -263,6 +263,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-html-tags.php';         // Functions - Ver 1.9.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-helper-functions.php';             // Functions - Ver 1.0.0
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-keyguard.php';                     // Functions - Ver 2.2.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-message-limits.php';               // Length, burst, and period quotas
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php';      // Globals - Ver 1.9.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php';                       // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php';                        // Functions - Ver 1.9.4
@@ -632,15 +633,10 @@ function chatbot_chatgpt_enqueue_scripts() {
     ), chatbot_chatgpt_get_ajax_nonces());
     
     // Set visitor and logged in user limits - Ver 2.0.1
-    if (is_user_logged_in()) {
-        $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_user_message_limit_setting', '999'));
-        $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr(get_option('chatbot_chatgpt_user_message_limit_period_setting', 'Lifetime'));
-        $kchat_settings['chatbot_chatgpt_display_message_count'] = esc_attr(get_option('chatbot_chatgpt_display_message_count', 'No'));
-    } else {
-        $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
-        $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_period_setting', 'Lifetime'));
-        $kchat_settings['chatbot_chatgpt_display_message_count'] = esc_attr(get_option('chatbot_chatgpt_display_message_count', 'No'));
-    }
+    $message_quota = chatbot_chatgpt_actor_message_quota( is_user_logged_in() );
+    $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr( $message_quota['limit'] );
+    $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr( $message_quota['period'] );
+    $kchat_settings['chatbot_chatgpt_display_message_count'] = esc_attr(get_option('chatbot_chatgpt_display_message_count', 'No'));
 
     // Localize the data for the chatbot - Ver 2.1.1.1
     $kchat_settings = array_merge($kchat_settings, array(
@@ -1352,25 +1348,13 @@ function chatbot_chatgpt_send_message() {
     }
     chatbot_chatgpt_capture_context_scope_from_request();
 
-    if ($current_user_id === 0) {
-        // For anonymous users, user_id should be 0 (session_id is used in transient key via get_chatbot_chatgpt_transients)
-        $user_id = 0;
-        
-        // Rate limiting for unauthenticated users to prevent API abuse
-        $client_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-        $rate_limit_key = 'chatbot_rate_limit_' . (function_exists('wp_fast_hash') ? wp_fast_hash($client_ip) : hash('sha256', $client_ip));
-        
-        // Check rate limit (max 10 requests per minute for unauthenticated users)
-        $current_count = get_transient($rate_limit_key) ?: 0;
-        if ($current_count >= 10) {
-            wp_send_json_error('Rate limit exceeded. Please wait before sending another message.', 429);
-            return;
-        }
-        
-        // Increment rate limit counter
-        set_transient($rate_limit_key, $current_count + 1, 60); // 60 seconds
-    } else {
-        $user_id = $current_user_id;
+    // Length, burst, and the saved period quota. A refusal does not call the provider.
+    $message_spend = chatbot_chatgpt_accept_message_spend( $current_user_id, $verified_session_id );
+    if ( is_wp_error( $message_spend ) ) {
+        $spend_data   = $message_spend->get_error_data();
+        $spend_status = ( is_array( $spend_data ) && isset( $spend_data['status'] ) ) ? (int) $spend_data['status'] : 429;
+        wp_send_json_error( $message_spend->get_error_message(), $spend_status );
+        return;
     }
 
     // Global variables

@@ -47,6 +47,13 @@ The dashboard widget shows token totals. It does not show message text.
 - **Default**: All.
 - **Disclosure**: This limits who can start a chat. It does not hide history that was already stored.
 
+### Message limits
+
+- **Where**: General.
+- **Use**: The server counts messages against the saved visitor or user limit before it calls the AI provider. It also refuses a prompt over 4,000 characters, more than 10 guest messages per minute from one address, and more than 20 messages per minute from one account.
+- **Default**: Visitors are limited to 20 messages per day until you save another visitor limit. Logged-in accounts are limited to 999 messages over Lifetime until you save another user limit. A saved limit stays as you saved it.
+- **Disclosure**: Each counter stores a hash of the visitor cookie, a hash of the network address, or the WordPress user id. The counter does not store the message text. Guests who share an address share that guest allowance.
+
 ### Conversation Continuation
 
 - **Where**: General.

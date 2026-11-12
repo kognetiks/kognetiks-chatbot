@@ -39,20 +39,26 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 <img src="message-limit-settings.png" alt="Message Limit Settings" style="width:auto;height:auto;">
 
+The server applies these limits before it sends a prompt to the AI provider. The count kept in the browser is a display. Clearing browser data leaves the server count in place.
+
+A prompt longer than 4,000 characters is refused. Guests can send 10 messages per minute from one network address. Each logged-in account, including an administrator, can send 20 messages per minute. Those two limits stay fixed. The settings below choose the longer cap.
+
+A guest must stay under both the signed visitor cookie and the network address. A new cookie leaves the address count in place, so guests who share an address share that allowance. A logged-in account is counted by its WordPress user.
+
 1. **Display Message Count**:
    - **Description**: This setting determines if the message count is displayed in the chatbot's response, such as `(29/50)`, i.e., 29 prompts out of 50 limited, to help visitors and logged-in users understand how many exchanges they have had with the chatbot.
    - **Default Value**: The default value is `No`, i.e., don't display the count.
    - **Selection**: Choose `Yes` to display the message count.  Or choose `No` to exclude the message count from the response.
 
 1. **User Message Limit per Period**:
-   - **Description**: This setting limits the number of messages logged-in users can send to the chatbot per day. It helps manage API usage and costs.
-   - **Default Value**: The default limit is set to 999 messages per day.
-   - **Customization**: You can adjust this number based on your needs. Enter the desired limit in the provided field.
+   - **Description**: This setting limits the number of messages each logged-in account can send during the selected period. It helps manage API usage and costs.
+   - **Default Value**: Until you save this setting, each account can send 999 messages over Lifetime. A number you have already saved stays as you saved it.
+   - **Customization**: Choose a number from 1 to 999.
 
 2. **User Message Limit Period**:
-   - **Description**:This setting defines the time period during which non-logged-in users (visitors) and logged-in users can send messages to the chatbot. It allows you to manage how often users can interact with the chatbot and helps regulate API usage and associated costs.
-   - **Default Value**: By default, users are allowed to send up to 999 messages per day.
-   - **Customization**: You can customize the number of allowed messages and the reset period based on your specific needs. Enter the desired message limit in the provided field. The following time periods are available for customization:
+   - **Description**: This setting defines the period for logged-in accounts.
+   - **Default Value**: Until you save this setting, the period is Lifetime.
+   - **Customization**: Choose the reset period. The following time periods are available:
    
       - **Hourly**: Resets the message count every hour, providing a more granular control over usage within a single day. This is useful if you want to limit message bursts within short time frames.
       - **Daily**: Resets the message count once per day. This is the most common setting, providing users with a fixed number of messages each day.
@@ -60,17 +66,17 @@ The General Settings allow you to customize the basic behavior and appearance of
       - **Monthly**: Resets the message count at the start of each month. Useful for managing API usage on a month-to-month basis, ensuring that your usage aligns with monthly API cost limits.
       - **Quarterly**: Resets the message count every three months. This option is useful for managing seasonal fluctuations in chatbot usage.
       - **Yearly**: Resets the message count once per year. This is ideal for long-term planning and budgeting for API usage.
-   - **NOTE**: Lifetime: No reset occurs. This option allows unlimited messages over a user's lifetime, which can be useful for creating limited-time access.
+   - **NOTE**: Lifetime: The count does not reset. The account can send the selected number of messages, and then the chatbot refuses further messages from that account.
    
 3. **Visitor Message Limit**:
-   - **Description**: This setting limits the number of messages non-logged-in users (visitors) can send to the chatbot per day. It also helps manage API usage and costs.
-   - **Default Value**: The default limit is set to 999 messages per day.
-   - **Customization**: You can adjust this number based on your needs. Enter the desired limit in the provided field.
+   - **Description**: This setting limits the number of messages a guest can send during the selected period. The server counts the signed visitor cookie and the network address. It also helps manage API usage and costs.
+   - **Default Value**: Until this setting is saved, visitors are limited to 20 messages per day. A limit you have already saved stays as you saved it.
+   - **Customization**: Choose a number from 1 to 999.
 
 4. **Visitor Message Limit per Period**:
-   - **Description**:This setting defines the time period during which non-logged-in users (visitors) and logged-in users can send messages to the chatbot. It allows you to manage how often users can interact with the chatbot and helps regulate API usage and associated costs.
-   - **Default Value**: By default, users are allowed to send up to 999 messages per day.
-   - **Customization**: You can customize the number of allowed messages and the reset period based on your specific needs. Enter the desired message limit in the provided field. The following time periods are available for customization:
+   - **Description**: This setting defines the period for guests.
+   - **Default Value**: Until this setting is saved, the visitor period is Daily. A period you have already saved stays as you saved it.
+   - **Customization**: Choose the reset period. The following time periods are available:
    
       - **Hourly**: Resets the message count every hour, providing a more granular control over usage within a single day. This is useful if you want to limit message bursts within short time frames.
       - **Daily**: Resets the message count once per day. This is the most common setting, providing users with a fixed number of messages each day.
@@ -78,7 +84,7 @@ The General Settings allow you to customize the basic behavior and appearance of
       - **Monthly**: Resets the message count at the start of each month. Useful for managing API usage on a month-to-month basis, ensuring that your usage aligns with monthly API cost limits.
       - **Quarterly**: Resets the message count every three months. This option is useful for managing seasonal fluctuations in chatbot usage.
       - **Yearly**: Resets the message count once per year. This is ideal for long-term planning and budgeting for API usage.
-   - **NOTE**: Lifetime: No reset occurs. This option allows unlimited messages over a user's lifetime, which can be useful for creating limited-time access.
+   - **NOTE**: Lifetime: The count does not reset. The guest cookie and the network address can each send the selected number of messages, and then the chatbot refuses further messages from that cookie or address.
 
 ## Prompts and Greetings
 
@@ -154,13 +160,13 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 3. Set the `Start Status` and `Start Status New Visitor` according to your preference.
 
-4. Select a `User Message Limit per Perod` or use the default.
+4. Select a `User Message Limit per Period`. Until you save one, the default is 999.
 
-5. Select a `User Message Limit Period` or use the default.
+5. Select a `User Message Limit Period`. Until you save one, the default is Lifetime.
 
-6. Select a `Visitor Message Limit per Perod` or use the default.
+6. Select a `Visitor Message Limit per Period`. Until you save one, the default is 20.
 
-7. Select a `Visitor Message Limit Period` or use the default.
+7. Select a `Visitor Message Limit Period`. Until you save one, the default is Daily.
 
 8. Customize the `Chatbot Prompt` with a message that fits your use case.
 
