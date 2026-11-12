@@ -5,7 +5,7 @@ Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 8.0
-Stable tag: 2.5.9
+Stable tag: 2.6.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -192,6 +192,11 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 5. Chatbot settings and configuration
 
 == Changelog ==
+
+= 2.6.0 - Released TBD =
+
+### Bug Fixes
+* **TBD**: TBD
 
 = 2.5.9 - Released 2026-11-12 =
 

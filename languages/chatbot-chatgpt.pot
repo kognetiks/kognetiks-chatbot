@@ -2,7 +2,7 @@
 # This file is distributed under the GPLv3 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Kognetiks Chatbot 2.5.9\n"
+"Project-Id-Version: Kognetiks Chatbot 2.6.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/chatbot-chatgpt\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
