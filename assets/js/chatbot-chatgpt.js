@@ -909,29 +909,15 @@ window.resetAllLocks = resetAllLocks;
 
         messageElement = $('<div></div>').addClass('chat-message');
 
-        // Convert HTML entities back to their original form
-        let decodedMessage = $('<textarea/>').html(DOMPurify.sanitize(message)).text();
-
-        // Check if the message contains an audio tag
-        if (decodedMessage.includes('<audio')) {
-            // Add the autoplay attribute to the audio tag
-            decodedMessage = decodedMessage.replace('<audio', '<audio autoplay');
+        // One sanitize, then one insertion. Do not decode the sanitized string
+        // back through a textarea; that second parse can revive markup.
+        if (message.indexOf('<audio') !== -1) {
+            message = message.replace(/<audio\b(?![^>]*\bautoplay\b)/gi, '<audio autoplay');
         }
-
-        // Parse the HTML string
-        let parsedHtml = $.parseHTML(decodedMessage);
-
-        // Assuming parsedHtml is the variable containing the parsed HTML elements
-        $(parsedHtml).find('a').addBack('a').attr('target', '_blank');
-
-        // Create a new span element
+        let cleanHtml = DOMPurify.sanitize(message);
         let textElement = $('<span></span>');
-
-        // Iterate over the parsed elements
-        $.each(parsedHtml, function(i, el) {
-            // Append each element to the textElement as HTML
-            textElement.append(el);
-        });
+        textElement.html(cleanHtml);
+        textElement.find('a').attr('target', '_blank');
 
         // Add initial greetings if first time
         if (cssClass) {
@@ -2628,8 +2614,8 @@ window.resetAllLocks = resetAllLocks;
                     }
                     var continuationHtml = continuationBrowser.restoredHtml(continuationRaw, continuationAuthority);
                     var continuationElement = continuationNodes[continuationIndex].querySelector('.chatbot-chatgpt-conversation');
-                    if (continuationHtml && continuationElement && continuationElement !== conversation[0]) {
-                        continuationElement.innerHTML = (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize(continuationHtml) : continuationHtml;
+                    if (continuationHtml && continuationElement && continuationElement !== conversation[0] && typeof DOMPurify !== 'undefined') {
+                        continuationElement.innerHTML = DOMPurify.sanitize(continuationHtml);
                     }
                     if (continuationNodes[continuationIndex] === continuationRoot) {
                         storedConversation = continuationHtml;

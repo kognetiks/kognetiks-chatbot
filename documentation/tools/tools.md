@@ -14,7 +14,7 @@ Each tool is briefly described below.
 
 ## Options Exporter
 
-Export the Chatbot options to a file.  This excludes sensitive information such as your API key.
+Export the Chatbot options to a file. This excludes API keys for every provider.
 
 <img src="options-exporter.png" alt="Options Exporter" style="width:auto;height:auto;">
 

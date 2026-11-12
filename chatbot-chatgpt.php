@@ -591,16 +591,12 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Now override the default styles with the custom styles - Ver 1.8.1
     chatbot_chatgpt_appearance_custom_css_settings();
 
-    // Enqueue the scripts
+    // Enqueue the scripts. DOMPurify is registered first so chatbot-chatgpt.js can depend on it.
     wp_enqueue_script('jquery');
+    wp_enqueue_script( 'dompurify', plugin_dir_url(__FILE__) . 'assets/js/purify.min.js', array(), $chatbot_chatgpt_plugin_version, true );
     wp_enqueue_script('chatbot-chatgpt-transcript-download', plugins_url('assets/js/chatbot-transcript-download.js', __FILE__), array(), $chatbot_chatgpt_plugin_version, true);
     wp_enqueue_script('chatbot-chatgpt-conversation-browser', plugins_url('assets/js/chatbot-conversation-browser.js', __FILE__), array(), $chatbot_chatgpt_plugin_version, true);
-    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery', 'chatbot-chatgpt-transcript-download', 'chatbot-chatgpt-conversation-browser'), $chatbot_chatgpt_plugin_version, true);
-
-    // Enqueue DOMPurify - Ver 1.8.1
-    // https://raw.githubusercontent.com/cure53/DOMPurify/main/dist/purify.min.js
-    // https://chat.openai.com/c/275770c1-fa72-404b-97c2-2dad2e8a0230
-    wp_enqueue_script( 'dompurify', plugin_dir_url(__FILE__) . 'assets/js/purify.min.js', array(), $chatbot_chatgpt_plugin_version, true );
+    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery', 'dompurify', 'chatbot-chatgpt-transcript-download', 'chatbot-chatgpt-conversation-browser'), $chatbot_chatgpt_plugin_version, true );
 
     // Localize the data for user id and page id
     $user_id = get_current_user_id();
@@ -671,7 +667,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     $kchat_settings_json = wp_json_encode($kchat_settings);
 
     // Enqueue the main chatbot script - CHANGED TO LOAD ORDER IN V2.1.2
-    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('chatbot-chatgpt-transcript-download'), $chatbot_chatgpt_plugin_version, true);
+    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery', 'dompurify', 'chatbot-chatgpt-transcript-download', 'chatbot-chatgpt-conversation-browser'), $chatbot_chatgpt_plugin_version, true);
 
     // Add the inline script to define kchat_settings before the main script runs - CHANGED THE LOAD ORDER IN VER 2.1.2
     wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');

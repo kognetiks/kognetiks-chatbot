@@ -40,7 +40,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 **NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider's pricing and usage policies before proceeding.
 
-## What's new in Version 2.5.9 - Release TBD
+## What's new in Version 2.5.9 - Released 2026-11-12
 
 ### Improvements
 * **Open-tab conversations**: Model memory and Assistants or Responses conversation ids now stay with the open browser tab, the page, and the assistant. Refresh continues that visit. A new tab, or a return after the tab is closed, starts a new provider conversation. Clear deletes that visit's memory and starts a new one. Older conversation ids are not resumed.

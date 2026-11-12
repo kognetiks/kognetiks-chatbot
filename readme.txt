@@ -193,7 +193,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.5.9 - Released TBD =
+= 2.5.9 - Released 2026-11-12 =
 
 ### Improvements
 * **Open-tab conversations**: Model memory and Assistants or Responses conversation ids now stay with the open browser tab, the page, and the assistant. Refresh continues that visit. A new tab, or a return after the tab is closed, starts a new provider conversation. Clear deletes that visit's memory and starts a new one. Older conversation ids are not resumed.
