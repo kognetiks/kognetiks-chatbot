@@ -5,7 +5,7 @@ Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 8.0
-Stable tag: 2.5.8
+Stable tag: 2.5.9
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -192,6 +192,18 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 5. Chatbot settings and configuration
 
 == Changelog ==
+
+= 2.5.9 - Released 2026-11-12 =
+
+### Improvements
+* **Open-tab conversations**: Model memory and Assistants or Responses conversation ids now stay with the open browser tab, the page, and the assistant. Refresh continues that visit. A new tab, or a return after the tab is closed, starts a new provider conversation. Clear deletes that visit's memory and starts a new one. Older conversation ids are not resumed.
+* **Account switch**: With Conversation Continuation on, the saved transcript belongs to the WordPress user. Another account in the same tab does not see the previous transcript. Continuation still defaults to Off.
+* **Signed visitor cookie**: Send, erase, upload, and queue status refuse a session id that does not match this browser's signed cookie. Read aloud follows the account and the open tab, and no longer falls back to the conversation log.
+* **Personal data and logs**: Export and Erase Personal Data include an account's chatbot messages. Error and widget logs store a keyed IP token instead of the raw address, and those folders deny direct web access on Apache.
+* **Message limits**: The server enforces the saved visitor and user message caps before it calls the AI provider. A prompt over 4,000 characters is refused. Guests are limited to 10 messages per minute per address, and each account, including administrators, to 20 per minute. A guest must stay under both the signed visitor cookie and the address, so a new cookie leaves the address count in place. Until a visitor limit is saved, the default is 20 messages per day. A limit already saved stays as it was saved.
+
+### Documentation
+* **Privacy**: A new privacy guide explains who can see a conversation, the settings that change that, and what remains visible when conversation logging or digest email is on.
 
 = 2.5.8 - Released 2026-11-11 =
 

@@ -4,7 +4,7 @@
 
 The **Kognetiks Chatbot** is a comprehensive WordPress plugin that integrates advanced AI capabilities into WordPress websites. It provides intelligent conversational experiences through multiple AI platforms, offering both cloud-based and local AI solutions for enhanced visitor engagement, customer support, and interactive assistance.
 
-**Version:** 2.5.8
+**Version:** 2.5.9
 **License:** GPLv3 or later  
 **WordPress Compatibility:** Tested up to WordPress 7.1.4
 
@@ -296,11 +296,13 @@ Cross-domain chatbot deployment with security controls:
 - **Personalized Greetings**: Dynamic greetings using WordPress user data
 - **Custom Avatars**: Upload custom avatars or choose from seasonal options
 - **Audience Targeting**: Show chatbot to all users, logged-in users, or visitors only
-- **Message Limits**: Flexible limit periods
-  - Period options: Hourly, Daily, Weekly, Lifetime
-  - Separate limits for visitors and logged-in users
+- **Message Limits**: The server enforces a separate cap for guests and for logged-in accounts
+  - Period options: Hourly, Daily, Weekly, Monthly, Quarterly, Yearly, and Lifetime
+  - Until a visitor limit is saved, guests are limited to 20 messages per day. A saved limit stays as saved. Until a user limit is saved, each account is limited to 999 messages over Lifetime.
+  - A prompt over 4,000 characters is refused. Guests are also limited to 10 messages per minute per address. Accounts, including administrators, are limited to 20 messages per minute.
+  - A guest must stay under both the signed visitor cookie and the address cap. The on-screen count is a display.
   - Message count display shows current usage (e.g., "29/50")
-  - Automatic reset based on selected period
+  - The selected period resets the count. Lifetime keeps the count at the selected number.
 - **Message Count Display**: Show message count in responses (e.g., "29/50") to help users track their usage against limits
 - **Custom Buttons**: Support for up to 4 customizable buttons
   - Can be displayed on floating only, embedded only, or both styles
@@ -355,9 +357,10 @@ Cross-domain chatbot deployment with security controls:
 - **Chatbot Name**: Customize chatbot identity
 - **Start Status**: Configure initial display state (Open/Closed)
 - **Start Status New Visitor**: Separate setting for new visitors
-- **Message Limits**: Set interaction limits per user type
-  - Period options: Hourly, Daily, Weekly, Lifetime
-  - Separate limits for visitors and logged-in users
+- **Message Limits**: Set interaction limits per user type. The server enforces the saved number.
+  - Period options: Hourly, Daily, Weekly, Monthly, Quarterly, Yearly, and Lifetime
+  - Separate limits for visitors and logged-in users. An unsaved visitor limit is 20 per day. An unsaved user limit is 999 over Lifetime.
+  - A prompt over 4,000 characters is refused. Guests are limited to 10 messages per minute per address, and each account to 20 per minute.
   - Display message count option
 - **Timeout Settings**: Configure request timeout values
 - **Conversation Continuation**: Enable/disable conversation continuation after page return
@@ -564,6 +567,19 @@ Users must agree to terms of service for each AI platform:
 - **JAN.AI**: JAN.AI About and Privacy Policy
 
 ## Version History
+
+## What's new in Version 2.5.9 - Released 2026-11-12
+
+### Improvements
+* **Open-tab conversations**: Model memory and Assistants or Responses conversation ids now stay with the open browser tab, the page, and the assistant. Refresh continues that visit. A new tab, or a return after the tab is closed, starts a new provider conversation. Clear deletes that visit's memory and starts a new one. Older conversation ids are not resumed.
+* **Account switch**: With Conversation Continuation on, the saved transcript belongs to the WordPress user. Another account in the same tab does not see the previous transcript. Continuation still defaults to Off.
+* **Signed visitor cookie**: Send, erase, upload, and queue status refuse a session id that does not match this browser's signed cookie. Read aloud follows the account and the open tab, and no longer falls back to the conversation log.
+* **Personal data and logs**: Export and Erase Personal Data include an account's chatbot messages. Error and widget logs store a keyed IP token instead of the raw address, and those folders deny direct web access on Apache.
+* **Message limits**: The server enforces the saved visitor and user message caps before it calls the AI provider. A prompt over 4,000 characters is refused. Guests are limited to 10 messages per minute per address, and each account, including administrators, to 20 per minute. A guest must stay under both the signed visitor cookie and the address, so a new cookie leaves the address count in place. Until a visitor limit is saved, the default is 20 messages per day. A limit already saved stays as it was saved.
+
+### Documentation
+* **Privacy**: A new privacy guide explains who can see a conversation, the settings that change that, and what remains visible when conversation logging or digest email is on.
+
 
 ## What's new in Version 2.5.8 - Released 2026-11-11
 

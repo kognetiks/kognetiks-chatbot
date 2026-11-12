@@ -85,7 +85,7 @@ function chatbot_chatgpt_name_section_callback($args) {
 function chatbot_chatgpt_message_limits_section_callback($args) {
     ?>
     <p>Configure message limits for (logged-in/registered) Users and (guest/unregistered) Visitors access.</p>
-    <p>The User Message Limit Settings applies to authenticated, registered and/or logged-in users. The Visitor Message Limit applies to unauthenticated, general, non-logged-in visitors or guests. The default is 999.</p>
+    <p>The User Message Limit applies to authenticated, registered, and logged-in users. Until you save a user limit, that default is 999 messages over the account's lifetime. The Visitor Message Limit applies to guests. Until you save a visitor limit, that default is 20 messages per day. A limit you have already saved stays as you saved it.</p>
     <?php
 }
 
@@ -111,8 +111,8 @@ function chatbot_chatgpt_display_message_count_callback($args) {
 
 // Logged-in User Message Limit - Ver 1.9.6
 function chatbot_chatgpt_user_message_limit_setting_callback($args) {
-    // Get the saved chatbot_chatgpt_user_message_limit_setting value or default to 999
-    $message_limit = esc_attr(get_option('chatbot_chatgpt_user_message_limit_setting', '999'));
+    $user_quota = chatbot_chatgpt_actor_message_quota( true );
+    $message_limit = esc_attr( $user_quota['limit'] );
     // Allow for a range of message limits between 1 and 999 in 1-step increments - Ver 1.9.6
     ?>
     <select id="chatbot_chatgpt_user_message_limit_setting" name="chatbot_chatgpt_user_message_limit_setting">
@@ -128,7 +128,8 @@ function chatbot_chatgpt_user_message_limit_setting_callback($args) {
 // Limit Period Setting - Ver 2.1.6
 function chatbot_chatgpt_user_message_limit_period_setting_callback($args) {
     // Options: Hourly, Daily, Weekly, Monthly, Quarterly, Yearly, Lifetime
-    $message_limit_period = esc_attr(get_option('chatbot_chatgpt_user_message_limit_period_setting', 'Lifetime'));
+    $user_quota = chatbot_chatgpt_actor_message_quota( true );
+    $message_limit_period = esc_attr( $user_quota['period'] );
     ?>
     <select id="chatbot_chatgpt_user_message_limit_period_setting" name="chatbot_chatgpt_user_message_limit_period_setting">
         <option value="Hourly" <?php selected($message_limit_period, 'Hourly'); ?>>Hourly</option>
@@ -145,8 +146,8 @@ function chatbot_chatgpt_user_message_limit_period_setting_callback($args) {
 
 // Visitor Message Limit - Ver 2.0.1
 function chatbot_chatgpt_visitor_message_limit_setting_callback($args) {
-    // Get the saved chatbot_chatgpt_visitor_message_limit_setting value or default to 999
-    $visitor_message_limit = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
+    $visitor_quota = chatbot_chatgpt_actor_message_quota( false );
+    $visitor_message_limit = esc_attr( $visitor_quota['limit'] );
     // Allow for a range of visitor message limits between 1 and 999 in 1-step increments - Ver 2.0.1
     ?>
     <select id="chatbot_chatgpt_visitor_message_limit_setting" name="chatbot_chatgpt_visitor_message_limit_setting">
@@ -162,7 +163,8 @@ function chatbot_chatgpt_visitor_message_limit_setting_callback($args) {
 // Limit Period Setting - Ver 2.1.6
 function chatbot_chatgpt_visitor_message_limit_period_setting_callback($args) {
     // Options: Hourly, Daily, Weekly, Monthly, Quarterly, Yearly, Lifetime
-    $message_limit_period = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_period_setting', 'Lifetime'));
+    $visitor_quota = chatbot_chatgpt_actor_message_quota( false );
+    $message_limit_period = esc_attr( $visitor_quota['period'] );
     ?>
     <select id="chatbot_chatgpt_visitor_message_limit_period_setting" name="chatbot_chatgpt_visitor_message_limit_period_setting">
         <option value="Hourly" <?php selected($message_limit_period, 'Hourly'); ?>>Hourly</option>
@@ -482,6 +484,7 @@ function chatbot_chatgpt_settings_setup_init() {
         array(
             'type'              => 'string',
             'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Lifetime',
         )
     );
     register_setting(
@@ -490,6 +493,7 @@ function chatbot_chatgpt_settings_setup_init() {
         array(
             'type'              => 'integer',
             'sanitize_callback' => 'absint',
+            'default'           => 20,
         )
     );
     register_setting(
@@ -498,6 +502,7 @@ function chatbot_chatgpt_settings_setup_init() {
         array(
             'type'              => 'string',
             'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Daily',
         )
     );
     register_setting(

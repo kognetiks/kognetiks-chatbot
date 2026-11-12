@@ -58,7 +58,7 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     // https://ai.google.dev/gemini-api/docs
 
     // Get the base URL directly from Google settings (don't rely on platform choice)
-    $google_base_url = esc_attr(get_option('chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta'));
+    $google_base_url = chatbot_chatgpt_get_provider_base_url( 'chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta' );
     $google_base_url = rtrim($google_base_url, '/');
     
     // Remove /models if present to ensure we have just the base URL

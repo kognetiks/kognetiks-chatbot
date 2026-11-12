@@ -102,6 +102,19 @@ function kognetiks_issue_visitor_cookie() {
  * @param int    $lifetime Max-Age in seconds.
  * @return string Header value without the Set-Cookie prefix, or empty when refused.
  */
+/**
+ * Secure is required on HTTPS. On plain HTTP the browser drops a Secure cookie,
+ * and the next request would have no visitor identity to check.
+ *
+ * @return string Attribute including the leading semicolon, or empty on HTTP.
+ */
+function kognetiks_visitor_cookie_secure_attribute() {
+    if ( function_exists( 'is_ssl' ) && is_ssl() ) {
+        return '; Secure';
+    }
+    return '';
+}
+
 function kognetiks_visitor_cookie_header( $token, $expires, $lifetime ) {
     if ( ! is_string( $token ) || ! preg_match( '/^v2\.[a-f0-9]{32}\.[a-f0-9]{64}$/', $token ) ) {
         return '';
@@ -114,7 +127,7 @@ function kognetiks_visitor_cookie_header( $token, $expires, $lifetime ) {
         . '=' . $token
         . '; Expires=' . gmdate( 'D, d-M-Y H:i:s', $expires ) . ' GMT'
         . '; Max-Age=' . $lifetime
-        . '; Path=/; Secure; HttpOnly; SameSite=Lax';
+        . '; Path=/' . kognetiks_visitor_cookie_secure_attribute() . '; HttpOnly; SameSite=Lax';
 }
 
 /**
@@ -211,6 +224,55 @@ function verify_session_ownership( $session_id ) {
 }
 
 /**
+ * Session id for this request. A posted id must match the signed cookie.
+ * An empty result means the caller must refuse the request.
+ *
+ * @return string
+ */
+function chatbot_chatgpt_bound_request_session_id() {
+    $posted = isset( $_POST['session_id'] ) ? sanitize_text_field( wp_unslash( $_POST['session_id'] ) ) : '';
+    if ( $posted !== '' ) {
+        return verify_session_ownership( $posted ) ? $posted : '';
+    }
+    $cookie = kognetiks_get_unique_id();
+    return is_string( $cookie ) ? $cookie : '';
+}
+
+/**
+ * 32 hex characters, or empty when the value is missing or malformed.
+ *
+ * @param mixed $generation Client conversation generation.
+ * @return string
+ */
+function chatbot_chatgpt_normalize_context_generation( $generation ) {
+    if ( ! is_string( $generation ) ) {
+        return '';
+    }
+    $generation = strtolower( trim( $generation ) );
+    if ( ! preg_match( '/^[a-f0-9]{32}$/', $generation ) ) {
+        return '';
+    }
+    return $generation;
+}
+
+/**
+ * Remember the page, assistant, and tab generation from this request.
+ * Model memory uses these values, not a later resolved assistant id.
+ *
+ * @return void
+ */
+function chatbot_chatgpt_capture_context_scope_from_request() {
+    $page = isset( $_POST['page_id'] ) ? sanitize_text_field( wp_unslash( $_POST['page_id'] ) ) : '';
+    $assistant = isset( $_POST['assistant_id'] ) ? sanitize_text_field( wp_unslash( $_POST['assistant_id'] ) ) : '';
+    $generation = isset( $_POST['context_generation'] ) ? sanitize_text_field( wp_unslash( $_POST['context_generation'] ) ) : '';
+
+    $GLOBALS['chatbot_chatgpt_context_page_id'] = chatbot_chatgpt_normalize_storage_part( $page );
+    $assistant = chatbot_chatgpt_normalize_storage_part( $assistant );
+    $GLOBALS['chatbot_chatgpt_context_assistant_id'] = ( $assistant !== '' ) ? $assistant : 'original';
+    $GLOBALS['chatbot_chatgpt_context_generation'] = chatbot_chatgpt_normalize_context_generation( $generation );
+}
+
+/**
  * A caller may use a conversation when they are that authenticated user,
  * or an anonymous visitor whose session matches the signed cookie.
  *
@@ -293,14 +355,37 @@ function chatbot_chatgpt_scoped_transient_key( $prefix, $purpose, $user_id, $ses
 /**
  * Live OpenAI conversation (cnv_) storage key.
  *
+ * The tab generation is required. A closed tab, a new tab, or a request that
+ * does not send the generation cannot read the previous provider conversation.
+ *
  * @param mixed $user_id User id.
  * @param mixed $session_id Session id.
  * @param mixed $page_id Page id.
  * @param mixed $assistant_id Assistant or prompt id.
- * @return string
+ * @return string Empty when the actor or tab generation is missing.
  */
 function chatbot_chatgpt_conversation_storage_key( $user_id, $session_id, $page_id, $assistant_id ) {
-    return chatbot_chatgpt_scoped_transient_key( 'kchat_cnv_', 'kchat-conv-v1', $user_id, $session_id, $page_id, $assistant_id, false );
+    if ( ! function_exists( 'wp_salt' ) ) {
+        return '';
+    }
+    $generation = chatbot_chatgpt_active_context_generation( null );
+    $actor = chatbot_chatgpt_conversation_actor_token( $user_id, $session_id, false );
+    $page = chatbot_chatgpt_normalize_storage_part( $page_id );
+    $assistant = chatbot_chatgpt_normalize_storage_part( $assistant_id );
+    if ( $generation === '' || $actor === '' || $page === '' || $assistant === '' ) {
+        return '';
+    }
+
+    $material = 'kchat-conv-v3'
+        . '|' . $actor
+        . '|' . $page
+        . '|' . $assistant
+        . '|' . $generation;
+    $key = 'kchat_cnv_' . substr( hash_hmac( 'sha256', $material, wp_salt( 'auth' ) ), 0, 32 );
+    if ( strlen( $key ) > 172 ) {
+        return '';
+    }
+    return $key;
 }
 
 /**
@@ -432,15 +517,53 @@ function chatbot_chatgpt_discard_shared_context_history() {
 }
 
 /**
- * Per-visitor history key. Empty when the actor is not verified, so callers do not
- * fall back to the shared transient.
+ * Page, assistant, or other scope part. Null means "use the request global".
+ *
+ * @param mixed  $explicit    Passed value, or null to read the global.
+ * @param string $global_key  Global name.
+ * @param string $fallback    Used when the resolved value is empty.
+ * @return string
+ */
+function chatbot_chatgpt_context_scope_value( $explicit, $global_key, $fallback ) {
+    if ( $explicit !== null ) {
+        $value = chatbot_chatgpt_normalize_storage_part( $explicit );
+        return $value !== '' ? $value : $fallback;
+    }
+    if ( isset( $GLOBALS[ $global_key ] ) ) {
+        $value = chatbot_chatgpt_normalize_storage_part( $GLOBALS[ $global_key ] );
+        if ( $value !== '' ) {
+            return $value;
+        }
+    }
+    return $fallback;
+}
+
+/**
+ * Generation for this history buffer. Null uses the value captured from the request.
+ *
+ * @param mixed $generation Explicit generation, or null.
+ * @return string
+ */
+function chatbot_chatgpt_active_context_generation( $generation ) {
+    if ( $generation === null && isset( $GLOBALS['chatbot_chatgpt_context_generation'] ) ) {
+        $generation = $GLOBALS['chatbot_chatgpt_context_generation'];
+    }
+    return chatbot_chatgpt_normalize_context_generation( is_string( $generation ) ? $generation : '' );
+}
+
+/**
+ * History key for one actor, page, assistant, and tab generation.
+ * Empty unless every part is present, so callers do not fall back to a shared buffer.
  *
  * @param string      $base_name Legacy transient name.
  * @param string|null $session_id Visitor id. Null uses the current request global.
  * @param mixed       $user_id WordPress user id. Null uses the current request global.
+ * @param mixed       $page_id Page id. Null uses the captured request value.
+ * @param mixed       $assistant_id Assistant id. Null uses the captured request value.
+ * @param mixed       $generation Tab generation. Null uses the captured request value.
  * @return string
  */
-function chatbot_chatgpt_visitor_context_history_key( $base_name = 'chatbot_chatgpt_context_history', $session_id = null, $user_id = null ) {
+function chatbot_chatgpt_visitor_context_history_key( $base_name = 'chatbot_chatgpt_context_history', $session_id = null, $user_id = null, $page_id = null, $assistant_id = null, $generation = null ) {
     if ( ! chatbot_chatgpt_is_shared_context_history_name( $base_name ) ) {
         return '';
     }
@@ -455,12 +578,69 @@ function chatbot_chatgpt_visitor_context_history_key( $base_name = 'chatbot_chat
     }
 
     $actor = chatbot_chatgpt_conversation_actor_token( $user_id, is_string( $session_id ) ? $session_id : '', false );
-    if ( $actor === '' ) {
+    $page = chatbot_chatgpt_context_scope_value( $page_id, 'chatbot_chatgpt_context_page_id', '' );
+    $assistant = chatbot_chatgpt_context_scope_value( $assistant_id, 'chatbot_chatgpt_context_assistant_id', 'original' );
+    $generation = chatbot_chatgpt_active_context_generation( $generation );
+    if ( $actor === '' || $page === '' || $assistant === '' || $generation === '' ) {
         return '';
     }
 
-    $purpose = ( $base_name === 'chatbot_azure_context_history' ) ? 'kchat-azure-ctx-v1' : 'kchat-context-v1';
-    return 'kchat_ctx_' . substr( hash_hmac( 'sha256', $purpose . '|' . $actor, wp_salt( 'auth' ) ), 0, 32 );
+    $purpose = ( $base_name === 'chatbot_azure_context_history' ) ? 'kchat-azure-ctx-v2' : 'kchat-context-v2';
+    $material = $purpose . '|' . $actor . '|' . $page . '|' . $assistant . '|' . $generation;
+    return 'kchat_ctx_' . substr( hash_hmac( 'sha256', $material, wp_salt( 'auth' ) ), 0, 32 );
+}
+
+/**
+ * Transient names this account must be able to delete later.
+ *
+ * @param mixed  $user_id WordPress user id.
+ * @param string $key Transient name.
+ * @return void
+ */
+function chatbot_chatgpt_remember_private_transient( $user_id, $key ) {
+    $uid = chatbot_chatgpt_normalize_wp_user_id( $user_id );
+    if ( $uid <= 0 || ! is_string( $key ) || $key === '' || ! function_exists( 'get_user_meta' ) ) {
+        return;
+    }
+    if ( ! preg_match( '/^(kchat_ctx_|chatbot_chatgpt_tts_last_)[a-f0-9]{32}$/', $key ) ) {
+        return;
+    }
+
+    $stored = get_user_meta( $uid, 'chatbot_chatgpt_private_transients', true );
+    $keys = is_array( $stored ) ? $stored : array();
+    if ( in_array( $key, $keys, true ) ) {
+        return;
+    }
+    $keys[] = $key;
+    if ( count( $keys ) > 40 ) {
+        $keys = array_slice( $keys, -40 );
+    }
+    update_user_meta( $uid, 'chatbot_chatgpt_private_transients', $keys );
+}
+
+/**
+ * Drop one transient name from the account index.
+ *
+ * @param mixed  $user_id WordPress user id.
+ * @param string $key Transient name.
+ * @return void
+ */
+function chatbot_chatgpt_forget_private_transient( $user_id, $key ) {
+    $uid = chatbot_chatgpt_normalize_wp_user_id( $user_id );
+    if ( $uid <= 0 || ! function_exists( 'get_user_meta' ) ) {
+        return;
+    }
+    $stored = get_user_meta( $uid, 'chatbot_chatgpt_private_transients', true );
+    if ( ! is_array( $stored ) ) {
+        return;
+    }
+    $keys = array();
+    foreach ( $stored as $existing ) {
+        if ( is_string( $existing ) && $existing !== $key ) {
+            $keys[] = $existing;
+        }
+    }
+    update_user_meta( $uid, 'chatbot_chatgpt_private_transients', $keys );
 }
 
 /**
@@ -528,8 +708,59 @@ function chatbot_chatgpt_append_context_history_entry( $base_name, $new_entry, $
     }
 
     $context_history[] = $new_entry;
-    set_transient( $key, $context_history );
+    set_transient( $key, $context_history, chatbot_chatgpt_thread_retention_seconds() );
+    chatbot_chatgpt_remember_private_transient( $user_id, $key );
     return true;
+}
+
+/**
+ * Delete the Chat Completions buffers for the scope captured on this request.
+ *
+ * @param mixed $user_id WordPress user id, or 0 for a visitor.
+ * @param mixed $session_id Verified visitor id.
+ * @return void
+ */
+function chatbot_chatgpt_delete_request_context_history( $user_id, $session_id ) {
+    $bases = array( 'chatbot_chatgpt_context_history', 'chatbot_azure_context_history' );
+    foreach ( $bases as $base_name ) {
+        $key = chatbot_chatgpt_visitor_context_history_key( $base_name, is_string( $session_id ) ? $session_id : '', $user_id );
+        if ( $key === '' ) {
+            continue;
+        }
+        delete_transient( $key );
+        chatbot_chatgpt_forget_private_transient( $user_id, $key );
+    }
+}
+
+/**
+ * Delete context buffers that were saved with no page, assistant, or expiration.
+ *
+ * @return void
+ */
+function chatbot_chatgpt_retire_unscoped_context_buffers() {
+    if ( get_option( 'chatbot_chatgpt_ctx_scope_v2', '' ) === '1' ) {
+        return;
+    }
+
+    global $wpdb;
+    if ( ! isset( $wpdb ) || ! is_object( $wpdb ) || empty( $wpdb->options ) || ! method_exists( $wpdb, 'query' ) ) {
+        return;
+    }
+
+    $likes = array(
+        $wpdb->esc_like( '_transient_kchat_ctx_' ) . '%',
+        $wpdb->esc_like( '_transient_timeout_kchat_ctx_' ) . '%',
+    );
+    foreach ( $likes as $like ) {
+        $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+                $like
+            )
+        );
+    }
+
+    update_option( 'chatbot_chatgpt_ctx_scope_v2', '1', false );
 }
 
 /**
@@ -948,9 +1179,11 @@ function chatbot_chatgpt_conversation_v2_row_scope( $decision ) {
 }
 
 /**
- * OpenAI Responses conversation key. v1 key generation is unchanged.
+ * OpenAI Responses conversation key.
  *
- * The raw actor is an HMAC input. It is not copied into the transient name.
+ * The tab generation is part of the key. A page view that does not send it
+ * cannot read the stored conversation. The raw actor is an HMAC input and is
+ * not copied into the transient name.
  *
  * @param mixed $user_id User id.
  * @param mixed $session_id Session id.
@@ -958,25 +1191,27 @@ function chatbot_chatgpt_conversation_v2_row_scope( $decision ) {
  * @param mixed $assistant_id External pmpt_ or asst_ id.
  * @param mixed $row_scope Validation decision or canonical scope.
  * @param bool  $session_already_authorized See chatbot_chatgpt_conversation_actor_token().
- * @return string Empty when the actor, page, assistant, or row scope is refused.
+ * @return string Empty when the actor, page, assistant, row scope, or tab generation is refused.
  */
 function chatbot_chatgpt_conversation_v2_storage_key( $user_id, $session_id, $page_id, $assistant_id, $row_scope, $session_already_authorized = false ) {
     if ( ! function_exists( 'wp_salt' ) ) {
         return '';
     }
+    $generation = chatbot_chatgpt_active_context_generation( null );
     $actor = chatbot_chatgpt_conversation_actor_token( $user_id, $session_id, $session_already_authorized );
     $page = chatbot_chatgpt_normalize_storage_part( $page_id );
     $assistant = chatbot_chatgpt_normalize_storage_part( $assistant_id );
     $scope = chatbot_chatgpt_conversation_v2_row_scope( $row_scope );
-    if ( $actor === '' || $page === '' || $assistant === '' || $scope === '' ) {
+    if ( $generation === '' || $actor === '' || $page === '' || $assistant === '' || $scope === '' ) {
         return '';
     }
 
-    $material = 'kchat-conv-v2'
+    $material = 'kchat-conv-v3'
         . '|' . $actor
         . '|' . $page
         . '|' . $assistant
-        . '|' . $scope;
+        . '|' . $scope
+        . '|' . $generation;
     $hash = substr( hash_hmac( 'sha256', $material, wp_salt( 'auth' ) ), 0, 32 );
     $key = 'kchat_cnv2_' . $hash;
     if ( strlen( $key ) > 172 ) {
@@ -1773,6 +2008,8 @@ function chatbot_chatgpt_conversation_v2_widget_attribute_string( $user_id, $ses
     if ( $scope === '' ) {
         return '';
     }
+    // A full page view does not know this tab's generation, so this stays empty.
+    // The browser restores the saved transcript for the same account.
     $generation = '';
     $record = chatbot_chatgpt_conversation_v2_current_record( $user_id, $session_id, $page_id, $assistant_id, $scope );
     if ( is_array( $record ) && isset( $record['generation'] ) && is_string( $record['generation'] ) ) {

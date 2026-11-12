@@ -26,28 +26,18 @@ function chatbot_chatgpt_erase_conversation_handler() {
     $current_user_id = $current_user->ID;
     
     // Named apart from $session_id because `global $session_id` below rebinds that name.
-    $verified_session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
-    
-    // Anonymous visitors stay user 0. The signed cookie, not the posted id alone, proves ownership.
+    // A posted session id has to match this browser's signed cookie for every account.
+    $verified_session_id = chatbot_chatgpt_bound_request_session_id();
+    if ( $verified_session_id === '' || ! verify_session_ownership( $verified_session_id ) ) {
+        wp_send_json_error( 'Unauthorized access to conversation.', 403 );
+        return;
+    }
+    chatbot_chatgpt_capture_context_scope_from_request();
+
     if ($current_user_id === 0) {
-        if ($verified_session_id === '') {
-            wp_send_json_error('Session ID required for anonymous users.', 403);
-            return;
-        }
-        
-        if (!verify_session_ownership($verified_session_id)) {
-            wp_send_json_error('Unauthorized access to conversation.', 403);
-            return;
-        }
-        
         $user_id = 0;
     } else {
         $user_id = $current_user_id;
-        
-        if ($verified_session_id === '') {
-            $fallback_session = kognetiks_get_unique_id();
-            $verified_session_id = is_string($fallback_session) ? $fallback_session : '';
-        }
     }
 
     // Get page_id from POST (this is safe as it's just identifying the page)
@@ -87,7 +77,13 @@ function chatbot_chatgpt_erase_conversation_handler() {
     }
 
     if ( $session_id !== '' && function_exists( 'chatbot_chatgpt_tts_last_reply_key' ) ) {
-        delete_transient( chatbot_chatgpt_tts_last_reply_key( $session_id ) );
+        $tts_key = chatbot_chatgpt_tts_last_reply_key( $session_id );
+        if ( $tts_key !== '' ) {
+            delete_transient( $tts_key );
+            if ( function_exists( 'chatbot_chatgpt_forget_private_transient' ) ) {
+                chatbot_chatgpt_forget_private_transient( $user_id, $tts_key );
+            }
+        }
     }
 
     $thread_id = ''; // Nullify the thread_id
@@ -96,6 +92,9 @@ function chatbot_chatgpt_erase_conversation_handler() {
     if ( is_wp_error( $erased ) ) {
         wp_send_json_error( $erased->get_error_message(), 403 );
         return;
+    }
+    if ( function_exists( 'chatbot_chatgpt_delete_request_context_history' ) ) {
+        chatbot_chatgpt_delete_request_context_history( $user_id, $session_id );
     }
     if ( function_exists( 'chatbot_chatgpt_conversation_v2_clear_selected_scope' ) ) {
         chatbot_chatgpt_conversation_v2_clear_selected_scope( $user_id, $session_id, $page_id, $assistant_id );

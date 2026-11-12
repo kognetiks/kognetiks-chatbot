@@ -376,7 +376,7 @@ function chatbot_local_clean_response_text($text) {
 // Fetch the local models - Ver 2.3.3 - 2025-08-11
 function chatbot_local_get_models() {
 
-    $base    = esc_url_raw(get_option('chatbot_local_base_url', 'http://127.0.0.1:1337/v1'));
+    $base    = chatbot_chatgpt_get_provider_base_url( 'chatbot_local_base_url', 'http://127.0.0.1:1337/v1' );
     $api_url = trailingslashit($base) . 'models';
 
     // API key (required by Jan.ai local server) - Ver 2.3.3 - 2025-08-13

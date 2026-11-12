@@ -13,6 +13,53 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+/**
+ * True when an options row holds a provider credential.
+ *
+ * Any chatbot option whose name ends in _api_key is omitted, including keys
+ * added after this list was written. The key-encryption secret is omitted too.
+ *
+ * @param string $option_name Option name from wp_options.
+ * @return bool
+ */
+function chatbot_chatgpt_options_export_is_secret( $option_name ) {
+    if ( ! is_string( $option_name ) || '' === $option_name ) {
+        return false;
+    }
+    if ( 'kognetiks_keyguard' === $option_name ) {
+        return true;
+    }
+    return 1 === preg_match( '/_api_key$/', $option_name );
+}
+
+/**
+ * Drop credential rows from an options export.
+ *
+ * @param array $options Rows from wp_options, ARRAY_A or objects.
+ * @return array
+ */
+function chatbot_chatgpt_options_export_without_secrets( $options ) {
+    if ( ! is_array( $options ) ) {
+        return array();
+    }
+
+    $safe = array();
+    foreach ( $options as $option ) {
+        $name = '';
+        if ( is_array( $option ) && isset( $option['option_name'] ) ) {
+            $name = (string) $option['option_name'];
+        } elseif ( is_object( $option ) && isset( $option->option_name ) ) {
+            $name = (string) $option->option_name;
+        }
+        if ( chatbot_chatgpt_options_export_is_secret( $name ) ) {
+            continue;
+        }
+        $safe[] = $option;
+    }
+
+    return $safe;
+}
+
 function chatbot_chatgpt_download_options_data() {
 
     global $chatbot_chatgpt_plugin_dir_path;
@@ -45,8 +92,20 @@ function chatbot_chatgpt_download_options_data() {
 
     $options_file = $debug_dir_path . 'chatbot-chatgpt-options.' . $output_choice;
 
-    // Fetch options from the database
-    $options = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot%' AND option_name != 'chatbot_chatgpt_api_key'", ARRAY_A);
+    // Fetch options from the database. Credential rows are removed in PHP so
+    // every provider key is omitted, not only the OpenAI key.
+    $like    = $wpdb->esc_like( 'chatbot' ) . '%';
+    $options = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT option_id, option_name, option_value, autoload FROM {$wpdb->options} WHERE option_name LIKE %s",
+            $like
+        ),
+        ARRAY_A
+    );
+    if ( ! is_array( $options ) ) {
+        $options = array();
+    }
+    $options = chatbot_chatgpt_options_export_without_secrets( $options );
 
     // Write options to file
     if ($output_choice == 'json') {

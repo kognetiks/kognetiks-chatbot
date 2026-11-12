@@ -272,15 +272,30 @@ function chatbot_chatgpt_tts_cap_text( $text, $max ) {
 }
 
 /**
- * Transient key for the last assistant reply this session may read aloud.
+ * Transient key for the last assistant reply this account and tab may read aloud.
+ * The cookie alone is not the key. Logout and a new tab use a different key.
  *
- * @param string $session_id Chat session id.
- * @return string
+ * @param string $session_id Chat session id. Must match the signed visitor cookie.
+ * @return string Empty when the actor or tab generation cannot be verified.
  */
 function chatbot_chatgpt_tts_last_reply_key( $session_id ) {
 
-    $session_id = (string) $session_id;
-    $hash       = function_exists( 'wp_fast_hash' ) ? wp_fast_hash( $session_id ) : hash( 'sha256', $session_id );
+    $session_id = is_string( $session_id ) ? $session_id : '';
+    if ( $session_id === '' || ! function_exists( 'verify_session_ownership' ) || ! verify_session_ownership( $session_id ) ) {
+        return '';
+    }
+    if ( ! function_exists( 'wp_salt' ) || ! function_exists( 'chatbot_chatgpt_active_context_generation' ) ) {
+        return '';
+    }
+
+    $generation = chatbot_chatgpt_active_context_generation( null );
+    if ( $generation === '' ) {
+        return '';
+    }
+
+    $uid = function_exists( 'get_current_user_id' ) ? (int) get_current_user_id() : 0;
+    $actor = $uid > 0 ? 'user:' . $uid : 'anon:' . $session_id;
+    $hash = substr( hash_hmac( 'sha256', 'kchat-tts-v2|' . $actor . '|' . $generation, wp_salt( 'auth' ) ), 0, 32 );
 
     return 'chatbot_chatgpt_tts_last_' . $hash;
 
@@ -311,7 +326,15 @@ function chatbot_chatgpt_remember_last_assistant_message( $session_id, $message 
         return;
     }
 
-    set_transient( chatbot_chatgpt_tts_last_reply_key( $session_id ), chatbot_chatgpt_tts_cap_text( $text, 4096 ), 12 * HOUR_IN_SECONDS );
+    $key = chatbot_chatgpt_tts_last_reply_key( $session_id );
+    if ( $key === '' ) {
+        return;
+    }
+
+    set_transient( $key, chatbot_chatgpt_tts_cap_text( $text, 4096 ), 12 * HOUR_IN_SECONDS );
+    if ( function_exists( 'chatbot_chatgpt_remember_private_transient' ) ) {
+        chatbot_chatgpt_remember_private_transient( get_current_user_id(), $key );
+    }
 
 }
 
@@ -323,28 +346,17 @@ function chatbot_chatgpt_remember_last_assistant_message( $session_id, $message 
  */
 function chatbot_chatgpt_get_last_assistant_message_for_read_aloud( $session_id ) {
 
-    $stored = get_transient( chatbot_chatgpt_tts_last_reply_key( $session_id ) );
+    $key = chatbot_chatgpt_tts_last_reply_key( $session_id );
+    if ( $key === '' ) {
+        return '';
+    }
+
+    $stored = get_transient( $key );
     if ( is_string( $stored ) && trim( $stored ) !== '' ) {
         return $stored;
     }
 
-    global $wpdb;
-
-    $table = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
-    $found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) );
-    if ( $found !== $table ) {
-        return '';
-    }
-
-    $text = $wpdb->get_var(
-        $wpdb->prepare(
-            "SELECT message_text FROM {$table} WHERE session_id = %s AND user_type = %s ORDER BY id DESC LIMIT 1",
-            $session_id,
-            'Chatbot'
-        )
-    );
-
-    return is_string( $text ) ? $text : '';
+    return '';
 
 }
 
@@ -374,10 +386,13 @@ function chatbot_chatgpt_read_aloud($message) {
     global $model;
     global $voice;
 
-    $session_id = isset( $_POST['session_id'] ) ? sanitize_text_field( wp_unslash( $_POST['session_id'] ) ) : '';
-    if ( ! function_exists( 'verify_session_ownership' ) || ! verify_session_ownership( $session_id ) ) {
+    $session_id = function_exists( 'chatbot_chatgpt_bound_request_session_id' ) ? chatbot_chatgpt_bound_request_session_id() : '';
+    if ( $session_id === '' || ! function_exists( 'verify_session_ownership' ) || ! verify_session_ownership( $session_id ) ) {
         wp_send_json_error( 'Session ID required.', 403 );
         return;
+    }
+    if ( function_exists( 'chatbot_chatgpt_capture_context_scope_from_request' ) ) {
+        chatbot_chatgpt_capture_context_scope_from_request();
     }
 
     // Speak the last server-produced reply for this session. Ignore posted text.

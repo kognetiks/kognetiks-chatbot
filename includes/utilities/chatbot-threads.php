@@ -3,8 +3,9 @@
  * Kognetiks Chatbot - Threads
  *
  * Isolated conversation ids (OpenAI cnv_ values and legacy thread ids) are stored
- * under a verified actor, page, and assistant. The historical anonymous key
- * chatbot_chatgpt_thread_id_0_{page_id} is never read.
+ * under a verified actor, page, assistant, and the tab generation. The historical
+ * anonymous key chatbot_chatgpt_thread_id_0_{page_id} is never read. A legacy
+ * authenticated thread is not copied into a new tab.
  *
  * @package chatbot-chatgpt
  */
@@ -14,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Store a conversation id for one verified actor, page, and assistant.
+ * Store a conversation id for one verified actor, page, assistant, and tab.
  * Does not replace an existing different id. Callers must erase first.
  *
  * @param string $thread_id Conversation id.
@@ -54,7 +55,7 @@ function set_chatbot_chatgpt_threads( $thread_id, $assistant_id, $user_id, $page
 }
 
 /**
- * Read the conversation id for one verified actor, page, and assistant.
+ * Read the conversation id for one verified actor, page, assistant, and tab.
  *
  * @param mixed $user_id WordPress user id, or 0 for a visitor.
  * @param mixed $session_id Verified visitor id.
@@ -81,14 +82,8 @@ function get_chatbot_chatgpt_threads( $user_id, $session_id, $page_id, $assistan
 
     $uid = chatbot_chatgpt_normalize_wp_user_id( $user_id );
     if ( $uid > 0 ) {
-        $legacy = chatbot_chatgpt_migrate_legacy_authenticated_thread( $uid, $page_id, $assistant_id );
-        if ( $legacy !== '' ) {
-            $written = set_chatbot_chatgpt_threads( $legacy, $assistant_id, $uid, $page_id, $session_id );
-            if ( $written === true ) {
-                chatbot_chatgpt_delete_matching_legacy_authenticated_thread( $uid, $page_id, $assistant_id );
-                return $legacy;
-            }
-        }
+        // Leave the old user-and-page thread unread so a new tab starts clean.
+        chatbot_chatgpt_delete_matching_legacy_authenticated_thread( $uid, $page_id, $assistant_id );
     }
 
     return '';

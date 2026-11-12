@@ -344,7 +344,7 @@ function chatbot_mistral_api_settings_init() {
         'chatbot_mistral_base_url',
         array(
             'type'              => 'string',
-            'sanitize_callback' => 'esc_url_raw',
+            'sanitize_callback' => 'chatbot_chatgpt_sanitize_mistral_base_url',
         )
     );
     register_setting(

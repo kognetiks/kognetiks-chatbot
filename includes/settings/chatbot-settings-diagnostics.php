@@ -23,6 +23,7 @@ function chatbot_chatgpt_diagnostics_settings_init() {
         array(
             'type'              => 'string',
             'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Off',
         )
     );
     register_setting(
@@ -419,8 +420,9 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     // back_trace( 'NOTICE', 'Some message');
     // back_trace( 'SUCCESS', 'Some message');
 
-    // Check if diagnostics is On
-    $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Error'));
+    // Unset means Off. A missing option must not log; the old default of Error
+    // wrote SQL and query failures to the PHP error log before an admin saved a level.
+    $chatbot_chatgpt_diagnostics = esc_attr( get_option( 'chatbot_chatgpt_diagnostics', 'Off' ) );
     if ('Off' === $chatbot_chatgpt_diagnostics) {
         return;
     }
@@ -710,7 +712,9 @@ function log_chatbot_error() {
         // Get additional info
         $session_id = session_id();
         $user_id = get_current_user_id();
-        $ip_address = $_SERVER['REMOTE_ADDR'];
+        $ip_address = function_exists( 'chatbot_chatgpt_redact_ip_for_log' )
+            ? chatbot_chatgpt_redact_ip_for_log( isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '' )
+            : 'redacted';
         $date_time = gmdate('Y-m-d H:i:s');
 
         // Construct the log message - Ver 2.3.7 - Fixed empty error message display

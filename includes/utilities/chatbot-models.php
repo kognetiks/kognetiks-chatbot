@@ -129,8 +129,7 @@ function chatbot_chatgpt_openai_configured_api_key() {
 // Models endpoint for the configured base URL. The key is not part of the URL.
 function chatbot_chatgpt_openai_models_endpoint() {
 
-    $base = get_option( 'chatbot_chatgpt_base_url' );
-    $base = is_string( $base ) ? esc_attr( $base ) : '';
+    $base = chatbot_chatgpt_get_provider_base_url( 'chatbot_chatgpt_base_url', 'https://api.openai.com/v1' );
     return rtrim( $base, '/' ) . '/models';
 
 }
@@ -683,7 +682,7 @@ function chatbot_nvidia_get_models() {
         return $default_model_list;
     }
 
-    $nvidia_models_url = esc_attr(get_option('chatbot_nvidia_base_url'));
+    $nvidia_models_url = chatbot_chatgpt_get_provider_base_url( 'chatbot_nvidia_base_url', 'https://integrate.api.nvidia.com/v1' );
     $nvidia_models_url = rtrim($nvidia_models_url, '/') . '/models';
 
     // Set HTTP request arguments
@@ -1048,14 +1047,8 @@ function chatbot_anthropic_get_models( $refresh = false ) {
         return $fallback;
     }
 
-    $base_url = get_option( 'chatbot_anthropic_base_url', 'https://api.anthropic.com/v1' );
-    if ( ! is_string( $base_url ) || '' === $base_url ) {
-        $base_url = 'https://api.anthropic.com/v1';
-    }
-    $base_url = esc_url_raw( untrailingslashit( $base_url ) );
-    if ( '' === $base_url || ! wp_http_validate_url( $base_url ) ) {
-        $base_url = 'https://api.anthropic.com/v1';
-    }
+    $base_url = chatbot_chatgpt_get_provider_base_url( 'chatbot_anthropic_base_url', 'https://api.anthropic.com/v1' );
+    $base_url = untrailingslashit( $base_url );
 
     $cache_key = 'chatbot_anth_models_' . substr( hash( 'sha256', $api_key ), 0, 16 );
     if ( ! $refresh ) {
@@ -1188,7 +1181,7 @@ function chatbot_deepseek_get_models() {
         return $default_model_list;
     }
 
-    $deepseek_models_url = esc_attr(get_option('chatbot_deepseek_base_url'));
+    $deepseek_models_url = chatbot_chatgpt_get_provider_base_url( 'chatbot_deepseek_base_url', 'https://api.deepseek.com' );
     $deepseek_models_url = rtrim($deepseek_models_url, '/') . '/models';
 
     // Set headers
@@ -1266,7 +1259,7 @@ function chatbot_mistral_get_models() {
     }
 
     // Set the API endpoint
-    $mistral_models_url = esc_attr(get_option('chatbot_mistral_base_url'));
+    $mistral_models_url = chatbot_chatgpt_get_provider_base_url( 'chatbot_mistral_base_url', 'https://api.mistral.ai/v1' );
     $mistral_models_url = rtrim($mistral_models_url, '/') . '/models';
 
     // Set headers
@@ -1415,7 +1408,7 @@ function chatbot_google_get_models() {
     }
 
     // Get the base URL from settings
-    $google_base_url = esc_attr(get_option('chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta'));
+    $google_base_url = chatbot_chatgpt_get_provider_base_url( 'chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta' );
     $google_models_url = rtrim($google_base_url, '/');
     
     // If the URL doesn't end with /models, add it

@@ -573,7 +573,7 @@ function kchat_fetch_api_status($api_key, $model) {
             $model = esc_attr( chatbot_google_resolve_model() );
             
             // Get the base URL from settings
-            $google_base_url = esc_attr(get_option('chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta'));
+            $google_base_url = chatbot_chatgpt_get_provider_base_url( 'chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta' );
             $google_base_url = rtrim($google_base_url, '/');
             
             // Remove /models if present to ensure we have just the base URL

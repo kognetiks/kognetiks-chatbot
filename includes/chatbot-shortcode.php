@@ -578,15 +578,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
 
     // Set visitor and logged in user limits - Ver 2.0.1
-    if (is_user_logged_in()) {
-        $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_user_message_limit_setting', '999'));
-        $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr(get_option('chatbot_chatgpt_user_message_limit_period_setting', 'Lifetime'));
-        $kchat_settings['chatbot_chatgpt_display_message_count'] = esc_attr(get_option('chatbot_chatgpt_display_message_count', 'No'));
-    } else {
-        $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
-        $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_period_setting', 'Lifetime'));
-        $kchat_settings['chatbot_chatgpt_display_message_count'] = esc_attr(get_option('chatbot_chatgpt_display_message_count', 'No'));
-    }
+    $message_quota = chatbot_chatgpt_actor_message_quota( is_user_logged_in() );
+    $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr( $message_quota['limit'] );
+    $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr( $message_quota['period'] );
+    $kchat_settings['chatbot_chatgpt_display_message_count'] = esc_attr(get_option('chatbot_chatgpt_display_message_count', 'No'));
 
     // Localize the data for the chatbot - Ver 2.1.1.1 - 2024 08 28 - THIS IS THE SPOT
     $kchat_settings = array_merge($kchat_settings, array(
