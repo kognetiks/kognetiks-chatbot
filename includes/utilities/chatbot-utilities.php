@@ -49,6 +49,7 @@ function create_directory_and_index_file($dir_path) {
     }
 
     chatbot_chatgpt_write_no_script_htaccess($dir_path);
+    chatbot_chatgpt_write_private_log_htaccess($dir_path);
 
     // Set directory permissions
     global $wp_filesystem;
@@ -169,9 +170,86 @@ function chatbot_chatgpt_harden_static_directories() {
         return;
     }
 
-    foreach ( chatbot_chatgpt_static_directory_names() as $name ) {
+    $names = array_merge( chatbot_chatgpt_static_directory_names(), chatbot_chatgpt_private_log_directory_names() );
+    foreach ( $names as $name ) {
         create_directory_and_index_file( $chatbot_chatgpt_plugin_dir_path . $name . '/' );
     }
+}
+
+/**
+ * Diagnostic directories. Files in these folders are not meant to be downloaded.
+ *
+ * @return string[]
+ */
+function chatbot_chatgpt_private_log_directory_names() {
+    return array( 'chatbot-logs', 'widget-logs' );
+}
+
+/**
+ * Deny every web request for a private log directory.
+ * Nginx does not read .htaccess. The comment states the equivalent rule.
+ *
+ * @return string
+ */
+function chatbot_chatgpt_private_log_htaccess_rules() {
+    return <<<'HTA'
+# chatbot-private-log-deny v1
+# Diagnostic logs are not public. Nginx does not read this file. Equivalent:
+# location ^~ /wp-content/plugins/chatbot-chatgpt/chatbot-logs/ { deny all; }
+# location ^~ /wp-content/plugins/chatbot-chatgpt/widget-logs/ { deny all; }
+Options -Indexes
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Deny from all
+</IfModule>
+HTA;
+}
+
+/**
+ * Write the deny-all rule into chatbot-logs or widget-logs.
+ *
+ * @param string $dir_path Directory path.
+ * @return void
+ */
+function chatbot_chatgpt_write_private_log_htaccess( $dir_path ) {
+    $normalized = rtrim( str_replace( '\\', '/', (string) $dir_path ), '/' );
+    $base       = basename( $normalized );
+    if ( ! in_array( $base, chatbot_chatgpt_private_log_directory_names(), true ) ) {
+        return;
+    }
+
+    $path  = $normalized . '/.htaccess';
+    $rules = chatbot_chatgpt_private_log_htaccess_rules();
+    if ( file_exists( $path ) ) {
+        $current = file_get_contents( $path );
+        if ( is_string( $current ) && false !== strpos( $current, 'chatbot-private-log-deny v1' ) ) {
+            return;
+        }
+    }
+
+    file_put_contents( $path, $rules );
+}
+
+/**
+ * Stable token for a log line. The raw address is not written to disk.
+ *
+ * @param mixed $ip Address or another log field.
+ * @return string
+ */
+function chatbot_chatgpt_redact_ip_for_log( $ip ) {
+    $ip = is_string( $ip ) ? trim( $ip ) : '';
+    if ( $ip === '' || $ip === 'unknown' ) {
+        return 'unknown';
+    }
+    if ( ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+        return sanitize_text_field( $ip );
+    }
+    if ( ! function_exists( 'wp_salt' ) ) {
+        return 'redacted';
+    }
+    return 'ip_' . substr( hash_hmac( 'sha256', 'kchat-ip-v1|' . $ip, wp_salt( 'auth' ) ), 0, 16 );
 }
 add_action( 'init', 'chatbot_chatgpt_harden_static_directories' );
 

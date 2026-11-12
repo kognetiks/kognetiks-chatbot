@@ -53,9 +53,11 @@ function chatbot_widget_logging( $message, $referer = null, $request_ip = null )
         $current_date = gmdate('Y-m-d');
         $log_file = $chatbot_widget_logs_dir . 'chatbot-widget-access-' . $current_date . '.log';
 
-        // Sanitize inputs
+        // Sanitize inputs. IP addresses are stored as a keyed token.
         $referer = $referer ? esc_url($referer) : 'unknown';
-        $request_ip = $request_ip ? sanitize_text_field($request_ip) : 'unknown';
+        $request_ip = function_exists( 'chatbot_chatgpt_redact_ip_for_log' )
+            ? chatbot_chatgpt_redact_ip_for_log( $request_ip )
+            : 'redacted';
         $message = sanitize_text_field($message);
 
         $log_entry = '[' . $date_time . '] [' . $request_ip . '] [' . $referer . '] ' . $message;

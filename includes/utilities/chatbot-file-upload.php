@@ -414,10 +414,12 @@ function chatbot_chatgpt_upload_files() {
     global $model;
     global $voice;
     
-    if (empty($session_id) || $session_id == 0) {
-        $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : null;
-        $user_id = isset($_POST['user_id']) ? sanitize_text_field(wp_unslash($_POST['user_id'])) : null;
+    $session_id = chatbot_chatgpt_bound_request_session_id();
+    if ( $session_id === '' || ! verify_session_ownership( $session_id ) ) {
+        wp_send_json_error( 'Unauthorized access to conversation.', 403 );
+        return;
     }
+    $user_id = get_current_user_id();
     
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;

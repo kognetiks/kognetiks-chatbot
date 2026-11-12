@@ -1,8 +1,10 @@
 /**
  * Browser transcript identity for OpenAI Responses widgets.
  *
- * The envelope is stored by external assistant id and row scope. HTML is
- * restored only when its generation matches the server generation on the widget.
+ * The envelope is stored by WordPress user, external assistant id, and row
+ * scope. HTML is restored only when its generation matches the server
+ * generation on the widget. An empty server generation means the page could
+ * not see this tab's conversation, so the caller may supply the saved one.
  * This file does not read credentials or create conversations.
  */
 (function (root, factory) {
@@ -18,15 +20,28 @@
     var SCOPE_PATTERN = /^(absent|0|[1-9][0-9]*)$/;
     var ASSISTANT_PATTERN = /^(?:asst_|pmpt_)[A-Za-z0-9_-]{1,80}$/;
 
-    function storageKey(assistantId, rowScope) {
-        if (!ASSISTANT_PATTERN.test(String(assistantId || '')) || !SCOPE_PATTERN.test(String(rowScope || ''))) {
+    function transcriptActor(actor) {
+        var owner = actor === undefined || actor === null ? '' : String(actor);
+        if (!/^[A-Za-z0-9]{1,64}$/.test(owner)) {
             return '';
         }
-        return 'chatbot_chatgpt_conversation_' + assistantId + '_' + rowScope;
+        return owner;
     }
 
-    function legacyStorageKey(assistantId) {
-        return 'chatbot_chatgpt_conversation_' + String(assistantId || '');
+    function storageKey(assistantId, rowScope, actor) {
+        var owner = transcriptActor(actor);
+        if (!owner || !ASSISTANT_PATTERN.test(String(assistantId || '')) || !SCOPE_PATTERN.test(String(rowScope || ''))) {
+            return '';
+        }
+        return 'chatbot_chatgpt_conversation_' + owner + '_' + assistantId + '_' + rowScope;
+    }
+
+    function legacyStorageKey(assistantId, actor) {
+        var owner = transcriptActor(actor);
+        if (!owner) {
+            return '';
+        }
+        return 'chatbot_chatgpt_conversation_' + owner + '_' + String(assistantId || '');
     }
 
     function encodeEnvelope(generation, html) {
@@ -100,7 +115,7 @@
         return 'rotate';
     }
 
-    function applyReply(roots, meta, visitorHtml, replyHtml) {
+    function applyReply(roots, meta, visitorHtml, replyHtml, actor) {
         var next = [];
         var writes = [];
         var applied = false;
@@ -126,10 +141,13 @@
                 html: html
             };
             next.push(updated);
-            writes.push({
-                key: storageKey(updated.assistantId, updated.rowScope),
-                value: encodeEnvelope(updated.generation, updated.html)
-            });
+            var writeKey = storageKey(updated.assistantId, updated.rowScope, actor);
+            if (writeKey !== '') {
+                writes.push({
+                    key: writeKey,
+                    value: encodeEnvelope(updated.generation, updated.html)
+                });
+            }
         }
         return { applied: applied, roots: next, writes: writes };
     }
@@ -157,13 +175,13 @@
         }
     }
 
-    function scopeEpochKey(assistantId, rowScope) {
-        var key = storageKey(assistantId, rowScope);
+    function scopeEpochKey(assistantId, rowScope, actor) {
+        var key = storageKey(assistantId, rowScope, actor);
         return key === '' ? '' : 'epoch:' + key;
     }
 
-    function beginRequest(epochs, assistantId, rowScope) {
-        var key = scopeEpochKey(assistantId, rowScope);
+    function beginRequest(epochs, assistantId, rowScope, actor) {
+        var key = scopeEpochKey(assistantId, rowScope, actor);
         if (!key || !epochs || typeof epochs !== 'object') {
             return null;
         }
@@ -173,8 +191,8 @@
         return { key: key, epoch: epochs[key] };
     }
 
-    function invalidateScope(epochs, assistantId, rowScope) {
-        var key = scopeEpochKey(assistantId, rowScope);
+    function invalidateScope(epochs, assistantId, rowScope, actor) {
+        var key = scopeEpochKey(assistantId, rowScope, actor);
         if (!key || !epochs || typeof epochs !== 'object') {
             return false;
         }

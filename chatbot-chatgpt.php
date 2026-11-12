@@ -142,6 +142,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversatio
 
 add_action('init', 'kognetiks_assign_unique_id', 1);
 add_action('init', 'chatbot_chatgpt_retire_shared_anonymous_conversation_keys', 20);
+add_action('init', 'chatbot_chatgpt_retire_unscoped_context_buffers', 21);
 
 // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
 $user_id = get_current_user_id();
@@ -249,6 +250,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assisted-se
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversation-context.php';         // Conversation Context - Ver 2.3.9
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversation-digest.php';          // Conversation Digest - Ver 2.3.9
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversation-history.php';         // Ver 1.9.2
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-privacy.php';                      // Personal data export and erase
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-content-search.php';               // Functions - Ver 2.2.4
 require_once plugin_dir_path(__FILE__) . 'includes/dashboard/chatbot-chatgpt-dashboard-widget.php';     // Dashboard Widget - Ver 2.2.7
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php';                // Database Management for Reporting - Ver 1.6.3
@@ -821,16 +823,16 @@ function chatbot_chatgpt_get_queue_status_ajax() {
     }
 
     $page_id = isset($_POST['page_id']) ? sanitize_text_field(wp_unslash($_POST['page_id'])) : '';
-    $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
+    $session_id = chatbot_chatgpt_bound_request_session_id();
     $assistant_id = isset($_POST['assistant_id']) ? sanitize_text_field(wp_unslash($_POST['assistant_id'])) : '';
     $lock_user_id = chatbot_chatgpt_get_conversation_lock_user_id(get_current_user_id());
 
-    if (!$page_id || !$session_id || !$assistant_id) {
+    if (!$page_id || !$assistant_id) {
         wp_send_json_error('Missing required parameters');
         return;
     }
 
-    if ($lock_user_id === 0 && !verify_session_ownership($session_id)) {
+    if ($session_id === '' || !verify_session_ownership($session_id)) {
         wp_send_json_error('Unauthorized access to conversation.', 403);
         return;
     }
@@ -1345,25 +1347,16 @@ function chatbot_chatgpt_send_message() {
     
     // Kept off the $session_id name until after `global $session_id`. In PHP that
     // keyword rebinds the name and would drop the value verified just above.
-    $verified_session_id = '';
+    // Logged-in and anonymous requests both have to present this browser's cookie.
+    $verified_session_id = chatbot_chatgpt_bound_request_session_id();
+    if ( $verified_session_id === '' ) {
+        prod_trace( 'ERROR', 'Chatbot Session Validation Failed' );
+        wp_send_json_error( 'Unauthorized access to conversation.', 403 );
+        return;
+    }
+    chatbot_chatgpt_capture_context_scope_from_request();
 
-    // For anonymous users, we need to verify they own the session
     if ($current_user_id === 0) {
-        // Anonymous user - verify session ownership through session_id
-        if (!isset($_POST['session_id'])) {
-            wp_send_json_error('Session ID required for anonymous users.', 403);
-            return;
-        }
-        $verified_session_id = sanitize_text_field(wp_unslash($_POST['session_id']));
-        
-        // The posted session must match this browser's signed visitor cookie.
-        if (!verify_session_ownership($verified_session_id)) {
-            // DIAG - Diagnostics - Ver 2.4.5
-            prod_trace( 'ERROR', 'Chatbot Session Validation Failed - Length: ' . strlen($verified_session_id));
-            wp_send_json_error('Unauthorized access to conversation.', 403);
-            return;
-        }
-        
         // For anonymous users, user_id should be 0 (session_id is used in transient key via get_chatbot_chatgpt_transients)
         $user_id = 0;
         
@@ -1381,13 +1374,7 @@ function chatbot_chatgpt_send_message() {
         // Increment rate limit counter
         set_transient($rate_limit_key, $current_count + 1, 60); // 60 seconds
     } else {
-        // Logged-in user - use their actual user ID
-        // Get session_id for logged-in users (needed for transient keys) - Ver 2.3.6
-        if (!isset($_POST['session_id'])) {
-            $verified_session_id = kognetiks_get_unique_id();
-        } else {
-            $verified_session_id = sanitize_text_field(wp_unslash($_POST['session_id']));
-        }
+        $user_id = $current_user_id;
     }
 
     // Global variables
@@ -1585,19 +1572,7 @@ function chatbot_chatgpt_send_message() {
     // Security: Get page_id from POST (this is safe as it's just identifying the page)
     $page_id = isset($_POST['page_id']) ? sanitize_text_field($_POST['page_id']) : '';
     
-    // For logged-in users, session_id should come from the secure session
-    // For anonymous users, session_id was already validated above
-    if ($current_user_id === 0) {
-        // session_id was already validated and set above for anonymous users
-        // No need to overwrite it
-    } else {
-        // For logged-in users, get session_id from POST but validate it
-        if (isset($_POST['session_id'])) {
-            $session_id = sanitize_text_field(wp_unslash($_POST['session_id']));
-        } else {
-            $session_id = kognetiks_get_unique_id();
-        }
-    }
+    // The session id was bound to the signed cookie above. Do not read POST again.
 
     // Additional security: Verify the conversation belongs to this user
     if (!verify_conversation_ownership($user_id, $page_id, $session_id)) {

@@ -567,8 +567,14 @@ Users must agree to terms of service for each AI platform:
 
 ## What's new in Version 2.5.9 - Released TBD
 
-### Bug Fixes
-* **TBD**: TBD
+### Improvements
+* **Open-tab conversations**: Model memory and Assistants or Responses conversation ids now stay with the open browser tab, the page, and the assistant. Refresh continues that visit. A new tab, or a return after the tab is closed, starts a new provider conversation. Clear deletes that visit's memory and starts a new one. Older conversation ids are not resumed.
+* **Account switch**: With Conversation Continuation on, the saved transcript belongs to the WordPress user. Another account in the same tab does not see the previous transcript. Continuation still defaults to Off.
+* **Signed visitor cookie**: Send, erase, upload, and queue status refuse a session id that does not match this browser's signed cookie. Read aloud follows the account and the open tab, and no longer falls back to the conversation log.
+* **Personal data and logs**: Export and Erase Personal Data include an account's chatbot messages. Error and widget logs store a keyed IP token instead of the raw address, and those folders deny direct web access on Apache.
+
+### Documentation
+* **Privacy**: A new privacy guide explains who can see a conversation, the settings that change that, and what remains visible when conversation logging or digest email is on.
 
 
 ## What's new in Version 2.5.8 - Released 2026-11-11

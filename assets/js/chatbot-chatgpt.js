@@ -31,6 +31,80 @@ jQuery(document).ready(function ($) {
         kchat_settings.nonce_timestamp = Date.now();
         return true;
     }
+
+    function chatbotTranscriptActor() {
+        var userId = kchat_settings.user_id === undefined || kchat_settings.user_id === null ? '' : String(kchat_settings.user_id);
+        if (!/^[A-Za-z0-9]{1,64}$/.test(userId)) {
+            return '0';
+        }
+        return userId;
+    }
+
+    function chatbotTranscriptStorageKey(assistantId) {
+        var actor = chatbotTranscriptActor();
+        var browser = (typeof v2BrowserApi === 'function') ? v2BrowserApi() : null;
+        if (browser && typeof browser.legacyStorageKey === 'function') {
+            return browser.legacyStorageKey(assistantId, actor);
+        }
+        if (!/^[A-Za-z0-9]{1,64}$/.test(actor)) {
+            return '';
+        }
+        return 'chatbot_chatgpt_conversation_' + actor + '_' + String(assistantId || '');
+    }
+
+    function chatbotContextScopeKey() {
+        var pageId = kchat_settings.page_id ? String(kchat_settings.page_id) : '';
+        var assistantId = kchat_settings.assistant_id ? String(kchat_settings.assistant_id) : '';
+        return 'chatbot_chatgpt_context_generation_' + chatbotTranscriptActor() + '_' + pageId + '_' + assistantId;
+    }
+
+    function chatbotNewContextGeneration() {
+        var bytes = new Uint8Array(16);
+        if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+            window.crypto.getRandomValues(bytes);
+        } else {
+            for (var i = 0; i < bytes.length; i++) {
+                bytes[i] = Math.floor(Math.random() * 256);
+            }
+        }
+        var hex = '';
+        for (var j = 0; j < bytes.length; j++) {
+            hex += ('0' + bytes[j].toString(16)).slice(-2);
+        }
+        return hex;
+    }
+
+    function chatbotStoreContextGeneration(generation) {
+        kchat_settings.context_generation = generation;
+        try {
+            sessionStorage.setItem(chatbotContextScopeKey(), generation);
+        } catch (storageError) {
+            // sessionStorage can be blocked. This page still sends the in-memory value.
+        }
+        return generation;
+    }
+
+    function chatbotRotateContextGeneration() {
+        return chatbotStoreContextGeneration(chatbotNewContextGeneration());
+    }
+
+    function chatbotContextGeneration() {
+        var current = kchat_settings.context_generation ? String(kchat_settings.context_generation) : '';
+        if (/^[a-f0-9]{32}$/.test(current)) {
+            return current;
+        }
+        var existing = '';
+        try {
+            existing = sessionStorage.getItem(chatbotContextScopeKey()) || '';
+        } catch (storageError) {
+            existing = '';
+        }
+        if (!/^[a-f0-9]{32}$/.test(existing)) {
+            return chatbotRotateContextGeneration();
+        }
+        kchat_settings.context_generation = existing;
+        return existing;
+    }
     
 // Unlock conversation on page load/refresh to prevent stuck locks
 function unlockConversationOnLoad() {
@@ -725,7 +799,7 @@ window.resetAllLocks = resetAllLocks;
         if (!browser || !root) {
             return false;
         }
-        var key = browser.storageKey(root.getAttribute('data-assistant-id'), root.getAttribute('data-row-scope'));
+        var key = browser.storageKey(root.getAttribute('data-assistant-id'), root.getAttribute('data-row-scope'), chatbotTranscriptActor());
         var encoded = browser.encodeEnvelope(root.getAttribute('data-conversation-generation') || '', html);
         return browser.storageSet(v2SessionStorage(), key, encoded);
     }
@@ -735,7 +809,7 @@ window.resetAllLocks = resetAllLocks;
         if (!browser || !root) {
             return false;
         }
-        var key = browser.storageKey(root.getAttribute('data-assistant-id'), root.getAttribute('data-row-scope'));
+        var key = browser.storageKey(root.getAttribute('data-assistant-id'), root.getAttribute('data-row-scope'), chatbotTranscriptActor());
         browser.storageRemove(v2SessionStorage(), key);
         root.setAttribute('data-conversation-generation', '');
         return true;
@@ -746,7 +820,7 @@ window.resetAllLocks = resetAllLocks;
         if (!browser || !root || typeof browser.beginRequest !== 'function') {
             return null;
         }
-        return browser.beginRequest(v2RequestEpochs, root.getAttribute('data-assistant-id'), root.getAttribute('data-row-scope'));
+        return browser.beginRequest(v2RequestEpochs, root.getAttribute('data-assistant-id'), root.getAttribute('data-row-scope'), chatbotTranscriptActor());
     }
 
     function v2InvalidateRoot(root) {
@@ -754,7 +828,7 @@ window.resetAllLocks = resetAllLocks;
         if (!browser || !root || typeof browser.invalidateScope !== 'function') {
             return false;
         }
-        return browser.invalidateScope(v2RequestEpochs, root.getAttribute('data-assistant-id'), root.getAttribute('data-row-scope'));
+        return browser.invalidateScope(v2RequestEpochs, root.getAttribute('data-assistant-id'), root.getAttribute('data-row-scope'), chatbotTranscriptActor());
     }
 
     function v2SaveConversationElement(element, html) {
@@ -903,7 +977,7 @@ window.resetAllLocks = resetAllLocks;
             if (!clearedRoot || !v2ClearRoot(clearedRoot)) {
                 if (!clearedRoot) {
                     try {
-                        sessionStorage.removeItem('chatbot_chatgpt_conversation' + '_' + assistant_id);
+                        sessionStorage.removeItem(chatbotTranscriptStorageKey(assistant_id));
                     } catch (storageError) {
                         // sessionStorage can be blocked. The visible clear still stands.
                     }
@@ -912,7 +986,7 @@ window.resetAllLocks = resetAllLocks;
         } else if (!v2SaveConversationElement(conversation && conversation[0], conversation.html())) {
             if (!v2RootForElement(conversation && conversation[0])) {
                 try {
-                    sessionStorage.setItem('chatbot_chatgpt_conversation' + '_' + assistant_id, conversation.html());
+                    sessionStorage.setItem(chatbotTranscriptStorageKey(assistant_id), conversation.html());
                 } catch (storageError) {
                     // sessionStorage can be blocked. The visible message still stands.
                 }
@@ -1336,6 +1410,7 @@ window.resetAllLocks = resetAllLocks;
                 page_id: page_id, // pass the page ID here
                 session_id: session_id, // pass the session ID here
                 assistant_id: assistant_id, // pass the assistant/prompt ID for logging and routing
+                context_generation: chatbotContextGeneration(),
                 client_message_id: client_message_id, // pass the client message ID for idempotency
                 chatbot_nonce: kchat_settings.chatbot_message_nonce, // Security: CSRF protection
             };
@@ -1541,6 +1616,8 @@ window.resetAllLocks = resetAllLocks;
                                         user_id: user_id,
                                         page_id: page_id,
                                         session_id: session_id,
+                                        assistant_id: assistant_id,
+                                        context_generation: chatbotContextGeneration(),
                                         client_message_id: client_message_id,
                                         chatbot_nonce: kchat_settings.chatbot_message_nonce,
                                     },
@@ -1798,6 +1875,7 @@ window.resetAllLocks = resetAllLocks;
                 user_id: kchat_settings.user_id,
                 page_id: kchat_settings.page_id,
                 session_id: kchat_settings.session_id,
+                context_generation: chatbotContextGeneration(),
                 chatbot_nonce: kchat_settings.chatbot_tts_nonce // Security: CSRF protection
             },
             beforeSend: function () {
@@ -2275,6 +2353,7 @@ window.resetAllLocks = resetAllLocks;
                 user_id: user_id, // pass the user ID here
                 page_id: page_id, // pass the page ID here
                 session_id: session_id, // pass the session
+                context_generation: chatbotContextGeneration(),
                 thread_id: thread_id, // pass the thread ID
                 assistant_id: assistant_id, // pass the assistant ID
                 chatbot_chatgpt_force_page_reload: chatbot_chatgpt_force_page_reload, // pass the force page reload setting
@@ -2286,12 +2365,13 @@ window.resetAllLocks = resetAllLocks;
             },
             success: function(response) {
                 var clearedRoot = v2ActiveRoot();
+                chatbotRotateContextGeneration();
                 if (clearedRoot) {
                     v2ClearRoot(clearedRoot);
                     v2InvalidateRoot(clearedRoot);
                 } else {
                     try {
-                        sessionStorage.removeItem('chatbot_chatgpt_conversation' + '_' + assistant_id);
+                        sessionStorage.removeItem(chatbotTranscriptStorageKey(assistant_id));
                     } catch (storageError) {
                         // sessionStorage can be blocked. The server clear still stands.
                     }
@@ -2539,8 +2619,14 @@ window.resetAllLocks = resetAllLocks;
                 var continuationIndex;
                 for (continuationIndex = 0; continuationIndex < continuationNodes.length; continuationIndex++) {
                     var continuationState = v2RootState(continuationNodes[continuationIndex]);
-                    var continuationKey = continuationBrowser.storageKey(continuationState.assistantId, continuationState.rowScope);
-                    var continuationHtml = continuationBrowser.restoredHtml(continuationBrowser.storageGet(v2SessionStorage(), continuationKey), continuationState.generation);
+                    var continuationKey = continuationBrowser.storageKey(continuationState.assistantId, continuationState.rowScope, chatbotTranscriptActor());
+                    var continuationRaw = continuationBrowser.storageGet(v2SessionStorage(), continuationKey);
+                    var continuationEnvelope = continuationBrowser.readEnvelope(continuationRaw);
+                    var continuationAuthority = continuationState.generation;
+                    if (!continuationAuthority && continuationEnvelope) {
+                        continuationAuthority = continuationEnvelope.generation;
+                    }
+                    var continuationHtml = continuationBrowser.restoredHtml(continuationRaw, continuationAuthority);
                     var continuationElement = continuationNodes[continuationIndex].querySelector('.chatbot-chatgpt-conversation');
                     if (continuationHtml && continuationElement && continuationElement !== conversation[0]) {
                         continuationElement.innerHTML = (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize(continuationHtml) : continuationHtml;
@@ -2551,7 +2637,7 @@ window.resetAllLocks = resetAllLocks;
                 }
             } else {
                 try {
-                    storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation' + '_' + assistant_id);
+                    storedConversation = sessionStorage.getItem(chatbotTranscriptStorageKey(assistant_id));
                 } catch (storageError) {
                     storedConversation = '';
                 }
@@ -2568,6 +2654,10 @@ window.resetAllLocks = resetAllLocks;
                 // console.warn('Chatbot: WARNING: No conversation found in session storage.');
             }
         }
+
+        // This tab keeps its generation across refresh. Clear starts a new one.
+        // Another account uses a different key, so it starts its own generation.
+        chatbotContextGeneration();
 
         if (storedConversation) {
  

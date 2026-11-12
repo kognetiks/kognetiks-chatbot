@@ -710,7 +710,9 @@ function log_chatbot_error() {
         // Get additional info
         $session_id = session_id();
         $user_id = get_current_user_id();
-        $ip_address = $_SERVER['REMOTE_ADDR'];
+        $ip_address = function_exists( 'chatbot_chatgpt_redact_ip_for_log' )
+            ? chatbot_chatgpt_redact_ip_for_log( isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '' )
+            : 'redacted';
         $date_time = gmdate('Y-m-d H:i:s');
 
         // Construct the log message - Ver 2.3.7 - Fixed empty error message display
