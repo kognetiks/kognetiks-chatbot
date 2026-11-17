@@ -952,6 +952,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         : '';
 
 
+    // Glyph rendering follows the chatbot instance. Pages without one do not load MathJax.
+    enqueue_mathjax_with_custom_config();
+
     // Depending on the style, adjust the output - Ver 1.7.1
     if ($chatbot_chatgpt_display_style == 'embedded') {
         // Code for embed style ('embedded' is the alternative style)
