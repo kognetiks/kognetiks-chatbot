@@ -5,7 +5,7 @@ Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 8.0
-Stable tag: 2.5.9
+Stable tag: 2.6.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -168,6 +168,8 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
    - Agree to abide by the provider's terms of service, pricing, and privacy policy.
    - Acknowledge that your data, including text submitted by users, may be transferred to and processed by the AI platform in accordance with its privacy policy.
 
+**NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider's pricing and usage policies before proceeding.
+
 **Freemius** ([https://freemius.com](https://freemius.com)) is used for optional account connection, licensing, checkout, the 7-day Premium trial, and premium updates. It is not an AI provider and does not process chatbot conversations.
 
 Free chatbot features work if you skip connecting an account. Freemius is contacted when you start a trial, activate a license, open checkout or the pricing/account screens, or opt in to diagnostics.
@@ -177,7 +179,19 @@ When that happens, Freemius may receive the site URL, WordPress version, PHP ver
 - [Freemius Terms of Service](https://freemius.com/terms/)
 - [Freemius Privacy Policy](https://freemius.com/privacy/)
 
-**NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider's pricing and usage policies before proceeding.
+== Third-Party Libraries ==
+
+**MathJax 3.2.0**
+
+Kognetiks Chatbot includes locally hosted MathJax components for mathematical notation rendering in chatbot conversations.
+
+- License: Apache License 2.0
+- Project: https://www.mathjax.org/
+- Source code: https://github.com/mathjax/MathJax-src
+- Runtime components: https://github.com/mathjax/MathJax
+- The distributed runtime components are included locally; the complete development source is publicly available from the MathJax project.
+
+The bundled MathJax components are configured with additional security controls appropriate for rendering chatbot content.
 
 == Disclaimer ==
 
@@ -192,6 +206,18 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 5. Chatbot settings and configuration
 
 == Changelog ==
+
+= 2.6.0 - Released 2026-11-17 =
+
+### Security
+- Fixed a stored cross-site scripting vulnerability involving MathJax rendering of untrusted mathematical expressions.
+- Added secure mathematical rendering that prevents unsafe URLs and executable attributes from being introduced into chatbot content.
+- Restricted MathJax processing to chatbot content, preventing the plugin from interpreting unrelated WordPress comments and page content.
+- Improved MathJax initialization, dependency isolation, and asset versioning.
+
+### Compatibility
+- Preserved mathematical notation rendering in chatbot conversations.
+- Improved compatibility with other plugins that use MathJax.
 
 = 2.5.9 - Released 2026-11-12 =
 

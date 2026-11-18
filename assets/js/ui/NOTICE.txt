@@ -1,0 +1,11 @@
+MathJax ui/safe component
+Version: 3.2.0
+File: safe.js
+Source: https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/ui/safe.js
+Upstream: https://github.com/mathjax/MathJax-src/tree/3.2.0/ts/ui/safe
+Copyright (c) 2020-2021 The MathJax Consortium
+License: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+safe.js is the official MathJax 3.2.0 build of the ui/safe extension.
+It is served from this plugin. It was not modified.
+The plugin loads it through MathJax's loader from assets/js/ui/safe.js.

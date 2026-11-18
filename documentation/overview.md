@@ -40,16 +40,31 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 **NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider's pricing and usage policies before proceeding.
 
-## What's new in Version 2.5.9 - Released 2026-11-12
+## Third-Party Libraries
 
-### Improvements
-* **Open-tab conversations**: Model memory and Assistants or Responses conversation ids now stay with the open browser tab, the page, and the assistant. Refresh continues that visit. A new tab, or a return after the tab is closed, starts a new provider conversation. Clear deletes that visit's memory and starts a new one. Older conversation ids are not resumed.
-* **Account switch**: With Conversation Continuation on, the saved transcript belongs to the WordPress user. Another account in the same tab does not see the previous transcript. Continuation still defaults to Off.
-* **Signed visitor cookie**: Send, erase, upload, and queue status refuse a session id that does not match this browser's signed cookie. Read aloud follows the account and the open tab, and no longer falls back to the conversation log.
-* **Personal data and logs**: Export and Erase Personal Data include an account's chatbot messages. Error and widget logs store a keyed IP token instead of the raw address, and those folders deny direct web access on Apache.
+**MathJax 3.2.0**
 
-### Documentation
-* **Privacy**: A new privacy guide explains who can see a conversation, the settings that change that, and what remains visible when conversation logging or digest email is on.
+Kognetiks Chatbot includes locally hosted MathJax components for mathematical notation rendering in chatbot conversations.
+
+- License: Apache License 2.0
+- Project: https://www.mathjax.org/
+- Source code: https://github.com/mathjax/MathJax-src
+- Runtime components: https://github.com/mathjax/MathJax
+- The distributed runtime components are included locally; the complete development source is publicly available from the MathJax project.
+
+The bundled MathJax components are configured with additional security controls appropriate for rendering chatbot content.
+
+## What's new in Version 2.6.0 - Released 2026-11-17
+
+## Security
+- Fixed a stored cross-site scripting vulnerability involving MathJax rendering of untrusted mathematical expressions.
+- Added secure mathematical rendering that prevents unsafe URLs and executable attributes from being introduced into chatbot content.
+- Restricted MathJax processing to chatbot content, preventing the plugin from interpreting unrelated WordPress comments and page content.
+- Improved MathJax initialization, dependency isolation, and asset versioning.
+
+## Compatibility
+- Preserved mathematical notation rendering in chatbot conversations.
+- Improved compatibility with other plugins that use MathJax.
 
 * Information about past updates can be found [here](updates/updates.md).
 

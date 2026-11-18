@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.5.9
+ * Version:     2.6.0
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * Text Domain: chatbot-chatgpt
@@ -28,7 +28,7 @@
  * along with Kognetiks Chatbot. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  * 
  * @package chatbot-chatgpt
- * @version 2.5.9
+ * @version 2.6.0
  * @author Kognetiks.com
  */
 
@@ -95,7 +95,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.5.9';
+$chatbot_chatgpt_plugin_version = '2.6.0';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -673,43 +673,176 @@ function chatbot_chatgpt_enqueue_scripts() {
 }
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
-// Enqueue MathJax with custom configuration - Ver 2.1.2
-// https://docs.mathjax.org/en/latest/
-// https://github.com/mathjax/MathJax/blob/master/LICENSE
-// https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js
-// https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js
+// MathJax configuration for the bundled 3.2.0 build - 2026 11 17
+// https://docs.mathjax.org/en/v3.2.2/options/safe.html
+// ui/safe is vendored at assets/js/ui/safe.js and is loaded from the plugin, not a CDN.
+
+// Read this plugin's header. Other Kognetiks plugins reuse $chatbot_chatgpt_plugin_version.
+function chatbot_chatgpt_mathjax_asset_version() {
+
+    static $chatbot_mathjax_asset_version = null;
+
+    if ( null !== $chatbot_mathjax_asset_version ) {
+        return $chatbot_mathjax_asset_version;
+    }
+
+    $chatbot_mathjax_asset_version = '2.6.0';
+    $plugin_header = file_get_contents( __FILE__, false, null, 0, 8192 );
+    if ( is_string( $plugin_header ) && preg_match( '/^[ \t]*\*[ \t]*Version:[ \t]*([^\r\n]+)/mi', $plugin_header, $version_match ) ) {
+        $header_version = trim( $version_match[1] );
+        if ( '' !== $header_version ) {
+            $chatbot_mathjax_asset_version = $header_version;
+        }
+    }
+
+    return $chatbot_mathjax_asset_version;
+
+}
+
+// Another plugin's MathJax already owns window.MathJax when its script is queued.
+// A registered-but-not-queued handle does not print, so it does not take ownership.
+function chatbot_chatgpt_foreign_mathjax_is_active() {
+
+    global $wp_scripts;
+
+    if ( ! ( $wp_scripts instanceof WP_Scripts ) ) {
+        return false;
+    }
+
+    $our_handles = array(
+        'chatbot-mathjax-security' => true,
+        'chatbot-chatgpt-mathjax'  => true,
+    );
+
+    foreach ( $wp_scripts->registered as $handle => $script ) {
+        $handle = (string) $handle;
+        if ( isset( $our_handles[ $handle ] ) ) {
+            continue;
+        }
+
+        $src = ( is_object( $script ) && isset( $script->src ) ) ? (string) $script->src : '';
+        $handle_match = ( 'mathjax' === $handle || 0 === strpos( $handle, 'mathjax-' ) );
+        $src_match = (
+            false !== stripos( $src, 'mathjax' )
+            || false !== stripos( $src, 'tex-mml-chtml' )
+            || false !== stripos( $src, 'tex-chtml' )
+            || false !== stripos( $src, 'tex-svg' )
+        );
+        if ( ! $handle_match && ! $src_match ) {
+            continue;
+        }
+
+        if ( wp_script_is( $handle, 'enqueued' ) || wp_script_is( $handle, 'done' ) || wp_script_is( $handle, 'queue' ) ) {
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
+function chatbot_chatgpt_mathjax_runtime_config( $script_base_url, $font_url ) {
+
+    return array(
+        'loader' => array(
+            'load' => array( 'ui/safe' ),
+            'paths' => array(
+                'mathjax' => (string) $script_base_url,
+            ),
+        ),
+        'startup' => array(
+            'typeset' => false,
+        ),
+        'options' => array(
+            'enableMenu' => false,
+            'safeOptions' => array(
+                'allow' => array(
+                    'URLs' => 'safe',
+                    'classes' => 'none',
+                    'cssIDs' => 'none',
+                    'styles' => 'safe',
+                ),
+                'safeProtocols' => array(
+                    'http' => true,
+                    'https' => true,
+                    'file' => false,
+                    'javascript' => false,
+                    'data' => false,
+                    'vbscript' => false,
+                ),
+            ),
+        ),
+        'tex' => array(
+            'inlineMath' => array(
+                array( '$', '$' ),
+                array( '\\(', '\\)' ),
+            ),
+            'displayMath' => array(
+                array( '$$', '$$' ),
+                array( '\\[', '\\]' ),
+            ),
+        ),
+        'chtml' => array(
+            'fontURL' => (string) $font_url,
+        ),
+    );
+
+}
+
+// Enqueue MathJax only for a rendered chatbot when glyph rendering is enabled.
+// wp_enqueue_scripts cannot see every shortcode, template, or widget render, so
+// chatbot_chatgpt_shortcode() calls this while the chatbot markup is produced.
 function enqueue_mathjax_with_custom_config() {
-    
-    // Check to see if MathJax is enabled
-    if (esc_attr(get_option('chatbot_chatgpt_enable_mathjax','Yes')) === 'Yes') {
 
-        global $chatbot_chatgpt_plugin_version;
-        global $chatbot_chatgpt_plugin_dir_url;
+    if ( esc_attr( get_option( 'chatbot_chatgpt_enable_mathjax', 'Yes' ) ) !== 'Yes' ) {
+        return;
+    }
 
-        // Add the MathJax configuration script
-        $mathjax_config = "
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
-                displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']],
-            },
-            chtml: {
-                fontURL: '" . plugin_dir_url(__FILE__) . "assets/fonts/woff-v2'
-            }
-        };
-        ";
+    if ( wp_script_is( 'chatbot-chatgpt-mathjax', 'enqueued' ) || wp_script_is( 'chatbot-chatgpt-mathjax', 'done' ) ) {
+        return;
+    }
 
-        // Enqueue the MathJax script
-        // wp_enqueue_script( 'mathjax', plugin_dir_url(__FILE__) . 'assets/js/tex-chtml.js', array(), $chatbot_chatgpt_plugin_version, true );
-        wp_enqueue_script( 'mathjax', $chatbot_chatgpt_plugin_dir_url . 'assets/js/tex-mml-chtml.js', array(), $chatbot_chatgpt_plugin_version, true );
+    // A foreign MathJax was already accepted for this request. Do not load a second copy.
+    if ( wp_script_is( 'chatbot-mathjax-security', 'enqueued' ) || wp_script_is( 'chatbot-mathjax-security', 'done' ) ) {
+        return;
+    }
 
-        // Add the inline script before MathJax script
-        wp_add_inline_script( 'mathjax', $mathjax_config, 'before' );
+    $mathjax_version = chatbot_chatgpt_mathjax_asset_version();
+    $script_base_url = plugin_dir_url( __FILE__ ) . 'assets/js';
+    $security_src = $script_base_url . '/chatbot-mathjax-security.js';
 
+    if ( chatbot_chatgpt_foreign_mathjax_is_active() ) {
+        // Keep the click guard. Do not configure, wrap, or typeset with the other library.
+        wp_enqueue_script( 'chatbot-mathjax-security', $security_src, array(), $mathjax_version, true );
+        wp_add_inline_script( 'chatbot-mathjax-security', 'window.chatbotMathJaxForeign = true;', 'before' );
+        if ( did_action( 'wp_print_footer_scripts' ) ) {
+            wp_print_scripts( 'chatbot-mathjax-security' );
+        }
+        return;
+    }
+
+    $font_url = plugin_dir_url( __FILE__ ) . 'assets/fonts/woff-v2';
+    $mathjax_config = chatbot_chatgpt_mathjax_runtime_config( $script_base_url, $font_url );
+    $mathjax_config['chatbotOwned'] = true;
+    $version_literal = wp_json_encode( $mathjax_version );
+    $mathjax_before = 'window.MathJax = ' . wp_json_encode( $mathjax_config ) . ';';
+    $mathjax_before .= 'window.MathJax.loader.pathFilters = window.MathJax.loader.pathFilters || [];';
+    $mathjax_before .= 'window.MathJax.loader.pathFilters.push([function (data) {';
+    $mathjax_before .= 'if (data && typeof data.name === "string" && data.name.indexOf("/ui/safe.js") !== -1 && data.name.indexOf("ver=") === -1) {';
+    $mathjax_before .= 'data.name += "?ver=" + encodeURIComponent(' . $version_literal . ');';
+    $mathjax_before .= '} return true; }, 30]);';
+
+    wp_enqueue_script( 'chatbot-mathjax-security', $security_src, array(), $mathjax_version, true );
+    wp_enqueue_script( 'chatbot-chatgpt-mathjax', $script_base_url . '/tex-mml-chtml.js', array( 'chatbot-mathjax-security' ), $mathjax_version, true );
+    wp_add_inline_script( 'chatbot-chatgpt-mathjax', $mathjax_before, 'before' );
+    wp_add_inline_script( 'chatbot-chatgpt-mathjax', 'if (window.MathJax) { window.MathJax.chatbotOwned = true; } if (typeof chatbotInstallMathJaxGuard === "function") { chatbotInstallMathJaxGuard(); }', 'after' );
+
+    // A chatbot printed after the footer script queue still receives the guarded library.
+    if ( did_action( 'wp_print_footer_scripts' ) ) {
+        wp_print_scripts( 'chatbot-chatgpt-mathjax' );
     }
 
 }
-add_action( 'wp_enqueue_scripts', 'enqueue_mathjax_with_custom_config' );
 
 // CORS - Cross Origin Resource Sharing - CAUTION: This allows all domains to access the end point - Ver 2.1.2
 // function allow_cross_domain_requests() {

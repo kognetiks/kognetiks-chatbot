@@ -148,6 +148,8 @@ By using this plugin, you agree to abide by each service's terms of service and 
 | **Google** | [Terms of Use](https://ai.google.dev/gemini-api/terms) | [Privacy Policy](https://policies.google.com/privacy) | [API Keys](https://aistudio.google.com/api-keys)
 | **JAN.AI** | [About](https://jan.ai/about) | [Privacy Policy](https://jan.ai/docs/privacy-policy) | [API Keys](https://www.jan.ai/docs/desktop/api-server)
 
+**Note:** You are responsible for any fees associated with the use of third-party APIs.
+
 **Freemius** is used for optional account connection, licensing, checkout, the 7-day Premium trial, and premium updates. It is not an AI provider.
 
 Free chatbot features work without a Freemius account. Freemius is contacted when you start a trial, activate a license, open checkout or the pricing/account screens, or opt in to diagnostics.
@@ -158,7 +160,19 @@ When that happens, Freemius may receive the site URL, WordPress version, PHP ver
 |--|--|--|
 | **Freemius** | [Terms of Service](https://freemius.com/terms/) | [Privacy Policy](https://freemius.com/privacy/) |
 
-**Note:** You are responsible for any fees associated with the use of third-party APIs.
+## Third-Party Libraries
+
+**MathJax 3.2.0**
+
+Kognetiks Chatbot includes locally hosted MathJax components for mathematical notation rendering in chatbot conversations.
+
+- License: Apache License 2.0
+- Project: https://www.mathjax.org/
+- Source code: https://github.com/mathjax/MathJax-src
+- Runtime components: https://github.com/mathjax/MathJax
+- The distributed runtime components are included locally; the complete development source is publicly available from the MathJax project.
+
+The bundled MathJax components are configured with additional security controls appropriate for rendering chatbot content.
 
 ## License
 

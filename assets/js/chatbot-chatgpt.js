@@ -979,16 +979,9 @@ window.resetAllLocks = resetAllLocks;
             }
         }
 
-        // MathJax rendering - Ver 2.1.2 - 2024 08 29
-        if (typeof MathJax !== 'undefined') {
-            // console.log("MathJax is loaded.");
-            MathJax.typesetPromise([messageElement[0]])
-                .then(() => {
-                    // console.log("MathJax rendering complete");
-                })
-                .catch((err) => { /* console.log("MathJax rendering failed: ", err); */ });
-        } else {
-            // console.log("MathJax is not loaded.");
+        // MathJax rendering stays inside this chatbot and runs only after ui/safe is active.
+        if (typeof chatbotTypesetMath === 'function') {
+            chatbotTypesetMath(messageElement[0]);
         }
 
     }
@@ -2690,12 +2683,10 @@ window.resetAllLocks = resetAllLocks;
             setTimeout(scrollToBottom, 0);
             removeTypingIndicator();
 
-            // Re-render MathJax for any formulas in the stored conversation - Ver 2.1.2 - 2024 08 29
-            MathJax.typesetPromise([conversation[0]])
-            .then(() => {
-                // console.log("MathJax re-rendering complete for stored conversation");
-            })
-            .catch((err) => { /* console.error("Chatbot: ERROR: MathJax re-rendering failed: ", err); */ });
+            // Re-render MathJax inside the stored conversation only.
+            if (typeof chatbotTypesetMath === 'function' && conversation && conversation[0]) {
+                chatbotTypesetMath(conversation[0]);
+            }
 
         } else {
 
