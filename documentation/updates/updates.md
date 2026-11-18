@@ -1,5 +1,11 @@
 # Past Updates
 
+## What's new in Version 2.6.1 - Released TBD
+
+### Bug Fixes
+
+* **TBD**: TBD
+
 ## What's new in Version 2.6.0 - Released 2026-11-17
 
 ## Security

@@ -4,7 +4,7 @@
 
 The **Kognetiks Chatbot** is a comprehensive WordPress plugin that integrates advanced AI capabilities into WordPress websites. It provides intelligent conversational experiences through multiple AI platforms, offering both cloud-based and local AI solutions for enhanced visitor engagement, customer support, and interactive assistance.
 
-**Version:** 2.6.0
+**Version:** 2.6.1
 **License:** GPLv3 or later  
 **WordPress Compatibility:** Tested up to WordPress 7.1.4
 
@@ -585,7 +585,6 @@ Users must agree to terms of service for each AI platform:
 
 ### Documentation
 * **Privacy**: A new privacy guide explains who can see a conversation, the settings that change that, and what remains visible when conversation logging or digest email is on.
-
 
 ## What's new in Version 2.5.8 - Released 2026-11-11
 
