@@ -14,6 +14,10 @@ if ( ! defined( 'WPINC' ) ) {
 
 function chatbot_markov_chain_decode($mc_message, $max_tokens) {
 
+    if ( ! chatbot_chatgpt_beta_engine_is_ready( 'markov' ) ) {
+        return chatbot_chatgpt_beta_engine_unavailable_message();
+    }
+
     // Markov Model Names - 2024 11 24
     // Flask: Precursor stage for foundational elements.
     // Beaker: Small-scale, foundational stage—perfect for initial lexical analysis or simple models.

@@ -26,6 +26,17 @@ function chatbot_chatgpt_content_search($search_prompt) {
     $post_types = chatbot_chatgpt_get_searchable_post_types();
     $search_terms = chatbot_chatgpt_prepare_search_terms($object);
 
+    if (empty($post_types)) {
+        return [
+            'success' => true,
+            'total_posts' => 0,
+            'total_pages' => 0,
+            'current_page' => $page,
+            'results' => [],
+            'message' => 'No results found.'
+        ];
+    }
+
     if (!is_array($search_terms) || empty($search_terms)) {
         return [
             'success' => true,
@@ -54,7 +65,7 @@ function chatbot_chatgpt_content_search($search_prompt) {
         SELECT ID, post_title, post_content, post_excerpt, post_author, post_date, guid
         FROM {$wpdb->posts}
         WHERE post_type IN ($in_clause)
-        AND post_status = 'publish'
+        AND " . chatbot_chatgpt_knowledge_post_sql_clause() . "
         AND (" . implode(' AND ', $search_conditions) . ")
         ORDER BY post_date DESC
         LIMIT %d OFFSET %d
@@ -83,7 +94,7 @@ function chatbot_chatgpt_content_search($search_prompt) {
         SELECT ID, post_title, post_content, post_excerpt, post_author, post_date, guid
         FROM {$wpdb->posts}
         WHERE post_type IN ($in_clause)
-        AND post_status = 'publish'
+        AND " . chatbot_chatgpt_knowledge_post_sql_clause() . "
         AND (" . implode(' OR ', $search_conditions) . ")
         ORDER BY post_date DESC
         LIMIT %d OFFSET %d
@@ -119,16 +130,29 @@ function chatbot_chatgpt_content_search($search_prompt) {
 
 function chatbot_chatgpt_format_search_results($results, $include_excerpt, $page, $per_page) {
 
-    $formatted_results = array_map(function ($post) use ($include_excerpt) {
-        return [
+    $formatted_results = array();
+
+    foreach ($results as $post) {
+        $post_id = (is_object($post) && isset($post->ID)) ? (int) $post->ID : 0;
+        if ($post_id <= 0 || !chatbot_chatgpt_is_post_eligible_for_knowledge($post_id)) {
+            continue;
+        }
+
+        $excerpt = null;
+        if ($include_excerpt) {
+            $content = chatbot_chatgpt_post_content_for_knowledge($post_id);
+            $excerpt = wp_strip_all_tags(strip_shortcodes($content));
+        }
+
+        $formatted_results[] = array(
             'ID' => $post->ID,
             'title' => $post->post_title,
             'url' => $post->guid,
             'date' => $post->post_date,
             'author' => get_the_author_meta('display_name', $post->post_author),
-            'excerpt' => $include_excerpt ? wp_strip_all_tags(strip_shortcodes($post->post_content)) : null
-        ];
-    }, $results);
+            'excerpt' => $excerpt
+        );
+    }
 
     return [
         'success' => true,
@@ -174,8 +198,7 @@ function chatbot_chatgpt_get_searchable_post_types() {
         $post_types = ['post', 'page']; // Default to posts and pages
     }
 
-
-    return $post_types;
+    return chatbot_chatgpt_filter_public_post_types($post_types);
     
 }
 

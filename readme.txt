@@ -3,7 +3,7 @@ Contributors: kognetiks
 Tags: chat, chatgpt, ai, reporting, insights
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 6.0
-Tested up to: 7.1.4
+Tested up to: 7.1.5
 Requires PHP: 8.0
 Stable tag: 2.6.1
 License: GPLv3 or later

@@ -232,13 +232,16 @@ function transformer_model_lexical_context_lcm_should_skip_pmi_cache_load( $corp
         return true;
     }
 
-    $pmi_php  = __DIR__ . '/lexical_embeddings_cache/lexical_embeddings_cache.php';
-    $pmi_gz   = $pmi_php . '.gz';
-    $max_gz_b = (int) apply_filters( 'chatbot_lcm_max_pmi_gzip_cache_bytes', 0 );
-    if ( $max_gz_b > 0 && file_exists( $pmi_gz ) ) {
-        $fs = @filesize( $pmi_gz );
-        if ( is_int( $fs ) && $fs > $max_gz_b ) {
-            return true;
+    $pmi_dir = chatbot_chatgpt_beta_engine_cache_directory( 'lexical' );
+    if ( $pmi_dir !== '' ) {
+        $pmi_php  = $pmi_dir . '/lexical_embeddings_cache.php';
+        $pmi_gz   = $pmi_php . '.gz';
+        $max_gz_b = (int) apply_filters( 'chatbot_lcm_max_pmi_gzip_cache_bytes', 0 );
+        if ( $max_gz_b > 0 && file_exists( $pmi_gz ) ) {
+            $fs = @filesize( $pmi_gz );
+            if ( is_int( $fs ) && $fs > $max_gz_b ) {
+                return true;
+            }
         }
     }
 
@@ -522,8 +525,9 @@ function transformer_model_lexical_context_log_lcm_fetch_filter( array $payload 
 /**
  * Fetch posts and pages as structured documents with normalized text and sentence chunks.
  *
- * SQL scope: `post` and `page`, plus CPT slugs from `chatbot_lcm_allowed_private_post_types` (published and private
- * for those types; private for other types is never returned). See `transformer_model_lexical_context_log_lcm_fetch_filter`.
+ * SQL scope: public post types that pass the shared content-eligibility policy
+ * (published, no password). Configured private post types are not ingested.
+ * See `transformer_model_lexical_context_log_lcm_fetch_filter`.
  *
  * @return array<int, array<string, mixed>> List of documents.
  */
@@ -534,17 +538,20 @@ function transformer_model_lexical_context_fetch_wordpress_documents() {
     transformer_model_lexical_context_lexical_rebuild_log( 'before fetch_wordpress_documents' );
 
     $parts       = transformer_model_lexical_context_lcm_fetch_post_type_in_prepare_parts(
-        transformer_model_lexical_context_lcm_fetch_query_post_types()
+        chatbot_chatgpt_filter_public_post_types( transformer_model_lexical_context_lcm_fetch_query_post_types() )
     );
     $type_sql    = $parts['sql_fragment'];
     $query_types = $parts['types'];
+    if ( empty( $query_types ) ) {
+        return array();
+    }
 
     $sql = "SELECT ID, post_title, post_type, post_status, post_content FROM {$wpdb->posts}
-             WHERE post_status IN (%s, %s) AND post_type IN ({$type_sql}) AND post_content != ''
+             WHERE " . chatbot_chatgpt_knowledge_post_sql_clause() . " AND post_type IN ({$type_sql}) AND post_content != ''
              ORDER BY ID ASC";
 
     $prepare_args = array_merge(
-        array( $sql, 'publish', 'private' ),
+        array( $sql ),
         $query_types
     );
     $prepared     = call_user_func_array( array( $wpdb, 'prepare' ), $prepare_args );
@@ -574,7 +581,6 @@ function transformer_model_lexical_context_fetch_wordpress_documents() {
 
     $loop_counter                       = 0;
     $excluded_revisions                 = 0;
-    $allowed_private_flip               = array_fill_keys( transformer_model_lexical_context_lcm_allowed_private_post_types(), true );
 
     foreach ( $results as $row ) {
 
@@ -587,21 +593,14 @@ function transformer_model_lexical_context_fetch_wordpress_documents() {
             ++$excluded_revisions;
             continue;
         }
-        // Post-status filter: published rows for all queried types; private only for `chatbot_lcm_allowed_private_post_types`.
-        $post_status     = isset( $row['post_status'] ) ? (string) $row['post_status'] : '';
-        $private_type_ok = ( $post_status === 'private' && ! empty( $allowed_private_flip[ $post_type ] ) );
-        if ( $post_status !== 'publish' && ! $private_type_ok ) {
+
+        $post_id = isset( $row['ID'] ) ? (int) $row['ID'] : 0;
+        if ( $post_id <= 0 || ! chatbot_chatgpt_is_post_eligible_for_knowledge( $post_id ) ) {
             continue;
         }
 
-        if (empty($row['post_content'])) {
-            continue;
-        }
-
-        $post_id   = isset($row['ID'] ) ? (int) $row['ID'] : 0;
-        $title     = isset($row['post_title'] ) ? $row['post_title'] : '';
-
-        $normalized = wp_strip_all_tags( (string) $row['post_content'] );
+        $title = isset( $row['post_title'] ) ? $row['post_title'] : '';
+        $normalized = wp_strip_all_tags( chatbot_chatgpt_post_content_for_knowledge( $post_id ) );
         $normalized = preg_replace( '/\s+/', ' ', $normalized );
         $normalized = trim( $normalized );
 
@@ -726,7 +725,10 @@ function transformer_model_lexical_context_get_cached_embeddings( $documents_or_
     $windowSize = max( 1, min( 50, intval( $windowSize ) ) );
 
     // Cache directory path
-    $cacheDir = __DIR__ . '/lexical_embeddings_cache';
+    $cacheDir = chatbot_chatgpt_beta_engine_cache_directory( 'lexical' );
+    if ( $cacheDir === '' ) {
+        return array();
+    }
 
     // Ensure cache directory exists
     if ( ! file_exists( $cacheDir ) ) {
@@ -1018,7 +1020,10 @@ function transformer_model_lexical_context_build_pmi_matrix( $corpus, $windowSiz
 
 // Function to migrate old cache format to compressed format
 function transformer_model_lexical_context_migrate_old_cache($cacheFile) {
-    
+
+    if ( ! chatbot_chatgpt_beta_engine_stamp_matches( 'lexical' ) ) {
+        return false;
+    }
     // Check if old uncompressed cache exists
     if (file_exists($cacheFile)) {
         $fileSize = filesize($cacheFile);
@@ -1413,18 +1418,21 @@ function transformer_model_lexical_context_fetch_wordpress_documents_page( $offs
     $limit  = max( 1, min( 200, (int) $limit ) );
 
     $parts       = transformer_model_lexical_context_lcm_fetch_post_type_in_prepare_parts(
-        transformer_model_lexical_context_lcm_fetch_query_post_types()
+        chatbot_chatgpt_filter_public_post_types( transformer_model_lexical_context_lcm_fetch_query_post_types() )
     );
     $type_sql    = $parts['sql_fragment'];
     $query_types = $parts['types'];
+    if ( empty( $query_types ) ) {
+        return array();
+    }
 
     $sql = "SELECT ID, post_title, post_type, post_status, post_content FROM {$wpdb->posts}
-             WHERE post_status IN (%s, %s) AND post_type IN ({$type_sql}) AND post_content != ''
+             WHERE " . chatbot_chatgpt_knowledge_post_sql_clause() . " AND post_type IN ({$type_sql}) AND post_content != ''
              ORDER BY ID ASC
              LIMIT %d, %d";
 
     $prepare_args = array_merge(
-        array( $sql, 'publish', 'private' ),
+        array( $sql ),
         $query_types,
         array( $offset, $limit )
     );
@@ -1436,27 +1444,20 @@ function transformer_model_lexical_context_fetch_wordpress_documents_page( $offs
         return array();
     }
 
-    $documents            = array();
-    $allowed_private_flip = array_fill_keys( transformer_model_lexical_context_lcm_allowed_private_post_types(), true );
+    $documents = array();
     foreach ( $results as $row ) {
         $post_type = isset( $row['post_type'] ) ? (string) $row['post_type'] : 'post';
         if ( $post_type === 'revision' ) {
             continue;
         }
-        $post_status     = isset( $row['post_status'] ) ? (string) $row['post_status'] : '';
-        $private_type_ok = ( $post_status === 'private' && ! empty( $allowed_private_flip[ $post_type ] ) );
-        if ( $post_status !== 'publish' && ! $private_type_ok ) {
+
+        $post_id = isset( $row['ID'] ) ? (int) $row['ID'] : 0;
+        if ( $post_id <= 0 || ! chatbot_chatgpt_is_post_eligible_for_knowledge( $post_id ) ) {
             continue;
         }
 
-        if ( empty( $row['post_content'] ) ) {
-            continue;
-        }
-
-        $post_id   = isset( $row['ID'] ) ? (int) $row['ID'] : 0;
-        $title     = isset( $row['post_title'] ) ? (string) $row['post_title'] : '';
-
-        $normalized = wp_strip_all_tags( (string) $row['post_content'] );
+        $title      = isset( $row['post_title'] ) ? (string) $row['post_title'] : '';
+        $normalized = wp_strip_all_tags( chatbot_chatgpt_post_content_for_knowledge( $post_id ) );
         $normalized = preg_replace( '/\s+/', ' ', $normalized );
         $normalized = trim( (string) $normalized );
         if ( $normalized === '' ) {
@@ -1478,7 +1479,10 @@ function transformer_model_lexical_context_fetch_wordpress_documents_page( $offs
 
 // Function to load cache with automatic format detection
 function transformer_model_lexical_context_load_cache($cacheFile) {
-    
+
+    if ( ! chatbot_chatgpt_beta_lexical_cache_is_loadable( $cacheFile ) ) {
+        return array();
+    }
     // Try compressed format first
     $compressedFile = $cacheFile . '.gz';
     if (file_exists($compressedFile)) {
@@ -2359,7 +2363,12 @@ function transformer_model_lexical_context_build_local_idf_map( $documents ) {
  */
 function transformer_model_lexical_context_local_idf_cache_path() {
 
-    return __DIR__ . '/lexical_embeddings_cache/lexical_local_idf_cache.json';
+    $directory = chatbot_chatgpt_beta_engine_cache_directory( 'lexical' );
+    if ( $directory === '' ) {
+        return '';
+    }
+
+    return $directory . '/lexical_local_idf_cache.json';
 }
 
 /**
@@ -2453,19 +2462,25 @@ function transformer_model_lexical_context_lexical_corpus_sql_aggregate() {
     global $wpdb;
 
     $parts       = transformer_model_lexical_context_lcm_fetch_post_type_in_prepare_parts(
-        transformer_model_lexical_context_lcm_fetch_query_post_types()
+        chatbot_chatgpt_filter_public_post_types( transformer_model_lexical_context_lcm_fetch_query_post_types() )
     );
     $type_sql    = $parts['sql_fragment'];
     $query_types = $parts['types'];
+    if ( empty( $query_types ) ) {
+        return array(
+            'row_count'     => 0,
+            'content_bytes' => 0,
+        );
+    }
 
     $sql = "SELECT COUNT(*) AS row_count, COALESCE(SUM(CHAR_LENGTH(post_content)), 0) AS content_bytes
              FROM {$wpdb->posts}
-             WHERE post_status IN (%s, %s)
+             WHERE " . chatbot_chatgpt_knowledge_post_sql_clause() . "
              AND post_type IN ({$type_sql})
              AND post_content != ''";
 
     $prepare_args = array_merge(
-        array( $sql, 'publish', 'private' ),
+        array( $sql ),
         $query_types
     );
     $prepared     = call_user_func_array( array( $wpdb, 'prepare' ), $prepare_args );
@@ -2625,6 +2640,7 @@ function transformer_model_lexical_context_lexical_rebuild_shutdown_probe() {
  */
 function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $context = 'cron' ) {
 
+    $beta_generation = chatbot_chatgpt_beta_engine_begin( 'lexical' );
     transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=rebuild_started' );
 
     static $lcm_shutdown_registered = false;
@@ -2648,6 +2664,7 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $cont
 
     $documents = transformer_model_lexical_context_fetch_wordpress_documents();
     if ( empty( $documents ) ) {
+        chatbot_chatgpt_beta_engine_commit( 'lexical', $beta_generation );
         transformer_model_lexical_context_lexical_rebuild_log( 'step=aborted reason=empty_corpus' );
         return array( 'ok' => false, 'error' => 'empty_corpus' );
     }
@@ -2688,12 +2705,10 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $cont
         return array( 'ok' => false, 'error' => 'build_error' );
     }
 
-    $cache_dir = __DIR__ . '/lexical_embeddings_cache';
-    if ( ! file_exists( $cache_dir ) ) {
-        if ( ! wp_mkdir_p( $cache_dir ) ) {
-            transformer_model_lexical_context_lexical_rebuild_log( 'step=aborted reason=cache_dir' );
-            return array( 'ok' => false, 'error' => 'write_error' );
-        }
+    $cache_dir = chatbot_chatgpt_beta_engine_cache_directory( 'lexical' );
+    if ( $cache_dir === '' || ( ! file_exists( $cache_dir ) && ! wp_mkdir_p( $cache_dir ) ) ) {
+        transformer_model_lexical_context_lexical_rebuild_log( 'step=aborted reason=cache_dir' );
+        return array( 'ok' => false, 'error' => 'write_error' );
     }
 
     $token = function_exists( 'random_bytes' )
@@ -2801,6 +2816,7 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $cont
     }
 
     transformer_model_lexical_context_lexical_rebuild_log( 'step=rebuild_completed_ok' );
+    chatbot_chatgpt_beta_engine_commit( 'lexical', $beta_generation );
 
     return array( 'ok' => true );
 
@@ -2836,6 +2852,8 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
     }
     set_transient( $lock_key, 1, $lock_ttl );
 
+    chatbot_chatgpt_beta_engine_begin( 'lexical' );
+
     $time_budget = (float) apply_filters( 'chatbot_lexical_rebuild_cron_time_budget_seconds', 8.0, $context, $run_kind );
     $batch_size  = (int) apply_filters( 'chatbot_lexical_rebuild_cron_document_batch_size', 6, $context, $run_kind );
     $batch_size  = max( 1, min( 50, $batch_size ) );
@@ -2843,7 +2861,11 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
     $t0 = microtime( true );
     $deadline = $t0 + max( 3.0, $time_budget );
 
-    $cache_dir = __DIR__ . '/lexical_embeddings_cache';
+    $cache_dir = chatbot_chatgpt_beta_engine_cache_directory( 'lexical' );
+    if ( $cache_dir === '' ) {
+        delete_transient( $lock_key );
+        return array( 'done' => true, 'ok' => false, 'error' => 'cache_dir' );
+    }
     if ( ! file_exists( $cache_dir ) ) {
         @wp_mkdir_p( $cache_dir );
     }
@@ -3159,8 +3181,12 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
             return $err;
         }
 
-        $cache_dir = __DIR__ . '/lexical_embeddings_cache';
-        if ( ! file_exists( $cache_dir ) ) {
+    $cache_dir = chatbot_chatgpt_beta_engine_cache_directory( 'lexical' );
+    if ( $cache_dir === '' ) {
+        delete_transient( $lock_key );
+        return array( 'done' => true, 'ok' => false, 'error' => 'cache_dir' );
+    }
+    if ( ! file_exists( $cache_dir ) ) {
             if ( ! wp_mkdir_p( $cache_dir ) ) {
                 delete_option( $state_key );
                 wp_delete_file( $pmi_path );
@@ -3288,6 +3314,10 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
         // DF/N no longer needed once caches are installed.
         transformer_model_lexical_context_rebuild_counts_unlink_all( $counts_base );
         delete_option( 'chatbot_lcm_lexical_cache_rebuild_last_error' );
+        chatbot_chatgpt_beta_engine_commit(
+            'lexical',
+            (int) get_option( chatbot_chatgpt_beta_engine_build_generation_key( 'lexical' ), 0 )
+        );
 
         return array( 'done' => true, 'ok' => true );
     }
@@ -3317,7 +3347,7 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
 function transformer_model_lexical_context_load_local_idf_cache_for_corpus( $expected_corpus_hash ) {
 
     $expected_corpus_hash = is_string( $expected_corpus_hash ) ? trim( $expected_corpus_hash ) : '';
-    if ( $expected_corpus_hash === '' ) {
+    if ( $expected_corpus_hash === '' || ! chatbot_chatgpt_beta_engine_stamp_matches( 'lexical' ) ) {
         return array(
             'hit'    => false,
             'reason' => 'empty_corpus',

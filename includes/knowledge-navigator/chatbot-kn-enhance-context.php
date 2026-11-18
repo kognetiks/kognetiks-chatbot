@@ -83,9 +83,11 @@ function kn_enhance_context( $message ) {
     $enhancedContext = [];
 
     foreach ($results as $result) {
-        // from the posts table get the content based on the pid
-        $query = $wpdb->prepare("SELECT post_content FROM $wpdb->posts WHERE ID = %d", $result['pid']);
-        $enhancedContext[] = $wpdb->get_var($query);
+        $content = chatbot_chatgpt_post_content_for_knowledge( $result['pid'] );
+        if ( $content === '' ) {
+            continue;
+        }
+        $enhancedContext[] = $content;
     }
 
     // Collapse the enhanced content into a single string

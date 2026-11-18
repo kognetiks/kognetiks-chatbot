@@ -21,8 +21,12 @@ function chatbot_chatgpt_kn_analysis_section_callback($args) {
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the Knowledge Navigator Analysis and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=knowledge-navigator&file=knowledge-navigator-analysis.md">here</a>.</b></p>
     <?php
     if (is_admin()) {
-        $header = " ";
-        $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_kn_analysis_download_csv')) . '">Download Data</a>';
+        $download_url = wp_nonce_url(
+            admin_url( 'admin-post.php?action=chatbot_chatgpt_kn_analysis_download_csv' ),
+            chatbot_chatgpt_kn_download_nonce_action()
+        );
+        $header = ' ';
+        $header .= '<a class="button button-primary" href="' . esc_url( $download_url ) . '">Download Data</a>';
         echo wp_kses_post( $header );
     }
 }
@@ -43,34 +47,33 @@ function chatbot_chatgpt_kn_analysis_output_callback($args) {
 // Download the TF-IDF data
 function chatbot_chatgpt_kn_analysis_download_csv() {
 
-    global $chatbot_chatgpt_plugin_dir_path;
-
-    // Generate the results directory path
-    $results_dir_path = $chatbot_chatgpt_plugin_dir_path . 'results/';
-
-    // Specify the output file's path
-    $results_csv_file = $results_dir_path . 'results.csv';
-
-    // Exit early if the file doesn't exist
-    if (!file_exists($results_csv_file)) {
-        wp_die('File not found!');
+    if ( chatbot_chatgpt_kn_download_authorization_error() !== '' ) {
+        wp_die(
+            esc_html__( 'You do not have sufficient permissions to access this page.', 'chatbot-chatgpt' ),
+            '',
+            array( 'response' => 403 )
+        );
     }
 
-    // Read the file contents using WordPress functions
-    $csv_data = file_get_contents($results_csv_file);
+    $storage_key = chatbot_chatgpt_kn_export_storage_key( 'csv' );
+    $csv_data = ( $storage_key === '' ) ? '' : get_option( $storage_key, '' );
 
-    // Check if reading the file was successful
-    if ($csv_data === false) {
-        wp_die('Error reading file.');
+    if ( ! is_string( $csv_data ) || $csv_data === '' ) {
+        wp_die(
+            esc_html__( 'File not found.', 'chatbot-chatgpt' ),
+            '',
+            array( 'response' => 404 )
+        );
     }
 
-    // Set headers for file download
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment; filename="Knowledge Navigator Results.csv"');
-    header('Content-Length: ' . filesize($results_csv_file));
+    nocache_headers();
+    header( 'Content-Type: text/csv; charset=utf-8' );
+    header( 'Content-Disposition: attachment; filename="knowledge-navigator-results.csv"' );
+    header( 'Content-Length: ' . strlen( $csv_data ) );
+    header( 'X-Content-Type-Options: nosniff' );
 
-    // Output the file contents
-    readfile($results_csv_file);
+    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSV download, not HTML.
+    echo $csv_data;
     exit;
 
 }

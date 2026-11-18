@@ -15,6 +15,12 @@ if ( ! defined( 'WPINC' ) ) {
 // Run the Markov Chain algorithm and store the chain in the database
 function runMarkovChatbotAndSaveChain() {
 
+    if ( chatbot_chatgpt_beta_engine_state( 'markov' ) !== 'ready' ) {
+        chatbot_chatgpt_beta_engine_begin( 'markov' );
+    } else {
+        update_option( chatbot_chatgpt_beta_engine_build_generation_key( 'markov' ), chatbot_chatgpt_beta_engine_generation( 'markov' ), false );
+    }
+
     // Step 0: Force a full rebuild if necessary
     $force_rebuild = esc_attr(get_option('chatbot_markov_chain_force_rebuild', 'No'));
 
@@ -164,14 +170,19 @@ function processContentBatches($last_updated, $batch_starting_points, $batch_siz
 
         $content = getContentBatch($last_updated, $batch_starting_point, $batch_size, $type);
 
-        if ($content) {
-            buildMarkovChain($content);
+        if ( $content === false ) {
+            prod_trace( 'NOTICE', "No content found for processing type: $type. Skipping to next type.");
+        } else {
+            if ( $content !== '' ) {
+                $generation = (int) get_option( chatbot_chatgpt_beta_engine_build_generation_key( 'markov' ), 0 );
+                if ( chatbot_chatgpt_beta_engine_build_is_current( 'markov', $generation ) ) {
+                    buildMarkovChain($content);
+                }
+            }
             $batch_starting_point++;
             $batch_starting_points[$type] = $batch_starting_point;
             set_transient('chatbot_markov_chain_batch_starting_points', $batch_starting_points, 12 * HOUR_IN_SECONDS);
-            $all_batches_completed = false; // There are still batches to process
-        } else {
-            prod_trace( 'NOTICE', "No content found for processing type: $type. Skipping to next type.");
+            $all_batches_completed = false;
         }
     }
 
@@ -188,10 +199,15 @@ function processContentBatches($last_updated, $batch_starting_points, $batch_siz
     } else {
 
         // All batches are completed
-        updateMarkovChainTimestamp(); // Update last_updated here
-        update_option('chatbot_markov_chain_build_schedule', 'Completed');
-        delete_transient('chatbot_markov_chain_batch_starting_points');
-        delete_option('chatbot_markov_chain_build_schedule');
+        $generation = (int) get_option( chatbot_chatgpt_beta_engine_build_generation_key( 'markov' ), 0 );
+        if ( chatbot_chatgpt_beta_engine_commit( 'markov', $generation ) ) {
+            updateMarkovChainTimestamp();
+            update_option('chatbot_markov_chain_build_schedule', 'Completed');
+            delete_transient('chatbot_markov_chain_batch_starting_points');
+            delete_option('chatbot_markov_chain_build_schedule');
+        } else {
+            update_option('chatbot_markov_chain_build_status', 'Invalidated');
+        }
     }
 
     prod_trace( 'NOTICE', 'processContentBatches - End');
@@ -214,6 +230,7 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
         $args = [
             'post_type'      => ['post', 'page'],
             'post_status'    => 'publish',
+            'has_password'   => false,
             'date_query'     => [
                 [
                     'column' => 'post_modified', // Use the post_modified column
@@ -229,6 +246,7 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
 
         $query = new WP_Query($args);
         $content = '';
+        $saw_posts = false;
 
         // Count of posts fetched
         $post_count = $query->post_count;
@@ -237,9 +255,14 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
             while ($query->have_posts()) {
 
                 $query->the_post();
+                $saw_posts = true;
+                $post_id = get_the_ID();
+                if ( ! chatbot_chatgpt_is_post_eligible_for_knowledge( $post_id ) ) {
+                    continue;
+                }
 
                 // Clean up the post content
-                $clean_content = clean_up_training_data(get_the_content());
+                $clean_content = clean_up_training_data( chatbot_chatgpt_post_content_for_knowledge( $post_id ) );
                 $clean_post_title = clean_up_training_data(get_the_title());
 
                 $content .= ' ' . $clean_post_title . ' ' . $clean_content;
@@ -247,7 +270,7 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
 
             wp_reset_postdata();
 
-            return $content;
+            return $saw_posts ? $content : false;
 
         } else {
 
@@ -274,14 +297,19 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
 
         if (!empty($comments)) {
             $content = '';
+            $saw_comments = false;
             foreach ($comments as $comment) {
+                $saw_comments = true;
+                if ( ! chatbot_chatgpt_is_comment_eligible_for_knowledge( $comment ) ) {
+                    continue;
+                }
                 $clean_comment = clean_up_training_data($comment->comment_content);
                 $content .= ' ' . $clean_comment;
             }
-            return $content;
-        } else {
-            return false;
+            return $saw_comments ? $content : false;
         }
+
+        return false;
     }
 
     if ($processing_type == 'synthetic') {

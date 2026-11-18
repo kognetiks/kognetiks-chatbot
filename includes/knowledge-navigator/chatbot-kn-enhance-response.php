@@ -180,6 +180,9 @@ function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
         // Check if matches are found
         if ($rows) {
             foreach ($rows as $row) {
+                if ( ! chatbot_chatgpt_is_post_eligible_for_knowledge( (int) $row->pid ) ) {
+                    continue;
+                }
                 
                 $result_key = hash('sha256', $row->url);
                 if (!isset($results[$result_key])) {

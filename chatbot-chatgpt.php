@@ -156,6 +156,8 @@ ob_end_flush(); // End output buffering and send the buffer to the browser
 
 // Include necessary files - Utilities (must be loaded before API files that use them)
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.php';                    // Ver 1.8.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-content-eligibility.php';           // Public-content eligibility
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-beta-knowledge.php';               // Beta engine artifact guard
 
 // Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-anthropic-api.php';         // ANT API - Ver 2.0.7
@@ -188,6 +190,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-a
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-user-css.php';
 
 // Include necessary files - Knowledge Navigator
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-exports.php';             // Knowledge Navigator export protection
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-controller.php';  // Knowledge Navigator Acquisition - Ver 1.9.6
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-words.php';       // Knowledge Navigator Acquisition - Ver 1.9.6
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-analysis.php';            // Knowledge Navigator Analysis- Ver 1.6.2

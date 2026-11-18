@@ -37,11 +37,10 @@ function chatbot_markov_chain_scheduler() {
     // Reset the results message
     update_option('chatbot_markov_chain_build_results', '');
 
-    // Run the Markov Chain building and saving process
+    // Run the Markov Chain building and saving process.
+    // Readiness is the beta engine stamp, not this status option. A multi-batch
+    // run stays in process until the training function commits a clean model.
     chatbot_markov_chain_scan();
-
-    // Update the status as 'Completed'
-    update_option('chatbot_markov_chain_build_status', 'Completed');
 
 }
 add_action('chatbot_markov_chain_scheduler_hook', 'chatbot_markov_chain_scheduler');

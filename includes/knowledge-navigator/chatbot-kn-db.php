@@ -208,42 +208,12 @@ function store_top_words() {
 
 }
 
-// Save the results to a file
+// Save the results to private plugin options. Public results files are removed.
 function output_results() {
 
-    global $chatbot_chatgpt_plugin_dir_path;
     global $topWords;
 
-    // Generate the directory path
-    $results_dir_path = $chatbot_chatgpt_plugin_dir_path . 'results/';
-
-    // Ensure the directory exists or attempt to create it
-    if (!create_directory_and_index_file($results_dir_path)) {
-        // Error handling, e.g., log the error or handle the failure appropriately
-        return;
-    }
-
-    // Define output files' paths
-    $results_csv_file = $results_dir_path . 'results.csv';
-    $results_json_file = $results_dir_path . 'results.json';
-
-    // Write CSV
-    try {
-        $f = new SplFileObject($results_csv_file, 'w');
-        $f->fputcsv(['Word', 'TF-IDF']);
-        foreach ($topWords as $word => $tfidf) {
-            $f->fputcsv([$word, $tfidf]);
-        }
-    } catch (RuntimeException $e) {
-    }
-
-    // Write JSON
-    try {
-        if (file_put_contents($results_json_file, json_encode($topWords)) === false) {
-            throw new Exception("Failed to write to JSON file.");
-        }
-    } catch (Exception $e) {
-    }
+    chatbot_chatgpt_kn_store_analysis_rows( $topWords );
 
     return;
 }

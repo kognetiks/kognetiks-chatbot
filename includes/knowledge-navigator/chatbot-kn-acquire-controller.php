@@ -199,10 +199,24 @@ function chatbot_kn_count_documents() {
 
     // Count comments separately since they're not a post type
     if (esc_attr(get_option('chatbot_chatgpt_kn_include_comments', 'No')) === 'Yes') {
-        $comment_count = $wpdb->get_var(
-            "SELECT COUNT(comment_post_ID) FROM {$wpdb->prefix}comments WHERE comment_approved = '1'"
-        );
-        $document_count += $comment_count;
+        $public_types = chatbot_chatgpt_filter_public_post_types( get_post_types( array( 'public' => true ) ) );
+        $comment_count = 0;
+        if ( ! empty( $public_types ) ) {
+            $type_placeholders = implode( ', ', array_fill( 0, count( $public_types ), '%s' ) );
+            $eligibility_sql = chatbot_chatgpt_knowledge_post_sql_clause( 'p' );
+            $comment_count = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(c.comment_ID)
+                    FROM {$wpdb->prefix}comments c
+                    INNER JOIN {$wpdb->prefix}posts p ON p.ID = c.comment_post_ID
+                    WHERE c.comment_approved = '1'
+                    AND p.post_type IN ($type_placeholders)
+                    AND {$eligibility_sql}",
+                    $public_types
+                )
+            );
+        }
+        $document_count += (int) $comment_count;
     }
 
     // Update the total number of documents
@@ -258,6 +272,8 @@ function chatbot_kn_run_phase_1() {
 
     // List the post types
 
+    $post_types = chatbot_chatgpt_filter_public_post_types( $post_types );
+
     // If no post types are selected, move to phase 2
     if (empty($post_types)) {
         update_option('chatbot_chatgpt_kn_action', 'phase 2');
@@ -269,7 +285,7 @@ function chatbot_kn_run_phase_1() {
     $placeholders = implode(', ', array_fill(0, count($post_types), '%s'));
     $prepared_query = $wpdb->prepare(
         "SELECT ID, post_title, post_content, post_excerpt, post_type FROM {$wpdb->prefix}posts 
-        WHERE post_type IN ($placeholders) AND post_status = 'publish' 
+        WHERE post_type IN ($placeholders) AND " . chatbot_chatgpt_knowledge_post_sql_clause() . "
         ORDER BY ID ASC LIMIT %d OFFSET %d",
         array_merge($post_types, [$batch_size, $offset])
     );
@@ -292,6 +308,10 @@ function chatbot_kn_run_phase_1() {
 
     // Process the results
     foreach ($results as $result) {
+        if ( ! chatbot_chatgpt_is_post_eligible_for_knowledge( (int) $result->ID ) ) {
+            continue;
+        }
+
         $Content = $result->post_content;
 
         if (!empty($Content)) {
@@ -333,11 +353,25 @@ function chatbot_kn_run_phase_3() {
     // Query WordPress database for comment content
     if ($chatbot_chatgpt_kn_include_comments === 'Yes') {
 
-        // Prepare the SQL query for fetching approved comments
+        $public_types = chatbot_chatgpt_filter_public_post_types( get_post_types( array( 'public' => true ) ) );
+        if ( empty( $public_types ) ) {
+            unset($results);
+            update_option( 'chatbot_chatgpt_kn_action', 'phase 4' );
+            wp_schedule_single_event( time() + 30, 'chatbot_kn_acquire_controller' );
+            return;
+        }
+
+        $type_placeholders = implode( ', ', array_fill( 0, count( $public_types ), '%s' ) );
+        $eligibility_sql = chatbot_chatgpt_knowledge_post_sql_clause( 'p' );
         $prepared_query = $wpdb->prepare(
-            "SELECT comment_ID, comment_post_ID, comment_content FROM {$wpdb->prefix}comments WHERE comment_approved = '1' 
-            ORDER BY comment_ID ASC LIMIT %d OFFSET %d",
-            array_merge([$batch_size, $offset])
+            "SELECT c.comment_ID, c.comment_post_ID, c.comment_content, c.comment_approved
+            FROM {$wpdb->prefix}comments c
+            INNER JOIN {$wpdb->prefix}posts p ON p.ID = c.comment_post_ID
+            WHERE c.comment_approved = '1'
+            AND p.post_type IN ($type_placeholders)
+            AND {$eligibility_sql}
+            ORDER BY c.comment_ID ASC LIMIT %d OFFSET %d",
+            array_merge( $public_types, array( $batch_size, $offset ) )
         );
     
         // Execute the query and fetch results
@@ -366,6 +400,10 @@ function chatbot_kn_run_phase_3() {
 
     // Loop through query results
     foreach ($results as $result) {  
+
+        if ( ! chatbot_chatgpt_is_comment_eligible_for_knowledge( $result ) ) {
+            continue;
+        }
 
         // Directly use the post content
         if (array_key_exists('comment_content', $result)) {
@@ -538,6 +576,7 @@ function chatbot_kn_run_phase_6() {
     }
 
     // If no post types are selected, move to phase 7
+    $post_types = chatbot_chatgpt_filter_public_post_types( $post_types );
     if (empty($post_types)) {
         update_option('chatbot_chatgpt_kn_action', 'phase 7');
         wp_schedule_single_event(time() + 30, 'chatbot_kn_acquire_controller');
@@ -548,7 +587,7 @@ function chatbot_kn_run_phase_6() {
     $placeholders = implode(', ', array_fill(0, count($post_types), '%s'));
     $prepared_query = $wpdb->prepare(
         "SELECT ID, post_title, post_content, post_excerpt, post_type FROM {$wpdb->prefix}posts 
-        WHERE post_type IN ($placeholders) AND post_status = 'publish' 
+        WHERE post_type IN ($placeholders) AND " . chatbot_chatgpt_knowledge_post_sql_clause() . "
         ORDER BY ID ASC LIMIT %d OFFSET %d",
         array_merge($post_types, [$batch_size, $offset])
     );
@@ -568,6 +607,10 @@ function chatbot_kn_run_phase_6() {
 
     // Loop through query results
     foreach ($results as $result) {     
+
+        if ( ! chatbot_chatgpt_is_post_eligible_for_knowledge( (int) $result->ID ) ) {
+            continue;
+        }
 
         // Directly use the post content
         $Content = $result->post_content;
@@ -664,71 +707,17 @@ function chatbot_kn_run_phase_6() {
 // Output the results
 function chatbot_kn_output_the_results() {
 
-    global $chatbot_chatgpt_plugin_dir_path;
-
     global $wpdb;
 
-    // Generate directory path
-    $results_dir_path = $chatbot_chatgpt_plugin_dir_path . 'results/';
-
-    // Ensure the directory exists or attempt to create it
-    if (!create_directory_and_index_file($results_dir_path)) {
-        // Error handling, e.g., log the error or handle the failure appropriately
-        return;
-    }
-
-    // Remove legacy files
-    if (file_exists($results_dir_path . 'results-comments.log')) {
-        wp_delete_file($results_dir_path . 'results-comments.log');
-    }
-    if (file_exists($results_dir_path . 'results-pages.log')) {
-        wp_delete_file($results_dir_path . 'results-pages.log');
-    }
-    if (file_exists($results_dir_path . 'results-posts.log')) {
-        wp_delete_file($results_dir_path . 'results-posts.log');
-    }
-
-    // Prepare CSV file for output
-    $results_csv_file = $results_dir_path . 'results.csv';
-
-    // Delete CSV file if it already exists
-    if (file_exists($results_csv_file)) {
-        wp_delete_file($results_csv_file);
-    }
-
-    // Prepare JSON file for output
-    $results_json_file = $results_dir_path . 'results.json';
-
-    // Delete JSON file if it already exists
-    if (file_exists($results_json_file)) {
-        wp_delete_file($results_json_file);
-    }
+    // Remove any older public copies before writing the private export.
+    chatbot_chatgpt_kn_remove_public_export_files();
 
     // Retrieve the list of words and the score for each word ordered by score descending in the TF-IDF table
     $results = $wpdb->get_results(
         "SELECT word, score FROM {$wpdb->prefix}chatbot_chatgpt_knowledge_base_tfidf ORDER BY score DESC"
     );
 
-    // Write CSV for pages, posts, and products
-    try {
-        $f = new SplFileObject($results_csv_file, 'w');
-        $f->fputcsv(['Word', 'TF-IDF']);
-        foreach ($results as $result) {
-            $f->fputcsv([$result->word, $result->score]);
-        }
-    } catch (RuntimeException $e) {
-    }
-
-    // Write JSON for pages, posts, and products
-    try {
-        if (file_put_contents($results_json_file, json_encode($results)) === false) {
-            throw new Exception("Failed to write to JSON file.");
-        }
-    } catch (Exception $e) {
-    }
-
-    // Close the files
-    $f = null;
+    chatbot_chatgpt_kn_store_analysis_rows( $results );
 
     // Retrieve the list of words and the score for each word ordered by score descending in the TF-IDF table
     $results = $wpdb->get_results(
