@@ -419,7 +419,7 @@ function chatbot_transformer_model_cache_info_callback($args) {
 
     $cacheDir = chatbot_chatgpt_beta_engine_cache_directory( 'lexical' );
     if ( $cacheDir === '' ) {
-        echo '<p>Lexical cache storage is unavailable. The site cache directory could not be created. Check that includes/transformers/lexical_embeddings_cache is writable by PHP, then rebuild the lexical cache.</p>';
+        echo '<p>Lexical cache storage is unavailable. The site uploads directory could not be prepared. Check that the WordPress uploads directory is writable by PHP, then rebuild the lexical cache.</p>';
         return;
     }
     $cacheFile = $cacheDir . '/lexical_embeddings_cache.php';
@@ -474,7 +474,7 @@ function chatbot_transformer_model_cache_info_callback($args) {
         <tbody>
             <tr>
                 <th scope="row">Cache Directory</th>
-                <td><?php echo esc_html( 'includes/transformers/lexical_embeddings_cache/' . chatbot_chatgpt_beta_site_directory_segment() . '/' ); ?></td>
+                <td><?php echo esc_html( 'Site uploads / chatbot-chatgpt / lexical_embeddings_cache / ' . chatbot_chatgpt_beta_site_directory_segment() . '/' ); ?></td>
             </tr>
             <tr>
                 <th scope="row">Created</th>

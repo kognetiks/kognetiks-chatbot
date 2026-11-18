@@ -14,6 +14,9 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+require_once __DIR__ . '/chatbot-generated-storage.php';
+require_once __DIR__ . '/chatbot-generated-file-integrity.php';
+
 /**
  * Revision stamped onto a clean rebuild. Older files and rows do not carry it.
  *
@@ -187,7 +190,7 @@ function chatbot_chatgpt_beta_apply_cache_permissions( $path ) {
 }
 
 /**
- * In-plugin cache root for one engine. This does not create the directory.
+ * Legacy cache root inside the plugin package. New files are not written here.
  *
  * @param string $engine Engine slug.
  * @return string
@@ -269,7 +272,11 @@ function chatbot_chatgpt_beta_engine_cache_root( $engine ) {
     if ( isset( $GLOBALS['chatbot_chatgpt_beta_cache_directories'][ $engine ] ) ) {
         $root = (string) $GLOBALS['chatbot_chatgpt_beta_cache_directories'][ $engine ];
     } else {
-        $root = chatbot_chatgpt_beta_plugin_cache_root( $engine );
+        $slug = ( 'sentential' === $engine ) ? 'sentential_embeddings_cache' : 'lexical_embeddings_cache';
+        $root = chatbot_chatgpt_generated_storage_directory( $slug );
+        if ( $root === '' ) {
+            return '';
+        }
     }
 
     return chatbot_chatgpt_beta_prepare_cache_root( $root );
@@ -403,7 +410,17 @@ function chatbot_chatgpt_beta_engine_stamp_matches( $engine ) {
  * @return bool
  */
 function chatbot_chatgpt_beta_engine_is_ready( $engine ) {
-    return chatbot_chatgpt_beta_engine_state( $engine ) === 'ready' && chatbot_chatgpt_beta_engine_stamp_matches( $engine );
+    if ( function_exists( 'chatbot_chatgpt_gfi_review_abandoned_build' ) ) {
+        chatbot_chatgpt_gfi_review_abandoned_build( $engine );
+    }
+    if ( chatbot_chatgpt_beta_engine_state( $engine ) !== 'ready' || ! chatbot_chatgpt_beta_engine_stamp_matches( $engine ) ) {
+        return false;
+    }
+    if ( $engine === 'markov' || ! function_exists( 'chatbot_chatgpt_gfi_generation_is_trusted' ) ) {
+        return true;
+    }
+
+    return chatbot_chatgpt_gfi_generation_is_trusted( $engine, true );
 }
 
 /**
@@ -595,6 +612,9 @@ function chatbot_chatgpt_beta_engine_invalidate( $engine ) {
     update_option( chatbot_chatgpt_beta_engine_generation_key( $engine ), $generation, false );
     update_option( chatbot_chatgpt_beta_engine_state_key( $engine ), 'invalid', false );
     update_option( chatbot_chatgpt_beta_engine_build_generation_key( $engine ), 0, false );
+    if ( function_exists( 'chatbot_chatgpt_gfi_discard' ) ) {
+        chatbot_chatgpt_gfi_discard( $engine );
+    }
 
     return (bool) $purged;
 }
@@ -612,16 +632,22 @@ function chatbot_chatgpt_beta_engine_begin( $engine ) {
 
     $state = chatbot_chatgpt_beta_engine_state( $engine );
     if ( $state === 'building' ) {
+        if ( function_exists( 'chatbot_chatgpt_gfi_touch' ) ) {
+            chatbot_chatgpt_gfi_touch( $engine );
+        }
         return (int) get_option( chatbot_chatgpt_beta_engine_build_generation_key( $engine ), 0 );
     }
 
     if ( $state !== 'ready' ) {
         chatbot_chatgpt_beta_engine_purge( $engine );
-        update_option( chatbot_chatgpt_beta_engine_state_key( $engine ), 'building', false );
     }
+    update_option( chatbot_chatgpt_beta_engine_state_key( $engine ), 'building', false );
 
     $generation = chatbot_chatgpt_beta_engine_generation( $engine );
     update_option( chatbot_chatgpt_beta_engine_build_generation_key( $engine ), $generation, false );
+    if ( function_exists( 'chatbot_chatgpt_gfi_begin' ) ) {
+        chatbot_chatgpt_gfi_begin( $engine, $generation );
+    }
 
     return $generation;
 }
@@ -638,7 +664,11 @@ function chatbot_chatgpt_beta_engine_mark_building( $engine ) {
     }
 
     update_option( chatbot_chatgpt_beta_engine_state_key( $engine ), 'building', false );
-    update_option( chatbot_chatgpt_beta_engine_build_generation_key( $engine ), chatbot_chatgpt_beta_engine_generation( $engine ), false );
+    $generation = chatbot_chatgpt_beta_engine_generation( $engine );
+    update_option( chatbot_chatgpt_beta_engine_build_generation_key( $engine ), $generation, false );
+    if ( function_exists( 'chatbot_chatgpt_gfi_begin' ) ) {
+        chatbot_chatgpt_gfi_begin( $engine, $generation );
+    }
 }
 
 /**
@@ -672,9 +702,17 @@ function chatbot_chatgpt_beta_engine_commit( $engine, $generation ) {
     }
 
     if ( ! chatbot_chatgpt_beta_engine_build_is_current( $engine, $generation ) ) {
+        $keep = function_exists( 'chatbot_chatgpt_gfi_generation_is_trusted' )
+            && chatbot_chatgpt_gfi_generation_is_trusted( $engine, false );
+        if ( $keep ) {
+            return false;
+        }
         chatbot_chatgpt_beta_engine_purge( $engine );
         if ( function_exists( 'update_option' ) ) {
             update_option( chatbot_chatgpt_beta_engine_state_key( $engine ), 'invalid', false );
+        }
+        if ( function_exists( 'chatbot_chatgpt_gfi_discard' ) ) {
+            chatbot_chatgpt_gfi_discard( $engine );
         }
 
         return false;
@@ -715,6 +753,11 @@ function chatbot_chatgpt_beta_engine_commit( $engine, $generation ) {
             return false;
         }
         chatbot_chatgpt_beta_apply_cache_permissions( $path );
+        if ( function_exists( 'chatbot_chatgpt_gfi_publish' ) && ! chatbot_chatgpt_gfi_publish( $engine ) ) {
+            update_option( chatbot_chatgpt_beta_engine_state_key( $engine ), 'failed', false );
+
+            return false;
+        }
     }
 
     update_option( chatbot_chatgpt_beta_engine_state_key( $engine ), 'ready', false );
@@ -739,7 +782,14 @@ function chatbot_chatgpt_beta_lexical_cache_is_loadable( $path ) {
         return true;
     }
 
-    return chatbot_chatgpt_beta_engine_stamp_matches( 'lexical' );
+    if ( ! chatbot_chatgpt_beta_engine_stamp_matches( 'lexical' ) ) {
+        return false;
+    }
+    if ( function_exists( 'chatbot_chatgpt_gfi_file_is_trusted' ) ) {
+        return chatbot_chatgpt_gfi_file_is_trusted( 'lexical', $path );
+    }
+
+    return true;
 }
 
 /**
@@ -1022,11 +1072,42 @@ function chatbot_chatgpt_beta_knowledge_invalidate_once() {
     }
 
     foreach ( chatbot_chatgpt_beta_knowledge_engines() as $engine ) {
-        if ( ! chatbot_chatgpt_beta_engine_invalidate( $engine ) ) {
+        if ( ! chatbot_chatgpt_beta_knowledge_invalidate_engine_once( $engine ) ) {
             return;
         }
     }
 
     update_option( 'chatbot_chatgpt_beta_knowledge_invalidated_eligibility_v1', 'yes', false );
+}
+
+/**
+ * One engine's eligibility pass.
+ *
+ * A generation that still verifies is kept. An active build or a held publication
+ * lock defers the pass. Schedules are not changed.
+ *
+ * @param string $engine Engine slug.
+ * @return bool True when this engine is done. False when the caller should retry.
+ */
+function chatbot_chatgpt_beta_knowledge_invalidate_engine_once( $engine ) {
+    if ( $engine === 'markov' || ! function_exists( 'chatbot_chatgpt_gfi_lock' ) ) {
+        return chatbot_chatgpt_beta_engine_invalidate( $engine );
+    }
+    if ( function_exists( 'chatbot_chatgpt_gfi_build_is_active' ) && chatbot_chatgpt_gfi_build_is_active( $engine ) ) {
+        return false;
+    }
+    $token = chatbot_chatgpt_gfi_token();
+    if ( ! chatbot_chatgpt_gfi_lock( $engine, $token ) ) {
+        return false;
+    }
+    try {
+        if ( function_exists( 'chatbot_chatgpt_gfi_generation_is_trusted' ) && chatbot_chatgpt_gfi_generation_is_trusted( $engine, false ) ) {
+            return true;
+        }
+
+        return chatbot_chatgpt_beta_engine_invalidate( $engine );
+    } finally {
+        chatbot_chatgpt_gfi_unlock( $engine, $token );
+    }
 }
 add_action( 'init', 'chatbot_chatgpt_beta_knowledge_invalidate_once', 23 );

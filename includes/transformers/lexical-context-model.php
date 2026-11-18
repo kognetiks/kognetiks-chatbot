@@ -1021,34 +1021,10 @@ function transformer_model_lexical_context_build_pmi_matrix( $corpus, $windowSiz
 // Function to migrate old cache format to compressed format
 function transformer_model_lexical_context_migrate_old_cache($cacheFile) {
 
-    if ( ! chatbot_chatgpt_beta_engine_stamp_matches( 'lexical' ) ) {
-        return false;
-    }
-    // Check if old uncompressed cache exists
-    if (file_exists($cacheFile)) {
-        $fileSize = filesize($cacheFile);
-        // If file is very large (> 1MB), it's likely the old var_export format
-        if ($fileSize > 1048576) {
-            prod_trace('NOTICE', 'Migrating old cache format to compressed format. Old size: ' . number_format($fileSize) . ' bytes');
-            
-            // Try to load old cache
-            $embeddings = include $cacheFile;
-            if (is_array($embeddings) && !empty($embeddings)) {
-                // Save in new compressed format
-                if (transformer_model_lexical_context_save_cache($cacheFile, $embeddings)) {
-                    // Backup old file before deleting
-                    $backupFile = $cacheFile . '.old';
-                    if (!file_exists($backupFile)) {
-                        copy($cacheFile, $backupFile);
-                    }
-                    // Delete old uncompressed file (keep backup for safety)
-                    // wp_delete_file($cacheFile); // Uncomment to delete old file after migration
-                    prod_trace('NOTICE', 'Cache migration completed. Backup saved to: ' . basename($backupFile));
-                }
-            }
-        }
-    }
-    
+    unset( $cacheFile );
+
+    return false;
+
 }
 
 // Function to save cache with compression
@@ -1073,7 +1049,7 @@ function transformer_model_lexical_context_save_cache($cacheFile, $embeddings) {
             $wrapperContent .= "// File size: " . number_format(filesize($compressedFile)) . " bytes\n";
             $wrapperContent .= "// Original size would be: " . number_format(strlen($serialized)) . " bytes\n";
             $wrapperContent .= "// Compression ratio: " . round((1 - filesize($compressedFile) / strlen($serialized)) * 100, 1) . "%\n";
-            $wrapperContent .= "return unserialize(gzdecode(file_get_contents(__FILE__ . '.gz')));\n";
+            $wrapperContent .= "return unserialize(gzdecode(file_get_contents(__FILE__ . '.gz')), array('allowed_classes' => false));\n";
             
             file_put_contents($cacheFile, $wrapperContent);
             return true;
@@ -1088,7 +1064,7 @@ function transformer_model_lexical_context_save_cache($cacheFile, $embeddings) {
         $wrapperContent .= "// Lexical embeddings cache (serialized)\n";
         $wrapperContent .= "// Created: {$createdAt}\n";
         $wrapperContent .= "// Updated: {$updatedAt}\n";
-        $wrapperContent .= "return unserialize(file_get_contents(__FILE__ . '.ser'));\n";
+        $wrapperContent .= "return unserialize(file_get_contents(__FILE__ . '.ser'), array('allowed_classes' => false));\n";
         file_put_contents($cacheFile, $wrapperContent);
         return true;
     }
@@ -1204,8 +1180,8 @@ function transformer_model_lexical_context_rebuild_blob_load( $path ) {
         // Fallback: treat as uncompressed serialized blob.
         $serialized = $compressed;
     }
-    $data = @unserialize( $serialized );
-    return ( $data === false && $serialized !== 'b:0;' ) ? null : $data;
+    $data = function_exists( 'chatbot_chatgpt_gfi_unserialize_array' ) ? chatbot_chatgpt_gfi_unserialize_array( $serialized ) : null;
+    return is_array( $data ) ? $data : null;
 }
 
 /**
@@ -1483,43 +1459,85 @@ function transformer_model_lexical_context_load_cache($cacheFile) {
     if ( ! chatbot_chatgpt_beta_lexical_cache_is_loadable( $cacheFile ) ) {
         return array();
     }
-    // Try compressed format first
+
+    $base    = strtolower( basename( (string) $cacheFile ) );
+    $staging = strpos( $base, '.staging.' ) !== false;
+    if ( $staging && function_exists( 'chatbot_chatgpt_beta_engine_state' ) && chatbot_chatgpt_beta_engine_state( 'lexical' ) !== 'building' ) {
+        return array();
+    }
+    $decode = function ( $serialized ) {
+        if ( function_exists( 'chatbot_chatgpt_gfi_unserialize_array' ) ) {
+            $value = chatbot_chatgpt_gfi_unserialize_array( $serialized );
+            return is_array( $value ) ? $value : false;
+        }
+
+        return false;
+    };
+    $read    = function ( $path ) use ( $staging ) {
+        if ( $staging ) {
+            if ( is_link( $path ) || ! is_file( $path ) ) {
+                return false;
+            }
+            $bytes = file_get_contents( $path );
+            return is_string( $bytes ) ? $bytes : false;
+        }
+        if ( ! function_exists( 'chatbot_chatgpt_gfi_trusted_contents' ) ) {
+            return false;
+        }
+
+        return chatbot_chatgpt_gfi_trusted_contents( 'lexical', $path );
+    };
+
+    // Try compressed format first. A failed integrity check does not fall through.
     $compressedFile = $cacheFile . '.gz';
     if (file_exists($compressedFile)) {
-        $compressed = file_get_contents($compressedFile);
-        if ($compressed !== false) {
-            $serialized = gzdecode($compressed);
-            if ($serialized !== false) {
-                $embeddings = unserialize($serialized);
-                if ($embeddings !== false) {
-                    return $embeddings;
-                }
-            }
+        $compressed = $read( $compressedFile );
+        if ( ! is_string( $compressed ) ) {
+            return array();
         }
-    }
-    
-    // Try serialized format
-    $serializedFile = $cacheFile . '.ser';
-    if (file_exists($serializedFile)) {
-        $serialized = file_get_contents($serializedFile);
-        if ($serialized !== false) {
-            $embeddings = unserialize($serialized);
-            if ($embeddings !== false) {
+        $serialized = gzdecode($compressed);
+        if ( is_string( $serialized ) ) {
+            $embeddings = $decode( $serialized );
+            if ( is_array( $embeddings ) ) {
                 return $embeddings;
             }
         }
+        return array();
     }
-    
+
+    // Try serialized format
+    $serializedFile = $cacheFile . '.ser';
+    if (file_exists($serializedFile)) {
+        $serialized = $read( $serializedFile );
+        if ( ! is_string( $serialized ) ) {
+            return array();
+        }
+        $embeddings = $decode( $serialized );
+        if ( is_array( $embeddings ) ) {
+            return $embeddings;
+        }
+        return array();
+    }
+
+    // A staging PHP file is builder scratch and is never included.
+    if ( $staging ) {
+        return array();
+    }
+
     // Fallback to PHP include (original var_export format)
     if (file_exists($cacheFile)) {
-        $embeddings = include $cacheFile;
+        if ( function_exists( 'chatbot_chatgpt_gfi_include_trusted' ) ) {
+            $embeddings = chatbot_chatgpt_gfi_include_trusted( 'lexical', $cacheFile );
+        } else {
+            return array();
+        }
         if (is_array($embeddings)) {
             return $embeddings;
         }
     }
-    
+
     return [];
-    
+
 }
 
 // Function to capture cache timestamps for metadata comments

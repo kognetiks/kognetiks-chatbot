@@ -161,6 +161,9 @@ function transformer_model_sentential_context_fetch_content($offset, $batchSize)
 // Cache embeddings for the fetched content
 function transformer_model_sentential_context_cache_embeddings($corpus, $windowSize = 3) {
 
+    if ( function_exists( 'chatbot_chatgpt_gfi_touch' ) ) {
+        chatbot_chatgpt_gfi_touch( 'sentential' );
+    }
     $cacheDir = chatbot_chatgpt_beta_engine_cache_directory( 'sentential' );
     if ( $cacheDir === '' ) {
         return;
@@ -236,7 +239,16 @@ function transformer_model_sentential_context_cache_embeddings($corpus, $windowS
         $can_merge = chatbot_chatgpt_beta_engine_build_is_current( 'sentential', $generation )
             && ( chatbot_chatgpt_beta_engine_state( 'sentential' ) === 'building' || chatbot_chatgpt_beta_engine_stamp_matches( 'sentential' ) );
         if ( $can_merge && file_exists($cacheFile)) {
-            $existingEmbeddings = include $cacheFile;
+            if ( chatbot_chatgpt_beta_engine_state( 'sentential' ) === 'building' ) {
+                $existingEmbeddings = chatbot_chatgpt_gfi_include_builder_literal( $cacheFile );
+            } elseif ( function_exists( 'chatbot_chatgpt_gfi_include_trusted' ) ) {
+                $existingEmbeddings = chatbot_chatgpt_gfi_include_trusted( 'sentential', $cacheFile );
+                if ( ! is_array( $existingEmbeddings ) ) {
+                    return;
+                }
+            } else {
+                return;
+            }
         }
 
         // Merge updates with existing embeddings

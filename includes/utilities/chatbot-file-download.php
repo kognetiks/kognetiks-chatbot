@@ -64,10 +64,10 @@ function download_openai_file($file_id, $filename) {
         return false;
     }
 
-    $downloads_dir = $chatbot_chatgpt_plugin_dir_path . 'downloads/';
+    $downloads_dir = chatbot_chatgpt_generated_storage_directory( 'downloads' );
 
     // Ensure the directory exists or attempt to create it
-    if (!create_directory_and_index_file($downloads_dir)) {
+    if ( $downloads_dir === '' || ! create_directory_and_index_file( $downloads_dir ) ) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // FIXME - Return an error message
         return false;
@@ -153,7 +153,8 @@ function download_openai_file($file_id, $filename) {
                 }
             }
 
-            return content_url( 'plugins/' . basename( $chatbot_chatgpt_plugin_dir_path ) . '/downloads/' . $saved_name );
+            $download_url = chatbot_chatgpt_generated_storage_url( 'downloads', $saved_name );
+            return ( $download_url === '' ) ? false : $download_url;
         } finally {
             if ( file_exists( $temp_path ) ) {
                 wp_delete_file( $temp_path );
@@ -173,22 +174,29 @@ function chatbot_chatgpt_cleanup_download_directory() {
 
     global $chatbot_chatgpt_plugin_dir_path;
 
-    $download_dir = $chatbot_chatgpt_plugin_dir_path . 'downloads/';
-    $download_files = glob($download_dir . '*');
-    if (!is_array($download_files)) {
-        $download_files = array();
+    $download_dirs = array( chatbot_chatgpt_generated_storage_directory( 'downloads' ) );
+    $legacy_downloads = chatbot_chatgpt_generated_storage_legacy_directory( 'downloads' );
+    if ( $legacy_downloads !== '' && is_dir( $legacy_downloads ) ) {
+        $download_dirs[] = $legacy_downloads;
     }
-    foreach ($download_files as $file) {
-        if (chatbot_chatgpt_is_static_guard_file($file)) {
+    foreach ( $download_dirs as $download_dir ) {
+        if ( $download_dir === '' || ! is_dir( $download_dir ) ) {
             continue;
         }
-        // Delete files older than 1 hour
-        if (filemtime($file) < time() - 60 * 60 * 1) {
-            wp_delete_file($file);
+        $download_files = glob( rtrim( $download_dir, '/\\' ) . '/*' );
+        if ( ! is_array( $download_files ) ) {
+            $download_files = array();
         }
+        foreach ( $download_files as $file ) {
+            if ( chatbot_chatgpt_is_static_guard_file( $file ) ) {
+                continue;
+            }
+            if ( filemtime( $file ) < time() - 60 * 60 * 1 ) {
+                wp_delete_file( $file );
+            }
+        }
+        create_directory_and_index_file( $download_dir );
     }
-    // Create the index.php file if it does not exist
-    create_directory_and_index_file($download_dir);
     
 }
 add_action('chatbot_chatgpt_cleanup_download_files', 'chatbot_chatgpt_cleanup_download_directory');

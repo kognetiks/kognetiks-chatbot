@@ -74,14 +74,15 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
         }
     }
 
-    // Generate directory path
-    $audio_dir_path = $chatbot_chatgpt_plugin_dir_path . 'audio/';
+    // Generate directory path under the active site's uploads namespace.
+    $audio_dir_path = chatbot_chatgpt_generated_storage_directory( 'audio' );
 
     // Ensure the directory exists or attempt to create it
-    if (!create_directory_and_index_file($audio_dir_path)) {
+    if ( $audio_dir_path === '' || ! create_directory_and_index_file( $audio_dir_path ) ) {
         // Error handling, e.g., log the error or handle the failure appropriately
         return;
     }
+    $audio_dir_path = rtrim( $audio_dir_path, '/\\' ) . '/';
 
     // Get the audio format option
     $audio_format = esc_attr(get_option('chatbot_chatgpt_audio_output_format', 'mp3'));
@@ -92,7 +93,10 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     // Generate the URL of the audio file
     // $audio_file_url = $plugins_url . '/' . $plugin_name . '/audio/' . $audio_file_name;
-    $audio_file_url = plugins_url('audio/' . $audio_file_name, $chatbot_chatgpt_plugin_dir_path . 'chatbot-chatgpt');
+    $audio_file_url = chatbot_chatgpt_generated_storage_url( 'audio', $audio_file_name );
+    if ( $audio_file_url === '' ) {
+        return;
+    }
 
     $audio_output = null;
 
@@ -503,31 +507,22 @@ function deleteAudioFile($file_id) {
     global $thread_id;
     global $assistant_id;
 
-    // Generate directory path
-    $audio_dir_path = $chatbot_chatgpt_plugin_dir_path . 'audio/';
-
-    // Ensure the directory exists or attempt to create it
-    if (!create_directory_and_index_file($audio_dir_path)) {
-        // Error handling, e.g., log the error or handle the failure appropriately
-        return;
+    $file_id = basename( str_replace( '\\', '/', (string) $file_id ) );
+    $audio_dirs = array();
+    $live_audio = chatbot_chatgpt_generated_storage_directory( 'audio' );
+    if ( $live_audio !== '' ) {
+        $audio_dirs[] = $live_audio;
     }
-
-    // Strip off just the file name
-    $file_id = basename($file_id);
-
-    // Add the $audio_dir_path to the $file_id
-    $file_id = $audio_dir_path . $file_id;
-
-    // Check if the file exists
-    if (!file_exists($file_id)) {
-        return;
+    $legacy_audio = chatbot_chatgpt_generated_storage_legacy_directory( 'audio' );
+    if ( $legacy_audio !== '' && is_dir( $legacy_audio ) ) {
+        $audio_dirs[] = $legacy_audio;
     }
-
-    // Try to delete the file
-    if (!wp_delete_file($file_id)) {
-        return;
+    foreach ( $audio_dirs as $audio_dir_path ) {
+        $candidate = rtrim( $audio_dir_path, '/\\' ) . '/' . $file_id;
+        if ( is_file( $candidate ) ) {
+            wp_delete_file( $candidate );
+        }
     }
-
 }
 add_action( 'chatbot_chatgpt_delete_audio_file', 'deleteAudioFile' );
 
@@ -536,8 +531,16 @@ function chatbot_chatgpt_cleanup_audio_directory() {
 
     global $chatbot_chatgpt_plugin_dir_path;
     
-    $audio_dir = $chatbot_chatgpt_plugin_dir_path . 'audio/';
-    $audio_files = glob($audio_dir . '*');
+    $audio_dirs = array( chatbot_chatgpt_generated_storage_directory( 'audio' ) );
+    $legacy_audio = chatbot_chatgpt_generated_storage_legacy_directory( 'audio' );
+    if ( $legacy_audio !== '' && is_dir( $legacy_audio ) ) {
+        $audio_dirs[] = $legacy_audio;
+    }
+    foreach ( $audio_dirs as $audio_dir ) {
+        if ( $audio_dir === '' || ! is_dir( $audio_dir ) ) {
+            continue;
+        }
+    $audio_files = glob( rtrim( $audio_dir, '/\\' ) . '/*' );
     if (!is_array($audio_files)) {
         $audio_files = array();
     }
@@ -552,5 +555,6 @@ function chatbot_chatgpt_cleanup_audio_directory() {
     }
     // Create the index.php file if it does not exist
     create_directory_and_index_file($audio_dir);
+    }
 }
 add_action('chatbot_chatgpt_cleanup_audio_files', 'chatbot_chatgpt_cleanup_audio_directory');

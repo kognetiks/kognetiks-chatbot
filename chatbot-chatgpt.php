@@ -157,6 +157,8 @@ ob_end_flush(); // End output buffering and send the buffer to the browser
 // Include necessary files - Utilities (must be loaded before API files that use them)
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.php';                    // Ver 1.8.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-content-eligibility.php';           // Public-content eligibility
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-generated-storage.php';            // Uploads storage for generated files
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-generated-file-integrity.php';    // HMAC integrity for generated caches
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-beta-knowledge.php';               // Beta engine artifact guard
 
 // Include necessary files - Main files
