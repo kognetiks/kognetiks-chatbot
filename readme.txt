@@ -207,10 +207,17 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.6.0 - Released TBD =
+= 2.6.0 - Released 2026-11-17 =
 
-### Bug Fixes
-* **TBD**: TBD
+### Security
+- Fixed a stored cross-site scripting vulnerability involving MathJax rendering of untrusted mathematical expressions.
+- Added secure mathematical rendering that prevents unsafe URLs and executable attributes from being introduced into chatbot content.
+- Restricted MathJax processing to chatbot content, preventing the plugin from interpreting unrelated WordPress comments and page content.
+- Improved MathJax initialization, dependency isolation, and asset versioning.
+
+### Compatibility
+- Preserved mathematical notation rendering in chatbot conversations.
+- Improved compatibility with other plugins that use MathJax.
 
 = 2.5.9 - Released 2026-11-12 =
 
