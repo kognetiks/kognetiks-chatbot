@@ -45,11 +45,16 @@
     }
 
     function browserProtocol(value) {
-        var probe = document.createElement('a');
         var protocol = '';
+        var base;
         try {
-            probe.href = value;
-            protocol = String(probe.protocol || '').replace(/[\u0000-\u0020]+/g, '').toLowerCase();
+            if (typeof URL !== 'function') {
+                return '';
+            }
+            // Same scheme parser used for link navigation, without writing the
+            // untrusted value into an element URL property.
+            base = document.baseURI || 'https://example.invalid/';
+            protocol = String(new URL(value, base).protocol || '').replace(/[\u0000-\u0020]+/g, '').toLowerCase();
         } catch (error) {
             protocol = '';
         }
