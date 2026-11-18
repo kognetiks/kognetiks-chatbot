@@ -676,6 +676,71 @@ add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 // MathJax configuration for the bundled 3.2.0 build - 2026 11 17
 // https://docs.mathjax.org/en/v3.2.2/options/safe.html
 // ui/safe is vendored at assets/js/ui/safe.js and is loaded from the plugin, not a CDN.
+
+// Read this plugin's header. Other Kognetiks plugins reuse $chatbot_chatgpt_plugin_version.
+function chatbot_chatgpt_mathjax_asset_version() {
+
+    static $chatbot_mathjax_asset_version = null;
+
+    if ( null !== $chatbot_mathjax_asset_version ) {
+        return $chatbot_mathjax_asset_version;
+    }
+
+    $chatbot_mathjax_asset_version = '2.6.0';
+    $plugin_header = file_get_contents( __FILE__, false, null, 0, 8192 );
+    if ( is_string( $plugin_header ) && preg_match( '/^[ \t]*\*[ \t]*Version:[ \t]*([^\r\n]+)/mi', $plugin_header, $version_match ) ) {
+        $header_version = trim( $version_match[1] );
+        if ( '' !== $header_version ) {
+            $chatbot_mathjax_asset_version = $header_version;
+        }
+    }
+
+    return $chatbot_mathjax_asset_version;
+
+}
+
+// Another plugin's MathJax already owns window.MathJax when its script is queued.
+// A registered-but-not-queued handle does not print, so it does not take ownership.
+function chatbot_chatgpt_foreign_mathjax_is_active() {
+
+    global $wp_scripts;
+
+    if ( ! ( $wp_scripts instanceof WP_Scripts ) ) {
+        return false;
+    }
+
+    $our_handles = array(
+        'chatbot-mathjax-security' => true,
+        'chatbot-chatgpt-mathjax'  => true,
+    );
+
+    foreach ( $wp_scripts->registered as $handle => $script ) {
+        $handle = (string) $handle;
+        if ( isset( $our_handles[ $handle ] ) ) {
+            continue;
+        }
+
+        $src = ( is_object( $script ) && isset( $script->src ) ) ? (string) $script->src : '';
+        $handle_match = ( 'mathjax' === $handle || 0 === strpos( $handle, 'mathjax-' ) );
+        $src_match = (
+            false !== stripos( $src, 'mathjax' )
+            || false !== stripos( $src, 'tex-mml-chtml' )
+            || false !== stripos( $src, 'tex-chtml' )
+            || false !== stripos( $src, 'tex-svg' )
+        );
+        if ( ! $handle_match && ! $src_match ) {
+            continue;
+        }
+
+        if ( wp_script_is( $handle, 'enqueued' ) || wp_script_is( $handle, 'done' ) || wp_script_is( $handle, 'queue' ) ) {
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
 function chatbot_chatgpt_mathjax_runtime_config( $script_base_url, $font_url ) {
 
     return array(
@@ -733,25 +798,48 @@ function enqueue_mathjax_with_custom_config() {
         return;
     }
 
-    if ( wp_script_is( 'mathjax', 'enqueued' ) || wp_script_is( 'mathjax', 'done' ) ) {
+    if ( wp_script_is( 'chatbot-chatgpt-mathjax', 'enqueued' ) || wp_script_is( 'chatbot-chatgpt-mathjax', 'done' ) ) {
         return;
     }
 
-    global $chatbot_chatgpt_plugin_version;
-    global $chatbot_chatgpt_plugin_dir_url;
+    // A foreign MathJax was already accepted for this request. Do not load a second copy.
+    if ( wp_script_is( 'chatbot-mathjax-security', 'enqueued' ) || wp_script_is( 'chatbot-mathjax-security', 'done' ) ) {
+        return;
+    }
 
-    $script_base_url = $chatbot_chatgpt_plugin_dir_url . 'assets/js';
+    $mathjax_version = chatbot_chatgpt_mathjax_asset_version();
+    $script_base_url = plugin_dir_url( __FILE__ ) . 'assets/js';
+    $security_src = $script_base_url . '/chatbot-mathjax-security.js';
+
+    if ( chatbot_chatgpt_foreign_mathjax_is_active() ) {
+        // Keep the click guard. Do not configure, wrap, or typeset with the other library.
+        wp_enqueue_script( 'chatbot-mathjax-security', $security_src, array(), $mathjax_version, true );
+        wp_add_inline_script( 'chatbot-mathjax-security', 'window.chatbotMathJaxForeign = true;', 'before' );
+        if ( did_action( 'wp_print_footer_scripts' ) ) {
+            wp_print_scripts( 'chatbot-mathjax-security' );
+        }
+        return;
+    }
+
     $font_url = plugin_dir_url( __FILE__ ) . 'assets/fonts/woff-v2';
-    $mathjax_config = 'window.MathJax = ' . wp_json_encode( chatbot_chatgpt_mathjax_runtime_config( $script_base_url, $font_url ) ) . ';';
+    $mathjax_config = chatbot_chatgpt_mathjax_runtime_config( $script_base_url, $font_url );
+    $mathjax_config['chatbotOwned'] = true;
+    $version_literal = wp_json_encode( $mathjax_version );
+    $mathjax_before = 'window.MathJax = ' . wp_json_encode( $mathjax_config ) . ';';
+    $mathjax_before .= 'window.MathJax.loader.pathFilters = window.MathJax.loader.pathFilters || [];';
+    $mathjax_before .= 'window.MathJax.loader.pathFilters.push([function (data) {';
+    $mathjax_before .= 'if (data && typeof data.name === "string" && data.name.indexOf("/ui/safe.js") !== -1 && data.name.indexOf("ver=") === -1) {';
+    $mathjax_before .= 'data.name += "?ver=" + encodeURIComponent(' . $version_literal . ');';
+    $mathjax_before .= '} return true; }, 30]);';
 
-    wp_enqueue_script( 'chatbot-mathjax-security', $script_base_url . '/chatbot-mathjax-security.js', array(), $chatbot_chatgpt_plugin_version, true );
-    wp_enqueue_script( 'mathjax', $script_base_url . '/tex-mml-chtml.js', array( 'chatbot-mathjax-security' ), $chatbot_chatgpt_plugin_version, true );
-    wp_add_inline_script( 'mathjax', $mathjax_config, 'before' );
-    wp_add_inline_script( 'mathjax', 'if (typeof chatbotInstallMathJaxGuard === "function") { chatbotInstallMathJaxGuard(); }', 'after' );
+    wp_enqueue_script( 'chatbot-mathjax-security', $security_src, array(), $mathjax_version, true );
+    wp_enqueue_script( 'chatbot-chatgpt-mathjax', $script_base_url . '/tex-mml-chtml.js', array( 'chatbot-mathjax-security' ), $mathjax_version, true );
+    wp_add_inline_script( 'chatbot-chatgpt-mathjax', $mathjax_before, 'before' );
+    wp_add_inline_script( 'chatbot-chatgpt-mathjax', 'if (window.MathJax) { window.MathJax.chatbotOwned = true; } if (typeof chatbotInstallMathJaxGuard === "function") { chatbotInstallMathJaxGuard(); }', 'after' );
 
     // A chatbot printed after the footer script queue still receives the guarded library.
     if ( did_action( 'wp_print_footer_scripts' ) ) {
-        wp_print_scripts( 'mathjax' );
+        wp_print_scripts( 'chatbot-chatgpt-mathjax' );
     }
 
 }

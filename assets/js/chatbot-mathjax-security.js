@@ -1,11 +1,11 @@
 /**
- * Scope MathJax to chatbot containers and neutralize unsafe generated URLs.
+ * Typeset chatbot math off-document and move it into the page only after
+ * unsafe URLs have been removed.
  *
  * MathJax 3.2.0 ui/safe blocks ordinary javascript: and data: URLs, but its
  * scheme parser still allows a value when it cannot identify a protocol.
- * Control characters inside a scheme produce that gap. This script therefore
- * typesets only chatbot containers and then checks the browser-resolved URL
- * of every generated attribute.
+ * This script does not replace MathJax.typeset or MathJax.typesetPromise.
+ * A foreign MathJax on the page is left alone, and chatbot math is not typeset.
  */
 (function () {
     'use strict';
@@ -257,85 +257,92 @@
         return null;
     }
 
-    function scopeElements(elements) {
-        var scoped = [];
-        var index;
-        var target;
-        if (!elements || typeof elements.length !== 'number') {
-            return Array.prototype.slice.call(document.querySelectorAll('.chatbot-chatgpt-root'));
-        }
-        for (index = 0; index < elements.length; index++) {
-            target = mathJaxTarget(elements[index]);
-            if (target) {
-                scoped.push(target);
-            }
-        }
-        return scoped;
-    }
-
-    function neutralizeRoots(elements) {
-        var index;
-        for (index = 0; index < elements.length; index++) {
-            neutralizeMathJaxOutput(elements[index]);
-        }
-    }
-
     function safeReady() {
         var startup = window.MathJax && window.MathJax.startup;
         var doc = startup && startup.document;
-        return !!(doc && doc.safe && typeof doc.safe.sanitize === 'function');
+        return !!(doc && doc.safe && typeof doc.safe.sanitize === 'function' && doc.safe.filterMethods);
     }
 
-    function disableTypeset() {
-        if (!window.MathJax) {
-            return;
-        }
-        window.MathJax.__chatbotSafeActive = false;
-        window.MathJax.typesetPromise = function () {
-            return Promise.resolve();
-        };
-        window.MathJax.typeset = function () {
-            return [];
-        };
+    function ownedMathJax() {
+        return !!(
+            window.MathJax &&
+            window.MathJax.chatbotOwned === true &&
+            window.chatbotMathJaxForeign !== true &&
+            window.MathJax.startup &&
+            typeof window.MathJax.typesetPromise === 'function'
+        );
     }
 
-    function wrapTypeset() {
-        var originalPromise;
-        var originalSync;
-        if (!window.MathJax || window.MathJax.__chatbotTypesetWrapped) {
-            return;
+    function elementHasDanger(element) {
+        var attributes;
+        var index;
+        var name;
+        var value;
+        if (!element || !element.attributes) {
+            return false;
         }
-        originalPromise = window.MathJax.typesetPromise;
-        originalSync = window.MathJax.typeset;
-        if (typeof originalPromise !== 'function') {
-            return;
+        if (element.matches && element.matches('script, iframe, object, embed, form, link, meta, base')) {
+            return true;
         }
-        window.MathJax.__chatbotTypesetWrapped = true;
-        window.MathJax.__chatbotSafeActive = true;
-        window.MathJax.typesetPromise = function (elements) {
-            var scoped = scopeElements(elements);
-            var result = originalPromise.call(window.MathJax, scoped);
-            if (result && typeof result.then === 'function') {
-                return result.then(function (value) {
-                    neutralizeRoots(scoped);
-                    return value;
-                });
+        attributes = element.attributes;
+        for (index = 0; index < attributes.length; index++) {
+            name = attributes[index].name;
+            value = attributes[index].value;
+            if (isEventHandlerAttribute(name)) {
+                return true;
             }
-            neutralizeRoots(scoped);
-            return result;
-        };
-        if (typeof originalSync === 'function') {
-            window.MathJax.typeset = function (elements) {
-                var scoped = scopeElements(elements);
-                var value = originalSync.call(window.MathJax, scoped);
-                neutralizeRoots(scoped);
-                return value;
-            };
+            if (String(name).toLowerCase() === 'style' && styleIsUnsafe(value)) {
+                return true;
+            }
+            if (attributeIsUrl(name) && (String(name).toLowerCase() === 'srcset' ? srcsetIsBlocked(value) : urlIsBlocked(value))) {
+                return true;
+            }
         }
+        return false;
+    }
+
+    function treeHasDanger(root) {
+        var nodes;
+        var index;
+        if (!root) {
+            return true;
+        }
+        if (elementHasDanger(root)) {
+            return true;
+        }
+        if (typeof root.querySelectorAll !== 'function') {
+            return true;
+        }
+        nodes = root.querySelectorAll('*');
+        for (index = 0; index < nodes.length; index++) {
+            if (elementHasDanger(nodes[index])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function installStricterFilter() {
+        var safe = window.MathJax && window.MathJax.startup && window.MathJax.startup.document && window.MathJax.startup.document.safe;
+        var original;
+        if (!safe || !safe.filterMethods || safe.filterMethods.__chatbotUrlFilter) {
+            return;
+        }
+        original = safe.filterMethods.filterURL;
+        safe.filterMethods.filterURL = function (safeObject, value) {
+            if (typeof value !== 'string' || urlIsBlocked(value)) {
+                return null;
+            }
+            if (typeof original === 'function') {
+                return original.call(safe.filterMethods, safeObject, value);
+            }
+            return value;
+        };
+        safe.filterMethods.__chatbotUrlFilter = true;
     }
 
     function installGuard() {
-        if (!window.MathJax || !window.MathJax.startup || !window.MathJax.startup.promise) {
+        if (!ownedMathJax()) {
             return false;
         }
         if (window.MathJax.__chatbotGuardInstalled) {
@@ -343,61 +350,149 @@
         }
         window.MathJax.__chatbotGuardInstalled = true;
         window.MathJax.startup.promise.then(function () {
-            if (!safeReady()) {
-                disableTypeset();
+            if (!ownedMathJax() || !safeReady()) {
+                if (window.MathJax) {
+                    window.MathJax.__chatbotSafeActive = false;
+                }
                 return;
             }
-            wrapTypeset();
+            installStricterFilter();
+            window.MathJax.__chatbotSafeActive = true;
         }).catch(function () {
-            disableTypeset();
+            if (window.MathJax) {
+                window.MathJax.__chatbotSafeActive = false;
+            }
         });
         return true;
+    }
+
+    function moveSanitized(target, scratch) {
+        while (target.firstChild) {
+            target.removeChild(target.firstChild);
+        }
+        while (scratch.firstChild) {
+            target.appendChild(scratch.firstChild);
+        }
+    }
+
+    function renderSafely(target) {
+        var snapshot = target.innerHTML;
+        var scratch = document.createElement('div');
+        scratch.innerHTML = snapshot;
+        return window.MathJax.startup.promise.then(function () {
+            if (!ownedMathJax() || !safeReady()) {
+                if (window.MathJax) {
+                    window.MathJax.__chatbotSafeActive = false;
+                }
+                return false;
+            }
+            installStricterFilter();
+            window.MathJax.__chatbotSafeActive = true;
+            return window.MathJax.typesetPromise([scratch]);
+        }).then(function (typesetResult) {
+            if (typesetResult === false) {
+                return false;
+            }
+            neutralizeMathJaxOutput(scratch);
+            if (scratch.isConnected || treeHasDanger(scratch) || target.innerHTML !== snapshot) {
+                if (scratch.parentNode) {
+                    scratch.parentNode.removeChild(scratch);
+                }
+                return false;
+            }
+            moveSanitized(target, scratch);
+            return true;
+        }).catch(function () {
+            if (scratch.parentNode) {
+                scratch.parentNode.removeChild(scratch);
+            }
+            if (window.MathJax) {
+                window.MathJax.__chatbotSafeActive = false;
+            }
+            return false;
+        });
     }
 
     var pending = [];
     var pump = 0;
 
-    function typesetMath(element) {
-        var target = mathJaxTarget(element);
-        if (!target) {
-            return Promise.resolve();
-        }
-        if (!window.MathJax || typeof window.MathJax.typesetPromise !== 'function' || !window.MathJax.startup) {
-            pending.push(target);
-            if (!pump) {
-                var tries = 0;
-                pump = window.setInterval(function () {
-                    var queued;
-                    var index;
-                    tries += 1;
-                    if (window.MathJax && window.MathJax.startup && typeof window.MathJax.typesetPromise === 'function') {
-                        window.clearInterval(pump);
-                        pump = 0;
-                        installGuard();
-                        queued = pending.splice(0, pending.length);
-                        for (index = 0; index < queued.length; index++) {
-                            typesetMath(queued[index]);
-                        }
-                    } else if (tries > 50) {
-                        window.clearInterval(pump);
-                        pump = 0;
-                        pending = [];
-                    }
-                }, 100);
+    function renderTarget(target) {
+        return renderSafely(target).then(function (ok) {
+            var children;
+            var chain;
+            if (ok) {
+                return true;
             }
-            return Promise.resolve();
+            children = target.children ? Array.prototype.slice.call(target.children) : [];
+            if (!children.length) {
+                return false;
+            }
+            if (children.length === 1) {
+                return renderTarget(children[0]);
+            }
+            chain = Promise.resolve(false);
+            children.forEach(function (child) {
+                chain = chain.then(function (any) {
+                    return renderTarget(child).then(function (childOk) {
+                        return any || childOk;
+                    });
+                });
+            });
+            return chain;
+        });
+    }
+
+    function flushPending() {
+        var queued = pending.splice(0, pending.length);
+        var index;
+        for (index = 0; index < queued.length; index++) {
+            queued[index].resolve(renderTarget(queued[index].target));
         }
-        installGuard();
-        return window.MathJax.startup.promise.then(function () {
-            if (!safeReady() || typeof window.MathJax.typesetPromise !== 'function') {
+    }
+
+    function enqueueTypeset(target) {
+        return new Promise(function (resolve) {
+            pending.push({ target: target, resolve: resolve });
+            if (pump) {
                 return;
             }
-            return window.MathJax.typesetPromise([target]);
-        }).then(function () {
-            neutralizeMathJaxOutput(target);
-        }).catch(function () {
-            neutralizeMathJaxOutput(target);
+            var tries = 0;
+            pump = window.setInterval(function () {
+                tries += 1;
+                if (window.chatbotMathJaxForeign === true) {
+                    window.clearInterval(pump);
+                    pump = 0;
+                    flushPending();
+                    return;
+                }
+                if (ownedMathJax()) {
+                    window.clearInterval(pump);
+                    pump = 0;
+                    installGuard();
+                    flushPending();
+                    return;
+                }
+                if (tries > 50) {
+                    window.clearInterval(pump);
+                    pump = 0;
+                    pending.splice(0, pending.length).forEach(function (item) {
+                        item.resolve(false);
+                    });
+                }
+            }, 100);
         });
+    }
+
+    function typesetMath(element) {
+        var target = mathJaxTarget(element);
+        if (!target || window.chatbotMathJaxForeign === true) {
+            return Promise.resolve(false);
+        }
+        if (!ownedMathJax()) {
+            return enqueueTypeset(target);
+        }
+        installGuard();
+        return renderTarget(target);
     }
 
     function installClickGuard() {

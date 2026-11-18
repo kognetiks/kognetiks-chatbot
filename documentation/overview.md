@@ -40,6 +40,20 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 **NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider's pricing and usage policies before proceeding.
 
+## Third-Party Libraries
+
+**MathJax 3.2.0**
+
+Kognetiks Chatbot includes locally hosted MathJax components for mathematical notation rendering in chatbot conversations.
+
+- License: Apache License 2.0
+- Project: https://www.mathjax.org/
+- Source code: https://github.com/mathjax/MathJax-src
+- Runtime components: https://github.com/mathjax/MathJax
+- The distributed runtime components are included locally; the complete development source is publicly available from the MathJax project.
+
+The bundled MathJax components are configured with additional security controls appropriate for rendering chatbot content.
+
 ## What's new in Version 2.6.0 - Released TBD
 
 ### Bug Fixes
