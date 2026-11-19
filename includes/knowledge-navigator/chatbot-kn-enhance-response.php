@@ -19,6 +19,32 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+/**
+ * Plain excerpt text safe to append to a chat reply.
+ *
+ * WordPress auto-excerpts end in the excerpt-more string "[&hellip;]".
+ * The chatbot renderer escapes "&", so that marker would appear as the
+ * literal text [&hellip;]. Turn it into a triple ellipsis, and decode any
+ * other entities so they are not escaped a second time.
+ *
+ * @param string $post_excerpt Excerpt HTML or text from get_the_excerpt().
+ * @return string
+ */
+function chatbot_chatgpt_normalize_excerpt_for_chat( $post_excerpt ) {
+
+    if ( ! is_string( $post_excerpt ) || $post_excerpt === '' ) {
+        return '';
+    }
+
+    $post_excerpt = html_entity_decode( $post_excerpt, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+    $post_excerpt = html_entity_decode( $post_excerpt, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+    $post_excerpt = wp_strip_all_tags( $post_excerpt );
+    $post_excerpt = preg_replace( '/\[\s*(?:\x{2026}|&hellip;|&#0*8230;|&#x0*2026;|\.{3})\s*\]/iu', '...', $post_excerpt );
+
+    return trim( (string) $post_excerpt );
+
+}
+
 function chatbot_chatgpt_enhance_with_tfidf($message) {
 
     global $wpdb;
@@ -57,7 +83,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
             }
 
             if ($include_post_or_page_excerpt == 'Yes') {
-                $post_excerpt = get_the_excerpt($result['ID']);
+                $post_excerpt = chatbot_chatgpt_normalize_excerpt_for_chat( get_the_excerpt( $result['ID'] ) );
                 if (!empty($post_excerpt)) {
                     $links[] = "<li>" . $post_excerpt . "</li>";
                 }
@@ -232,7 +258,7 @@ function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
             }
 
             if ($include_post_or_page_excerpt == 'Yes') {
-                $post_excerpt = get_the_excerpt($result->ID);
+                $post_excerpt = chatbot_chatgpt_normalize_excerpt_for_chat( get_the_excerpt( $result->ID ) );
                 if (!empty($post_excerpt)) {
                     $links[] = "<li>" . $post_excerpt . "</li>";
                 }

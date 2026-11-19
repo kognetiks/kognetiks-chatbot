@@ -1007,6 +1007,11 @@ window.resetAllLocks = resetAllLocks;
     function markdownToHtml(markdown) {
         // Normalize input to string defensively before any string operations
         markdown = toSafeString(markdown);
+
+        // WordPress excerpt-more is "[&hellip;]". Escaping "&" below would show that
+        // entity as literal text. Show a triple ellipsis instead.
+        markdown = markdown.replace(/\[\s*(?:&hellip;|&#0*8230;|&#x0*2026;|\u2026)\s*\]/gi, '...');
+        markdown = markdown.replace(/&hellip;|&#0*8230;|&#x0*2026;/gi, '...');
         
         // Step 1: Process links before any other inline elements
         markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
