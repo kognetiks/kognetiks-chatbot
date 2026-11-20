@@ -14,6 +14,43 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * Encode chatbot settings for embedding inside an HTML script element.
+ *
+ * Uses HTML-safe JSON hex flags so values cannot close the script tag.
+ * Encoding failure yields an empty object literal — never raw PHP output.
+ *
+ * @param mixed $settings Settings array or value for kchat_settings.
+ * @return string JSON object/array literal safe for script embedding.
+ */
+function chatbot_chatgpt_encode_kchat_settings_for_script( $settings ) {
+
+    $flags = 0;
+    if ( defined( 'JSON_HEX_TAG' ) ) {
+        $flags |= JSON_HEX_TAG;
+    }
+    if ( defined( 'JSON_HEX_AMP' ) ) {
+        $flags |= JSON_HEX_AMP;
+    }
+    if ( defined( 'JSON_HEX_APOS' ) ) {
+        $flags |= JSON_HEX_APOS;
+    }
+    if ( defined( 'JSON_HEX_QUOT' ) ) {
+        $flags |= JSON_HEX_QUOT;
+    }
+
+    $json = function_exists( 'wp_json_encode' )
+        ? wp_json_encode( $settings, $flags )
+        : json_encode( $settings, $flags );
+
+    if ( ! is_string( $json ) || $json === '' || strtolower( $json ) === 'null' ) {
+        return '{}';
+    }
+
+    return $json;
+
+}
+
+/**
  * Copy an assistants-table row onto shortcode attributes.
  *
  * The model column is not copied. An explicit shortcode model attribute stays
@@ -655,8 +692,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // Define $kchat_settings_json before it's used in Hot Prompt block - Fix for undefined variable warning
     // Ver 2.4.0 - Fix for undefined $kchat_settings_json variable
+    // Stage 6A.6 — HTML-safe JSON for wp_add_inline_script (same HEX strategy as OUT-007).
     if (!isset($kchat_settings_json)) {
-        $kchat_settings_json = wp_json_encode($kchat_settings);
+        $kchat_settings_json = chatbot_chatgpt_encode_kchat_settings_for_script( $kchat_settings );
     }
 
     // Hot Prompt the Chatbot - Ver 1.9.0
@@ -896,17 +934,20 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         array( 'nonce_timestamp' => time() * 1000 )
     );
 
-    $kchat_settings_json = wp_json_encode($kchat_settings);
+    // Stage 6A.6 — HTML-safe JSON for wp_add_inline_script HTML <script> sinks.
+    $kchat_settings_json = chatbot_chatgpt_encode_kchat_settings_for_script( $kchat_settings );
     wp_add_inline_script('chatbot-chatgpt-local-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
     wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
 
     $kchat_settings['chatbot_chatgpt_avatar_icon_setting'] = esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', ''));
     $kchat_settings['chatbot_chatgpt_custom_avatar_icon_setting'] = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', ''));
 
+    $kchat_settings_script_json = chatbot_chatgpt_encode_kchat_settings_for_script( $kchat_settings );
+
     ?>
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function() {
-            let kchat_settings = <?php echo json_encode($kchat_settings); ?>;
+            let kchat_settings = <?php echo $kchat_settings_script_json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML-safe JSON from chatbot_chatgpt_encode_kchat_settings_for_script(). ?>;
             if (kchat_settings && typeof kchat_settings === "object") {
                 // Resolve LocalStorage - Ver 2.1.1.1.R2
                 const includeKeys = [
@@ -1398,10 +1439,12 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     $custom_avatar_icon_setting = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', ''));
     $kchat_settings['chatbot_chatgpt_custom_avatar_icon_setting'] = $custom_avatar_icon_setting;
 
+    $kchat_settings_script_json = chatbot_chatgpt_encode_kchat_settings_for_script( $kchat_settings );
+
     ?>
         <script type="text/javascript">
             document.addEventListener("DOMContentLoaded", function() {
-                let kchat_settings = <?php echo json_encode($kchat_settings); ?>;
+                let kchat_settings = <?php echo $kchat_settings_script_json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML-safe JSON from chatbot_chatgpt_encode_kchat_settings_for_script(). ?>;
                 if (kchat_settings && typeof kchat_settings === "object") {
                     // Resolve LocalStorage - Ver 2.1.1.1.R1
                     const includeKeys = [
