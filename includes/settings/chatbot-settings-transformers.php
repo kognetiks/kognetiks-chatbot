@@ -32,9 +32,16 @@ function chatbot_lcm_lexical_cache_rebuild_cron_hook() {
 function chatbot_lcm_lexical_cache_register_monthly_cron_schedule( $schedules ) {
 
     if ( ! isset( $schedules['monthly'] ) ) {
+        // Defer translation until after_setup_theme — cron_schedules can run during early bootstrap.
+        $display = (
+            did_action( 'after_setup_theme' )
+            || doing_action( 'after_setup_theme' )
+        )
+            ? __( 'Once Monthly (approx. 30 days)', 'chatbot-chatgpt' )
+            : 'Once Monthly (approx. 30 days)';
         $schedules['monthly'] = array(
             'interval' => 30 * DAY_IN_SECONDS,
-            'display'  => __( 'Once Monthly (approx. 30 days)', 'chatbot-chatgpt' ),
+            'display'  => $display,
         );
     }
 

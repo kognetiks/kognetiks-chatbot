@@ -1366,7 +1366,8 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     // Write headers to file
     if (isset($results[0]) && is_array($results[0])) {
         $keys = array_keys($results[0]);
-        fputcsv($file, $keys);
+        // Explicit empty $escape silences PHP 8.4+ deprecation and matches RFC 4180 / future PHP default.
+        fputcsv( $file, $keys, ',', '"', '' );
     } else {
         $class = 'notice notice-error';
         $message = __( 'Chatbot No data in the file. Please enable conversation logging if currently off.', 'chatbot-chatgpt' );
@@ -1381,7 +1382,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
         $result = array_map(function($value) {
             return $value !== null ? mb_convert_encoding($value, 'UTF-8', 'auto') : '';
         }, $result);
-        fputcsv($file, $result);
+        fputcsv( $file, $result, ',', '"', '' );
     }
 
     rewind( $file );

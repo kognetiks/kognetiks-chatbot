@@ -133,9 +133,16 @@ function chatbot_markov_chain_build_results_callback($run_scanner) {
 // Register a custom weekly interval if not already defined
 add_filter('cron_schedules', 'chatbot_chatgpt_add_weekly_schedule');
 function chatbot_chatgpt_add_weekly_schedule($schedules) {
+    // Defer translation until after_setup_theme — cron_schedules can run during early Freemius init.
+    $display = (
+        did_action( 'after_setup_theme' )
+        || doing_action( 'after_setup_theme' )
+    )
+        ? __( 'Once Weekly', 'chatbot-chatgpt' )
+        : 'Once Weekly';
     $schedules['weekly'] = array(
         'interval' => 604800, // 1 week in seconds
-        'display' => __('Once Weekly', 'chatbot-chatgpt')
+        'display'  => $display,
     );
     return $schedules;
 }

@@ -129,11 +129,12 @@ function chatbot_chatgpt_download_options_data() {
         }
 
         // Write the CSV header
-        fputcsv($fileHandle, array('option_id', 'option_name', 'option_value', 'autoload'));
+        // Explicit empty $escape silences PHP 8.4+ deprecation and matches RFC 4180 / future PHP default.
+        fputcsv( $fileHandle, array( 'option_id', 'option_name', 'option_value', 'autoload' ), ',', '"', '' );
 
         // Write each option as a CSV row
-        foreach ($options as $option) {
-            fputcsv($fileHandle, $option);
+        foreach ( $options as $option ) {
+            fputcsv( $fileHandle, $option, ',', '"', '' );
         }
 
         // Close the file

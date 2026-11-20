@@ -218,9 +218,10 @@ function chatbot_chatgpt_kn_store_analysis_rows( $rows ) {
         return false;
     }
 
-    fputcsv( $handle, array( 'Word', 'TF-IDF' ) );
+    // Explicit empty $escape silences PHP 8.4+ deprecation and matches RFC 4180 / future PHP default.
+    fputcsv( $handle, array( 'Word', 'TF-IDF' ), ',', '"', '' );
     foreach ( $rows as $row ) {
-        fputcsv( $handle, array( $row['word'], $row['score'] ) );
+        fputcsv( $handle, array( $row['word'], $row['score'] ), ',', '"', '' );
     }
     rewind( $handle );
     $csv = stream_get_contents( $handle );
