@@ -333,8 +333,10 @@ function chatbot_chatgpt_pmpt_local_request_preview( $row ) {
 /**
  * Hosted-prompt controls for one assistant Details section.
  *
+ * Prints escaped markup. Callers must not wrap the output in esc_html().
+ *
  * @param object $assistant Database row object.
- * @return string
+ * @return void
  */
 function chatbot_chatgpt_render_pmpt_row_mode_row( $assistant ) {
     $assistant_id = isset( $assistant->assistant_id ) ? trim( (string) $assistant->assistant_id ) : '';
@@ -342,7 +344,7 @@ function chatbot_chatgpt_render_pmpt_row_mode_row( $assistant ) {
         ? chatbot_chatgpt_id_starts_with( $assistant_id, 'pmpt_' )
         : ( 0 === strpos( $assistant_id, 'pmpt_' ) );
     if ( ! $is_prompt ) {
-        return '';
+        return;
     }
 
     $row_id = isset( $assistant->id ) ? absint( $assistant->id ) : 0;
@@ -403,5 +405,6 @@ function chatbot_chatgpt_render_pmpt_row_mode_row( $assistant ) {
     $html .= esc_html__( 'I confirm the hosted prompt instructions have been copied into Additional Instructions for this row.', 'chatbot-chatgpt' ) . '</label> ';
     $html .= '<button type="button" class="button button-secondary button-small" onclick="saveChatgptPromptMode(' . esc_attr( (string) $row_id ) . '); return false;">' . esc_html__( 'Save prompt mode', 'chatbot-chatgpt' ) . '</button>';
     $html .= '</div>';
-    return $html;
+    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Fragment built with esc_html/esc_html__/esc_attr/selected() above; esc_html() on the whole string would break markup.
+    echo $html;
 }

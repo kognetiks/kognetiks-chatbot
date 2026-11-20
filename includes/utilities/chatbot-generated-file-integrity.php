@@ -2720,8 +2720,7 @@ function chatbot_chatgpt_gfi_admin_notice() {
         } else {
             $text = $label . ' is turned off, so its cache was not rebuilt after an integrity failure. Choose Now or an interval to rebuild it.';
         }
-        $safe = function_exists( 'esc_html' ) ? esc_html( $text ) : htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' );
-        echo '<div class="notice notice-warning"><p>' . $safe . '</p></div>';
+        echo '<div class="notice notice-warning"><p>' . esc_html( $text ) . '</p></div>';
     }
 }
 if ( function_exists( 'add_action' ) ) {

@@ -835,7 +835,7 @@ function chatbot_chatgpt_render_assistant_configuration( $row_key, $assistant, $
     echo '<div id="' . esc_attr( $region_id ) . '" class="kchat-assistant-details" role="region" aria-labelledby="' . esc_attr( $heading_id ) . '">';
     echo '<h3 id="' . esc_attr( $heading_id ) . '">' . esc_html( $heading ) . '</h3>';
     if ( ! $is_new && function_exists( 'chatbot_chatgpt_render_pmpt_row_mode_row' ) ) {
-        echo chatbot_chatgpt_render_pmpt_row_mode_row( $assistant );
+        chatbot_chatgpt_render_pmpt_row_mode_row( $assistant );
     }
     echo '<div id="kchat-assistant-feedback-' . esc_attr( (string) $row_key ) . '" class="notice notice-error inline kchat-assistant-feedback" hidden>';
     echo '<p></p>';
@@ -901,7 +901,6 @@ function chatbot_chatgpt_render_manage_assistant_rows( $assistant, $model_invent
 
     $row_id      = absint( $assistant->id );
     $row_key     = (string) $row_id;
-    $row_id_attr = esc_attr( $row_key );
     $row_id_js   = (string) $row_id;
     $shortcode   = '[chatbot-' . $row_key . ']';
 
@@ -913,8 +912,8 @@ function chatbot_chatgpt_render_manage_assistant_rows( $assistant, $model_invent
     echo '</td>';
     echo '<td class="kchat-col-shortcode"><code>' . esc_html( $shortcode ) . '</code> ';
     echo '<button type="button" class="button button-small" onclick="copyToClipboard(\'' . esc_js( $shortcode ) . '\'); return false;" aria-label="' . esc_attr( sprintf( __( 'Copy shortcode %s', 'chatbot-chatgpt' ), $shortcode ) ) . '">' . esc_html__( 'Copy', 'chatbot-chatgpt' ) . '</button></td>';
-    echo '<td class="kchat-col-assistant-id"><input type="text" name="assistant_id_' . $row_id_attr . '" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'assistant_id_' . $row_key ) ) . '" value="' . esc_attr( $assistant->assistant_id ) . '" aria-label="' . esc_attr( sprintf( __( 'Assistant ID for %s', 'chatbot-chatgpt' ), $shortcode ) ) . '"></td>';
-    echo '<td class="kchat-col-common-name"><input type="text" name="common_name_' . $row_id_attr . '" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'common_name_' . $row_key ) ) . '" value="' . esc_attr( $assistant->common_name ) . '" aria-label="' . esc_attr( sprintf( __( 'Common Name for %s', 'chatbot-chatgpt' ), $shortcode ) ) . '"></td>';
+    echo '<td class="kchat-col-assistant-id"><input type="text" name="assistant_id_' . esc_attr( $row_key ) . '" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'assistant_id_' . $row_key ) ) . '" value="' . esc_attr( $assistant->assistant_id ) . '" aria-label="' . esc_attr( sprintf( __( 'Assistant ID for %s', 'chatbot-chatgpt' ), $shortcode ) ) . '"></td>';
+    echo '<td class="kchat-col-common-name"><input type="text" name="common_name_' . esc_attr( $row_key ) . '" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'common_name_' . $row_key ) ) . '" value="' . esc_attr( $assistant->common_name ) . '" aria-label="' . esc_attr( sprintf( __( 'Common Name for %s', 'chatbot-chatgpt' ), $shortcode ) ) . '"></td>';
     echo '</tr>';
 
     echo '<tr class="kchat-assistant-details-row" id="kchat-assistant-details-row-' . esc_attr( $row_key ) . '" data-assistant-row="' . esc_attr( $row_key ) . '" hidden>';
