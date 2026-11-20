@@ -803,24 +803,23 @@ function transformer_model_sentential_context_build_cooccurrence_matrix($corpus,
 
     $matrix = [];
     $words = preg_split('/\s+/', strtolower($corpus)); // Tokenize and normalize
-    $words = transformer_model_sentential_context_remove_stop_words($words); // Remove stop words
+    // Filtered tokens are a consecutive sequence; windows use those positions.
+    $words = transformer_model_sentential_context_remove_stop_words($words);
 
-    foreach ($words as $i => $word) {
+    $n = count($words);
+    for ($i = 0; $i < $n; $i++) {
+        $word = $words[$i];
 
         if (!isset($matrix[$word])) {
             $matrix[$word] = [];
         }
 
-        for ($j = max(0, $i - $windowSize); $j <= min(count($words) - 1, $i + $windowSize); $j++) {
-            if ($i !== $j) {
-                if (isset($words[$j])) {
-                    $contextWord = $words[$j];
-                } else {
-                    // Handle the case where the index does not exist
-                    $contextWord = null; // or any default value
-                }
-                $matrix[$word][$contextWord] = ($matrix[$word][$contextWord] ?? 0) + 1;
+        for ($j = max(0, $i - $windowSize); $j <= min($n - 1, $i + $windowSize); $j++) {
+            if ($i === $j) {
+                continue;
             }
+            $contextWord = $words[$j];
+            $matrix[$word][$contextWord] = ($matrix[$word][$contextWord] ?? 0) + 1;
         }
     }
 
@@ -838,7 +837,9 @@ function transformer_model_sentential_context_remove_stop_words($words) {
         $stopWords = array(); // Ensure $stopWords is an array
     }
 
-    return array_diff($words, $stopWords);
+    // array_diff() preserves keys and can leave gaps. Callers that walk token
+    // positions (co-occurrence windows, etc.) need a dense filtered sequence.
+    return array_values(array_diff($words, $stopWords));
 
 }
 
