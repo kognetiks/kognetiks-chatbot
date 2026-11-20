@@ -1036,14 +1036,18 @@ function transformer_model_lexical_context_save_cache($cacheFile, $embeddings) {
     $compressed = gzencode($serialized, 9); // Maximum compression level
     list($createdAt, $updatedAt) = transformer_model_lexical_context_get_cache_timestamps($cacheFile);
     
-    $directAccessGuard = "if ( ! defined( 'ABSPATH' ) ) {\n    exit;\n}\n";
+    if ( function_exists( 'chatbot_chatgpt_gfi_direct_access_guard_source' ) ) {
+        $directAccessGuard = chatbot_chatgpt_gfi_direct_access_guard_source();
+    } else {
+        $directAccessGuard = "if ( ! defined( 'ABSPATH' ) ) {\n    http_response_code( 403 );\n    exit;\n}\n";
+    }
 
     if ($compressed !== false) {
         if (file_put_contents($compressedFile, $compressed) !== false) {
             // Also create a PHP wrapper for backward compatibility
-            $wrapperContent = "<?php\n";
+            $wrapperContent = "<?php\n\n";
             $wrapperContent .= $directAccessGuard;
-            $wrapperContent .= "// Lexical embeddings cache (compressed)\n";
+            $wrapperContent .= "\n// Lexical embeddings cache (compressed)\n";
             $wrapperContent .= "// Created: {$createdAt}\n";
             $wrapperContent .= "// Updated: {$updatedAt}\n";
             $wrapperContent .= "// File size: " . number_format(filesize($compressedFile)) . " bytes\n";
@@ -1059,9 +1063,9 @@ function transformer_model_lexical_context_save_cache($cacheFile, $embeddings) {
     // Fallback to uncompressed serialization if compression fails
     $serializedFile = $cacheFile . '.ser';
     if (file_put_contents($serializedFile, serialize($embeddings)) !== false) {
-        $wrapperContent = "<?php\n";
+        $wrapperContent = "<?php\n\n";
         $wrapperContent .= $directAccessGuard;
-        $wrapperContent .= "// Lexical embeddings cache (serialized)\n";
+        $wrapperContent .= "\n// Lexical embeddings cache (serialized)\n";
         $wrapperContent .= "// Created: {$createdAt}\n";
         $wrapperContent .= "// Updated: {$updatedAt}\n";
         $wrapperContent .= "return unserialize(file_get_contents(__FILE__ . '.ser'), array('allowed_classes' => false));\n";
@@ -1069,13 +1073,13 @@ function transformer_model_lexical_context_save_cache($cacheFile, $embeddings) {
         return true;
     }
     
-    // Last resort: use var_export (original method, but should rarely be needed)
-    $cacheContent = "<?php\n";
+    // Last resort: literal array export with the approved direct-access guard.
+    if ( function_exists( 'chatbot_chatgpt_gfi_literal_cache_php' ) ) {
+        return file_put_contents( $cacheFile, chatbot_chatgpt_gfi_literal_cache_php( $embeddings ) ) !== false;
+    }
+    $cacheContent = "<?php\n\n";
     $cacheContent .= $directAccessGuard;
-    $cacheContent .= "// Lexical embeddings cache (exported)\n";
-    $cacheContent .= "// Created: {$createdAt}\n";
-    $cacheContent .= "// Updated: {$updatedAt}\n";
-    $cacheContent .= 'return ' . var_export($embeddings, true) . ";\n";
+    $cacheContent .= "\nreturn " . var_export( $embeddings, true ) . ";\n";
     return file_put_contents($cacheFile, $cacheContent) !== false;
     
 }
@@ -2582,6 +2586,170 @@ function transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cac
 }
 
 /**
+ * Move one staged Lexical artifact into place, rolling back a temporary backup on failure.
+ *
+ * @param string $staging_path Absolute staging path.
+ * @param string $final_path   Absolute published path.
+ * @param string $backup_sfx   Backup suffix (for example `.lcm_bak_token`).
+ * @return bool
+ */
+function transformer_model_lexical_context_install_one_cache_file( $staging_path, $final_path, $backup_sfx ) {
+
+    if ( ! file_exists( $staging_path ) ) {
+        return false;
+    }
+    if ( file_exists( $final_path ) ) {
+        if ( ! chatbot_chatgpt_move_file( $final_path, $final_path . $backup_sfx ) ) {
+            return false;
+        }
+    }
+    if ( ! chatbot_chatgpt_move_file( $staging_path, $final_path ) ) {
+        if ( file_exists( $final_path . $backup_sfx ) ) {
+            chatbot_chatgpt_move_file( $final_path . $backup_sfx, $final_path );
+        }
+
+        return false;
+    }
+    if ( file_exists( $final_path . $backup_sfx ) ) {
+        wp_delete_file( $final_path . $backup_sfx );
+    }
+
+    return true;
+}
+
+/**
+ * Whether a published Lexical directory contains the required logical artifacts.
+ *
+ * Mandatory: PHP cache, version stamp, IDF JSON, plus a PMI payload as `.gz`, `.ser`,
+ * or a literal-array PHP body (last-resort save_cache path).
+ *
+ * @param string $cache_dir Absolute cache directory.
+ * @return bool
+ */
+function transformer_model_lexical_context_published_artifacts_are_complete( $cache_dir ) {
+
+    $cache_dir = trailingslashit( (string) $cache_dir );
+    if ( $cache_dir === '/' || $cache_dir === '\\' || ! is_dir( $cache_dir ) ) {
+        return false;
+    }
+
+    $final_php = $cache_dir . 'lexical_embeddings_cache.php';
+    $final_ver = $cache_dir . 'lexical_embeddings_cache_version.txt';
+    $final_idf = $cache_dir . 'lexical_local_idf_cache.json';
+    if ( ! is_file( $final_php ) || ! is_file( $final_ver ) || ! is_file( $final_idf ) ) {
+        return false;
+    }
+
+    if ( is_file( $final_php . '.gz' ) || is_file( $final_php . '.ser' ) ) {
+        return true;
+    }
+
+    if ( ! function_exists( 'chatbot_chatgpt_gfi_buffer_is_literal_return' ) ) {
+        return false;
+    }
+    $bytes = file_get_contents( $final_php );
+
+    return is_string( $bytes ) && chatbot_chatgpt_gfi_buffer_is_literal_return( $bytes );
+}
+
+/**
+ * Promote staged Lexical cache artifacts to published names (full and chunked installers).
+ *
+ * Required companions created by save_cache (`.gz` preferred, else `.ser`) are moved with the
+ * PHP wrapper. Staging leftovers are removed only after a successful promotion. Callers must
+ * still run GFI commit/publish separately.
+ *
+ * @param string               $cache_dir Absolute cache directory.
+ * @param string               $token     Staging token.
+ * @param array<string,string> $paths     Optional absolute overrides: staging_php, ver_staging, idf_staging, final_php, final_ver, final_idf.
+ * @return array{ ok: bool, error?: string }
+ */
+function transformer_model_lexical_context_promote_staged_cache_artifacts( $cache_dir, $token, $paths = array() ) {
+
+    // Stale workers that lost build ownership must not replace published finals.
+    $owner = function_exists( 'chatbot_chatgpt_gfi_session_owner' ) ? chatbot_chatgpt_gfi_session_owner( 'lexical' ) : '';
+    if ( $owner === '' && function_exists( 'chatbot_chatgpt_gfi_job_owner' ) ) {
+        $owner = chatbot_chatgpt_gfi_job_owner( 'lexical' );
+        if ( $owner !== '' && function_exists( 'chatbot_chatgpt_gfi_remember_owner' ) ) {
+            chatbot_chatgpt_gfi_remember_owner( 'lexical', $owner );
+        }
+    }
+    if ( function_exists( 'chatbot_chatgpt_gfi_builder_may_mutate' ) && ! chatbot_chatgpt_gfi_builder_may_mutate( 'lexical', $owner ) ) {
+        return array( 'ok' => false, 'error' => 'ownership' );
+    }
+
+    $cache_dir = trailingslashit( (string) $cache_dir );
+    $token     = preg_replace( '/[^a-zA-Z0-9_-]/', '', (string) $token );
+    if ( $cache_dir === '/' || $cache_dir === '\\' || $token === '' ) {
+        return array( 'ok' => false, 'error' => 'cache_dir' );
+    }
+
+    $staging_php = isset( $paths['staging_php'] ) ? (string) $paths['staging_php'] : $cache_dir . 'lexical_embeddings_cache.staging.' . $token . '.php';
+    $ver_staging = isset( $paths['ver_staging'] ) ? (string) $paths['ver_staging'] : $cache_dir . 'lexical_embeddings_cache_version.staging.' . $token . '.txt';
+    $idf_staging = isset( $paths['idf_staging'] ) ? (string) $paths['idf_staging'] : $cache_dir . 'lexical_local_idf_cache.staging.' . $token . '.json';
+    $final_php   = isset( $paths['final_php'] ) ? (string) $paths['final_php'] : $cache_dir . 'lexical_embeddings_cache.php';
+    $final_ver   = isset( $paths['final_ver'] ) ? (string) $paths['final_ver'] : $cache_dir . 'lexical_embeddings_cache_version.txt';
+    $final_idf   = isset( $paths['final_idf'] ) ? (string) $paths['final_idf'] : $cache_dir . 'lexical_local_idf_cache.json';
+
+    if ( ! is_file( $staging_php ) || ! is_file( $ver_staging ) || ! is_file( $idf_staging ) ) {
+        return array( 'ok' => false, 'error' => 'incomplete_staging' );
+    }
+
+    $gz_staging  = $staging_php . '.gz';
+    $ser_staging = $staging_php . '.ser';
+    $had_gz      = is_file( $gz_staging );
+    $had_ser     = is_file( $ser_staging );
+    if ( ! $had_gz && ! $had_ser ) {
+        $staging_bytes = file_get_contents( $staging_php );
+        $literal_ok    = is_string( $staging_bytes )
+            && function_exists( 'chatbot_chatgpt_gfi_buffer_is_literal_return' )
+            && chatbot_chatgpt_gfi_buffer_is_literal_return( $staging_bytes );
+        if ( ! $literal_ok ) {
+            return array( 'ok' => false, 'error' => 'missing_companion' );
+        }
+    }
+
+    $backup_sfx = '.lcm_bak_' . $token;
+    $ok_move    = transformer_model_lexical_context_install_one_cache_file( $staging_php, $final_php, $backup_sfx );
+    if ( $ok_move && $had_gz ) {
+        $ok_move = transformer_model_lexical_context_install_one_cache_file( $gz_staging, $final_php . '.gz', $backup_sfx );
+    }
+    if ( $ok_move && $had_ser ) {
+        $ok_move = transformer_model_lexical_context_install_one_cache_file( $ser_staging, $final_php . '.ser', $backup_sfx );
+    }
+    if ( $ok_move ) {
+        $ok_move = transformer_model_lexical_context_install_one_cache_file( $ver_staging, $final_ver, $backup_sfx );
+    }
+    if ( $ok_move ) {
+        $ok_move = transformer_model_lexical_context_install_one_cache_file( $idf_staging, $final_idf, $backup_sfx );
+    }
+
+    if ( ! $ok_move ) {
+        transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cache_dir, $token );
+
+        return array( 'ok' => false, 'error' => 'write_error' );
+    }
+
+    // Drop leftover backups from older chunked installers (.bak) and any failed suffix.
+    foreach ( array( $final_php, $final_php . '.gz', $final_php . '.ser', $final_ver, $final_idf ) as $published ) {
+        if ( is_file( $published . '.bak' ) ) {
+            wp_delete_file( $published . '.bak' );
+        }
+        if ( is_file( $published . $backup_sfx ) ) {
+            wp_delete_file( $published . $backup_sfx );
+        }
+    }
+
+    transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cache_dir, $token );
+
+    if ( ! transformer_model_lexical_context_published_artifacts_are_complete( $cache_dir ) ) {
+        return array( 'ok' => false, 'error' => 'incomplete_publish' );
+    }
+
+    return array( 'ok' => true );
+}
+
+/**
  * If the full lexical rebuild exits without finishing (fatal, OOM, max execution time), log what we can.
  *
  * @return void
@@ -2659,6 +2827,12 @@ function transformer_model_lexical_context_lexical_rebuild_shutdown_probe() {
 function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $context = 'cron' ) {
 
     $beta_generation = chatbot_chatgpt_beta_engine_begin( 'lexical' );
+    $gfi_owner       = function_exists( 'chatbot_chatgpt_gfi_session_owner' ) ? chatbot_chatgpt_gfi_session_owner( 'lexical' ) : '';
+    // Ownership failure: begin() returns 0 and leaves no session owner.
+    if ( $gfi_owner === '' && function_exists( 'chatbot_chatgpt_gfi_is_engine' ) ) {
+        transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=aborted reason=ownership' );
+        return array( 'ok' => false, 'error' => 'ownership' );
+    }
     transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=rebuild_started' );
 
     static $lcm_shutdown_registered = false;
@@ -2682,7 +2856,7 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $cont
 
     $documents = transformer_model_lexical_context_fetch_wordpress_documents();
     if ( empty( $documents ) ) {
-        chatbot_chatgpt_beta_engine_commit( 'lexical', $beta_generation );
+        chatbot_chatgpt_beta_engine_commit( 'lexical', $beta_generation, $gfi_owner );
         transformer_model_lexical_context_lexical_rebuild_log( 'step=aborted reason=empty_corpus' );
         return array( 'ok' => false, 'error' => 'empty_corpus' );
     }
@@ -2771,70 +2945,29 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild( $cont
         return array( 'ok' => false, 'error' => 'write_error' );
     }
 
-    $final_php = $cache_dir . '/lexical_embeddings_cache.php';
-    $final_ver = $cache_dir . '/lexical_embeddings_cache_version.txt';
-    $final_idf = $cache_dir . '/lexical_local_idf_cache.json';
-
-    $backup_sfx = '.lcm_bak_' . $token;
-
-    /**
-     * Install staging file over production; roll back one step if the move fails.
-     *
-     * @param string $staging_path Absolute staging path.
-     * @param string $final_path   Absolute production path.
-     * @return bool
-     */
-    $install_one = static function ( $staging_path, $final_path ) use ( $backup_sfx ) {
-
-        if ( ! file_exists( $staging_path ) ) {
-            return false;
-        }
-        if ( file_exists( $final_path ) ) {
-            if ( ! chatbot_chatgpt_move_file( $final_path, $final_path . $backup_sfx ) ) {
-                return false;
-            }
-        }
-        if ( ! chatbot_chatgpt_move_file( $staging_path, $final_path ) ) {
-            if ( file_exists( $final_path . $backup_sfx ) ) {
-                chatbot_chatgpt_move_file( $final_path . $backup_sfx, $final_path );
-            }
-            return false;
-        }
-        if ( file_exists( $final_path . $backup_sfx ) ) {
-            wp_delete_file( $final_path . $backup_sfx );
-        }
-
-        return true;
-    };
-
     transformer_model_lexical_context_lexical_rebuild_log( 'step=atomic_swap_started' );
 
-    $ok_move = $install_one( $staging_php, $final_php );
-
-    $gz_staging = $staging_php . '.gz';
-    if ( $ok_move && file_exists( $gz_staging ) ) {
-        $ok_move = $install_one( $gz_staging, $final_php . '.gz' );
-    }
-
-    $ser_staging = $staging_php . '.ser';
-    if ( $ok_move && file_exists( $ser_staging ) ) {
-        $ok_move = $install_one( $ser_staging, $final_php . '.ser' );
-    }
-
-    if ( $ok_move ) {
-        $ok_move = $install_one( $ver_staging, $final_ver );
-    }
-    if ( $ok_move ) {
-        $ok_move = $install_one( $idf_staging, $final_idf );
-    }
-
-    if ( ! $ok_move ) {
-        transformer_model_lexical_context_lexical_rebuild_log( 'step=atomic_swap_failed' );
+    $promoted = transformer_model_lexical_context_promote_staged_cache_artifacts(
+        $cache_dir,
+        $token,
+        array(
+            'staging_php' => $staging_php,
+            'ver_staging' => $ver_staging,
+            'idf_staging' => $idf_staging,
+        )
+    );
+    if ( empty( $promoted['ok'] ) ) {
+        transformer_model_lexical_context_lexical_rebuild_log(
+            'step=atomic_swap_failed detail=' . ( isset( $promoted['error'] ) ? (string) $promoted['error'] : 'write_error' )
+        );
         return array( 'ok' => false, 'error' => 'write_error' );
     }
 
     transformer_model_lexical_context_lexical_rebuild_log( 'step=rebuild_completed_ok' );
-    chatbot_chatgpt_beta_engine_commit( 'lexical', $beta_generation );
+    if ( ! chatbot_chatgpt_beta_engine_commit( 'lexical', $beta_generation, $gfi_owner ) ) {
+        transformer_model_lexical_context_lexical_rebuild_log( 'step=commit_failed' );
+        return array( 'ok' => false, 'error' => 'write_error' );
+    }
 
     return array( 'ok' => true );
 
@@ -2870,7 +3003,24 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
     }
     set_transient( $lock_key, 1, $lock_ttl );
 
-    chatbot_chatgpt_beta_engine_begin( 'lexical' );
+    $state_key = 'chatbot_lcm_lexical_rebuild_state';
+    $state     = get_option( $state_key, array() );
+    if ( ! is_array( $state ) ) {
+        $state = array();
+    }
+    $continue = ! empty( $state['gfi_owner'] ) ? (string) $state['gfi_owner'] : '';
+    if ( $continue === '' && function_exists( 'chatbot_chatgpt_gfi_job_owner' ) ) {
+        $continue = chatbot_chatgpt_gfi_job_owner( 'lexical' );
+    }
+    $beta_generation = chatbot_chatgpt_beta_engine_begin( 'lexical', $continue );
+    $gfi_owner       = function_exists( 'chatbot_chatgpt_gfi_session_owner' ) ? chatbot_chatgpt_gfi_session_owner( 'lexical' ) : $continue;
+    if ( $gfi_owner === '' ) {
+        delete_transient( $lock_key );
+        transformer_model_lexical_context_lexical_rebuild_log(
+            sprintf( 'context=%s step=aborted reason=ownership', $context )
+        );
+        return array( 'done' => true, 'ok' => false, 'error' => 'ownership' );
+    }
 
     $time_budget = (float) apply_filters( 'chatbot_lexical_rebuild_cron_time_budget_seconds', 8.0, $context, $run_kind );
     $batch_size  = (int) apply_filters( 'chatbot_lexical_rebuild_cron_document_batch_size', 6, $context, $run_kind );
@@ -2889,13 +3039,14 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
     }
     $cache_dir = trailingslashit( $cache_dir );
 
-    $state_key = 'chatbot_lcm_lexical_rebuild_state';
-    $state     = get_option( $state_key, array() );
-    if ( ! is_array( $state ) ) {
-        $state = array();
-    }
-
     try {
+
+    if ( empty( $state['gfi_owner'] ) ) {
+        $state['gfi_owner'] = $gfi_owner;
+    }
+    if ( ! isset( $state['beta_generation'] ) ) {
+        $state['beta_generation'] = (int) $beta_generation;
+    }
 
     // Initialize state if needed.
     if ( empty( $state['token'] ) || empty( $state['stage'] ) ) {
@@ -2922,6 +3073,8 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
             'window_size'      => max( 1, min( 50, (int) get_option( 'chatbot_transformer_model_word_content_window_size', 3 ) ) ),
             'started_at'       => time(),
             'run_kind'         => is_string( $run_kind ) ? $run_kind : '',
+            'gfi_owner'        => $gfi_owner,
+            'beta_generation'  => (int) $beta_generation,
         );
 
         transformer_model_lexical_context_lexical_rebuild_log(
@@ -3219,13 +3372,9 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
         $cache_dir = trailingslashit( $cache_dir );
         $token     = (string) $state['token'];
 
-        $final_php    = $cache_dir . 'lexical_embeddings_cache.php';
-        $final_ver    = $cache_dir . 'lexical_embeddings_cache_version.txt';
-        $final_idf    = $cache_dir . 'lexical_local_idf_cache.json';
-
-        $staging_php  = $cache_dir . 'lexical_embeddings_cache.staging.' . $token . '.php';
-        $idf_staging  = $cache_dir . 'lexical_local_idf_cache.staging.' . $token . '.json';
-        $ver_staging  = $cache_dir . 'lexical_embeddings_cache_version.staging.' . $token . '.txt';
+        $staging_php = $cache_dir . 'lexical_embeddings_cache.staging.' . $token . '.php';
+        $idf_staging = $cache_dir . 'lexical_local_idf_cache.staging.' . $token . '.json';
+        $ver_staging = $cache_dir . 'lexical_embeddings_cache_version.staging.' . $token . '.txt';
 
         transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=install_started' );
 
@@ -3289,29 +3438,22 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
             return $err;
         }
 
-        // Atomic-ish swap.
-        $install_one = function ( $from, $to ) {
-            if ( ! file_exists( $from ) ) {
-                return false;
-            }
-            if ( file_exists( $to ) ) {
-                wp_delete_file( $to . '.bak' );
-                chatbot_chatgpt_move_file( $to, $to . '.bak' );
-            }
-            return chatbot_chatgpt_move_file( $from, $to );
-        };
-
-        $ok_move = $install_one( $staging_php, $final_php );
-        $ok_move = $ok_move && $install_one( $idf_staging, $final_idf );
-        $ok_move = $ok_move && $install_one( $ver_staging, $final_ver );
-
-        if ( ! $ok_move ) {
-            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=install_failed' );
+        $promoted = transformer_model_lexical_context_promote_staged_cache_artifacts(
+            $cache_dir,
+            $token,
+            array(
+                'staging_php' => $staging_php,
+                'ver_staging' => $ver_staging,
+                'idf_staging' => $idf_staging,
+            )
+        );
+        if ( empty( $promoted['ok'] ) ) {
+            $detail = isset( $promoted['error'] ) ? (string) $promoted['error'] : 'atomic_swap';
+            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=install_failed detail=' . $detail );
             transformer_model_lexical_context_lexical_rebuild_cleanup_staging( $cache_dir, $token );
             $err = array( 'done' => true, 'ok' => false, 'error' => 'write_error' );
-            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=' . $err['error'] . ' detail=atomic_swap' );
-            transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'], 'detail' => 'atomic_swap' ) );
-            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', 'write_error:atomic_swap', false );
+            transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => $err['error'], 'detail' => $detail ) );
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', 'write_error:' . $detail, false );
             return $err;
         }
 
@@ -3325,17 +3467,26 @@ function transformer_model_lexical_context_run_full_lexical_cache_rebuild_chunke
             )
         );
 
-        // Cleanup.
+        // Cleanup rebuild temps before sealing so they are not published.
         wp_delete_file( $pmi_path );
         wp_delete_file( $corpus_path );
         delete_option( $state_key );
-        // DF/N no longer needed once caches are installed.
         transformer_model_lexical_context_rebuild_counts_unlink_all( $counts_base );
-        delete_option( 'chatbot_lcm_lexical_cache_rebuild_last_error' );
-        chatbot_chatgpt_beta_engine_commit(
+
+        $committed = chatbot_chatgpt_beta_engine_commit(
             'lexical',
-            (int) get_option( chatbot_chatgpt_beta_engine_build_generation_key( 'lexical' ), 0 )
+            (int) ( $state['beta_generation'] ?? get_option( chatbot_chatgpt_beta_engine_build_generation_key( 'lexical' ), 0 ) ),
+            $gfi_owner
         );
+        if ( ! $committed ) {
+            $err = array( 'done' => true, 'ok' => false, 'error' => 'write_error' );
+            transformer_model_lexical_context_lexical_rebuild_log( 'context=' . $context . ' step=failed error=commit' );
+            transformer_model_lexical_context_rebuild_record_activity( $context, array( 'step' => 'failed', 'stage' => 'install', 'error' => 'commit' ) );
+            update_option( 'chatbot_lcm_lexical_cache_rebuild_last_error', 'write_error:commit', false );
+            return $err;
+        }
+
+        delete_option( 'chatbot_lcm_lexical_cache_rebuild_last_error' );
 
         return array( 'done' => true, 'ok' => true );
     }

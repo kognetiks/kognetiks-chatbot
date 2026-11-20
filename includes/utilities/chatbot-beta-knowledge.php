@@ -620,33 +620,65 @@ function chatbot_chatgpt_beta_engine_invalidate( $engine ) {
 }
 
 /**
- * Start a rebuild. A rebuild that is already invalid is purged again. An in-progress build is left in place.
+ * Start a rebuild. A rebuild that is already invalid is purged again.
  *
- * @param string $engine Engine slug.
- * @return int Generation captured for this build.
+ * For GFI engines, build ownership is claimed atomically. A losing worker
+ * receives 0 and must not mutate. Pass $continue_owner when continuing a
+ * chunked/scan build across PHP requests.
+ *
+ * @param string $engine          Engine slug.
+ * @param string $continue_owner  Caller-held owner from a prior successful begin.
+ * @return int Generation captured for this build, or 0 on failure.
  */
-function chatbot_chatgpt_beta_engine_begin( $engine ) {
+function chatbot_chatgpt_beta_engine_begin( $engine, $continue_owner = '' ) {
     if ( ! chatbot_chatgpt_beta_engine_is_known( $engine ) ) {
         return 0;
     }
 
     $state = chatbot_chatgpt_beta_engine_state( $engine );
     if ( $state === 'building' ) {
-        if ( function_exists( 'chatbot_chatgpt_gfi_touch' ) ) {
+        // Continuing the same active build (chunked workers / scan batches).
+        $owner = (string) $continue_owner;
+        if ( $owner === '' && function_exists( 'chatbot_chatgpt_gfi_session_owner' ) ) {
+            $owner = chatbot_chatgpt_gfi_session_owner( $engine );
+        }
+        if ( function_exists( 'chatbot_chatgpt_gfi_is_engine' ) && chatbot_chatgpt_gfi_is_engine( $engine ) ) {
+            if ( $owner === '' || ! chatbot_chatgpt_gfi_builder_may_mutate( $engine, $owner ) ) {
+                return 0;
+            }
+            chatbot_chatgpt_gfi_remember_owner( $engine, $owner );
+            chatbot_chatgpt_gfi_touch( $engine, $owner );
+        } elseif ( function_exists( 'chatbot_chatgpt_gfi_touch' ) ) {
             chatbot_chatgpt_gfi_touch( $engine );
         }
+
         return (int) get_option( chatbot_chatgpt_beta_engine_build_generation_key( $engine ), 0 );
     }
 
     if ( $state !== 'ready' ) {
         chatbot_chatgpt_beta_engine_purge( $engine );
     }
-    update_option( chatbot_chatgpt_beta_engine_state_key( $engine ), 'building', false );
 
     $generation = chatbot_chatgpt_beta_engine_generation( $engine );
+
+    // Claim ownership before flipping engine state so a loser does not leave
+    // a building state without a matching owner record.
+    $owner = '';
+    if ( function_exists( 'chatbot_chatgpt_gfi_is_engine' ) && chatbot_chatgpt_gfi_is_engine( $engine )
+        && function_exists( 'chatbot_chatgpt_gfi_begin' ) ) {
+        $owner = chatbot_chatgpt_gfi_begin( $engine, $generation );
+        if ( $owner === '' ) {
+            return 0;
+        }
+    }
+
+    update_option( chatbot_chatgpt_beta_engine_state_key( $engine ), 'building', false );
     update_option( chatbot_chatgpt_beta_engine_build_generation_key( $engine ), $generation, false );
-    if ( function_exists( 'chatbot_chatgpt_gfi_begin' ) ) {
-        chatbot_chatgpt_gfi_begin( $engine, $generation );
+
+    // Defect B: a ready→building transition must not leave the previous ready
+    // manifest authenticating files the rebuild is about to rewrite in place.
+    if ( $state === 'ready' && function_exists( 'chatbot_chatgpt_gfi_discard_manifest' ) ) {
+        chatbot_chatgpt_gfi_discard_manifest( $engine );
     }
 
     return $generation;
@@ -655,38 +687,87 @@ function chatbot_chatgpt_beta_engine_begin( $engine ) {
 /**
  * Record that a full cache reset is the current build, after the caller has already deleted the files.
  *
- * @param string $engine Engine slug.
- * @return void
+ * @param string $engine         Engine slug.
+ * @param string $continue_owner Caller-held owner when continuing.
+ * @return string Owner token on success, empty string on failure.
  */
-function chatbot_chatgpt_beta_engine_mark_building( $engine ) {
+function chatbot_chatgpt_beta_engine_mark_building( $engine, $continue_owner = '' ) {
     if ( ! chatbot_chatgpt_beta_engine_is_known( $engine ) || ! function_exists( 'update_option' ) ) {
-        return;
+        return '';
+    }
+
+    if ( chatbot_chatgpt_beta_engine_state( $engine ) === 'building' ) {
+        // Caller must present its own token (argument or request session). Do not
+        // silently load job_owner — that would let a losing worker borrow the winner.
+        $owner = (string) $continue_owner;
+        if ( $owner === '' && function_exists( 'chatbot_chatgpt_gfi_session_owner' ) ) {
+            $owner = chatbot_chatgpt_gfi_session_owner( $engine );
+        }
+        if ( function_exists( 'chatbot_chatgpt_gfi_is_engine' ) && chatbot_chatgpt_gfi_is_engine( $engine ) ) {
+            if ( $owner === '' || ! chatbot_chatgpt_gfi_builder_may_mutate( $engine, $owner ) ) {
+                return '';
+            }
+            chatbot_chatgpt_gfi_remember_owner( $engine, $owner );
+            chatbot_chatgpt_gfi_touch( $engine, $owner );
+
+            return $owner;
+        }
+        if ( function_exists( 'chatbot_chatgpt_gfi_touch' ) ) {
+            chatbot_chatgpt_gfi_touch( $engine, $owner );
+        }
+
+        return $owner;
+    }
+
+    $generation = chatbot_chatgpt_beta_engine_generation( $engine );
+    $owner      = '';
+    if ( function_exists( 'chatbot_chatgpt_gfi_is_engine' ) && chatbot_chatgpt_gfi_is_engine( $engine )
+        && function_exists( 'chatbot_chatgpt_gfi_begin' ) ) {
+        $owner = chatbot_chatgpt_gfi_begin( $engine, $generation );
+        if ( $owner === '' ) {
+            return '';
+        }
     }
 
     update_option( chatbot_chatgpt_beta_engine_state_key( $engine ), 'building', false );
-    $generation = chatbot_chatgpt_beta_engine_generation( $engine );
     update_option( chatbot_chatgpt_beta_engine_build_generation_key( $engine ), $generation, false );
-    if ( function_exists( 'chatbot_chatgpt_gfi_begin' ) ) {
-        chatbot_chatgpt_gfi_begin( $engine, $generation );
+    if ( function_exists( 'chatbot_chatgpt_gfi_discard_manifest' ) ) {
+        chatbot_chatgpt_gfi_discard_manifest( $engine );
     }
+
+    return $owner;
 }
 
 /**
  * Whether this build may still publish its result.
  *
+ * Requires an active `building` state for the captured generation. A generation
+ * that is already `ready` cannot be recommitted by a stale worker.
+ *
  * @param string $engine     Engine slug.
  * @param int    $generation Generation returned when the build started.
+ * @param string $owner      Caller-held owner token.
  * @return bool
  */
-function chatbot_chatgpt_beta_engine_build_is_current( $engine, $generation ) {
+function chatbot_chatgpt_beta_engine_build_is_current( $engine, $generation, $owner = '' ) {
     $generation = (int) $generation;
     $started    = (int) get_option( chatbot_chatgpt_beta_engine_build_generation_key( $engine ), -1 );
     if ( $started < 0 || $started !== $generation ) {
         return false;
     }
+    if ( chatbot_chatgpt_beta_engine_generation( $engine ) !== $generation ) {
+        return false;
+    }
+    if ( chatbot_chatgpt_beta_engine_state( $engine ) !== 'building' ) {
+        return false;
+    }
+    // Ownership applies only to GFI-covered engines. Markov has no GFI build record.
+    if ( function_exists( 'chatbot_chatgpt_gfi_is_engine' ) && chatbot_chatgpt_gfi_is_engine( $engine )
+        && function_exists( 'chatbot_chatgpt_gfi_build_owns_generation' ) ) {
+        return chatbot_chatgpt_gfi_build_owns_generation( $engine, $generation, $owner );
+    }
 
-    return chatbot_chatgpt_beta_engine_generation( $engine ) === $generation
-        && chatbot_chatgpt_beta_engine_state( $engine ) !== 'invalid';
+    return true;
 }
 
 /**
@@ -694,14 +775,19 @@ function chatbot_chatgpt_beta_engine_build_is_current( $engine, $generation ) {
  *
  * @param string $engine     Engine slug.
  * @param int    $generation Generation captured at the start.
+ * @param string $owner      Caller-held owner token.
  * @return bool
  */
-function chatbot_chatgpt_beta_engine_commit( $engine, $generation ) {
+function chatbot_chatgpt_beta_engine_commit( $engine, $generation, $owner = '' ) {
     if ( ! chatbot_chatgpt_beta_engine_is_known( $engine ) ) {
         return false;
     }
 
-    if ( ! chatbot_chatgpt_beta_engine_build_is_current( $engine, $generation ) ) {
+    if ( $owner === '' && function_exists( 'chatbot_chatgpt_gfi_session_owner' ) ) {
+        $owner = chatbot_chatgpt_gfi_session_owner( $engine );
+    }
+
+    if ( ! chatbot_chatgpt_beta_engine_build_is_current( $engine, $generation, $owner ) ) {
         $keep = function_exists( 'chatbot_chatgpt_gfi_generation_is_trusted' )
             && chatbot_chatgpt_gfi_generation_is_trusted( $engine, false );
         if ( $keep ) {
@@ -753,7 +839,7 @@ function chatbot_chatgpt_beta_engine_commit( $engine, $generation ) {
             return false;
         }
         chatbot_chatgpt_beta_apply_cache_permissions( $path );
-        if ( function_exists( 'chatbot_chatgpt_gfi_publish' ) && ! chatbot_chatgpt_gfi_publish( $engine ) ) {
+        if ( function_exists( 'chatbot_chatgpt_gfi_publish' ) && ! chatbot_chatgpt_gfi_publish( $engine, $owner ) ) {
             update_option( chatbot_chatgpt_beta_engine_state_key( $engine ), 'failed', false );
 
             return false;

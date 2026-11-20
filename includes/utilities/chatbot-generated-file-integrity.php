@@ -19,10 +19,14 @@ if ( ! defined( 'WPINC' ) ) {
  */
 function &chatbot_chatgpt_gfi_runtime() {
     static $runtime = array(
-        'keys'   => array(),
-        'trust'  => array(),
-        'failed' => array(),
-        'code'   => '',
+        'keys'     => array(),
+        'trust'    => array(),
+        'failed'   => array(),
+        'code'     => '',
+        'owners'   => array(),
+        'reviewed' => array(),
+        'reviewing'=> false,
+        'in_fail'  => false,
     );
 
     return $runtime;
@@ -208,8 +212,13 @@ function chatbot_chatgpt_gfi_signing_key( $site_id ) {
         $parts[] = $part;
     }
 
-    $info = "kognetiks-chatbot-gfi-v1\0site:" . $site_id . "\0purpose:artifact-integrity\0kdf:1";
-    $key  = hash_hkdf( 'sha256', implode( "\0", $parts ), 32, $info, 'kognetiks-chatbot-gfi-v1' );
+    // Public HKDF domain-separation context (not a secret). Built from the plugin slug.
+    if ( ! defined( 'CHATBOT_CHATGPT_SLUG' ) ) {
+        return '';
+    }
+    $gfi_context = CHATBOT_CHATGPT_SLUG . '-gfi-v1';
+    $info        = $gfi_context . "\0site:" . $site_id . "\0purpose:artifact-integrity\0kdf:1";
+    $key         = hash_hkdf( 'sha256', implode( "\0", $parts ), 32, $info, $gfi_context );
     if ( ! is_string( $key ) || strlen( $key ) !== 32 ) {
         return '';
     }
@@ -541,10 +550,19 @@ function chatbot_chatgpt_gfi_build_stale_seconds() {
  * @return array<string, mixed>|null
  */
 function chatbot_chatgpt_gfi_build_record( $engine ) {
+    $key = chatbot_chatgpt_gfi_build_key( $engine );
+    // Prefer the database row for ownership authority; object-cache alone must not
+    // grant mutation rights after a concurrent replace.
+    $raw = chatbot_chatgpt_gfi_option_db_get( $key );
+    if ( is_string( $raw ) && $raw !== '' ) {
+        $record = chatbot_chatgpt_gfi_maybe_unserialize( $raw );
+
+        return is_array( $record ) ? $record : null;
+    }
     if ( ! function_exists( 'get_option' ) ) {
         return null;
     }
-    $record = get_option( chatbot_chatgpt_gfi_build_key( $engine ), null );
+    $record = get_option( $key, null );
 
     return is_array( $record ) ? $record : null;
 }
@@ -557,54 +575,598 @@ function chatbot_chatgpt_gfi_clear_build( $engine ) {
     if ( function_exists( 'delete_option' ) ) {
         delete_option( chatbot_chatgpt_gfi_build_key( $engine ) );
     }
-}
-
-/**
- * Start a build without replacing a manifest that still describes a sealed generation.
- *
- * @param string $engine     Engine slug.
- * @param int    $generation Build generation.
- * @return void
- */
-function chatbot_chatgpt_gfi_begin( $engine, $generation ) {
-    if ( ! chatbot_chatgpt_gfi_is_engine( $engine ) || ! function_exists( 'update_option' ) ) {
-        return;
+    chatbot_chatgpt_gfi_clear_job_owner( $engine );
+    if ( chatbot_chatgpt_gfi_is_engine( $engine ) ) {
+        $runtime = &chatbot_chatgpt_gfi_runtime();
+        unset( $runtime['owners'][ chatbot_chatgpt_gfi_site_id() . '|' . $engine ] );
     }
-    $now = time();
-    update_option(
-        chatbot_chatgpt_gfi_build_key( $engine ),
-        array(
-            'status'         => 'building',
-            'site_id'        => chatbot_chatgpt_gfi_site_id(),
-            'engine'         => (string) $engine,
-            'generation_id'  => (string) (int) $generation,
-            'owner'          => chatbot_chatgpt_gfi_token(),
-            'started_gmt'    => $now,
-            'heartbeat_gmt'  => $now,
-        ),
-        false
-    );
 }
 
 /**
- * Show that the current build is still running.
+ * Drop only the sealed manifest. Build ownership and recovery options stay intact.
+ *
+ * Used when entering `building` from `ready` so previous HMACs cannot authenticate
+ * files that the rebuild is about to rewrite.
  *
  * @param string $engine Engine slug.
  * @return void
  */
-function chatbot_chatgpt_gfi_touch( $engine ) {
-    if ( ! chatbot_chatgpt_gfi_is_engine( $engine ) || ! function_exists( 'update_option' ) || ! function_exists( 'chatbot_chatgpt_beta_engine_generation' ) ) {
+function chatbot_chatgpt_gfi_discard_manifest( $engine ) {
+    if ( function_exists( 'delete_option' ) ) {
+        delete_option( chatbot_chatgpt_gfi_manifest_key( $engine ) );
+    }
+    chatbot_chatgpt_gfi_clear_request_cache();
+}
+
+/**
+ * Publication lock lease length in seconds.
+ *
+ * @return int
+ */
+function chatbot_chatgpt_gfi_lock_ttl_seconds() {
+    return 900;
+}
+
+/**
+ * Option that holds the continuation owner for cross-request chunked builds.
+ *
+ * Written only when begin() succeeds. Cleared with the build. Callers must pass
+ * this value explicitly into may_mutate / continue-begin; may_mutate never loads
+ * it implicitly.
+ *
+ * @param string $engine Engine slug.
+ * @return string
+ */
+function chatbot_chatgpt_gfi_job_owner_key( $engine ) {
+    return 'chatbot_chatgpt_gfi_job_owner_' . $engine;
+}
+
+/**
+ * @param mixed $data Value.
+ * @return string|mixed
+ */
+function chatbot_chatgpt_gfi_maybe_serialize( $data ) {
+    if ( function_exists( 'maybe_serialize' ) ) {
+        return maybe_serialize( $data );
+    }
+    if ( is_array( $data ) || is_object( $data ) ) {
+        return serialize( $data );
+    }
+
+    return $data;
+}
+
+/**
+ * @param mixed $data Raw option value.
+ * @return mixed
+ */
+function chatbot_chatgpt_gfi_maybe_unserialize( $data ) {
+    if ( function_exists( 'maybe_unserialize' ) ) {
+        return maybe_unserialize( $data );
+    }
+    if ( ! is_string( $data ) || $data === '' ) {
+        return $data;
+    }
+    $result = @unserialize( $data ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+    if ( false !== $result || $data === 'b:0;' ) {
+        return $result;
+    }
+
+    return $data;
+}
+
+/**
+ * Whether $wpdb looks like a real WordPress database handle with an options table.
+ *
+ * @return bool
+ */
+function chatbot_chatgpt_gfi_has_options_table() {
+    global $wpdb;
+
+    return isset( $wpdb )
+        && is_object( $wpdb )
+        && isset( $wpdb->options )
+        && is_string( $wpdb->options )
+        && $wpdb->options !== ''
+        && method_exists( $wpdb, 'get_var' )
+        && method_exists( $wpdb, 'prepare' )
+        && method_exists( $wpdb, 'query' );
+}
+
+/**
+ * Bust the WordPress options object-cache entry for one option name.
+ *
+ * Direct SQL inserts/CAS/deletes bypass Options API cache maintenance, so every
+ * exclusive ownership write must call this. The database remains authoritative;
+ * this only prevents stale cache from masking a newer owner.
+ *
+ * @param string $name Option name.
+ * @return void
+ */
+function chatbot_chatgpt_gfi_option_cache_bust( $name ) {
+    $name = (string) $name;
+    if ( $name === '' || ! function_exists( 'wp_cache_delete' ) ) {
         return;
+    }
+    wp_cache_delete( $name, 'options' );
+    if ( function_exists( 'wp_cache_get' ) && function_exists( 'wp_cache_set' ) ) {
+        $notoptions = wp_cache_get( 'notoptions', 'options' );
+        if ( is_array( $notoptions ) && isset( $notoptions[ $name ] ) ) {
+            unset( $notoptions[ $name ] );
+            wp_cache_set( 'notoptions', $notoptions, 'options' );
+        }
+        $alloptions = wp_cache_get( 'alloptions', 'options' );
+        if ( is_array( $alloptions ) && array_key_exists( $name, $alloptions ) ) {
+            unset( $alloptions[ $name ] );
+            wp_cache_set( 'alloptions', $alloptions, 'options' );
+        }
+    }
+}
+
+/**
+ * Whether a $wpdb error string indicates a duplicate option_name collision.
+ *
+ * @param string $error Database error text.
+ * @return bool
+ */
+function chatbot_chatgpt_gfi_is_duplicate_key_error( $error ) {
+    $error = (string) $error;
+    if ( $error === '' ) {
+        return false;
+    }
+
+    return (bool) preg_match( '/duplicate entry/i', $error )
+        || false !== strpos( $error, '1062' );
+}
+
+/**
+ * Read a raw option_value from the database, bypassing the object cache.
+ *
+ * @param string $name Option name.
+ * @return string|null Raw value or null when missing.
+ */
+function chatbot_chatgpt_gfi_option_db_get( $name ) {
+    global $wpdb;
+    $name = (string) $name;
+    if ( chatbot_chatgpt_gfi_has_options_table() ) {
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $value = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s LIMIT 1",
+                $name
+            )
+        );
+
+        return is_string( $value ) ? $value : null;
+    }
+    if ( ! function_exists( 'get_option' ) ) {
+        return null;
+    }
+    $sentinel = new stdClass();
+    $value    = get_option( $name, $sentinel );
+    if ( $value === $sentinel ) {
+        return null;
+    }
+    $raw = chatbot_chatgpt_gfi_maybe_serialize( $value );
+
+    return is_string( $raw ) ? $raw : null;
+}
+
+/**
+ * Atomic insert-only creation of an option row.
+ *
+ * WordPress 7.x `add_option()` uses `INSERT ... ON DUPLICATE KEY UPDATE` and can
+ * return success while overwriting a concurrent winner. This helper issues a
+ * plain INSERT against `$wpdb->options` and treats exactly one inserted row as
+ * acquisition. Duplicate-key collisions lose without modifying the existing row.
+ *
+ * @param string $name  Option name.
+ * @param mixed  $value Value (serialized like WordPress options).
+ * @return bool True only when this caller inserted the row.
+ */
+function chatbot_chatgpt_gfi_option_add( $name, $value ) {
+    global $wpdb;
+    $name = (string) $name;
+    if ( $name === '' ) {
+        return false;
+    }
+    $raw = chatbot_chatgpt_gfi_maybe_serialize( $value );
+    if ( ! is_string( $raw ) ) {
+        return false;
+    }
+
+    if ( chatbot_chatgpt_gfi_has_options_table() ) {
+        $wpdb->last_error = '';
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $inserted = $wpdb->query(
+            $wpdb->prepare(
+                "INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, %s)",
+                $name,
+                $raw,
+                'no'
+            )
+        );
+        chatbot_chatgpt_gfi_option_cache_bust( $name );
+        if ( (int) $inserted === 1 ) {
+            $stored = chatbot_chatgpt_gfi_option_db_get( $name );
+
+            return is_string( $stored ) && $stored === $raw;
+        }
+        // Duplicate key = lost race (existing owner unchanged). Other SQL errors
+        // also fail closed and must not authorize mutation.
+        return false;
+    }
+
+    // Isolated unit-test stubs without `$wpdb->options`: claim the key only when
+    // absent, then verify the stored raw value. Do not call WordPress `add_option()`
+    // here — modern WP UPSERTs and would overwrite a concurrent winner.
+    if ( ! function_exists( 'get_option' ) || ! function_exists( 'update_option' ) ) {
+        return false;
+    }
+    $sentinel = new stdClass();
+    if ( get_option( $name, $sentinel ) !== $sentinel ) {
+        return false;
+    }
+    update_option( $name, $value, false );
+    chatbot_chatgpt_gfi_option_cache_bust( $name );
+    $stored = chatbot_chatgpt_gfi_option_db_get( $name );
+
+    return is_string( $stored ) && $stored === $raw;
+}
+
+/**
+ * Compare-and-swap an option value using the raw DB contents as the expected value.
+ *
+ * @param string $name         Option name.
+ * @param string $expected_raw Exact option_value currently in the database.
+ * @param mixed  $new_value    Replacement value (will be maybe_serialize'd).
+ * @return bool True when exactly one row was updated.
+ */
+function chatbot_chatgpt_gfi_option_cas( $name, $expected_raw, $new_value ) {
+    global $wpdb;
+    $name = (string) $name;
+    if ( ! is_string( $expected_raw ) ) {
+        return false;
+    }
+    if ( chatbot_chatgpt_gfi_has_options_table() ) {
+        $new_raw = chatbot_chatgpt_gfi_maybe_serialize( $new_value );
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $updated = $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s",
+                $new_raw,
+                $name,
+                $expected_raw
+            )
+        );
+        chatbot_chatgpt_gfi_option_cache_bust( $name );
+
+        return (int) $updated === 1;
+    }
+    if ( ! function_exists( 'get_option' ) || ! function_exists( 'update_option' ) ) {
+        return false;
+    }
+    $sentinel = new stdClass();
+    $current  = get_option( $name, $sentinel );
+    if ( $current === $sentinel ) {
+        return false;
+    }
+    $current_raw = chatbot_chatgpt_gfi_maybe_serialize( $current );
+    if ( ! is_string( $current_raw ) || $current_raw !== $expected_raw ) {
+        return false;
+    }
+
+    return (bool) update_option( $name, $new_value, false );
+}
+
+/**
+ * Delete an option only when its raw value still matches.
+ *
+ * @param string $name         Option name.
+ * @param string $expected_raw Exact option_value.
+ * @return bool
+ */
+function chatbot_chatgpt_gfi_option_delete_if( $name, $expected_raw ) {
+    global $wpdb;
+    $name = (string) $name;
+    if ( ! is_string( $expected_raw ) ) {
+        return false;
+    }
+    if ( chatbot_chatgpt_gfi_has_options_table() ) {
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $deleted = $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s",
+                $name,
+                $expected_raw
+            )
+        );
+        chatbot_chatgpt_gfi_option_cache_bust( $name );
+
+        return (int) $deleted === 1;
+    }
+    if ( ! function_exists( 'get_option' ) || ! function_exists( 'delete_option' ) ) {
+        return false;
+    }
+    $sentinel = new stdClass();
+    $current  = get_option( $name, $sentinel );
+    if ( $current === $sentinel ) {
+        return false;
+    }
+    $current_raw = chatbot_chatgpt_gfi_maybe_serialize( $current );
+    if ( ! is_string( $current_raw ) || $current_raw !== $expected_raw ) {
+        return false;
+    }
+
+    return (bool) delete_option( $name );
+}
+
+/**
+ * Remember the caller-held owner for this request only.
+ *
+ * @param string $engine Engine slug.
+ * @param string $owner  Owner token.
+ * @return void
+ */
+function chatbot_chatgpt_gfi_remember_owner( $engine, $owner ) {
+    $owner = (string) $owner;
+    if ( $owner === '' || ! chatbot_chatgpt_gfi_is_engine( $engine ) ) {
+        return;
+    }
+    $runtime = &chatbot_chatgpt_gfi_runtime();
+    $runtime['owners'][ chatbot_chatgpt_gfi_site_id() . '|' . $engine ] = $owner;
+}
+
+/**
+ * Owner token returned by a successful begin/continue in this request.
+ *
+ * Does not read the build record or job-owner option.
+ *
+ * @param string $engine Engine slug.
+ * @return string
+ */
+function chatbot_chatgpt_gfi_session_owner( $engine ) {
+    if ( ! chatbot_chatgpt_gfi_is_engine( $engine ) ) {
+        return '';
+    }
+    $runtime = &chatbot_chatgpt_gfi_runtime();
+    $key     = chatbot_chatgpt_gfi_site_id() . '|' . $engine;
+
+    return isset( $runtime['owners'][ $key ] ) ? (string) $runtime['owners'][ $key ] : '';
+}
+
+/**
+ * Persist the continuation owner for later chunk/scan requests.
+ *
+ * @param string $engine Engine slug.
+ * @param string $owner  Owner token.
+ * @return void
+ */
+function chatbot_chatgpt_gfi_store_job_owner( $engine, $owner ) {
+    if ( ! chatbot_chatgpt_gfi_is_engine( $engine ) || ! function_exists( 'update_option' ) ) {
+        return;
+    }
+    $owner = (string) $owner;
+    if ( $owner === '' ) {
+        return;
+    }
+    update_option( chatbot_chatgpt_gfi_job_owner_key( $engine ), $owner, false );
+}
+
+/**
+ * @param string $engine Engine slug.
+ * @return string
+ */
+function chatbot_chatgpt_gfi_job_owner( $engine ) {
+    if ( ! chatbot_chatgpt_gfi_is_engine( $engine ) || ! function_exists( 'get_option' ) ) {
+        return '';
+    }
+
+    return (string) get_option( chatbot_chatgpt_gfi_job_owner_key( $engine ), '' );
+}
+
+/**
+ * @param string $engine Engine slug.
+ * @return void
+ */
+function chatbot_chatgpt_gfi_clear_job_owner( $engine ) {
+    if ( function_exists( 'delete_option' ) && chatbot_chatgpt_gfi_is_engine( $engine ) ) {
+        delete_option( chatbot_chatgpt_gfi_job_owner_key( $engine ) );
+    }
+}
+
+/**
+ * Whether a build record heartbeat is still within the active window.
+ *
+ * @param array<string, mixed> $record Build record.
+ * @return bool
+ */
+function chatbot_chatgpt_gfi_record_heartbeat_fresh( $record ) {
+    if ( ! is_array( $record ) ) {
+        return false;
+    }
+    $heartbeat = isset( $record['heartbeat_gmt'] ) ? (int) $record['heartbeat_gmt'] : 0;
+
+    return $heartbeat >= time() - chatbot_chatgpt_gfi_build_stale_seconds();
+}
+
+/**
+ * Start a build. Returns the owner token for this build, or an empty string on failure.
+ *
+ * Acquisition of the build record is atomic (insert-only option row / CAS). A sealed
+ * manifest is not rewritten here. Callers that leave a ready generation and rewrite
+ * its files must discard that manifest separately.
+ *
+ * @param string $engine     Engine slug.
+ * @param int    $generation Build generation.
+ * @return string Owner token.
+ */
+function chatbot_chatgpt_gfi_begin( $engine, $generation ) {
+    if ( ! chatbot_chatgpt_gfi_is_engine( $engine ) ) {
+        return '';
+    }
+    if ( ! chatbot_chatgpt_gfi_has_options_table()
+        && ! function_exists( 'add_option' )
+        && ! function_exists( 'update_option' ) ) {
+        return '';
+    }
+    $now   = time();
+    $owner = chatbot_chatgpt_gfi_token();
+    $key   = chatbot_chatgpt_gfi_build_key( $engine );
+    $record = array(
+        'status'        => 'building',
+        'site_id'       => chatbot_chatgpt_gfi_site_id(),
+        'engine'        => (string) $engine,
+        'generation_id' => (string) (int) $generation,
+        'owner'         => $owner,
+        'started_gmt'   => $now,
+        'heartbeat_gmt' => $now,
+        'commit_epoch'  => 0,
+    );
+
+    if ( chatbot_chatgpt_gfi_option_add( $key, $record ) ) {
+        chatbot_chatgpt_gfi_remember_owner( $engine, $owner );
+        chatbot_chatgpt_gfi_store_job_owner( $engine, $owner );
+
+        return $owner;
+    }
+
+    $raw = chatbot_chatgpt_gfi_option_db_get( $key );
+    if ( ! is_string( $raw ) || $raw === '' ) {
+        // Row vanished between add failure and read — retry once.
+        if ( chatbot_chatgpt_gfi_option_add( $key, $record ) ) {
+            chatbot_chatgpt_gfi_remember_owner( $engine, $owner );
+            chatbot_chatgpt_gfi_store_job_owner( $engine, $owner );
+
+            return $owner;
+        }
+
+        return '';
+    }
+
+    $existing = chatbot_chatgpt_gfi_maybe_unserialize( $raw );
+    if ( is_array( $existing )
+        && ( $existing['status'] ?? '' ) === 'building'
+        && empty( $existing['commit_epoch'] )
+        && (int) ( $existing['site_id'] ?? 0 ) === chatbot_chatgpt_gfi_site_id()
+        && chatbot_chatgpt_gfi_record_heartbeat_fresh( $existing ) ) {
+        // Active builder already owns this engine.
+        return '';
+    }
+
+    if ( ! chatbot_chatgpt_gfi_option_cas( $key, $raw, $record ) ) {
+        return '';
+    }
+    chatbot_chatgpt_gfi_remember_owner( $engine, $owner );
+    chatbot_chatgpt_gfi_store_job_owner( $engine, $owner );
+
+    return $owner;
+}
+
+/**
+ * Whether the calling worker may mutate published cache names.
+ *
+ * The caller must present its own owner token (argument or request session from
+ * a successful begin/continue). This function never copies the stored build
+ * owner into the caller's authority.
+ *
+ * @param string      $engine Engine slug.
+ * @param string|null $owner  Caller-held owner token; null uses session owner only.
+ * @return bool
+ */
+function chatbot_chatgpt_gfi_builder_may_mutate( $engine, $owner = null ) {
+    if ( ! chatbot_chatgpt_gfi_is_engine( $engine ) ) {
+        return false;
+    }
+    if ( $owner === null ) {
+        $owner = chatbot_chatgpt_gfi_session_owner( $engine );
+    }
+    $owner = (string) $owner;
+    if ( $owner === '' ) {
+        return false;
+    }
+    if ( ! function_exists( 'chatbot_chatgpt_beta_engine_state' ) || chatbot_chatgpt_beta_engine_state( $engine ) !== 'building' ) {
+        return false;
     }
     $record = chatbot_chatgpt_gfi_build_record( $engine );
     if ( ! is_array( $record ) || ( $record['status'] ?? '' ) !== 'building' ) {
+        return false;
+    }
+    if ( (int) ( $record['site_id'] ?? 0 ) !== chatbot_chatgpt_gfi_site_id() ) {
+        return false;
+    }
+    if ( ! function_exists( 'chatbot_chatgpt_beta_engine_generation' ) ) {
+        return false;
+    }
+    $generation = (string) (int) chatbot_chatgpt_beta_engine_generation( $engine );
+    if ( $generation === '' || (string) ( $record['generation_id'] ?? '' ) !== $generation ) {
+        return false;
+    }
+    if ( ! empty( $record['commit_epoch'] ) ) {
+        return false;
+    }
+    $stored = isset( $record['owner'] ) ? (string) $record['owner'] : '';
+    if ( $stored === '' || ! hash_equals( $stored, $owner ) ) {
+        return false;
+    }
+
+    return chatbot_chatgpt_gfi_build_is_active( $engine );
+}
+
+/**
+ * Confirm the build record still matches this generation under the publish path.
+ *
+ * @param string $engine     Engine slug.
+ * @param int    $generation Generation captured at begin.
+ * @param string $owner      Caller-held owner token.
+ * @return bool
+ */
+function chatbot_chatgpt_gfi_build_owns_generation( $engine, $generation, $owner = '' ) {
+    if ( ! chatbot_chatgpt_gfi_builder_may_mutate( $engine, $owner ) ) {
+        return false;
+    }
+    $record = chatbot_chatgpt_gfi_build_record( $engine );
+    if ( ! is_array( $record ) ) {
+        return false;
+    }
+
+    return (string) ( $record['generation_id'] ?? '' ) === (string) (int) $generation;
+}
+
+/**
+ * Show that the current build is still running (caller-bound).
+ *
+ * @param string $engine Engine slug.
+ * @param string $owner  Caller-held owner token.
+ * @return void
+ */
+function chatbot_chatgpt_gfi_touch( $engine, $owner = '' ) {
+    if ( ! chatbot_chatgpt_gfi_is_engine( $engine ) || ! function_exists( 'chatbot_chatgpt_beta_engine_generation' ) ) {
+        return;
+    }
+    if ( $owner === '' ) {
+        $owner = chatbot_chatgpt_gfi_session_owner( $engine );
+    }
+    if ( ! chatbot_chatgpt_gfi_builder_may_mutate( $engine, $owner ) ) {
+        return;
+    }
+    $key = chatbot_chatgpt_gfi_build_key( $engine );
+    $raw = chatbot_chatgpt_gfi_option_db_get( $key );
+    if ( ! is_string( $raw ) || $raw === '' ) {
+        return;
+    }
+    $record = chatbot_chatgpt_gfi_maybe_unserialize( $raw );
+    if ( ! is_array( $record ) || ( $record['status'] ?? '' ) !== 'building' ) {
+        return;
+    }
+    if ( ! hash_equals( (string) ( $record['owner'] ?? '' ), (string) $owner ) ) {
         return;
     }
     if ( (string) ( $record['generation_id'] ?? '' ) !== (string) (int) chatbot_chatgpt_beta_engine_generation( $engine ) ) {
         return;
     }
     $record['heartbeat_gmt'] = time();
-    update_option( chatbot_chatgpt_gfi_build_key( $engine ), $record, false );
+    chatbot_chatgpt_gfi_option_cas( $key, $raw, $record );
 }
 
 /**
@@ -620,11 +1182,11 @@ function chatbot_chatgpt_gfi_build_is_active( $engine ) {
     if ( $heartbeat >= time() - chatbot_chatgpt_gfi_build_stale_seconds() ) {
         return true;
     }
-    $lock = function_exists( 'get_option' ) ? get_option( chatbot_chatgpt_gfi_lock_key( $engine ), '' ) : '';
+    $lock = chatbot_chatgpt_gfi_option_db_get( chatbot_chatgpt_gfi_lock_key( $engine ) );
     if ( is_string( $lock ) && $lock !== '' ) {
         $parts = explode( '|', $lock, 2 );
         $stamp = isset( $parts[1] ) ? (int) $parts[1] : 0;
-        if ( $stamp > time() - 900 ) {
+        if ( $stamp > time() - chatbot_chatgpt_gfi_lock_ttl_seconds() ) {
             return true;
         }
     }
@@ -687,41 +1249,64 @@ function chatbot_chatgpt_gfi_discard( $engine ) {
 }
 
 /**
+ * Acquire the publication lock atomically for one site/engine.
+ *
+ * First acquisition uses insert-only SQL (not WordPress `add_option()`, which
+ * UPSERTs on modern WordPress). Expired leases are taken only via compare-and-swap
+ * against the exact prior raw value. Never uses read-then-update_option for
+ * exclusive acquisition. Lock expiry alone does not restore mutation rights.
+ *
  * @param string $engine Engine slug.
- * @param string $token  Lock token.
+ * @param string $token  Lock token held by this worker.
  * @return bool
  */
 function chatbot_chatgpt_gfi_lock( $engine, $token ) {
-    if ( ! function_exists( 'get_option' ) || ! function_exists( 'update_option' ) ) {
+    $token = (string) $token;
+    if ( $token === '' || ! chatbot_chatgpt_gfi_is_engine( $engine ) ) {
         return false;
     }
-    $key     = chatbot_chatgpt_gfi_lock_key( $engine );
-    $current = get_option( $key, '' );
-    if ( is_string( $current ) && $current !== '' ) {
-        $parts = explode( '|', $current, 2 );
-        $stamp = isset( $parts[1] ) ? (int) $parts[1] : 0;
-        if ( $stamp > time() - 900 ) {
-            return false;
-        }
+    $key   = chatbot_chatgpt_gfi_lock_key( $engine );
+    $lease = $token . '|' . time();
+
+    if ( chatbot_chatgpt_gfi_option_add( $key, $lease ) ) {
+        return true;
     }
-    update_option( $key, $token . '|' . time(), false );
-    $stored = get_option( $key, '' );
+
+    $current = chatbot_chatgpt_gfi_option_db_get( $key );
+    if ( ! is_string( $current ) || $current === '' ) {
+        return chatbot_chatgpt_gfi_option_add( $key, $lease );
+    }
+
+    $parts = explode( '|', $current, 2 );
+    $stamp = isset( $parts[1] ) ? (int) $parts[1] : 0;
+    if ( $stamp > time() - chatbot_chatgpt_gfi_lock_ttl_seconds() ) {
+        return false;
+    }
+
+    if ( ! chatbot_chatgpt_gfi_option_cas( $key, $current, $lease ) ) {
+        return false;
+    }
+    $stored = chatbot_chatgpt_gfi_option_db_get( $key );
 
     return is_string( $stored ) && strpos( $stored, $token . '|' ) === 0;
 }
 
 /**
+ * Release the publication lock only when this worker still owns it.
+ *
  * @param string $engine Engine slug.
  * @param string $token  Lock token.
  * @return void
  */
 function chatbot_chatgpt_gfi_unlock( $engine, $token ) {
-    if ( ! function_exists( 'get_option' ) || ! function_exists( 'delete_option' ) ) {
+    $token = (string) $token;
+    if ( $token === '' || ! chatbot_chatgpt_gfi_is_engine( $engine ) ) {
         return;
     }
-    $stored = get_option( chatbot_chatgpt_gfi_lock_key( $engine ), '' );
+    $key    = chatbot_chatgpt_gfi_lock_key( $engine );
+    $stored = chatbot_chatgpt_gfi_option_db_get( $key );
     if ( is_string( $stored ) && strpos( $stored, $token . '|' ) === 0 ) {
-        delete_option( chatbot_chatgpt_gfi_lock_key( $engine ) );
+        chatbot_chatgpt_gfi_option_delete_if( $key, $stored );
     }
 }
 
@@ -743,20 +1328,35 @@ function chatbot_chatgpt_gfi_token() {
 /**
  * Sign the files currently in the site directory and store the manifest.
  *
+ * Publication requires the caller's build-owner token for the current generation.
+ * A worker that lost ownership, or that already committed, cannot reseal. Lock
+ * expiration alone does not authorize a stale publish.
+ *
  * @param string $engine Engine slug.
+ * @param string $owner  Caller-held build owner token.
  * @return bool
  */
-function chatbot_chatgpt_gfi_publish( $engine ) {
+function chatbot_chatgpt_gfi_publish( $engine, $owner = '' ) {
     if ( ! chatbot_chatgpt_gfi_is_engine( $engine ) || ! function_exists( 'chatbot_chatgpt_beta_engine_cache_directory' ) ) {
         return false;
     }
-    chatbot_chatgpt_gfi_touch( $engine );
+    if ( $owner === '' ) {
+        $owner = chatbot_chatgpt_gfi_session_owner( $engine );
+    }
+    if ( ! chatbot_chatgpt_gfi_builder_may_mutate( $engine, $owner ) ) {
+        return false;
+    }
+    chatbot_chatgpt_gfi_touch( $engine, $owner );
     $token = chatbot_chatgpt_gfi_token();
     if ( ! chatbot_chatgpt_gfi_lock( $engine, $token ) ) {
         return false;
     }
     try {
-        return chatbot_chatgpt_gfi_publish_locked( $engine );
+        // Re-check caller ownership under the lock immediately before sealing.
+        if ( ! chatbot_chatgpt_gfi_builder_may_mutate( $engine, $owner ) ) {
+            return false;
+        }
+        return chatbot_chatgpt_gfi_publish_locked( $engine, $owner );
     } finally {
         chatbot_chatgpt_gfi_unlock( $engine, $token );
     }
@@ -766,10 +1366,129 @@ function chatbot_chatgpt_gfi_publish( $engine ) {
  * @param string $engine Engine slug.
  * @return bool
  */
-function chatbot_chatgpt_gfi_publish_locked( $engine ) {
+/**
+ * Whether a basename is a staging leftover, backup, or other unpublished scratch name.
+ *
+ * @param string $name Basename.
+ * @return bool
+ */
+function chatbot_chatgpt_gfi_name_is_unpublished_scratch( $name ) {
+    $lower = strtolower( (string) $name );
+    if ( $lower === '' ) {
+        return true;
+    }
+    if ( strpos( $lower, '.staging.' ) !== false ) {
+        return true;
+    }
+    if ( substr( $lower, -4 ) === '.bak' ) {
+        return true;
+    }
+    if ( strpos( $lower, '.lcm_bak_' ) !== false ) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Required Lexical published basenames excluding the PMI companion choice.
+ *
+ * @return array<int, string>
+ */
+function chatbot_chatgpt_gfi_lexical_required_basenames() {
+    return array(
+        'eligibility-revision.txt',
+        'lexical_embeddings_cache.php',
+        'lexical_embeddings_cache_version.txt',
+        'lexical_local_idf_cache.json',
+    );
+}
+
+/**
+ * Whether the Lexical directory inventory is a complete published generation.
+ *
+ * Mandatory: eligibility stamp, PHP cache, version text, IDF JSON, and a PMI
+ * payload as `.gz`, `.ser`, or a literal-array PHP body. Staging and backup
+ * names are never complete.
+ *
+ * @param array<int|string, string> $names     Basenames present or about to be sealed.
+ * @param string                    $directory Absolute cache directory (needed for literal PHP check).
+ * @return bool
+ */
+function chatbot_chatgpt_gfi_lexical_inventory_is_complete( $names, $directory = '' ) {
+    $list = array();
+    foreach ( $names as $name ) {
+        if ( ! is_string( $name ) || $name === '' ) {
+            return false;
+        }
+        if ( chatbot_chatgpt_gfi_name_is_unpublished_scratch( $name ) ) {
+            return false;
+        }
+        $list[] = $name;
+    }
+    foreach ( chatbot_chatgpt_gfi_lexical_required_basenames() as $required ) {
+        if ( ! in_array( $required, $list, true ) ) {
+            return false;
+        }
+    }
+    if ( in_array( 'lexical_embeddings_cache.php.gz', $list, true ) || in_array( 'lexical_embeddings_cache.php.ser', $list, true ) ) {
+        return true;
+    }
+    $directory = rtrim( (string) $directory, '/\\' );
+    if ( $directory === '' || ! function_exists( 'chatbot_chatgpt_gfi_buffer_is_literal_return' ) ) {
+        return false;
+    }
+    $php_path = $directory . DIRECTORY_SEPARATOR . 'lexical_embeddings_cache.php';
+    if ( ! is_file( $php_path ) ) {
+        return false;
+    }
+    $bytes = file_get_contents( $php_path );
+
+    return is_string( $bytes ) && chatbot_chatgpt_gfi_buffer_is_literal_return( $bytes );
+}
+
+/**
+ * Engine-aware completeness gate used before publish and during evaluation.
+ *
+ * @param string                    $engine    Engine slug.
+ * @param array<int|string, string> $names     Basenames.
+ * @param string                    $directory Absolute cache directory.
+ * @return bool
+ */
+function chatbot_chatgpt_gfi_engine_inventory_is_complete( $engine, $names, $directory = '' ) {
+    if ( ! chatbot_chatgpt_gfi_is_engine( $engine ) ) {
+        return false;
+    }
+    $list = array();
+    foreach ( $names as $name ) {
+        if ( ! is_string( $name ) || $name === '' ) {
+            return false;
+        }
+        $list[] = $name;
+    }
+    if ( ! in_array( 'eligibility-revision.txt', $list, true ) ) {
+        return false;
+    }
+    if ( (string) $engine === 'lexical' ) {
+        return chatbot_chatgpt_gfi_lexical_inventory_is_complete( $list, $directory );
+    }
+
+    return true;
+}
+
+function chatbot_chatgpt_gfi_publish_locked( $engine, $owner = '' ) {
+    if ( $owner === '' ) {
+        $owner = chatbot_chatgpt_gfi_session_owner( $engine );
+    }
+    if ( ! chatbot_chatgpt_gfi_builder_may_mutate( $engine, $owner ) ) {
+        return false;
+    }
     $directory = chatbot_chatgpt_beta_engine_cache_directory( $engine );
     $files     = chatbot_chatgpt_gfi_collect_files( $directory );
     if ( ! is_array( $files ) || ! isset( $files['eligibility-revision.txt'] ) ) {
+        return false;
+    }
+    if ( ! chatbot_chatgpt_gfi_engine_inventory_is_complete( $engine, array_keys( $files ), $directory ) ) {
         return false;
     }
     $site_id = chatbot_chatgpt_gfi_site_id();
@@ -778,6 +1497,21 @@ function chatbot_chatgpt_gfi_publish_locked( $engine ) {
         return false;
     }
     $generation = (string) (int) chatbot_chatgpt_beta_engine_generation( $engine );
+    $build_key  = chatbot_chatgpt_gfi_build_key( $engine );
+    $raw        = chatbot_chatgpt_gfi_option_db_get( $build_key );
+    if ( ! is_string( $raw ) || $raw === '' ) {
+        return false;
+    }
+    $record = chatbot_chatgpt_gfi_maybe_unserialize( $raw );
+    if ( ! is_array( $record ) || (string) ( $record['generation_id'] ?? '' ) !== $generation ) {
+        return false;
+    }
+    if ( ! empty( $record['commit_epoch'] ) ) {
+        return false;
+    }
+    if ( ! hash_equals( (string) ( $record['owner'] ?? '' ), (string) $owner ) ) {
+        return false;
+    }
     $records    = array();
     foreach ( $files as $name => $path ) {
         $handle = fopen( $path, 'rb' );
@@ -834,6 +1568,13 @@ function chatbot_chatgpt_gfi_publish_locked( $engine ) {
         return false;
     }
     $manifest['inventory_mac'] = $mac;
+    // Consume ownership with CAS before exposing the sealed manifest so a
+    // concurrent publisher cannot reuse the same build epoch.
+    $record['commit_epoch']  = time();
+    $record['heartbeat_gmt'] = time();
+    if ( ! chatbot_chatgpt_gfi_option_cas( $build_key, $raw, $record ) ) {
+        return false;
+    }
     update_option( chatbot_chatgpt_gfi_manifest_key( $engine ), $manifest, false );
     if ( function_exists( 'delete_option' ) ) {
         delete_option( chatbot_chatgpt_gfi_recovery_key( $engine ) );
@@ -841,7 +1582,10 @@ function chatbot_chatgpt_gfi_publish_locked( $engine ) {
     chatbot_chatgpt_gfi_clear_build( $engine );
     chatbot_chatgpt_gfi_clear_request_cache();
 
-    return chatbot_chatgpt_gfi_generation_is_trusted( $engine, false );
+    // Sealing verified each file HMAC while collecting records. Engine state may
+    // still be `building` until commit() flips it to ready; evaluate() refuses
+    // building on purpose, so success here is the sealed write itself.
+    return true;
 }
 
 /**
@@ -855,6 +1599,11 @@ function chatbot_chatgpt_gfi_evaluate( $engine ) {
         return chatbot_chatgpt_gfi_result( 'bad_manifest', false, false );
     }
     $state = function_exists( 'chatbot_chatgpt_beta_engine_state' ) ? chatbot_chatgpt_beta_engine_state( $engine ) : '';
+    // Fail closed while rebuilding: previous HMACs must not authenticate files
+    // that may be mid-rewrite, and readers must not treat a building engine as ready.
+    if ( $state === 'building' ) {
+        return chatbot_chatgpt_gfi_result( 'incomplete', false, false );
+    }
     $manifest = chatbot_chatgpt_gfi_manifest( $engine );
     if ( ! is_array( $manifest ) ) {
         $hard = ( $state === 'ready' );
@@ -935,6 +1684,15 @@ function chatbot_chatgpt_gfi_evaluate( $engine ) {
         return chatbot_chatgpt_gfi_result( 'read_error', false, true );
     }
     $directory = chatbot_chatgpt_beta_engine_cache_directory( $engine );
+    if ( ! chatbot_chatgpt_gfi_engine_inventory_is_complete( $engine, $sorted_names, $directory ) ) {
+        foreach ( $sorted_names as $name ) {
+            if ( chatbot_chatgpt_gfi_name_is_unpublished_scratch( $name ) ) {
+                return chatbot_chatgpt_gfi_result( 'unexpected_file', false, true );
+            }
+        }
+
+        return chatbot_chatgpt_gfi_result( 'incomplete', false, true );
+    }
     $present   = chatbot_chatgpt_gfi_collect_files( $directory );
     if ( ! is_array( $present ) ) {
         return chatbot_chatgpt_gfi_result( is_dir( $directory ) ? 'symlink' : 'read_error', false, true );
@@ -944,6 +1702,9 @@ function chatbot_chatgpt_gfi_evaluate( $engine ) {
     if ( $present_names !== $sorted_names ) {
         $code = array_diff( $present_names, $sorted_names ) ? 'unexpected_file' : 'missing_file';
         return chatbot_chatgpt_gfi_result( $code, false, true );
+    }
+    if ( ! chatbot_chatgpt_gfi_engine_inventory_is_complete( $engine, $present_names, $directory ) ) {
+        return chatbot_chatgpt_gfi_result( 'incomplete', false, true );
     }
 
     foreach ( $manifest['files'] as $name => $row ) {
@@ -1257,10 +2018,90 @@ function chatbot_chatgpt_gfi_include_builder_literal( $path ) {
 }
 
 /**
- * A generated cache may execute only as `<?php return <literal array>;`.
+ * Approved direct-access guard source for newly generated PHP cache files.
+ *
+ * Whitespace after the opening tag is the caller's responsibility. This fragment
+ * does not include the opening tag or the following `return` statement.
+ *
+ * @return string
+ */
+function chatbot_chatgpt_gfi_direct_access_guard_source() {
+    return "if ( ! defined( 'ABSPATH' ) ) {\n    http_response_code( 403 );\n    exit;\n}\n";
+}
+
+/**
+ * Build a guarded literal-array PHP cache body for newly generated files.
+ *
+ * @param array<mixed> $data Cache array.
+ * @return string
+ */
+function chatbot_chatgpt_gfi_literal_cache_php( $data ) {
+    return "<?php\n\n" . chatbot_chatgpt_gfi_direct_access_guard_source() . "\nreturn " . var_export( $data, true ) . ';';
+}
+
+/**
+ * Consume the approved ABSPATH direct-access guard from a whitespace-stripped token stream.
+ *
+ * Exact structure (formatting/whitespace already removed):
+ * `if ( ! defined( 'ABSPATH' ) ) { http_response_code( 403 ); exit; }`
+ *
+ * `http_response_code` is allowed only here. Any other conditional or call fails.
+ *
+ * @param array<int, mixed> $tokens Tokens with whitespace and comments removed.
+ * @param int               $index  Cursor at the expected `if` token.
+ * @return bool
+ */
+function chatbot_chatgpt_gfi_consume_abspath_direct_access_guard( $tokens, &$index ) {
+    $need = array(
+        array( 'type' => T_IF, 'text' => 'if' ),
+        array( 'type' => 'char', 'text' => '(' ),
+        array( 'type' => 'char', 'text' => '!' ),
+        array( 'type' => T_STRING, 'text' => 'defined' ),
+        array( 'type' => 'char', 'text' => '(' ),
+        array( 'type' => T_CONSTANT_ENCAPSED_STRING, 'text' => "'ABSPATH'" ),
+        array( 'type' => 'char', 'text' => ')' ),
+        array( 'type' => 'char', 'text' => ')' ),
+        array( 'type' => 'char', 'text' => '{' ),
+        array( 'type' => T_STRING, 'text' => 'http_response_code' ),
+        array( 'type' => 'char', 'text' => '(' ),
+        array( 'type' => T_LNUMBER, 'text' => '403' ),
+        array( 'type' => 'char', 'text' => ')' ),
+        array( 'type' => 'char', 'text' => ';' ),
+        array( 'type' => T_EXIT, 'text' => 'exit' ),
+        array( 'type' => 'char', 'text' => ';' ),
+        array( 'type' => 'char', 'text' => '}' ),
+    );
+    foreach ( $need as $expected ) {
+        if ( ! isset( $tokens[ $index ] ) ) {
+            return false;
+        }
+        $token = $tokens[ $index ];
+        if ( 'char' === $expected['type'] ) {
+            if ( $token !== $expected['text'] ) {
+                return false;
+            }
+        } else {
+            if ( ! is_array( $token ) || $token[0] !== $expected['type'] || (string) $token[1] !== $expected['text'] ) {
+                return false;
+            }
+        }
+        $index++;
+    }
+
+    return true;
+}
+
+/**
+ * A generated cache may execute only as a literal array return.
+ *
+ * Accepted programs:
+ * - Legacy: `<?php return <literal array>;`
+ * - Guarded: `<?php` + approved ABSPATH direct-access guard + `return <literal array>;`
  *
  * TOKEN_PARSE is required so the token stream matches the PHP parser.
- * Comments are ignored. Any other statement, call, variable, or operator is refused.
+ * Comments and whitespace are ignored. Any other statement, call, variable, or
+ * operator is refused. `http_response_code()` is permitted only inside the
+ * approved direct-access guard.
  *
  * @param string $bytes File bytes from a single read.
  * @return bool
@@ -1288,12 +2129,16 @@ function chatbot_chatgpt_gfi_buffer_is_literal_return( $bytes ) {
         }
         $tokens[] = $token;
     }
-    $index = 0;
     $count = count( $tokens );
     if ( $count < 4 || ! is_array( $tokens[0] ) || $tokens[0][0] !== T_OPEN_TAG || strncmp( (string) $tokens[0][1], '<?php', 5 ) !== 0 ) {
         return false;
     }
     $index = 1;
+    if ( isset( $tokens[ $index ] ) && is_array( $tokens[ $index ] ) && $tokens[ $index ][0] === T_IF ) {
+        if ( ! chatbot_chatgpt_gfi_consume_abspath_direct_access_guard( $tokens, $index ) ) {
+            return false;
+        }
+    }
     if ( ! isset( $tokens[ $index ] ) || ! is_array( $tokens[ $index ] ) || $tokens[ $index ][0] !== T_RETURN ) {
         return false;
     }

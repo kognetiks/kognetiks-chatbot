@@ -110,6 +110,11 @@ if ( ! defined( 'CHATBOT_CHATGPT_PLUGIN_FILE' ) ) {
     define( 'CHATBOT_CHATGPT_PLUGIN_FILE', __FILE__ );
 }
 
+// Plugin slug (text domain / directory name). Used by GFI HKDF domain separation.
+if ( ! defined( 'CHATBOT_CHATGPT_SLUG' ) ) {
+    define( 'CHATBOT_CHATGPT_SLUG', 'chatbot-chatgpt' );
+}
+
 /**
  * Load plugin translations from /languages.
  *

@@ -74,6 +74,7 @@ function transformer_model_sentential_context_reset_cache() {
 
     chatbot_chatgpt_beta_engine_purge( 'sentential' );
     chatbot_chatgpt_beta_engine_mark_building( 'sentential' );
+    // Job owner is stored by GFI begin for later scan/commit requests.
 
 }
 
@@ -88,7 +89,11 @@ function chatbot_transformer_model_scan() {
 
     if ( (int) $corpus['raw'] === 0 ) {
         $generation = (int) get_option( chatbot_chatgpt_beta_engine_build_generation_key( 'sentential' ), 0 );
-        if ( chatbot_chatgpt_beta_engine_commit( 'sentential', $generation ) ) {
+        $owner      = function_exists( 'chatbot_chatgpt_gfi_job_owner' ) ? chatbot_chatgpt_gfi_job_owner( 'sentential' ) : '';
+        if ( $owner !== '' && function_exists( 'chatbot_chatgpt_gfi_remember_owner' ) ) {
+            chatbot_chatgpt_gfi_remember_owner( 'sentential', $owner );
+        }
+        if ( chatbot_chatgpt_beta_engine_commit( 'sentential', $generation, $owner ) ) {
             update_option('chatbot_transformer_model_build_status', 'Completed');
             update_option('chatbot_transformer_model_build_schedule', 'Completed');
             update_option('chatbot_transformer_model_last_updated', current_time('mysql'));
@@ -161,8 +166,18 @@ function transformer_model_sentential_context_fetch_content($offset, $batchSize)
 // Cache embeddings for the fetched content
 function transformer_model_sentential_context_cache_embeddings($corpus, $windowSize = 3) {
 
+    $owner = function_exists( 'chatbot_chatgpt_gfi_job_owner' ) ? chatbot_chatgpt_gfi_job_owner( 'sentential' ) : '';
+    if ( $owner === '' && function_exists( 'chatbot_chatgpt_gfi_session_owner' ) ) {
+        $owner = chatbot_chatgpt_gfi_session_owner( 'sentential' );
+    }
+    if ( $owner === '' || ( function_exists( 'chatbot_chatgpt_gfi_builder_may_mutate' ) && ! chatbot_chatgpt_gfi_builder_may_mutate( 'sentential', $owner ) ) ) {
+        return;
+    }
+    if ( function_exists( 'chatbot_chatgpt_gfi_remember_owner' ) ) {
+        chatbot_chatgpt_gfi_remember_owner( 'sentential', $owner );
+    }
     if ( function_exists( 'chatbot_chatgpt_gfi_touch' ) ) {
-        chatbot_chatgpt_gfi_touch( 'sentential' );
+        chatbot_chatgpt_gfi_touch( 'sentential', $owner );
     }
     $cacheDir = chatbot_chatgpt_beta_engine_cache_directory( 'sentential' );
     if ( $cacheDir === '' ) {
@@ -176,7 +191,7 @@ function transformer_model_sentential_context_cache_embeddings($corpus, $windowS
     }
 
     $generation = (int) get_option( chatbot_chatgpt_beta_engine_build_generation_key( 'sentential' ), 0 );
-    if ( ! chatbot_chatgpt_beta_engine_build_is_current( 'sentential', $generation ) ) {
+    if ( ! chatbot_chatgpt_beta_engine_build_is_current( 'sentential', $generation, $owner ) ) {
         return;
     }
 
@@ -236,7 +251,7 @@ function transformer_model_sentential_context_cache_embeddings($corpus, $windowS
         // Load existing cache if it exists
         $existingEmbeddings = [];
         $generation = (int) get_option( chatbot_chatgpt_beta_engine_build_generation_key( 'sentential' ), 0 );
-        $can_merge = chatbot_chatgpt_beta_engine_build_is_current( 'sentential', $generation )
+        $can_merge = chatbot_chatgpt_beta_engine_build_is_current( 'sentential', $generation, $owner )
             && ( chatbot_chatgpt_beta_engine_state( 'sentential' ) === 'building' || chatbot_chatgpt_beta_engine_stamp_matches( 'sentential' ) );
         if ( $can_merge && file_exists($cacheFile)) {
             if ( chatbot_chatgpt_beta_engine_state( 'sentential' ) === 'building' ) {
@@ -263,8 +278,18 @@ function transformer_model_sentential_context_cache_embeddings($corpus, $windowS
             }
         }
 
-        // Write the updated cache file
-        file_put_contents($cacheFile, '<?php return ' . var_export($existingEmbeddings, true) . ';');
+        // Stale workers that lost build ownership must not rewrite sealed letter files.
+        if ( function_exists( 'chatbot_chatgpt_gfi_builder_may_mutate' ) && ! chatbot_chatgpt_gfi_builder_may_mutate( 'sentential', $owner ) ) {
+            return;
+        }
+
+        // Write the updated cache file with a direct-access ABSPATH guard.
+        if ( function_exists( 'chatbot_chatgpt_gfi_literal_cache_php' ) ) {
+            $cache_php = chatbot_chatgpt_gfi_literal_cache_php( $existingEmbeddings );
+        } else {
+            $cache_php = "<?php\n\nif ( ! defined( 'ABSPATH' ) ) {\n    http_response_code( 403 );\n    exit;\n}\n\nreturn " . var_export( $existingEmbeddings, true ) . ';';
+        }
+        file_put_contents( $cacheFile, $cache_php );
         chatbot_chatgpt_beta_apply_cache_permissions( $cacheDir );
         chatbot_chatgpt_beta_apply_cache_permissions( $cacheFile );
     }

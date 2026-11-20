@@ -89,6 +89,13 @@ Kognetiks Chatbot may not be a fit if:
 - Optional speech recognition and voice replies
 - Embedded or floating chat via shortcode
 
+## What's New in 2.6.1
+
+- Stronger public-content eligibility for Knowledge Navigator and local context engines, excluding private, password-protected, draft, and other nonpublic WordPress content under the plugin’s eligibility rules.
+- HMAC-authenticated Sentential and Lexical generated caches with fail-closed handling when integrity checks fail, plus direct-access guards on applicable generated PHP cache files.
+- Site-specific generated-cache storage under WordPress uploads, with safer concurrent builds, interrupted-build recovery, and optional legacy-cache cleanup (execution remains off unless an administrator explicitly enables it).
+- Upgrade note: regenerate Sentential and Lexical caches after installing 2.6.1. Previously signed caches are not compatible with the new `chatbot-chatgpt-gfi-v1` signing context.
+
 ## Installation
 
 1. **Upload the Plugin**
