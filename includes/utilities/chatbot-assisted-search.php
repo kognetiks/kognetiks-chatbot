@@ -198,7 +198,8 @@ function chatbot_assistant_search_handler($request) {
                 $result = [
                     'ID' => $post->ID,
                     'title' => $post->post_title,
-                    'url' => $post->guid,
+                    // guid is an internal identifier (?p=ID), not a reliable URL; use the real permalink.
+                    'url' => get_permalink($post->ID) ?: $post->guid,
                     'date' => $post->post_date,
                     'author' => get_the_author_meta('display_name', $post->post_author),
                 ];
