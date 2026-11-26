@@ -123,7 +123,8 @@ function chatbot_chatgpt_format_search_results($results, $include_excerpt, $page
         return [
             'ID' => $post->ID,
             'title' => $post->post_title,
-            'url' => $post->guid,
+            // guid is an internal identifier (?p=ID), not a reliable URL; use the real permalink.
+            'url' => get_permalink($post->ID) ?: $post->guid,
             'date' => $post->post_date,
             'author' => get_the_author_meta('display_name', $post->post_author),
             'excerpt' => $include_excerpt ? wp_strip_all_tags(strip_shortcodes($post->post_content)) : null
