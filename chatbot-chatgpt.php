@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.6.0
+ * Version:     2.6.1
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * Text Domain: chatbot-chatgpt
@@ -28,7 +28,7 @@
  * along with Kognetiks Chatbot. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  * 
  * @package chatbot-chatgpt
- * @version 2.6.0
+ * @version 2.6.1
  * @author Kognetiks.com
  */
 
@@ -95,7 +95,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.6.0';
+$chatbot_chatgpt_plugin_version = '2.6.1';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -108,6 +108,11 @@ $chatbot_chatgpt_plugin_dir_url = plugins_url( '/', __FILE__ );
 // Main plugin file pointer (used by vendor-management hooks, etc.)
 if ( ! defined( 'CHATBOT_CHATGPT_PLUGIN_FILE' ) ) {
     define( 'CHATBOT_CHATGPT_PLUGIN_FILE', __FILE__ );
+}
+
+// Plugin slug (text domain / directory name). Used by GFI HKDF domain separation.
+if ( ! defined( 'CHATBOT_CHATGPT_SLUG' ) ) {
+    define( 'CHATBOT_CHATGPT_SLUG', 'chatbot-chatgpt' );
 }
 
 /**
@@ -156,6 +161,10 @@ ob_end_flush(); // End output buffering and send the buffer to the browser
 
 // Include necessary files - Utilities (must be loaded before API files that use them)
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.php';                    // Ver 1.8.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-content-eligibility.php';           // Public-content eligibility
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-generated-storage.php';            // Uploads storage for generated files
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-generated-file-integrity.php';    // HMAC integrity for generated caches
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-beta-knowledge.php';               // Beta engine artifact guard
 
 // Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-anthropic-api.php';         // ANT API - Ver 2.0.7
@@ -188,6 +197,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-a
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-user-css.php';
 
 // Include necessary files - Knowledge Navigator
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-exports.php';             // Knowledge Navigator export protection
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-controller.php';  // Knowledge Navigator Acquisition - Ver 1.9.6
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-words.php';       // Knowledge Navigator Acquisition - Ver 1.9.6
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-analysis.php';            // Knowledge Navigator Analysis- Ver 1.6.2

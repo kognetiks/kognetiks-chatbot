@@ -45,7 +45,7 @@ Knowledge Navigator automatically detects all public post types on your site tha
 
 ## What is the output of Knowledge Navigator?
 
-Both a detailed "results.csv" and "results.json" files are created, tucking away all the valuable information obtained in a dedicated 'results' directory within the plugin's folder. The prime objective of Knowledge Navigator is to enable the Kognetiks Chatbot plugin to have a crystal clear understanding of your website's context and content. As a result, your chatbot will deliver responses that are not just accurate, but also fittingly contextual, thereby crafting a truly bespoke user experience. This all is powered by the advanced AI technology of OpenAI's Large Language Model (LLM) API.
+Both a CSV and a JSON analysis are stored for administrators and downloaded from the Knowledge Navigator Analysis tab. They are not written to a public folder in the plugin directory. The prime objective of Knowledge Navigator is to enable the Kognetiks Chatbot plugin to have a crystal clear understanding of your website's context and content. As a result, your chatbot will deliver responses that are not just accurate, but also fittingly contextual, thereby crafting a truly bespoke user experience. This all is powered by the advanced AI technology of OpenAI's Large Language Model (LLM) API.
 
 ## How can I tell if the Knowledge Navigator is working?
 

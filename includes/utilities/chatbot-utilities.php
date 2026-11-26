@@ -174,6 +174,18 @@ function chatbot_chatgpt_harden_static_directories() {
     foreach ( $names as $name ) {
         create_directory_and_index_file( $chatbot_chatgpt_plugin_dir_path . $name . '/' );
     }
+
+    if ( function_exists( 'chatbot_chatgpt_generated_storage_catalog' ) ) {
+        foreach ( chatbot_chatgpt_generated_storage_catalog() as $slug => $meta ) {
+            if ( empty( $meta['writable'] ) ) {
+                continue;
+            }
+            $dir = chatbot_chatgpt_generated_storage_directory( $slug );
+            if ( $dir !== '' ) {
+                create_directory_and_index_file( $dir );
+            }
+        }
+    }
 }
 
 /**

@@ -336,7 +336,7 @@ function chatbot_chatgpt_reject_assistant_model( $message ) {
     if ( wp_doing_ajax() ) {
         wp_send_json_error( $message );
     }
-    wp_die( $message );
+    wp_die( esc_html( $message ) );
 
 }
 
@@ -733,13 +733,19 @@ function chatbot_chatgpt_render_assistant_textarea_field( $field_name, $label, $
 function chatbot_chatgpt_render_assistant_details_toggle( $row_key, $label, $expanded = false ) {
 
     $row_key  = (string) $row_key;
+    // JS expression inside a double-quoted HTML onclick attribute.
+    // "new" is an immutable internal row key (never user/admin free text).
+    // Use a single-quoted JS string literal so the attribute stays well-formed.
+    // Do not use wp_json_encode() here: JSON delimiters are double quotes, and
+    // JSON_HEX_QUOT does not guarantee HTML-attribute-safe embedding.
+    // Numeric rows stay absint digits only (no quotes required).
     $js_arg   = ( 'new' === $row_key ) ? "'new'" : (string) absint( $row_key );
     $expanded = (bool) $expanded;
     echo '<button type="button" class="button button-secondary button-small kchat-assistant-details-toggle"';
     echo ' id="kchat-assistant-details-toggle-' . esc_attr( $row_key ) . '"';
     echo ' aria-expanded="' . ( $expanded ? 'true' : 'false' ) . '" aria-controls="kchat-assistant-details-' . esc_attr( $row_key ) . '"';
     echo ' aria-label="' . esc_attr( $label ) . '"';
-    echo ' onclick="toggleChatgptAssistantDetails(' . $js_arg . ', event); return false;">';
+    echo ' onclick="toggleChatgptAssistantDetails(' . $js_arg . ', event); return false;">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $js_arg is the fixed literal 'new' or absint digits only.
     echo esc_html__( 'Details', 'chatbot-chatgpt' );
     echo '</button>';
 
@@ -829,7 +835,7 @@ function chatbot_chatgpt_render_assistant_configuration( $row_key, $assistant, $
     echo '<div id="' . esc_attr( $region_id ) . '" class="kchat-assistant-details" role="region" aria-labelledby="' . esc_attr( $heading_id ) . '">';
     echo '<h3 id="' . esc_attr( $heading_id ) . '">' . esc_html( $heading ) . '</h3>';
     if ( ! $is_new && function_exists( 'chatbot_chatgpt_render_pmpt_row_mode_row' ) ) {
-        echo chatbot_chatgpt_render_pmpt_row_mode_row( $assistant );
+        chatbot_chatgpt_render_pmpt_row_mode_row( $assistant );
     }
     echo '<div id="kchat-assistant-feedback-' . esc_attr( (string) $row_key ) . '" class="notice notice-error inline kchat-assistant-feedback" hidden>';
     echo '<p></p>';
@@ -893,20 +899,21 @@ function chatbot_chatgpt_render_assistant_configuration( $row_key, $assistant, $
  */
 function chatbot_chatgpt_render_manage_assistant_rows( $assistant, $model_inventory ) {
 
-    $row_id    = absint( $assistant->id );
-    $row_key   = (string) $row_id;
-    $shortcode = '[chatbot-' . $row_key . ']';
+    $row_id      = absint( $assistant->id );
+    $row_key     = (string) $row_id;
+    $row_id_js   = (string) $row_id;
+    $shortcode   = '[chatbot-' . $row_key . ']';
 
     echo '<tr class="kchat-assistant-overview-row" data-assistant-row="' . esc_attr( $row_key ) . '">';
     echo '<td class="kchat-assistant-actions">';
-    echo '<button type="button" class="button button-primary button-small" onclick="updateChatgptAssistant(' . $row_id . '); return false;" aria-label="' . esc_attr( sprintf( __( 'Update %s', 'chatbot-chatgpt' ), $shortcode ) ) . '">' . esc_html__( 'Update', 'chatbot-chatgpt' ) . '</button>';
-    echo '<button type="button" class="button button-primary button-small" onclick="deleteChatgptAssistant(' . $row_id . '); return false;" aria-label="' . esc_attr( sprintf( __( 'Delete %s', 'chatbot-chatgpt' ), $shortcode ) ) . '">' . esc_html__( 'Delete', 'chatbot-chatgpt' ) . '</button>';
+    echo '<button type="button" class="button button-primary button-small" onclick="updateChatgptAssistant(' . $row_id_js . '); return false;" aria-label="' . esc_attr( sprintf( __( 'Update %s', 'chatbot-chatgpt' ), $shortcode ) ) . '">' . esc_html__( 'Update', 'chatbot-chatgpt' ) . '</button>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $row_id_js is absint digits only.
+    echo '<button type="button" class="button button-primary button-small" onclick="deleteChatgptAssistant(' . $row_id_js . '); return false;" aria-label="' . esc_attr( sprintf( __( 'Delete %s', 'chatbot-chatgpt' ), $shortcode ) ) . '">' . esc_html__( 'Delete', 'chatbot-chatgpt' ) . '</button>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $row_id_js is absint digits only.
     chatbot_chatgpt_render_assistant_details_toggle( $row_key, sprintf( __( 'Details for %s', 'chatbot-chatgpt' ), $shortcode ) );
     echo '</td>';
     echo '<td class="kchat-col-shortcode"><code>' . esc_html( $shortcode ) . '</code> ';
     echo '<button type="button" class="button button-small" onclick="copyToClipboard(\'' . esc_js( $shortcode ) . '\'); return false;" aria-label="' . esc_attr( sprintf( __( 'Copy shortcode %s', 'chatbot-chatgpt' ), $shortcode ) ) . '">' . esc_html__( 'Copy', 'chatbot-chatgpt' ) . '</button></td>';
-    echo '<td class="kchat-col-assistant-id"><input type="text" name="assistant_id_' . $row_id . '" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'assistant_id_' . $row_key ) ) . '" value="' . esc_attr( $assistant->assistant_id ) . '" aria-label="' . esc_attr( sprintf( __( 'Assistant ID for %s', 'chatbot-chatgpt' ), $shortcode ) ) . '"></td>';
-    echo '<td class="kchat-col-common-name"><input type="text" name="common_name_' . $row_id . '" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'common_name_' . $row_key ) ) . '" value="' . esc_attr( $assistant->common_name ) . '" aria-label="' . esc_attr( sprintf( __( 'Common Name for %s', 'chatbot-chatgpt' ), $shortcode ) ) . '"></td>';
+    echo '<td class="kchat-col-assistant-id"><input type="text" name="assistant_id_' . esc_attr( $row_key ) . '" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'assistant_id_' . $row_key ) ) . '" value="' . esc_attr( $assistant->assistant_id ) . '" aria-label="' . esc_attr( sprintf( __( 'Assistant ID for %s', 'chatbot-chatgpt' ), $shortcode ) ) . '"></td>';
+    echo '<td class="kchat-col-common-name"><input type="text" name="common_name_' . esc_attr( $row_key ) . '" id="' . esc_attr( chatbot_chatgpt_assistant_control_id( 'common_name_' . $row_key ) ) . '" value="' . esc_attr( $assistant->common_name ) . '" aria-label="' . esc_attr( sprintf( __( 'Common Name for %s', 'chatbot-chatgpt' ), $shortcode ) ) . '"></td>';
     echo '</tr>';
 
     echo '<tr class="kchat-assistant-details-row" id="kchat-assistant-details-row-' . esc_attr( $row_key ) . '" data-assistant-row="' . esc_attr( $row_key ) . '" hidden>';

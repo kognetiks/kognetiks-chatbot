@@ -54,17 +54,10 @@ Kognetiks Chatbot includes locally hosted MathJax components for mathematical no
 
 The bundled MathJax components are configured with additional security controls appropriate for rendering chatbot content.
 
-## What's new in Version 2.6.0 - Released 2026-11-17
+## What's new in Version 2.6.1 - Released TBD
 
-## Security
-- Fixed a stored cross-site scripting vulnerability involving MathJax rendering of untrusted mathematical expressions.
-- Added secure mathematical rendering that prevents unsafe URLs and executable attributes from being introduced into chatbot content.
-- Restricted MathJax processing to chatbot content, preventing the plugin from interpreting unrelated WordPress comments and page content.
-- Improved MathJax initialization, dependency isolation, and asset versioning.
-
-## Compatibility
-- Preserved mathematical notation rendering in chatbot conversations.
-- Improved compatibility with other plugins that use MathJax.
+### Bug Fixes
+* **TBD**: TBD
 
 * Information about past updates can be found [here](updates/updates.md).
 

@@ -32,9 +32,16 @@ function chatbot_lcm_lexical_cache_rebuild_cron_hook() {
 function chatbot_lcm_lexical_cache_register_monthly_cron_schedule( $schedules ) {
 
     if ( ! isset( $schedules['monthly'] ) ) {
+        // Defer translation until after_setup_theme — cron_schedules can run during early bootstrap.
+        $display = (
+            did_action( 'after_setup_theme' )
+            || doing_action( 'after_setup_theme' )
+        )
+            ? __( 'Once Monthly (approx. 30 days)', 'chatbot-chatgpt' )
+            : 'Once Monthly (approx. 30 days)';
         $schedules['monthly'] = array(
             'interval' => 30 * DAY_IN_SECONDS,
-            'display'  => __( 'Once Monthly (approx. 30 days)', 'chatbot-chatgpt' ),
+            'display'  => $display,
         );
     }
 
@@ -417,7 +424,11 @@ function chatbot_transformer_model_cache_info_callback($args) {
         return;
     }
 
-    $cacheDir = trailingslashit($chatbot_chatgpt_plugin_dir_path) . 'includes/transformers/lexical_embeddings_cache';
+    $cacheDir = chatbot_chatgpt_beta_engine_cache_directory( 'lexical' );
+    if ( $cacheDir === '' ) {
+        echo '<p>Lexical cache storage is unavailable. The site uploads directory could not be prepared. Check that the WordPress uploads directory is writable by PHP, then rebuild the lexical cache.</p>';
+        return;
+    }
     $cacheFile = $cacheDir . '/lexical_embeddings_cache.php';
     $compressedFile = $cacheFile . '.gz';
 
@@ -470,7 +481,7 @@ function chatbot_transformer_model_cache_info_callback($args) {
         <tbody>
             <tr>
                 <th scope="row">Cache Directory</th>
-                <td><?php echo esc_html(str_replace($chatbot_chatgpt_plugin_dir_path, '', $cacheDir)); ?></td>
+                <td><?php echo esc_html( 'Site uploads / chatbot-chatgpt / lexical_embeddings_cache / ' . chatbot_chatgpt_beta_site_directory_segment() . '/' ); ?></td>
             </tr>
             <tr>
                 <th scope="row">Created</th>
@@ -1119,9 +1130,9 @@ function chatbot_transformer_model_handle_clear_lexical_rebuild() {
     $state = get_option( 'chatbot_lcm_lexical_rebuild_state', array() );
     if ( is_array( $state ) && ! empty( $state['token'] ) ) {
         $token = preg_replace( '/[^a-zA-Z0-9_-]/', '', (string) $state['token'] );
-        global $chatbot_chatgpt_plugin_dir_path;
-        if ( ! empty( $chatbot_chatgpt_plugin_dir_path ) ) {
-            $dir   = trailingslashit( $chatbot_chatgpt_plugin_dir_path ) . 'includes/transformers/lexical_embeddings_cache/';
+        $dir = chatbot_chatgpt_beta_engine_cache_directory( 'lexical' );
+        if ( $dir !== '' ) {
+            $dir   = trailingslashit( $dir );
             $base  = $dir . 'lexical_rebuild_counts.' . $token;
             $paths = array(
                 $base . '.co.bin',

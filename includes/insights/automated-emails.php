@@ -1096,9 +1096,17 @@ function kognetiks_insights_send_proof_of_value_email( $args = [] ) {
  */
 function kognetiks_insights_add_monthly_cron_interval( $schedules ) {
 
+    // Defer translation until after_setup_theme — cron_schedules can run during early bootstrap.
+    $display = (
+        did_action( 'after_setup_theme' )
+        || doing_action( 'after_setup_theme' )
+    )
+        ? __( 'Once Monthly', 'chatbot-chatgpt' )
+        : 'Once Monthly';
+
     $schedules['monthly'] = [
         'interval' => MONTH_IN_SECONDS, // 30 days
-        'display'  => __( 'Once Monthly', 'chatbot-chatgpt' ),
+        'display'  => $display,
     ];
 
     return $schedules;

@@ -85,8 +85,8 @@ function transformer_model_sentential_context_model_response_lite($prompt, $max_
     do {
 
         $query = $wpdb->prepare(
-            "SELECT post_title, post_content FROM {$wpdb->posts} 
-             WHERE post_status = 'publish' 
+            "SELECT ID, post_title, post_content FROM {$wpdb->posts} 
+             WHERE " . chatbot_chatgpt_knowledge_post_sql_clause() . "
              AND (post_type = 'post' OR post_type = 'page' OR post_type = 'product')
              LIMIT %d OFFSET %d", $batch_size, $offset
         );
@@ -107,7 +107,10 @@ function transformer_model_sentential_context_model_response_lite($prompt, $max_
 
         foreach ($results as $post) {
 
-            $content = preprocess_text($post->post_content);
+            if ( ! isset( $post->ID ) || ! chatbot_chatgpt_is_post_eligible_for_knowledge( (int) $post->ID ) ) {
+                continue;
+            }
+            $content = preprocess_text( chatbot_chatgpt_post_content_for_knowledge( (int) $post->ID ) );
             if (empty($content)) continue;
 
             $content_words = explode(' ', $content);
@@ -128,7 +131,10 @@ function transformer_model_sentential_context_model_response_lite($prompt, $max_
 
         foreach ($results as $post) {
 
-            $content = preprocess_text($post->post_content);
+            if ( ! isset( $post->ID ) || ! chatbot_chatgpt_is_post_eligible_for_knowledge( (int) $post->ID ) ) {
+                continue;
+            }
+            $content = preprocess_text( chatbot_chatgpt_post_content_for_knowledge( (int) $post->ID ) );
             if (empty($content)) continue;
 
             $content_words = explode(' ', $content);
@@ -166,7 +172,7 @@ function transformer_model_sentential_context_model_response_lite($prompt, $max_
                 if (!empty($intersection)) {
                     $matched_word = reset($intersection);
                     $match_index = array_search($matched_word, $content_words);
-                    $sentences = preg_split('/(?<=[.!?])\s+/', $post->post_content);
+                    $sentences = preg_split('/(?<=[.!?])\s+/', chatbot_chatgpt_post_content_for_knowledge( (int) $post->ID ));
                     $sentence_count = count($sentences);
                     $sentence_index = 0;
 
@@ -275,8 +281,8 @@ function transformer_model_sentential_context_model_response_lite_version_two($p
     do {
         // Fetch a batch of posts, pages, and products.
         $query = $wpdb->prepare(
-            "SELECT post_title, post_content FROM {$wpdb->posts} 
-             WHERE post_status = 'publish' 
+            "SELECT ID, post_title, post_content FROM {$wpdb->posts} 
+             WHERE " . chatbot_chatgpt_knowledge_post_sql_clause() . "
              AND (post_type = 'post' OR post_type = 'page' OR post_type = 'product')
              LIMIT %d OFFSET %d", $batch_size, $offset
         );
@@ -287,7 +293,10 @@ function transformer_model_sentential_context_model_response_lite_version_two($p
         }
     
         foreach ($results as $post) {
-            $content = preprocess_text($post->post_content);
+            if ( ! isset( $post->ID ) || ! chatbot_chatgpt_is_post_eligible_for_knowledge( (int) $post->ID ) ) {
+                continue;
+            }
+            $content = preprocess_text( chatbot_chatgpt_post_content_for_knowledge( (int) $post->ID ) );
     
             // Skip if content is empty.
             if (empty($content)) {
@@ -342,7 +351,7 @@ function transformer_model_sentential_context_model_response_lite_version_two($p
                     $match_index = array_search($matched_word, $content_words);
     
                     // Split the original post content into sentences.
-                    $sentences = preg_split('/(?<=[.!?])\s+/', $post->post_content);
+                    $sentences = preg_split('/(?<=[.!?])\s+/', chatbot_chatgpt_post_content_for_knowledge( (int) $post->ID ));
                     $sentence_count = count($sentences);
     
                     // Find the sentence containing the matched word.
@@ -415,8 +424,8 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
 
         // Fetch a batch of posts, pages, and products
         $query = $wpdb->prepare(
-            "SELECT post_title, post_content FROM {$wpdb->posts} 
-            WHERE post_status = 'publish' 
+            "SELECT ID, post_title, post_content FROM {$wpdb->posts} 
+            WHERE " . chatbot_chatgpt_knowledge_post_sql_clause() . "
             AND (post_type = 'post' OR post_type = 'page' OR post_type = 'product')
             LIMIT %d OFFSET %d", $batch_size, $offset
         );
@@ -428,7 +437,10 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
 
         foreach ($results as $post) {
 
-            $content = preprocess_text($post->post_content);
+            if ( ! isset( $post->ID ) || ! chatbot_chatgpt_is_post_eligible_for_knowledge( (int) $post->ID ) ) {
+                continue;
+            }
+            $content = preprocess_text( chatbot_chatgpt_post_content_for_knowledge( (int) $post->ID ) );
 
             // Skip if content is empty
             if (empty($content)) {
@@ -538,7 +550,7 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
                     $match_index = array_search(reset($intersection), $content_words);
 
                     // Split content into sentences
-                    $sentences = preg_split('/(?<=[.!?])\s+/', $post->post_content);
+                    $sentences = preg_split('/(?<=[.!?])\s+/', chatbot_chatgpt_post_content_for_knowledge( (int) $post->ID ));
                     $sentence_count = count($sentences);
 
                     // Find the sentence containing the match
@@ -741,15 +753,15 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     // Build the complete SQL query with proper parameterization
     // Combine base query placeholders with LIKE condition placeholders
     $sql_template = "
-        SELECT post_content
+        SELECT ID, post_content
         FROM {$wpdb->posts}
-        WHERE post_status = %s
+        WHERE " . chatbot_chatgpt_knowledge_post_sql_clause() . "
         AND (post_type = %s OR post_type = %s)
         AND (" . $like_condition_template . ")
     ";
     
     // Prepare the complete query with all values
-    $prepare_args = array_merge(['publish', 'post', 'page'], $like_condition_values);
+    $prepare_args = array_merge(['post', 'page'], $like_condition_values);
     $sql = call_user_func_array([$wpdb, 'prepare'], array_merge([$sql_template], $prepare_args));
 
     $results = $wpdb->get_results($sql, ARRAY_A);
@@ -758,7 +770,12 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     $content = '';
     if (!empty($results)) {
         foreach ($results as $row) {
-            $content .= $row['post_content'] . ' ';
+            $post_id = isset( $row['ID'] ) ? (int) $row['ID'] : 0;
+            $eligible = chatbot_chatgpt_post_content_for_knowledge( $post_id );
+            if ( $eligible === '' ) {
+                continue;
+            }
+            $content .= $eligible . ' ';
         }
     } else {
         $content = $no_matching_content_response[array_rand($no_matching_content_response)];
@@ -786,24 +803,23 @@ function transformer_model_sentential_context_build_cooccurrence_matrix($corpus,
 
     $matrix = [];
     $words = preg_split('/\s+/', strtolower($corpus)); // Tokenize and normalize
-    $words = transformer_model_sentential_context_remove_stop_words($words); // Remove stop words
+    // Filtered tokens are a consecutive sequence; windows use those positions.
+    $words = transformer_model_sentential_context_remove_stop_words($words);
 
-    foreach ($words as $i => $word) {
+    $n = count($words);
+    for ($i = 0; $i < $n; $i++) {
+        $word = $words[$i];
 
         if (!isset($matrix[$word])) {
             $matrix[$word] = [];
         }
 
-        for ($j = max(0, $i - $windowSize); $j <= min(count($words) - 1, $i + $windowSize); $j++) {
-            if ($i !== $j) {
-                if (isset($words[$j])) {
-                    $contextWord = $words[$j];
-                } else {
-                    // Handle the case where the index does not exist
-                    $contextWord = null; // or any default value
-                }
-                $matrix[$word][$contextWord] = ($matrix[$word][$contextWord] ?? 0) + 1;
+        for ($j = max(0, $i - $windowSize); $j <= min($n - 1, $i + $windowSize); $j++) {
+            if ($i === $j) {
+                continue;
             }
+            $contextWord = $words[$j];
+            $matrix[$word][$contextWord] = ($matrix[$word][$contextWord] ?? 0) + 1;
         }
     }
 
@@ -821,7 +837,9 @@ function transformer_model_sentential_context_remove_stop_words($words) {
         $stopWords = array(); // Ensure $stopWords is an array
     }
 
-    return array_diff($words, $stopWords);
+    // array_diff() preserves keys and can leave gaps. Callers that walk token
+    // positions (co-occurrence windows, etc.) need a dense filtered sequence.
+    return array_values(array_diff($words, $stopWords));
 
 }
 

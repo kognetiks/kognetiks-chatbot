@@ -1348,22 +1348,12 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
         exit;
     }
 
-    // Ask user where to save the file
+    // Conversation exports stay in a PHP temporary stream. They are not written
+    // under the plugin directory or the public uploads tree.
     $filename = $t_file_name . '-' . gmdate('Y-m-d') . '.csv';
-    // Replace spaces with - in the filename
     $filename = str_replace(' ', '-', $filename);
-    $results_dir_path = $chatbot_chatgpt_plugin_dir_path . 'results/';
 
-    // Ensure the directory exists or attempt to create it
-    if (!create_directory_and_index_file($results_dir_path)) {
-        // Error handling, e.g., log the error or handle the failure appropriately
-        return;
-    }
-
-    $results_csv_file = $results_dir_path . $filename;
-    
-    // Open file for writing
-    $file = fopen($results_csv_file, 'w');
+    $file = fopen( 'php://temp', 'w+' );
 
     // Check if file opened successfully
     if ($file === false) {
@@ -1376,11 +1366,13 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     // Write headers to file
     if (isset($results[0]) && is_array($results[0])) {
         $keys = array_keys($results[0]);
-        fputcsv($file, $keys);
+        // Explicit empty $escape silences PHP 8.4+ deprecation and matches RFC 4180 / future PHP default.
+        fputcsv( $file, $keys, ',', '"', '' );
     } else {
         $class = 'notice notice-error';
         $message = __( 'Chatbot No data in the file. Please enable conversation logging if currently off.', 'chatbot-chatgpt' );
         // printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+        fclose( $file );
         chatbot_chatgpt_general_admin_notice($message);
         return;
     }
@@ -1390,53 +1382,23 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
         $result = array_map(function($value) {
             return $value !== null ? mb_convert_encoding($value, 'UTF-8', 'auto') : '';
         }, $result);
-        fputcsv($file, $result);
+        fputcsv( $file, $result, ',', '"', '' );
     }
 
-    // Close the file
-    fclose($file);
-
-    // Exit early if the file doesn't exist
-    if (!file_exists($results_csv_file)) {
-        $class = 'notice notice-error';
-        $message = sprintf(
-            /* translators: %s: file path */
-            __( 'File not found: %s', 'chatbot-chatgpt' ),
-            $results_csv_file
-        );
-        // printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
-        chatbot_chatgpt_general_admin_notice($message);
-        return;
-    }
-
-    if (!file_exists($results_csv_file)) {
-        return;
-    }
-    
-    if (!is_readable($results_csv_file)) {
-        return;
-    }
-    
-    $csv_data = file_get_contents(realpath($results_csv_file));
-    if ($csv_data === false) {
-        $class = 'notice notice-error';
+    rewind( $file );
+    $csv_data = stream_get_contents( $file );
+    fclose( $file );
+    if ( ! is_string( $csv_data ) ) {
         $message = __( 'Error reading file', 'chatbot-chatgpt' );
         chatbot_chatgpt_general_admin_notice($message);
         return;
     }
-    
-    if (!is_writable($results_csv_file)) {
-        return;
-    }  
-    
+
     // Deliver the file for download
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment;filename=' . $filename);
     // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSV file download, not HTML output.
     echo $csv_data;
-
-    // Delete the file
-    wp_delete_file($results_csv_file);
     exit;
 
 }

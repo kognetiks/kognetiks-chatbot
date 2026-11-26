@@ -72,24 +72,9 @@ function transformer_model_sentential_context_reset_cache() {
     update_option('chatbot_transformer_model_offset', 0);
     update_option('chatbot_transformer_model_content_items_processed', 0);
 
-    // Cache folder path
-    $cacheDir = __DIR__ . '/sentential_embeddings_cache/';
-
-    // Check if the directory exists
-    if (is_dir($cacheDir)) {
-        // Open directory and delete all files inside
-        $files = glob($cacheDir . '*.php'); // Get all PHP files in the directory
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                wp_delete_file($file); // Delete the file
-            }
-        }
-        // Optionally, delete the folder itself if required
-        // rmdir($cacheDir); // Uncomment if you want to remove the folder
-    } else {
-        // Do nothing
-    }
-
+    chatbot_chatgpt_beta_engine_purge( 'sentential' );
+    chatbot_chatgpt_beta_engine_mark_building( 'sentential' );
+    // Job owner is stored by GFI begin for later scan/commit requests.
 
 }
 
@@ -102,11 +87,20 @@ function chatbot_transformer_model_scan() {
     $batchSize = intval(get_option('chatbot_transform_model_batch_size', 50));
     $corpus = transformer_model_sentential_context_fetch_content($offset, $batchSize);
 
-    if (empty($corpus)) {
-        update_option('chatbot_transformer_model_build_status', 'Completed');
-        update_option('chatbot_transformer_model_build_schedule', 'Completed');
-        update_option('chatbot_transformer_model_last_updated', current_time('mysql'));
-        prod_trace( 'NOTICE', 'chatbot_transformer_model_build_schedule: Completed');
+    if ( (int) $corpus['raw'] === 0 ) {
+        $generation = (int) get_option( chatbot_chatgpt_beta_engine_build_generation_key( 'sentential' ), 0 );
+        $owner      = function_exists( 'chatbot_chatgpt_gfi_job_owner' ) ? chatbot_chatgpt_gfi_job_owner( 'sentential' ) : '';
+        if ( $owner !== '' && function_exists( 'chatbot_chatgpt_gfi_remember_owner' ) ) {
+            chatbot_chatgpt_gfi_remember_owner( 'sentential', $owner );
+        }
+        if ( chatbot_chatgpt_beta_engine_commit( 'sentential', $generation, $owner ) ) {
+            update_option('chatbot_transformer_model_build_status', 'Completed');
+            update_option('chatbot_transformer_model_build_schedule', 'Completed');
+            update_option('chatbot_transformer_model_last_updated', current_time('mysql'));
+            prod_trace( 'NOTICE', 'chatbot_transformer_model_build_schedule: Completed');
+        } else {
+            update_option('chatbot_transformer_model_build_status', 'Invalidated');
+        }
         return;
     }
 
@@ -114,13 +108,14 @@ function chatbot_transformer_model_scan() {
     $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
 
     // Build embeddings with the updated logic
-    transformer_model_sentential_context_cache_embeddings($corpus, $windowSize);
+    if ( ! empty( $corpus['items'] ) ) {
+        transformer_model_sentential_context_cache_embeddings($corpus['items'], $windowSize);
+    }
 
-    // Update the offset
-    $processedItems = count($corpus);
-    update_option('chatbot_transformer_model_offset', $offset + $processedItems);
+    // Advance by the SQL page size so filtered rows cannot stall or skip the rest of the corpus.
+    update_option('chatbot_transformer_model_offset', $offset + (int) $corpus['raw']);
 
-    prod_trace( 'NOTICE', "Processed $processedItems items starting at offset $offset");
+    prod_trace( 'NOTICE', 'Processed ' . count( $corpus['items'] ) . ' eligible items starting at offset ' . $offset );
 
     // Schedule the next batch if needed
     wp_schedule_single_event(time() + 10, 'chatbot_transformer_model_scan_hook');
@@ -135,31 +130,68 @@ function transformer_model_sentential_context_fetch_content($offset, $batchSize)
 
     $results = $wpdb->get_results(
         $wpdb->prepare(
-            "SELECT ID, post_content FROM {$wpdb->posts} WHERE post_status = %s AND (post_type = %s OR post_type = %s) LIMIT %d, %d",
-            'publish', 'post', 'page', $offset, $batchSize
+            "SELECT ID, post_content, post_type, post_status FROM {$wpdb->posts} WHERE " . chatbot_chatgpt_knowledge_post_sql_clause() . " AND (post_type = %s OR post_type = %s) LIMIT %d, %d",
+            'post', 'page', $offset, $batchSize
         ),
         ARRAY_A
     );
 
     if (empty($results)) {
-        update_option('chatbot_transformer_model_offset', 0);
-        return [];
-    } else {
-        // Schedule the next batch
-        wp_schedule_single_event(time() + 10, 'chatbot_transformer_model_scan_hook');
+        return array(
+            'items' => array(),
+            'raw'   => 0,
+        );
     }
 
-    return $results;
+    $eligible = array();
+    foreach ( $results as $row ) {
+        $post_id = isset( $row['ID'] ) ? (int) $row['ID'] : 0;
+        if ( $post_id <= 0 || ! chatbot_chatgpt_is_post_eligible_for_knowledge( $post_id ) ) {
+            continue;
+        }
+        $row['post_content'] = chatbot_chatgpt_post_content_for_knowledge( $post_id );
+        if ( $row['post_content'] === '' ) {
+            continue;
+        }
+        $eligible[] = $row;
+    }
+
+    return array(
+        'items' => $eligible,
+        'raw'   => count( $results ),
+    );
 
 }
 
 // Cache embeddings for the fetched content
 function transformer_model_sentential_context_cache_embeddings($corpus, $windowSize = 3) {
 
-    $cacheDir = __DIR__ . '/sentential_embeddings_cache/';
+    $owner = function_exists( 'chatbot_chatgpt_gfi_job_owner' ) ? chatbot_chatgpt_gfi_job_owner( 'sentential' ) : '';
+    if ( $owner === '' && function_exists( 'chatbot_chatgpt_gfi_session_owner' ) ) {
+        $owner = chatbot_chatgpt_gfi_session_owner( 'sentential' );
+    }
+    if ( $owner === '' || ( function_exists( 'chatbot_chatgpt_gfi_builder_may_mutate' ) && ! chatbot_chatgpt_gfi_builder_may_mutate( 'sentential', $owner ) ) ) {
+        return;
+    }
+    if ( function_exists( 'chatbot_chatgpt_gfi_remember_owner' ) ) {
+        chatbot_chatgpt_gfi_remember_owner( 'sentential', $owner );
+    }
+    if ( function_exists( 'chatbot_chatgpt_gfi_touch' ) ) {
+        chatbot_chatgpt_gfi_touch( 'sentential', $owner );
+    }
+    $cacheDir = chatbot_chatgpt_beta_engine_cache_directory( 'sentential' );
+    if ( $cacheDir === '' ) {
+        return;
+    }
+    $cacheDir = rtrim( $cacheDir, '/\\' ) . '/';
 
     // Ensure the cache directory exists
     if (!create_directory_and_index_file($cacheDir)) {
+        return;
+    }
+
+    $generation = (int) get_option( chatbot_chatgpt_beta_engine_build_generation_key( 'sentential' ), 0 );
+    if ( ! chatbot_chatgpt_beta_engine_build_is_current( 'sentential', $generation, $owner ) ) {
         return;
     }
 
@@ -218,8 +250,20 @@ function transformer_model_sentential_context_cache_embeddings($corpus, $windowS
 
         // Load existing cache if it exists
         $existingEmbeddings = [];
-        if (file_exists($cacheFile)) {
-            $existingEmbeddings = include $cacheFile;
+        $generation = (int) get_option( chatbot_chatgpt_beta_engine_build_generation_key( 'sentential' ), 0 );
+        $can_merge = chatbot_chatgpt_beta_engine_build_is_current( 'sentential', $generation, $owner )
+            && ( chatbot_chatgpt_beta_engine_state( 'sentential' ) === 'building' || chatbot_chatgpt_beta_engine_stamp_matches( 'sentential' ) );
+        if ( $can_merge && file_exists($cacheFile)) {
+            if ( chatbot_chatgpt_beta_engine_state( 'sentential' ) === 'building' ) {
+                $existingEmbeddings = chatbot_chatgpt_gfi_include_builder_literal( $cacheFile );
+            } elseif ( function_exists( 'chatbot_chatgpt_gfi_include_trusted' ) ) {
+                $existingEmbeddings = chatbot_chatgpt_gfi_include_trusted( 'sentential', $cacheFile );
+                if ( ! is_array( $existingEmbeddings ) ) {
+                    return;
+                }
+            } else {
+                return;
+            }
         }
 
         // Merge updates with existing embeddings
@@ -234,8 +278,20 @@ function transformer_model_sentential_context_cache_embeddings($corpus, $windowS
             }
         }
 
-        // Write the updated cache file
-        file_put_contents($cacheFile, '<?php return ' . var_export($existingEmbeddings, true) . ';');
+        // Stale workers that lost build ownership must not rewrite sealed letter files.
+        if ( function_exists( 'chatbot_chatgpt_gfi_builder_may_mutate' ) && ! chatbot_chatgpt_gfi_builder_may_mutate( 'sentential', $owner ) ) {
+            return;
+        }
+
+        // Write the updated cache file with a direct-access ABSPATH guard.
+        if ( function_exists( 'chatbot_chatgpt_gfi_literal_cache_php' ) ) {
+            $cache_php = chatbot_chatgpt_gfi_literal_cache_php( $existingEmbeddings );
+        } else {
+            $cache_php = "<?php\n\nif ( ! defined( 'ABSPATH' ) ) {\n    http_response_code( 403 );\n    exit;\n}\n\nreturn " . var_export( $existingEmbeddings, true ) . ';';
+        }
+        file_put_contents( $cacheFile, $cache_php );
+        chatbot_chatgpt_beta_apply_cache_permissions( $cacheDir );
+        chatbot_chatgpt_beta_apply_cache_permissions( $cacheFile );
     }
 
 

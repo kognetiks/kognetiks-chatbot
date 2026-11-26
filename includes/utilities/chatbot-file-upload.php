@@ -940,22 +940,29 @@ function chatbot_chatgpt_cleanup_uploads_directory() {
 
     global $chatbot_chatgpt_plugin_dir_path;
     
-    $uploads_dir = $chatbot_chatgpt_plugin_dir_path . 'uploads/';
-    $upload_files = glob($uploads_dir . '*');
-    if (!is_array($upload_files)) {
-        $upload_files = array();
+    $upload_dirs = array( chatbot_chatgpt_generated_storage_directory( 'uploads' ) );
+    $legacy_uploads = chatbot_chatgpt_generated_storage_legacy_directory( 'uploads' );
+    if ( $legacy_uploads !== '' && is_dir( $legacy_uploads ) ) {
+        $upload_dirs[] = $legacy_uploads;
     }
-    foreach ($upload_files as $file) {
-        if (chatbot_chatgpt_is_static_guard_file($file)) {
+    foreach ( $upload_dirs as $uploads_dir ) {
+        if ( $uploads_dir === '' || ! is_dir( $uploads_dir ) ) {
             continue;
         }
-        // Delete files older than 1 hour
-        if (filemtime($file) < time() - 60 * 60 * 1) {
-            wp_delete_file($file);
+        $upload_files = glob( rtrim( $uploads_dir, '/\\' ) . '/*' );
+        if ( ! is_array( $upload_files ) ) {
+            $upload_files = array();
         }
+        foreach ( $upload_files as $file ) {
+            if ( chatbot_chatgpt_is_static_guard_file( $file ) ) {
+                continue;
+            }
+            if ( filemtime( $file ) < time() - 60 * 60 * 1 ) {
+                wp_delete_file( $file );
+            }
+        }
+        create_index_file( $uploads_dir );
     }
-    // Create the index.php file if it does not exist
-    create_index_file($uploads_dir);
     chatbot_chatgpt_cleanup_staged_temp_files();
 }
 add_action('chatbot_chatgpt_cleanup_upload_files', 'chatbot_chatgpt_cleanup_uploads_directory');
