@@ -6,7 +6,12 @@
 
 ---
 
-= 2.6.1 - Released TBD =
+= 2.6.2 - Released 2026-11-27 =
+
+### Bug Fixes
+* **Version history**: The version history was missing the 2.6.1 release. It is now included.
+
+= 2.6.1 - Released 2026-11-26 =
 
 **Security**
 - Public content indexing: Knowledge Navigator, local knowledge, and context-engine paths now apply shared eligibility rules so private, password-protected, draft, and other nonpublic WordPress content is excluded from indexing and retrieval under those rules.
