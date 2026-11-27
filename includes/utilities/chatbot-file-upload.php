@@ -825,17 +825,13 @@ function chatbot_chatgpt_upload_mp3() {
     global $additional_instructions;
     global $model;
     global $voice;
-    
-    // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
+
+    $session_id = chatbot_chatgpt_bound_request_session_id();
+    if ( $session_id === '' || ! verify_session_ownership( $session_id ) ) {
+        wp_send_json_error( 'Unauthorized access to conversation.', 403 );
+        return;
+    }
     $user_id = get_current_user_id();
-    // Fetch the Kognetiks cookie
-    if (empty($session_id) || $session_id == 0) {
-        $session_id = kognetiks_get_unique_id();
-    }
-    // $session_id = kognetiks_get_unique_id();
-    if (empty($user_id) || $user_id == 0) {
-        $user_id = $session_id;
-    }
 
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;

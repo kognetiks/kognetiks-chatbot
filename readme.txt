@@ -5,7 +5,7 @@ Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 6.0
 Tested up to: 7.1.5
 Requires PHP: 8.0
-Stable tag: 2.6.1
+Stable tag: 2.6.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -207,7 +207,12 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.6.1 - Released TBD =
+= 2.6.2 - Released 2026-11-27 =
+
+### Bug Fixes
+* **Version history**: The version history was missing the 2.6.1 release. It is now included.
+
+= 2.6.1 - Released 2026-11-26 =
 
 ### Security
 * **Public content indexing**: Knowledge Navigator, local knowledge, and context-engine paths now apply shared eligibility rules so private, password-protected, draft, and other nonpublic WordPress content is excluded from indexing and retrieval under those rules.

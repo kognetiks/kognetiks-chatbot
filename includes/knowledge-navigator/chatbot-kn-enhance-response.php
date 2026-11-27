@@ -76,16 +76,18 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     foreach ($results as $result) {
 
         if (is_array($result) && isset($result['title'], $result['url'], $result['ID'])) {
+            $title = esc_html( (string) $result['title'] );
+            $url   = esc_url( (string) $result['url'] );
             if ('yes' == $include_title) {
-                $links[] = "<li>[" . $result['title'] . "](" . $result['url'] . ")</li>";
+                $links[] = "<li>[" . $title . "](" . $url . ")</li>";
             } else {
-                $links[] = "[here](" . $result['url'] . ")";
+                $links[] = "[here](" . $url . ")";
             }
 
             if ($include_post_or_page_excerpt == 'Yes') {
                 $post_excerpt = chatbot_chatgpt_normalize_excerpt_for_chat( get_the_excerpt( $result['ID'] ) );
                 if (!empty($post_excerpt)) {
-                    $links[] = "<li>" . $post_excerpt . "</li>";
+                    $links[] = "<li>" . esc_html( $post_excerpt ) . "</li>";
                 }
             }
         }

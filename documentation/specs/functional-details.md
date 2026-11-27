@@ -568,11 +568,23 @@ Users must agree to terms of service for each AI platform:
 
 ## Version History
 
-## What's new in Version 2.6.0 - Released TBD
+## What's new in Version 2.6.1 - Released 2026-11-26
 
-### Bug Fixes
+### Security
+* **Public content indexing**: Knowledge Navigator, local knowledge, and context-engine paths now apply shared eligibility rules so private, password-protected, draft, and other nonpublic WordPress content is excluded from indexing and retrieval under those rules.
+* **Generated cache integrity**: Supported Sentential and Lexical generated-cache artifacts are authenticated with HMAC-based signatures. Modified or incomplete artifacts are rejected fail-closed, with controlled recovery instead of loading untrusted cache data.
+* **Generated PHP cache guards**: Applicable generated PHP cache files include direct-access guards and validate authenticated cache data before load.
+* **Signing context update**: Generated-file integrity now uses the versioned signing context `chatbot-chatgpt-gfi-v1`. Previously signed Sentential and Lexical caches are not signature-compatible and must be regenerated after upgrade.
 
-* **TBD**: TBD
+### Improvements
+* **Per-site cache storage**: Applicable generated caches are stored under site-specific directories in WordPress uploads, keeping generated data separate from installed plugin source.
+* **Build concurrency**: Exclusive publication locking, caller-bound build ownership, and stale-worker fencing reduce the risk that an older builder overwrites a newer generation.
+* **Interrupted builds**: Recovery handling for abandoned or interrupted cache builds is improved so a stuck build can be resumed or replaced safely.
+* **Legacy cache cleanup**: Optional support is available to inventory and remove obsolete generated-cache artifacts from earlier layouts. Cleanup execution remains off unless explicitly enabled by the site operator; multisite shared-root cleanup has not been broadly validated.
+
+### Upgrade Notes
+* After upgrading to 2.6.1, regenerate Sentential and Lexical generated caches so they are signed with the new integrity format and signing context.
+* Do not treat cache integrity authentication as a guarantee that every executable file on the server is harmless; it authenticates supported generated artifacts the plugin manages.
 
 ## What's new in Version 2.5.9 - Released 2026-11-12
 

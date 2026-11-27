@@ -59,12 +59,12 @@ function kn_enhance_context( $message ) {
         return null; // Skip processing if the table doesn't exist
     }
 
-    $limit = esc_attr(get_option('chatbot_chatgpt_enhanced_response_limit', 3));
+    $limit = max( 1, absint( get_option( 'chatbot_chatgpt_enhanced_response_limit', 3 ) ) );
     
     foreach ($enhancedMessage as $word) {
         $word = rtrim($word, "s.,;:!?");
         // IN THIS CASE RETURN THE PID
-        $query = $wpdb->prepare("SELECT score, pid FROM $table_name WHERE word = %s ORDER BY score DESC LIMIT $limit", $word);
+        $query = $wpdb->prepare( "SELECT score, pid FROM $table_name WHERE word = %s ORDER BY score DESC LIMIT %d", $word, $limit );
         $rows = $wpdb->get_results($query);
         if (!$wpdb->last_error && !empty($rows)) {
             foreach ($rows as $row) {

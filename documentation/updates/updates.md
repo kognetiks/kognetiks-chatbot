@@ -1,6 +1,6 @@
 # Past Updates
 
-## What's new in Version 2.6.1 - Released TBD
+## What's new in Version 2.6.1 - Released 2026-11-26
 
 ### Security
 * **Public content indexing**: Knowledge Navigator, local knowledge, and context-engine paths now apply shared eligibility rules so private, password-protected, draft, and other nonpublic WordPress content is excluded from indexing and retrieval under those rules.
