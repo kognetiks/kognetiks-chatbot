@@ -54,10 +54,10 @@ Kognetiks Chatbot includes locally hosted MathJax components for mathematical no
 
 The bundled MathJax components are configured with additional security controls appropriate for rendering chatbot content.
 
-## What's new in Version 2.6.2 - Released 2026-11-26
+## What's new in Version 2.6.3 - Released TBD
 
 ### Bug Fixes
-* **Version history**: The version history was missing the 2.6.1 release. It is now included.
+* **TBD**: TBD
 
 
 * Information about past updates can be found [here](updates/updates.md).

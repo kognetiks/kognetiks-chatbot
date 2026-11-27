@@ -1,5 +1,10 @@
 # Past Updates
 
+## What's new in Version 2.6.2 - Released 2026-11-26
+
+### Bug Fixes
+* **Version history**: The version history was missing the 2.6.1 release. It is now included.
+
 ## What's new in Version 2.6.1 - Released 2026-11-26
 
 ### Security

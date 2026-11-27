@@ -89,10 +89,10 @@ Kognetiks Chatbot may not be a fit if:
 - Optional speech recognition and voice replies
 - Embedded or floating chat via shortcode
 
-## What's New in 2.6.2 - Released 2026-11-26
+## What's New in 2.6.3 - Released TBD
 
 ### Bug Fixes
-* **Version history**: The version history was missing the 2.6.1 release. It is now included.
+* **TBD**: TBD
 
 ## Installation
 

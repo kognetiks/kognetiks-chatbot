@@ -6,7 +6,12 @@
 
 ---
 
-= 2.6.2 - Released 2026-11-27 =
+= 2.6.3 - Released TBD =
+
+### Bug Fixes
+* **TBD**: TBD
+
+= 2.6.2 - Released 2026-11-26 =
 
 ### Bug Fixes
 * **Version history**: The version history was missing the 2.6.1 release. It is now included.
